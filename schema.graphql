@@ -1,0 +1,649 @@
+extend schema
+  @link(
+    url: "https://specs.apollo.dev/federation/v2.7"
+    import: ["@key", "@shareable"]
+  )
+
+"Tipo de dato para representar una fecha y hora"
+scalar DateTime
+
+"Recupera el nombre de usuario"
+type UserRef @key(fields: "id") {
+  id: Int!
+}
+
+# ═══════════════════════════════════════════════════════
+# ENUMS
+# ═══════════════════════════════════════════════════════
+
+"Módulos de la aplicación"
+enum ModuleType {
+  "Calidad"
+  QUALITY
+  "Proyectos"
+  PROJECTS
+  "Tags / Equipos"
+  TAGS
+  "Operaciones"
+  OPERATIONS
+  "Gestión"
+  MANAGEMENT
+  "Comercial"
+  COMERCIAL
+}
+
+"Estado de las revisiones de un documento"
+enum RevisionStatus {
+  "En borrador, se pueden subir nuevas versiones"
+  DRAFT
+  "Enviado a workflow de revisión"
+  IN_REVIEW
+  "Aprobado, no se puede modificar"
+  APPROVED
+  "Reemplazado por una nueva revisión"
+  SUPERSEDED
+  "Obsoleto, ya no aplica"
+  OBSOLETE
+}
+
+"Estado del workflow de revisión"
+enum WorkflowStatus {
+  "Creado pero no iniciado"
+  PENDING
+  "Al menos un step en proceso"
+  IN_PROGRESS
+  "Todos los steps aprobados"
+  COMPLETED
+  "Al menos un step rechazado"
+  REJECTED
+}
+
+"Tipo de paso en el workflow de revisión"
+enum StepType {
+  "Revisión técnica"
+  REVIEW
+  "Aprobación formal"
+  APPROVE
+  "Toma de conocimiento"
+  ACKNOWLEDGE
+}
+
+"Estado de un paso del workflow"
+enum StepStatus {
+  "No evaluado aún"
+  PENDING
+  "Aprobado por el asignado"
+  APPROVED
+  "Rechazado por el asignado"
+  REJECTED
+  "Saltado"
+  SKIPPED
+}
+
+"Estado del transmittal"
+enum TransmittalStatus {
+  "En preparación"
+  DRAFT
+  "Enviado al cliente"
+  ISSUED
+  "Cliente acusó recibo"
+  ACKNOWLEDGED
+  "Cliente respondió con comentarios"
+  RESPONDED
+  "Cerrado"
+  CLOSED
+}
+
+"Código de propósito del envío"
+enum PurposeCode {
+  "Para aprobación del cliente"
+  FOR_APPROVAL
+  "Solo informativo"
+  FOR_INFORMATION
+  "Aprobado para construcción"
+  FOR_CONSTRUCTION
+  "Para revisión y comentarios"
+  FOR_REVIEW
+  "Documentación as-built"
+  AS_BUILT
+}
+
+"Estado de respuesta del cliente"
+enum ClientStatus {
+  "Aprobado sin comentarios"
+  APPROVED
+  "Aprobado con comentarios"
+  APPROVED_WITH_COMMENTS
+  "Rechazado"
+  REJECTED
+  "Revisado sin objeción"
+  REVIEWED_NO_EXCEPTION
+}
+
+"Estado de los registros a filtrar utilizando el campo terminatedAt"
+enum TerminatedFilterInput {
+  "Todos los registros"
+  ALL
+  "Registros habilitados o activos"
+  ACTIVE
+  "Registros deshabilitados o inactivos"
+  DISABLED
+}
+
+"Dirección de ordenamiento"
+enum OrderDirection {
+  ASC
+  DESC
+}
+
+"Campos de ordenamiento para documentos"
+enum DocumentOrderField {
+  CODE
+  TITLE
+  CREATED_AT
+  UPDATED_AT
+  MODULE
+}
+
+"Campos de ordenamiento para tipos de documento"
+enum DocumentTypeOrderField {
+  NAME
+  CODE
+  CREATED_AT
+  UPDATED_AT
+}
+
+"Campos de ordenamiento para transmittals"
+enum TransmittalOrderField {
+  CODE
+  CREATED_AT
+  ISSUED_AT
+  STATUS
+}
+
+# ═══════════════════════════════════════════════════════
+# ENTIDADES PRINCIPALES
+# ═══════════════════════════════════════════════════════
+
+"Tipo de documento (Procedimiento, Plano, Informe, etc.)"
+type DocumentType @key(fields: "id") {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  updatedBy: UserRef!
+  terminatedAt: DateTime
+  isSys: Boolean!
+  name: String!
+  code: String!
+  module: ModuleType
+  description: String
+  requiresWorkflow: Boolean!
+}
+
+"Documento maestro"
+type Document @key(fields: "id") {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  updatedBy: UserRef!
+  terminatedAt: DateTime
+  isSys: Boolean!
+  code: String!
+  title: String!
+  description: String
+  module: ModuleType!
+  entityType: String
+  entityId: Int
+  documentType: DocumentType!
+  currentRevision: DocumentRevision
+  revisions: [DocumentRevision!]!
+  createdBy: UserRef!
+}
+
+"Revisión de un documento"
+type DocumentRevision @key(fields: "id") {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  document: Document!
+  revisionCode: String!
+  status: RevisionStatus!
+  versions: [DocumentVersion!]!
+  currentVersion: DocumentVersion
+  workflow: ReviewWorkflow
+  approvedAt: DateTime
+  approvedBy: UserRef
+  createdBy: UserRef!
+}
+
+"Versión de archivo dentro de una revisión"
+type DocumentVersion @key(fields: "id") {
+  id: Int!
+  createdAt: DateTime!
+  revision: DocumentRevision!
+  versionNumber: Int!
+  fileKey: String!
+  fileName: String!
+  fileSize: Int!
+  mimeType: String!
+  checksum: String
+  comment: String
+  createdBy: UserRef!
+}
+
+# ═══════════════════════════════════════════════════════
+# WORKFLOW DE REVISIÓN (ISO 9001)
+# ═══════════════════════════════════════════════════════
+
+"Workflow de revisión de un documento"
+type ReviewWorkflow @key(fields: "id") {
+  id: Int!
+  createdAt: DateTime!
+  revision: DocumentRevision!
+  status: WorkflowStatus!
+  steps: [ReviewStep!]!
+  initiatedAt: DateTime!
+  initiatedBy: UserRef!
+  completedAt: DateTime
+}
+
+"Paso individual del workflow de revisión"
+type ReviewStep {
+  id: Int!
+  createdAt: DateTime!
+  workflow: ReviewWorkflow!
+  stepOrder: Int!
+  stepType: StepType!
+  assignedTo: UserRef!
+  status: StepStatus!
+  comments: String
+  completedAt: DateTime
+  signatureHash: String
+}
+
+# ═══════════════════════════════════════════════════════
+# TRANSMITTALS (INGENIERÍA)
+# ═══════════════════════════════════════════════════════
+
+"Transmittal de ingeniería"
+type Transmittal @key(fields: "id") {
+  id: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  updatedBy: UserRef!
+  code: String!
+  projectId: Int!
+  status: TransmittalStatus!
+  items: [TransmittalItem!]!
+  issuedTo: String!
+  issuedAt: DateTime
+  issuedBy: UserRef!
+  responseAt: DateTime
+  responseComments: String
+}
+
+"Item de un transmittal"
+type TransmittalItem {
+  id: Int!
+  transmittal: Transmittal!
+  documentRevision: DocumentRevision!
+  purposeCode: PurposeCode!
+  clientStatus: ClientStatus
+  clientComments: String
+}
+
+# ═══════════════════════════════════════════════════════
+# LOGS
+# ═══════════════════════════════════════════════════════
+
+"Registro de log del sistema"
+type DocumentSysLog {
+  id: Int!
+  createdAt: DateTime!
+  user: UserRef!
+  level: String!
+  name: String
+  message: String!
+  meta: String
+}
+
+# ═══════════════════════════════════════════════════════
+# PAGINACIÓN
+# ═══════════════════════════════════════════════════════
+
+"Información de paginación"
+type PaginationInfo {
+  currentPage: Int!
+  totalPages: Int!
+  totalItems: Int!
+  hasNext: Boolean!
+  hasPrev: Boolean!
+}
+
+"Respuesta paginada de documentos"
+type DocumentConnection {
+  items: [Document!]!
+  pagination: PaginationInfo!
+}
+
+"Respuesta paginada de transmittals"
+type TransmittalConnection {
+  items: [Transmittal!]!
+  pagination: PaginationInfo!
+}
+
+"Respuesta paginada de logs"
+type DocumentSysLogConnection {
+  items: [DocumentSysLog!]!
+  pagination: PaginationInfo!
+}
+
+"Lista de selección"
+type SelectList @shareable {
+  "Etiqueta para mostrar en la selección"
+  label: String! @shareable
+  "Valor para enviar en la selección"
+  value: String! @shareable
+}
+
+# ═══════════════════════════════════════════════════════
+# INPUTS
+# ═══════════════════════════════════════════════════════
+
+"Entrada de paginación"
+input PaginationInput {
+  skip: Int
+  take: Int
+}
+
+"Filtro de documentos"
+input DocumentFilterInput {
+  "Búsqueda en code + title"
+  query: String
+  module: ModuleType
+  documentTypeId: Int
+  "Filtra por status de revisión vigente"
+  status: RevisionStatus
+  terminatedFilter: TerminatedFilterInput
+}
+
+"Ordenamiento de documentos"
+input DocumentOrderByInput {
+  field: DocumentOrderField!
+  direction: OrderDirection!
+}
+
+"Filtro de tipos de documento"
+input DocumentTypeFilterInput {
+  query: String
+  module: ModuleType
+  terminatedFilter: TerminatedFilterInput
+}
+
+"Ordenamiento de tipos de documento"
+input DocumentTypeOrderByInput {
+  field: DocumentTypeOrderField!
+  direction: OrderDirection!
+}
+
+"Filtro de transmittals"
+input TransmittalFilterInput {
+  query: String
+  projectId: Int
+  status: TransmittalStatus
+}
+
+"Ordenamiento de transmittals"
+input TransmittalOrderByInput {
+  field: TransmittalOrderField!
+  direction: OrderDirection!
+}
+
+"Input para crear un documento"
+input CreateDocumentInput {
+  code: String!
+  title: String!
+  description: String
+  module: ModuleType!
+  entityType: String
+  entityId: Int
+  documentTypeId: Int!
+  "Datos del primer archivo"
+  fileKey: String!
+  fileName: String!
+  fileSize: Int!
+  mimeType: String!
+  checksum: String
+}
+
+"Input para actualizar un documento"
+input UpdateDocumentInput {
+  title: String
+  description: String
+}
+
+"Input para crear una revisión"
+input CreateRevisionInput {
+  "Auto-generado si no se provee"
+  revisionCode: String
+  comment: String
+  "Datos del archivo de la primera versión"
+  fileKey: String!
+  fileName: String!
+  fileSize: Int!
+  mimeType: String!
+  checksum: String
+}
+
+"Input para registrar una nueva versión de archivo"
+input RegisterVersionInput {
+  fileKey: String!
+  fileName: String!
+  fileSize: Int!
+  mimeType: String!
+  checksum: String
+  comment: String
+}
+
+"Input para iniciar un workflow de revisión"
+input InitiateReviewInput {
+  steps: [ReviewStepInput!]!
+}
+
+"Input para un paso del workflow"
+input ReviewStepInput {
+  stepOrder: Int!
+  stepType: StepType!
+  assignedToId: Int!
+}
+
+"Input para crear un tipo de documento"
+input CreateDocumentTypeInput {
+  name: String!
+  code: String!
+  module: ModuleType
+  description: String
+  requiresWorkflow: Boolean
+}
+
+"Input para actualizar un tipo de documento"
+input UpdateDocumentTypeInput {
+  name: String
+  code: String
+  module: ModuleType
+  description: String
+  requiresWorkflow: Boolean
+}
+
+"Input para crear un transmittal"
+input CreateTransmittalInput {
+  projectId: Int!
+  issuedTo: String!
+  items: [TransmittalItemInput!]!
+}
+
+"Input de item para transmittal"
+input TransmittalItemInput {
+  documentRevisionId: Int!
+  purposeCode: PurposeCode!
+}
+
+"Input para responder un transmittal"
+input RespondTransmittalInput {
+  responseComments: String
+  items: [TransmittalItemResponseInput!]!
+}
+
+"Input de respuesta por item del transmittal"
+input TransmittalItemResponseInput {
+  itemId: Int!
+  clientStatus: ClientStatus!
+  clientComments: String
+}
+
+# ═══════════════════════════════════════════════════════
+# QUERIES
+# ═══════════════════════════════════════════════════════
+
+type Query {
+  # ─── Documentos ───
+  "Obtener un documento por ID"
+  documentById(id: Int!): Document
+
+  "Listar documentos con filtro, paginación y ordenamiento"
+  documents(
+    filter: DocumentFilterInput
+    pagination: PaginationInput
+    orderBy: DocumentOrderByInput
+  ): DocumentConnection!
+
+  "Documentos filtrados por referencia de módulo"
+  documentsByModule(
+    module: ModuleType!
+    entityType: String
+    entityId: Int
+    pagination: PaginationInput
+    orderBy: DocumentOrderByInput
+  ): DocumentConnection!
+
+  "Listado de documentos para selectores"
+  documentsSelectList(filter: DocumentFilterInput): [SelectList!]!
+
+  # ─── Tipos de documento ───
+  "Listar tipos de documento"
+  documentTypes(
+    filter: DocumentTypeFilterInput
+    pagination: PaginationInput
+    orderBy: DocumentTypeOrderByInput
+  ): [DocumentType!]!
+
+  "Obtener un tipo de documento por ID"
+  documentTypeById(id: Int!): DocumentType
+
+  "Listado de tipos de documento para selectores"
+  documentTypesSelectList(module: ModuleType): [SelectList!]!
+
+  # ─── Revisiones ───
+  "Obtener una revisión por ID"
+  revisionById(id: Int!): DocumentRevision
+
+  # ─── Transmittals ───
+  "Obtener un transmittal por ID"
+  transmittalById(id: Int!): Transmittal
+
+  "Listar transmittals con filtro, paginación y ordenamiento"
+  transmittals(
+    filter: TransmittalFilterInput
+    pagination: PaginationInput
+    orderBy: TransmittalOrderByInput
+  ): TransmittalConnection!
+
+  "Transmittals de un proyecto específico"
+  transmittalsByProject(
+    projectId: Int!
+    pagination: PaginationInput
+  ): TransmittalConnection!
+
+  # ─── Workflows ───
+  "Steps de revisión pendientes para un usuario"
+  pendingReviewSteps(userId: Int!): [ReviewStep!]!
+
+  "Workflows filtrados por estado"
+  workflowsByStatus(status: WorkflowStatus!): [ReviewWorkflow!]!
+
+  # ─── Logs ───
+  "Listar logs del sistema"
+  documentSysLogs(pagination: PaginationInput): DocumentSysLogConnection!
+}
+
+# ═══════════════════════════════════════════════════════
+# MUTATIONS
+# ═══════════════════════════════════════════════════════
+
+type Mutation {
+  # ─── Documentos ───
+  "Crear un nuevo documento con su primera revisión y versión"
+  createDocument(input: CreateDocumentInput!): Document!
+
+  "Actualizar metadata de un documento"
+  updateDocument(id: Int!, input: UpdateDocumentInput!): Document!
+
+  "Eliminar un documento (soft delete)"
+  terminateDocument(id: Int!): Document!
+
+  "Reactivar un documento"
+  activateDocument(id: Int!): Document!
+
+  # ─── Revisiones ───
+  "Crear una nueva revisión para un documento"
+  createRevision(
+    documentId: Int!
+    input: CreateRevisionInput!
+  ): DocumentRevision!
+
+  # ─── Versiones ───
+  "Registrar una nueva versión de archivo en una revisión"
+  registerVersion(
+    revisionId: Int!
+    input: RegisterVersionInput!
+  ): DocumentVersion!
+
+  # ─── Workflow de revisión ───
+  "Iniciar un workflow de revisión para una revisión"
+  initiateReview(revisionId: Int!, input: InitiateReviewInput!): ReviewWorkflow!
+
+  "Aprobar un paso del workflow"
+  approveStep(stepId: Int!, comments: String): ReviewStep!
+
+  "Rechazar un paso del workflow"
+  rejectStep(stepId: Int!, comments: String!): ReviewStep!
+
+  "Cancelar un workflow de revisión"
+  cancelWorkflow(workflowId: Int!, reason: String!): ReviewWorkflow!
+
+  # ─── Transmittals ───
+  "Crear un nuevo transmittal"
+  createTransmittal(input: CreateTransmittalInput!): Transmittal!
+
+  "Emitir un transmittal (cambiar a ISSUED)"
+  issueTransmittal(id: Int!): Transmittal!
+
+  "Registrar respuesta del cliente en un transmittal"
+  respondTransmittal(id: Int!, input: RespondTransmittalInput!): Transmittal!
+
+  "Cerrar un transmittal"
+  closeTransmittal(id: Int!): Transmittal!
+
+  # ─── Tipos de documento ───
+  "Crear un tipo de documento"
+  createDocumentType(input: CreateDocumentTypeInput!): DocumentType!
+
+  "Actualizar un tipo de documento"
+  updateDocumentType(id: Int!, input: UpdateDocumentTypeInput!): DocumentType!
+
+  "Deshabilitar un tipo de documento"
+  terminateDocumentType(id: Int!): DocumentType!
+
+  "Reactivar un tipo de documento"
+  activateDocumentType(id: Int!): DocumentType!
+}

@@ -1,0 +1,38 @@
+{
+  "name": "209-mi-document",
+  "version": "1.0.0",
+  "description": "María Ingeniería API de Gestión Documental",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsc --noEmit && tsx watch ./src/index.ts",
+    "build": "prisma generate && npm run clean && tsc --build && npm run copy-schema",
+    "clean": "rm -rf ./dist",
+    "copy-schema": "cp schema.graphql dist/schema.graphql",
+    "start": "node ./dist/src/index.js",
+    "rover-check-staging": "rover subgraph check Maria-Ingenieria@staging --name mi-document --schema ./schema.graphql",
+    "rover-publish-staging": "rover subgraph publish Maria-Ingenieria@staging --name mi-document --schema ./schema.graphql --routing-url http://localhost:4209",
+    "rover-check-current": "rover subgraph check Maria-Ingenieria@current --name mi-document --schema ./schema.graphql",
+    "rover-publish-current": "rover subgraph publish Maria-Ingenieria@current --name mi-document --schema ./schema.graphql --routing-url http://localhost:4209"
+  },
+  "keywords": [],
+  "author": "César González Groh",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.2.3",
+    "prisma": "^7.3.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@apollo/server": "^5.4.0",
+    "@apollo/subgraph": "^2.13.0",
+    "@CLGonzalezGroh/mi-common": "^1.0.24",
+    "@prisma/adapter-mariadb": "^7.3.0",
+    "@prisma/client": "^7.3.0",
+    "graphql": "^16.12.0",
+    "graphql-tag": "^2.12.6",
+    "jsonwebtoken": "^9.0.3"
+  }
+}

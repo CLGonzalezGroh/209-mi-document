@@ -1,0 +1,286 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client"
+    output   = "../src/generated/prisma"
+}
+
+datasource db {
+    provider = "mysql"
+}
+
+// ================================
+// ENUMS DEL MÓDULO DE DOCUMENTOS
+// ================================
+
+enum ModuleType {
+    QUALITY
+    PROJECTS
+    TAGS
+    OPERATIONS
+    MANAGEMENT
+    COMERCIAL
+}
+
+enum RevisionStatus {
+    DRAFT // En borrador, se pueden subir nuevas versiones
+    IN_REVIEW // Enviado a workflow de revisión
+    APPROVED // Aprobado, no se puede modificar
+    SUPERSEDED // Reemplazado por una nueva revisión
+    OBSOLETE // Obsoleto, ya no aplica
+}
+
+enum WorkflowStatus {
+    PENDING // Creado pero no iniciado
+    IN_PROGRESS // Al menos un step en proceso
+    COMPLETED // Todos los steps aprobados
+    REJECTED // Al menos un step rechazado
+}
+
+enum StepType {
+    REVIEW // Revisión técnica
+    APPROVE // Aprobación formal
+    ACKNOWLEDGE // Toma de conocimiento
+}
+
+enum StepStatus {
+    PENDING // No evaluado aún
+    APPROVED // Aprobado por el asignado
+    REJECTED // Rechazado por el asignado
+    SKIPPED // Saltado (ej: aprobador anterior ya rechazó)
+}
+
+enum TransmittalStatus {
+    DRAFT // En preparación
+    ISSUED // Enviado al cliente
+    ACKNOWLEDGED // Cliente acusó recibo
+    RESPONDED // Cliente respondió con comentarios
+    CLOSED // Cerrado
+}
+
+enum PurposeCode {
+    FOR_APPROVAL // Para aprobación del cliente
+    FOR_INFORMATION // Solo informativo
+    FOR_CONSTRUCTION // Aprobado para construcción
+    FOR_REVIEW // Para revisión y comentarios
+    AS_BUILT // Documentación as-built
+}
+
+enum ClientStatus {
+    APPROVED // Aprobado sin comentarios
+    APPROVED_WITH_COMMENTS // Aprobado con comentarios
+    REJECTED // Rechazado
+    REVIEWED_NO_EXCEPTION // Revisado sin objeción
+}
+
+enum LogLevel {
+    INFO
+    WARNING
+    ERROR
+}
+
+// ================================
+// MODELOS
+// ================================
+
+// Tipos de documento (Procedimiento, Plano, Informe, etc.)
+model DocumentType {
+    id           Int       @id @default(autoincrement())
+    createdAt    DateTime  @default(now())
+    updatedAt    DateTime? @updatedAt
+    updatedById  Int       @default(1)
+    terminatedAt DateTime?
+    isSys        Boolean   @default(false)
+
+    name             String      @unique // "Procedimiento", "Plano", "Informe"
+    code             String      @unique // "PROC", "DWG", "RPT"
+    module           ModuleType? // null = disponible para todos los módulos
+    description      String?
+    requiresWorkflow Boolean     @default(false)
+
+    // Relaciones
+    documents Document[]
+
+    @@map("document_types")
+}
+
+// Documento maestro
+model Document {
+    id           Int       @id @default(autoincrement())
+    createdAt    DateTime  @default(now())
+    updatedAt    DateTime? @updatedAt
+    updatedById  Int       @default(1)
+    terminatedAt DateTime?
+    isSys        Boolean   @default(false)
+
+    code           String     @unique // Código único (ej: "PR-001")
+    title          String
+    description    String?
+    module         ModuleType // Quality, Projects, Tags, etc.
+    entityType     String? // "finding", "action", "project"...
+    entityId       Int? // ID de la entidad en otro subgraph
+    documentTypeId Int
+    createdById    Int // Referencia al User del sistema admin
+
+    // Relaciones
+    documentType DocumentType       @relation(fields: [documentTypeId], references: [id])
+    revisions    DocumentRevision[]
+
+    @@index([module, entityType, entityId])
+    @@map("documents")
+}
+
+// Revisiones de un documento (A, B, C... o 0, 1, 2...)
+model DocumentRevision {
+    id          Int       @id @default(autoincrement())
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime? @updatedAt
+    updatedById Int       @default(1)
+
+    documentId   Int
+    revisionCode String // "A", "B", "C" o "0", "1", "2"
+    status       RevisionStatus @default(DRAFT)
+    approvedById Int?
+    approvedAt   DateTime?
+    createdById  Int // Referencia al User del sistema admin
+
+    // Relaciones
+    document         Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+    versions         DocumentVersion[]
+    workflow         ReviewWorkflow?
+    transmittalItems TransmittalItem[]
+
+    @@unique([documentId, revisionCode])
+    @@map("document_revisions")
+}
+
+// Versiones de archivo dentro de una revisión
+model DocumentVersion {
+    id          Int      @id @default(autoincrement())
+    createdAt   DateTime @default(now())
+    createdById Int // Referencia al User del sistema admin
+
+    revisionId    Int
+    versionNumber Int // 1, 2, 3...
+    fileKey       String // Key en DO Spaces
+    fileName      String // Nombre original del archivo
+    fileSize      Int // Tamaño en bytes
+    mimeType      String // "application/pdf", "image/jpeg"
+    checksum      String? // SHA-256 para integridad
+    comment       String? // "Corrección de tabla 3"
+
+    // Relaciones
+    revision DocumentRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+
+    @@unique([revisionId, versionNumber])
+    @@map("document_versions")
+}
+
+// Workflow de revisión (ISO 9001)
+model ReviewWorkflow {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+
+    revisionId    Int            @unique
+    status        WorkflowStatus @default(PENDING)
+    initiatedById Int
+    initiatedAt   DateTime       @default(now())
+    completedAt   DateTime?
+
+    // Relaciones
+    revision DocumentRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+    steps    ReviewStep[]
+
+    @@map("review_workflows")
+}
+
+// Pasos individuales del workflow
+model ReviewStep {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+
+    workflowId    Int
+    stepOrder     Int // Orden de ejecución
+    stepType      StepType // REVIEW, APPROVE, ACKNOWLEDGE
+    assignedToId  Int // Referencia al User del sistema admin
+    status        StepStatus @default(PENDING)
+    comments      String?
+    completedAt   DateTime?
+    signatureHash String? // Hash para trazabilidad ISO
+
+    // Relaciones
+    workflow ReviewWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+    @@unique([workflowId, stepOrder])
+    @@map("review_steps")
+}
+
+// Transmittals de ingeniería
+model Transmittal {
+    id          Int       @id @default(autoincrement())
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime? @updatedAt
+    updatedById Int       @default(1)
+
+    code             String            @unique // "TR-001"
+    projectId        Int // Referencia externa al subgraph projects
+    status           TransmittalStatus @default(DRAFT)
+    issuedTo         String // Nombre del cliente/destinatario
+    issuedById       Int // Referencia al User del sistema admin
+    issuedAt         DateTime?
+    responseAt       DateTime?
+    responseComments String?
+
+    // Relaciones
+    items TransmittalItem[]
+
+    @@index([projectId])
+    @@map("transmittals")
+}
+
+// Items de un transmittal
+model TransmittalItem {
+    id Int @id @default(autoincrement())
+
+    transmittalId      Int
+    documentRevisionId Int
+    purposeCode        PurposeCode
+    clientStatus       ClientStatus?
+    clientComments     String?
+
+    // Relaciones
+    transmittal      Transmittal      @relation(fields: [transmittalId], references: [id], onDelete: Cascade)
+    documentRevision DocumentRevision @relation(fields: [documentRevisionId], references: [id])
+
+    @@unique([transmittalId, documentRevisionId])
+    @@map("transmittal_items")
+}
+
+// Logs generales del sistema (operacionales)
+model DocumentSysLog {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    userId    Int // Referencia al User del sistema admin
+    level     LogLevel
+    name      String?  @db.VarChar(200)
+    message   String   @db.VarChar(2048)
+    meta      String?  @db.Text
+
+    @@index([userId, level, createdAt])
+    @@map("document_sys_logs")
+}
+
+// Logs del Sistema Archivados
+model DocumentSysLogArchive {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime
+    userId    Int // Referencia al User del sistema admin
+    level     LogLevel
+    name      String?  @db.VarChar(200)
+    message   String   @db.VarChar(2048)
+    meta      String?  @db.Text
+
+    @@index([userId, level, createdAt])
+    @@map("document_sys_logs_archive")
+}

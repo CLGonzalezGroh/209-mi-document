@@ -1,0 +1,6 @@
+node_modules
+# Keep environment variables out of version control
+.env
+.env.mi-dev.com.ar
+.env.rbb.opermask.com.ar
+dist/
