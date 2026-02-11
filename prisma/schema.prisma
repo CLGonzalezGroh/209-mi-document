@@ -109,6 +109,7 @@ model DocumentType {
 model Document {
     id           Int       @id @default(autoincrement())
     createdAt    DateTime  @default(now())
+    createdById  Int // Referencia al User del sistema admin
     updatedAt    DateTime? @updatedAt
     updatedById  Int       @default(1)
     terminatedAt DateTime?
@@ -121,7 +122,6 @@ model Document {
     entityType     String? // "finding", "action", "project"...
     entityId       Int? // ID de la entidad en otro subgraph
     documentTypeId Int
-    createdById    Int // Referencia al User del sistema admin
 
     // Relaciones
     documentType DocumentType       @relation(fields: [documentTypeId], references: [id])
@@ -135,6 +135,7 @@ model Document {
 model DocumentRevision {
     id          Int       @id @default(autoincrement())
     createdAt   DateTime  @default(now())
+    createdById Int // Referencia al User del sistema admin
     updatedAt   DateTime? @updatedAt
     updatedById Int       @default(1)
 
@@ -143,7 +144,6 @@ model DocumentRevision {
     status       RevisionStatus @default(DRAFT)
     approvedById Int?
     approvedAt   DateTime?
-    createdById  Int // Referencia al User del sistema admin
 
     // Relaciones
     document         Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
@@ -168,7 +168,7 @@ model DocumentVersion {
     fileSize      Int // Tamaño en bytes
     mimeType      String // "application/pdf", "image/jpeg"
     checksum      String? // SHA-256 para integridad
-    comment       String? // "Corrección de tabla 3"
+    comment       String? // "Corrección del conexionado en la página 5"
 
     // Relaciones
     revision DocumentRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
@@ -255,6 +255,24 @@ model TransmittalItem {
 
     @@unique([transmittalId, documentRevisionId])
     @@map("transmittal_items")
+}
+
+// Adjuntos simples (evidencias, fotos, archivos de soporte)
+model Attachment {
+    id          Int      @id @default(autoincrement())
+    createdAt   DateTime @default(now())
+    createdById Int
+    module      ModuleType
+    entityType  String   @db.VarChar(100)
+    entityId    Int
+    fileKey     String   @db.VarChar(500)
+    fileName    String   @db.VarChar(300)
+    fileSize    Int
+    mimeType    String   @db.VarChar(100)
+    description String?  @db.VarChar(500)
+
+    @@index([module, entityType, entityId])
+    @@map("attachments")
 }
 
 // Logs generales del sistema (operacionales)

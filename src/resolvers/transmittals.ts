@@ -329,6 +329,7 @@ export const transmittalResolvers = {
             status: TransmittalStatus.ISSUED,
             issuedAt: new Date(),
             updatedById: userId,
+            issuedById: userId,
           },
           include: transmittalIncludes,
         })

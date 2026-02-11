@@ -300,12 +300,6 @@ export const workflowResolvers = {
 
           // Verificar si todos los steps están completados
           const allSteps = step.workflow.steps
-          const remainingSteps = allSteps.filter(
-            (s) =>
-              s.id !== stepId &&
-              s.status === StepStatus.PENDING &&
-              s.stepType !== "ACKNOWLEDGE",
-          )
 
           // Si no quedan pasos pendientes (excepto ACKNOWLEDGE), el workflow está completo
           const nonAckSteps = allSteps.filter(

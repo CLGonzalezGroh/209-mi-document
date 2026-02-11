@@ -1,6 +1,7 @@
 import { DocumentOrderByInput } from "../resolvers/documents.js"
 import { DocumentTypeOrderByInput } from "../resolvers/documentTypes.js"
 import { TransmittalOrderByInput } from "../resolvers/transmittals.js"
+import { DocumentSysLogOrderByInput } from "../resolvers/documentSysLogs.js"
 
 // Mapeo de campos GraphQL a campos de Prisma para documentos
 const documentFieldMap: Record<string, string> = {
@@ -23,6 +24,12 @@ const transmittalFieldMap: Record<string, string> = {
   CREATED_AT: "createdAt",
   ISSUED_AT: "issuedAt",
   STATUS: "status",
+}
+
+const documentSysLogFieldMap: Record<string, string> = {
+  CREATED_AT: "createdAt",
+  LEVEL: "level",
+  NAME: "name",
 }
 
 export function buildDocumentOrderBy(
@@ -48,6 +55,15 @@ export function buildTransmittalOrderBy(
 ): Record<string, string> | undefined {
   if (!orderBy) return undefined
   const field = transmittalFieldMap[orderBy.field]
+  if (!field) return undefined
+  return { [field]: orderBy.direction.toLowerCase() }
+}
+
+export function buildDocumentSysLogOrderBy(
+  orderBy?: DocumentSysLogOrderByInput,
+): Record<string, string> | undefined {
+  if (!orderBy) return undefined
+  const field = documentSysLogFieldMap[orderBy.field]
   if (!field) return undefined
   return { [field]: orderBy.direction.toLowerCase() }
 }

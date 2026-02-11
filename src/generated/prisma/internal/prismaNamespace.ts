@@ -80,12 +80,12 @@ export type PrismaVersion = {
 }
 
 /**
- * Prisma Client JS version: 7.3.0
- * Query Engine version: 9d6ad21cbbceab97458517b147a6a09ff43aa735
+ * Prisma Client JS version: 7.4.0
+ * Query Engine version: ab56fe763f921d033a6c195e7ddeb3e255bdbb57
  */
 export const prismaVersion: PrismaVersion = {
-  client: "7.3.0",
-  engine: "9d6ad21cbbceab97458517b147a6a09ff43aa735"
+  client: "7.4.0",
+  engine: "ab56fe763f921d033a6c195e7ddeb3e255bdbb57"
 }
 
 /**
@@ -392,6 +392,7 @@ export const ModelName = {
   ReviewStep: 'ReviewStep',
   Transmittal: 'Transmittal',
   TransmittalItem: 'TransmittalItem',
+  Attachment: 'Attachment',
   DocumentSysLog: 'DocumentSysLog',
   DocumentSysLogArchive: 'DocumentSysLogArchive'
 } as const
@@ -409,7 +410,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "documentType" | "document" | "documentRevision" | "documentVersion" | "reviewWorkflow" | "reviewStep" | "transmittal" | "transmittalItem" | "documentSysLog" | "documentSysLogArchive"
+    modelProps: "documentType" | "document" | "documentRevision" | "documentVersion" | "reviewWorkflow" | "reviewStep" | "transmittal" | "transmittalItem" | "attachment" | "documentSysLog" | "documentSysLogArchive"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -941,6 +942,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Attachment: {
+      payload: Prisma.$AttachmentPayload<ExtArgs>
+      fields: Prisma.AttachmentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AttachmentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttachmentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AttachmentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttachmentPayload>
+        }
+        findFirst: {
+          args: Prisma.AttachmentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttachmentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AttachmentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttachmentPayload>
+        }
+        findMany: {
+          args: Prisma.AttachmentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttachmentPayload>[]
+        }
+        create: {
+          args: Prisma.AttachmentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttachmentPayload>
+        }
+        createMany: {
+          args: Prisma.AttachmentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.AttachmentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttachmentPayload>
+        }
+        update: {
+          args: Prisma.AttachmentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttachmentPayload>
+        }
+        deleteMany: {
+          args: Prisma.AttachmentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AttachmentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.AttachmentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttachmentPayload>
+        }
+        aggregate: {
+          args: Prisma.AttachmentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAttachment>
+        }
+        groupBy: {
+          args: Prisma.AttachmentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AttachmentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AttachmentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AttachmentCountAggregateOutputType> | number
+        }
+      }
+    }
     DocumentSysLog: {
       payload: Prisma.$DocumentSysLogPayload<ExtArgs>
       fields: Prisma.DocumentSysLogFieldRefs
@@ -1132,6 +1199,7 @@ export type DocumentTypeScalarFieldEnum = (typeof DocumentTypeScalarFieldEnum)[k
 export const DocumentScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
+  createdById: 'createdById',
   updatedAt: 'updatedAt',
   updatedById: 'updatedById',
   terminatedAt: 'terminatedAt',
@@ -1142,8 +1210,7 @@ export const DocumentScalarFieldEnum = {
   module: 'module',
   entityType: 'entityType',
   entityId: 'entityId',
-  documentTypeId: 'documentTypeId',
-  createdById: 'createdById'
+  documentTypeId: 'documentTypeId'
 } as const
 
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
@@ -1152,14 +1219,14 @@ export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typ
 export const DocumentRevisionScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
+  createdById: 'createdById',
   updatedAt: 'updatedAt',
   updatedById: 'updatedById',
   documentId: 'documentId',
   revisionCode: 'revisionCode',
   status: 'status',
   approvedById: 'approvedById',
-  approvedAt: 'approvedAt',
-  createdById: 'createdById'
+  approvedAt: 'approvedAt'
 } as const
 
 export type DocumentRevisionScalarFieldEnum = (typeof DocumentRevisionScalarFieldEnum)[keyof typeof DocumentRevisionScalarFieldEnum]
@@ -1239,6 +1306,23 @@ export const TransmittalItemScalarFieldEnum = {
 } as const
 
 export type TransmittalItemScalarFieldEnum = (typeof TransmittalItemScalarFieldEnum)[keyof typeof TransmittalItemScalarFieldEnum]
+
+
+export const AttachmentScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  module: 'module',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  fileKey: 'fileKey',
+  fileName: 'fileName',
+  fileSize: 'fileSize',
+  mimeType: 'mimeType',
+  description: 'description'
+} as const
+
+export type AttachmentScalarFieldEnum = (typeof AttachmentScalarFieldEnum)[keyof typeof AttachmentScalarFieldEnum]
 
 
 export const DocumentSysLogScalarFieldEnum = {
@@ -1342,6 +1426,17 @@ export const TransmittalItemOrderByRelevanceFieldEnum = {
 } as const
 
 export type TransmittalItemOrderByRelevanceFieldEnum = (typeof TransmittalItemOrderByRelevanceFieldEnum)[keyof typeof TransmittalItemOrderByRelevanceFieldEnum]
+
+
+export const AttachmentOrderByRelevanceFieldEnum = {
+  entityType: 'entityType',
+  fileKey: 'fileKey',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  description: 'description'
+} as const
+
+export type AttachmentOrderByRelevanceFieldEnum = (typeof AttachmentOrderByRelevanceFieldEnum)[keyof typeof AttachmentOrderByRelevanceFieldEnum]
 
 
 export const DocumentSysLogOrderByRelevanceFieldEnum = {
@@ -1568,6 +1663,7 @@ export type GlobalOmitConfig = {
   reviewStep?: Prisma.ReviewStepOmit
   transmittal?: Prisma.TransmittalOmit
   transmittalItem?: Prisma.TransmittalItemOmit
+  attachment?: Prisma.AttachmentOmit
   documentSysLog?: Prisma.DocumentSysLogOmit
   documentSysLogArchive?: Prisma.DocumentSysLogArchiveOmit
 }

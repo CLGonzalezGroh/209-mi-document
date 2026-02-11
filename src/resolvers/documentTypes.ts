@@ -2,11 +2,13 @@ import { GraphQLError } from "graphql"
 import { ResolverContext } from "../types.js"
 import {
   PaginationInput,
+  ListResponse,
   OrderByInput,
   SelectOption,
   PERMISSIONS,
   TerminatedFilter,
 } from "@CLGonzalezGroh/mi-common"
+import { DocumentType } from "../generated/prisma/client.js"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentTypeOrderBy } from "../utils/orderByHelper.js"
@@ -85,14 +87,35 @@ export const documentTypeResolvers = {
           }
         }
 
+        const skip = pagination?.skip || 0
+        const take = pagination?.take || 10
+
         const orderByClause = buildDocumentTypeOrderBy(orderBy)
+
+        const totalItems = await context.orm.documentType.count({ where })
 
         const documentTypes = await context.orm.documentType.findMany({
           where,
+          skip,
+          take,
           orderBy: orderByClause || { name: "asc" },
         })
 
-        return documentTypes
+        const totalPages = Math.ceil(totalItems / take)
+        const currentPage = Math.floor(skip / take) + 1
+
+        const response: ListResponse<DocumentType> = {
+          items: documentTypes,
+          pagination: {
+            currentPage,
+            totalPages,
+            totalItems,
+            hasNext: skip + take < totalItems,
+            hasPrev: skip > 0,
+          },
+        }
+
+        return response
       } catch (error) {
         return handleError({
           error,
@@ -149,7 +172,7 @@ export const documentTypeResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_LIST],
+        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_SELECT],
         context,
       })
 

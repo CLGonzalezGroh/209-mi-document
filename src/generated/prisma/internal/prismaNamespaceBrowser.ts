@@ -59,6 +59,7 @@ export const ModelName = {
   ReviewStep: 'ReviewStep',
   Transmittal: 'Transmittal',
   TransmittalItem: 'TransmittalItem',
+  Attachment: 'Attachment',
   DocumentSysLog: 'DocumentSysLog',
   DocumentSysLogArchive: 'DocumentSysLogArchive'
 } as const
@@ -99,6 +100,7 @@ export type DocumentTypeScalarFieldEnum = (typeof DocumentTypeScalarFieldEnum)[k
 export const DocumentScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
+  createdById: 'createdById',
   updatedAt: 'updatedAt',
   updatedById: 'updatedById',
   terminatedAt: 'terminatedAt',
@@ -109,8 +111,7 @@ export const DocumentScalarFieldEnum = {
   module: 'module',
   entityType: 'entityType',
   entityId: 'entityId',
-  documentTypeId: 'documentTypeId',
-  createdById: 'createdById'
+  documentTypeId: 'documentTypeId'
 } as const
 
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
@@ -119,14 +120,14 @@ export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typ
 export const DocumentRevisionScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
+  createdById: 'createdById',
   updatedAt: 'updatedAt',
   updatedById: 'updatedById',
   documentId: 'documentId',
   revisionCode: 'revisionCode',
   status: 'status',
   approvedById: 'approvedById',
-  approvedAt: 'approvedAt',
-  createdById: 'createdById'
+  approvedAt: 'approvedAt'
 } as const
 
 export type DocumentRevisionScalarFieldEnum = (typeof DocumentRevisionScalarFieldEnum)[keyof typeof DocumentRevisionScalarFieldEnum]
@@ -206,6 +207,23 @@ export const TransmittalItemScalarFieldEnum = {
 } as const
 
 export type TransmittalItemScalarFieldEnum = (typeof TransmittalItemScalarFieldEnum)[keyof typeof TransmittalItemScalarFieldEnum]
+
+
+export const AttachmentScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  module: 'module',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  fileKey: 'fileKey',
+  fileName: 'fileName',
+  fileSize: 'fileSize',
+  mimeType: 'mimeType',
+  description: 'description'
+} as const
+
+export type AttachmentScalarFieldEnum = (typeof AttachmentScalarFieldEnum)[keyof typeof AttachmentScalarFieldEnum]
 
 
 export const DocumentSysLogScalarFieldEnum = {
@@ -309,6 +327,17 @@ export const TransmittalItemOrderByRelevanceFieldEnum = {
 } as const
 
 export type TransmittalItemOrderByRelevanceFieldEnum = (typeof TransmittalItemOrderByRelevanceFieldEnum)[keyof typeof TransmittalItemOrderByRelevanceFieldEnum]
+
+
+export const AttachmentOrderByRelevanceFieldEnum = {
+  entityType: 'entityType',
+  fileKey: 'fileKey',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  description: 'description'
+} as const
+
+export type AttachmentOrderByRelevanceFieldEnum = (typeof AttachmentOrderByRelevanceFieldEnum)[keyof typeof AttachmentOrderByRelevanceFieldEnum]
 
 
 export const DocumentSysLogOrderByRelevanceFieldEnum = {

@@ -80,6 +80,11 @@ export type Transmittal = Prisma.TransmittalModel
  */
 export type TransmittalItem = Prisma.TransmittalItemModel
 /**
+ * Model Attachment
+ * 
+ */
+export type Attachment = Prisma.AttachmentModel
+/**
  * Model DocumentSysLog
  * 
  */

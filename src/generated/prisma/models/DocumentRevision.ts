@@ -28,23 +28,24 @@ export type AggregateDocumentRevision = {
 
 export type DocumentRevisionAvgAggregateOutputType = {
   id: number | null
+  createdById: number | null
   updatedById: number | null
   documentId: number | null
   approvedById: number | null
-  createdById: number | null
 }
 
 export type DocumentRevisionSumAggregateOutputType = {
   id: number | null
+  createdById: number | null
   updatedById: number | null
   documentId: number | null
   approvedById: number | null
-  createdById: number | null
 }
 
 export type DocumentRevisionMinAggregateOutputType = {
   id: number | null
   createdAt: Date | null
+  createdById: number | null
   updatedAt: Date | null
   updatedById: number | null
   documentId: number | null
@@ -52,12 +53,12 @@ export type DocumentRevisionMinAggregateOutputType = {
   status: $Enums.RevisionStatus | null
   approvedById: number | null
   approvedAt: Date | null
-  createdById: number | null
 }
 
 export type DocumentRevisionMaxAggregateOutputType = {
   id: number | null
   createdAt: Date | null
+  createdById: number | null
   updatedAt: Date | null
   updatedById: number | null
   documentId: number | null
@@ -65,12 +66,12 @@ export type DocumentRevisionMaxAggregateOutputType = {
   status: $Enums.RevisionStatus | null
   approvedById: number | null
   approvedAt: Date | null
-  createdById: number | null
 }
 
 export type DocumentRevisionCountAggregateOutputType = {
   id: number
   createdAt: number
+  createdById: number
   updatedAt: number
   updatedById: number
   documentId: number
@@ -78,30 +79,30 @@ export type DocumentRevisionCountAggregateOutputType = {
   status: number
   approvedById: number
   approvedAt: number
-  createdById: number
   _all: number
 }
 
 
 export type DocumentRevisionAvgAggregateInputType = {
   id?: true
+  createdById?: true
   updatedById?: true
   documentId?: true
   approvedById?: true
-  createdById?: true
 }
 
 export type DocumentRevisionSumAggregateInputType = {
   id?: true
+  createdById?: true
   updatedById?: true
   documentId?: true
   approvedById?: true
-  createdById?: true
 }
 
 export type DocumentRevisionMinAggregateInputType = {
   id?: true
   createdAt?: true
+  createdById?: true
   updatedAt?: true
   updatedById?: true
   documentId?: true
@@ -109,12 +110,12 @@ export type DocumentRevisionMinAggregateInputType = {
   status?: true
   approvedById?: true
   approvedAt?: true
-  createdById?: true
 }
 
 export type DocumentRevisionMaxAggregateInputType = {
   id?: true
   createdAt?: true
+  createdById?: true
   updatedAt?: true
   updatedById?: true
   documentId?: true
@@ -122,12 +123,12 @@ export type DocumentRevisionMaxAggregateInputType = {
   status?: true
   approvedById?: true
   approvedAt?: true
-  createdById?: true
 }
 
 export type DocumentRevisionCountAggregateInputType = {
   id?: true
   createdAt?: true
+  createdById?: true
   updatedAt?: true
   updatedById?: true
   documentId?: true
@@ -135,7 +136,6 @@ export type DocumentRevisionCountAggregateInputType = {
   status?: true
   approvedById?: true
   approvedAt?: true
-  createdById?: true
   _all?: true
 }
 
@@ -228,6 +228,7 @@ export type DocumentRevisionGroupByArgs<ExtArgs extends runtime.Types.Extensions
 export type DocumentRevisionGroupByOutputType = {
   id: number
   createdAt: Date
+  createdById: number
   updatedAt: Date | null
   updatedById: number
   documentId: number
@@ -235,7 +236,6 @@ export type DocumentRevisionGroupByOutputType = {
   status: $Enums.RevisionStatus
   approvedById: number | null
   approvedAt: Date | null
-  createdById: number
   _count: DocumentRevisionCountAggregateOutputType | null
   _avg: DocumentRevisionAvgAggregateOutputType | null
   _sum: DocumentRevisionSumAggregateOutputType | null
@@ -264,6 +264,7 @@ export type DocumentRevisionWhereInput = {
   NOT?: Prisma.DocumentRevisionWhereInput | Prisma.DocumentRevisionWhereInput[]
   id?: Prisma.IntFilter<"DocumentRevision"> | number
   createdAt?: Prisma.DateTimeFilter<"DocumentRevision"> | Date | string
+  createdById?: Prisma.IntFilter<"DocumentRevision"> | number
   updatedAt?: Prisma.DateTimeNullableFilter<"DocumentRevision"> | Date | string | null
   updatedById?: Prisma.IntFilter<"DocumentRevision"> | number
   documentId?: Prisma.IntFilter<"DocumentRevision"> | number
@@ -271,7 +272,6 @@ export type DocumentRevisionWhereInput = {
   status?: Prisma.EnumRevisionStatusFilter<"DocumentRevision"> | $Enums.RevisionStatus
   approvedById?: Prisma.IntNullableFilter<"DocumentRevision"> | number | null
   approvedAt?: Prisma.DateTimeNullableFilter<"DocumentRevision"> | Date | string | null
-  createdById?: Prisma.IntFilter<"DocumentRevision"> | number
   document?: Prisma.XOR<Prisma.DocumentScalarRelationFilter, Prisma.DocumentWhereInput>
   versions?: Prisma.DocumentVersionListRelationFilter
   workflow?: Prisma.XOR<Prisma.ReviewWorkflowNullableScalarRelationFilter, Prisma.ReviewWorkflowWhereInput> | null
@@ -281,6 +281,7 @@ export type DocumentRevisionWhereInput = {
 export type DocumentRevisionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   documentId?: Prisma.SortOrder
@@ -288,7 +289,6 @@ export type DocumentRevisionOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   approvedById?: Prisma.SortOrderInput | Prisma.SortOrder
   approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  createdById?: Prisma.SortOrder
   document?: Prisma.DocumentOrderByWithRelationInput
   versions?: Prisma.DocumentVersionOrderByRelationAggregateInput
   workflow?: Prisma.ReviewWorkflowOrderByWithRelationInput
@@ -303,6 +303,7 @@ export type DocumentRevisionWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.DocumentRevisionWhereInput[]
   NOT?: Prisma.DocumentRevisionWhereInput | Prisma.DocumentRevisionWhereInput[]
   createdAt?: Prisma.DateTimeFilter<"DocumentRevision"> | Date | string
+  createdById?: Prisma.IntFilter<"DocumentRevision"> | number
   updatedAt?: Prisma.DateTimeNullableFilter<"DocumentRevision"> | Date | string | null
   updatedById?: Prisma.IntFilter<"DocumentRevision"> | number
   documentId?: Prisma.IntFilter<"DocumentRevision"> | number
@@ -310,7 +311,6 @@ export type DocumentRevisionWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumRevisionStatusFilter<"DocumentRevision"> | $Enums.RevisionStatus
   approvedById?: Prisma.IntNullableFilter<"DocumentRevision"> | number | null
   approvedAt?: Prisma.DateTimeNullableFilter<"DocumentRevision"> | Date | string | null
-  createdById?: Prisma.IntFilter<"DocumentRevision"> | number
   document?: Prisma.XOR<Prisma.DocumentScalarRelationFilter, Prisma.DocumentWhereInput>
   versions?: Prisma.DocumentVersionListRelationFilter
   workflow?: Prisma.XOR<Prisma.ReviewWorkflowNullableScalarRelationFilter, Prisma.ReviewWorkflowWhereInput> | null
@@ -320,6 +320,7 @@ export type DocumentRevisionWhereUniqueInput = Prisma.AtLeast<{
 export type DocumentRevisionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   documentId?: Prisma.SortOrder
@@ -327,7 +328,6 @@ export type DocumentRevisionOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   approvedById?: Prisma.SortOrderInput | Prisma.SortOrder
   approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  createdById?: Prisma.SortOrder
   _count?: Prisma.DocumentRevisionCountOrderByAggregateInput
   _avg?: Prisma.DocumentRevisionAvgOrderByAggregateInput
   _max?: Prisma.DocumentRevisionMaxOrderByAggregateInput
@@ -341,6 +341,7 @@ export type DocumentRevisionScalarWhereWithAggregatesInput = {
   NOT?: Prisma.DocumentRevisionScalarWhereWithAggregatesInput | Prisma.DocumentRevisionScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"DocumentRevision"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"DocumentRevision"> | Date | string
+  createdById?: Prisma.IntWithAggregatesFilter<"DocumentRevision"> | number
   updatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DocumentRevision"> | Date | string | null
   updatedById?: Prisma.IntWithAggregatesFilter<"DocumentRevision"> | number
   documentId?: Prisma.IntWithAggregatesFilter<"DocumentRevision"> | number
@@ -348,18 +349,17 @@ export type DocumentRevisionScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumRevisionStatusWithAggregatesFilter<"DocumentRevision"> | $Enums.RevisionStatus
   approvedById?: Prisma.IntNullableWithAggregatesFilter<"DocumentRevision"> | number | null
   approvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DocumentRevision"> | Date | string | null
-  createdById?: Prisma.IntWithAggregatesFilter<"DocumentRevision"> | number
 }
 
 export type DocumentRevisionCreateInput = {
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   revisionCode: string
   status?: $Enums.RevisionStatus
   approvedById?: number | null
   approvedAt?: Date | string | null
-  createdById: number
   document: Prisma.DocumentCreateNestedOneWithoutRevisionsInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutRevisionInput
   workflow?: Prisma.ReviewWorkflowCreateNestedOneWithoutRevisionInput
@@ -369,6 +369,7 @@ export type DocumentRevisionCreateInput = {
 export type DocumentRevisionUncheckedCreateInput = {
   id?: number
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   documentId: number
@@ -376,7 +377,6 @@ export type DocumentRevisionUncheckedCreateInput = {
   status?: $Enums.RevisionStatus
   approvedById?: number | null
   approvedAt?: Date | string | null
-  createdById: number
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutRevisionInput
   workflow?: Prisma.ReviewWorkflowUncheckedCreateNestedOneWithoutRevisionInput
   transmittalItems?: Prisma.TransmittalItemUncheckedCreateNestedManyWithoutDocumentRevisionInput
@@ -384,13 +384,13 @@ export type DocumentRevisionUncheckedCreateInput = {
 
 export type DocumentRevisionUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   revisionCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumRevisionStatusFieldUpdateOperationsInput | $Enums.RevisionStatus
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   document?: Prisma.DocumentUpdateOneRequiredWithoutRevisionsNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutRevisionNestedInput
   workflow?: Prisma.ReviewWorkflowUpdateOneWithoutRevisionNestedInput
@@ -400,6 +400,7 @@ export type DocumentRevisionUpdateInput = {
 export type DocumentRevisionUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   documentId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -407,7 +408,6 @@ export type DocumentRevisionUncheckedUpdateInput = {
   status?: Prisma.EnumRevisionStatusFieldUpdateOperationsInput | $Enums.RevisionStatus
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutRevisionNestedInput
   workflow?: Prisma.ReviewWorkflowUncheckedUpdateOneWithoutRevisionNestedInput
   transmittalItems?: Prisma.TransmittalItemUncheckedUpdateManyWithoutDocumentRevisionNestedInput
@@ -416,6 +416,7 @@ export type DocumentRevisionUncheckedUpdateInput = {
 export type DocumentRevisionCreateManyInput = {
   id?: number
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   documentId: number
@@ -423,23 +424,23 @@ export type DocumentRevisionCreateManyInput = {
   status?: $Enums.RevisionStatus
   approvedById?: number | null
   approvedAt?: Date | string | null
-  createdById: number
 }
 
 export type DocumentRevisionUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   revisionCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumRevisionStatusFieldUpdateOperationsInput | $Enums.RevisionStatus
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type DocumentRevisionUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   documentId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -447,7 +448,6 @@ export type DocumentRevisionUncheckedUpdateManyInput = {
   status?: Prisma.EnumRevisionStatusFieldUpdateOperationsInput | $Enums.RevisionStatus
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type DocumentRevisionListRelationFilter = {
@@ -474,6 +474,7 @@ export type DocumentRevisionDocumentIdRevisionCodeCompoundUniqueInput = {
 export type DocumentRevisionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   documentId?: Prisma.SortOrder
@@ -481,20 +482,20 @@ export type DocumentRevisionCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   approvedById?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
-  createdById?: Prisma.SortOrder
 }
 
 export type DocumentRevisionAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   documentId?: Prisma.SortOrder
   approvedById?: Prisma.SortOrder
-  createdById?: Prisma.SortOrder
 }
 
 export type DocumentRevisionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   documentId?: Prisma.SortOrder
@@ -502,12 +503,12 @@ export type DocumentRevisionMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   approvedById?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
-  createdById?: Prisma.SortOrder
 }
 
 export type DocumentRevisionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   documentId?: Prisma.SortOrder
@@ -515,15 +516,14 @@ export type DocumentRevisionMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   approvedById?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
-  createdById?: Prisma.SortOrder
 }
 
 export type DocumentRevisionSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   documentId?: Prisma.SortOrder
   approvedById?: Prisma.SortOrder
-  createdById?: Prisma.SortOrder
 }
 
 export type DocumentRevisionScalarRelationFilter = {
@@ -621,13 +621,13 @@ export type DocumentRevisionUpdateOneRequiredWithoutTransmittalItemsNestedInput 
 
 export type DocumentRevisionCreateWithoutDocumentInput = {
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   revisionCode: string
   status?: $Enums.RevisionStatus
   approvedById?: number | null
   approvedAt?: Date | string | null
-  createdById: number
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutRevisionInput
   workflow?: Prisma.ReviewWorkflowCreateNestedOneWithoutRevisionInput
   transmittalItems?: Prisma.TransmittalItemCreateNestedManyWithoutDocumentRevisionInput
@@ -636,13 +636,13 @@ export type DocumentRevisionCreateWithoutDocumentInput = {
 export type DocumentRevisionUncheckedCreateWithoutDocumentInput = {
   id?: number
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   revisionCode: string
   status?: $Enums.RevisionStatus
   approvedById?: number | null
   approvedAt?: Date | string | null
-  createdById: number
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutRevisionInput
   workflow?: Prisma.ReviewWorkflowUncheckedCreateNestedOneWithoutRevisionInput
   transmittalItems?: Prisma.TransmittalItemUncheckedCreateNestedManyWithoutDocumentRevisionInput
@@ -680,6 +680,7 @@ export type DocumentRevisionScalarWhereInput = {
   NOT?: Prisma.DocumentRevisionScalarWhereInput | Prisma.DocumentRevisionScalarWhereInput[]
   id?: Prisma.IntFilter<"DocumentRevision"> | number
   createdAt?: Prisma.DateTimeFilter<"DocumentRevision"> | Date | string
+  createdById?: Prisma.IntFilter<"DocumentRevision"> | number
   updatedAt?: Prisma.DateTimeNullableFilter<"DocumentRevision"> | Date | string | null
   updatedById?: Prisma.IntFilter<"DocumentRevision"> | number
   documentId?: Prisma.IntFilter<"DocumentRevision"> | number
@@ -687,18 +688,17 @@ export type DocumentRevisionScalarWhereInput = {
   status?: Prisma.EnumRevisionStatusFilter<"DocumentRevision"> | $Enums.RevisionStatus
   approvedById?: Prisma.IntNullableFilter<"DocumentRevision"> | number | null
   approvedAt?: Prisma.DateTimeNullableFilter<"DocumentRevision"> | Date | string | null
-  createdById?: Prisma.IntFilter<"DocumentRevision"> | number
 }
 
 export type DocumentRevisionCreateWithoutVersionsInput = {
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   revisionCode: string
   status?: $Enums.RevisionStatus
   approvedById?: number | null
   approvedAt?: Date | string | null
-  createdById: number
   document: Prisma.DocumentCreateNestedOneWithoutRevisionsInput
   workflow?: Prisma.ReviewWorkflowCreateNestedOneWithoutRevisionInput
   transmittalItems?: Prisma.TransmittalItemCreateNestedManyWithoutDocumentRevisionInput
@@ -707,6 +707,7 @@ export type DocumentRevisionCreateWithoutVersionsInput = {
 export type DocumentRevisionUncheckedCreateWithoutVersionsInput = {
   id?: number
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   documentId: number
@@ -714,7 +715,6 @@ export type DocumentRevisionUncheckedCreateWithoutVersionsInput = {
   status?: $Enums.RevisionStatus
   approvedById?: number | null
   approvedAt?: Date | string | null
-  createdById: number
   workflow?: Prisma.ReviewWorkflowUncheckedCreateNestedOneWithoutRevisionInput
   transmittalItems?: Prisma.TransmittalItemUncheckedCreateNestedManyWithoutDocumentRevisionInput
 }
@@ -737,13 +737,13 @@ export type DocumentRevisionUpdateToOneWithWhereWithoutVersionsInput = {
 
 export type DocumentRevisionUpdateWithoutVersionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   revisionCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumRevisionStatusFieldUpdateOperationsInput | $Enums.RevisionStatus
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   document?: Prisma.DocumentUpdateOneRequiredWithoutRevisionsNestedInput
   workflow?: Prisma.ReviewWorkflowUpdateOneWithoutRevisionNestedInput
   transmittalItems?: Prisma.TransmittalItemUpdateManyWithoutDocumentRevisionNestedInput
@@ -752,6 +752,7 @@ export type DocumentRevisionUpdateWithoutVersionsInput = {
 export type DocumentRevisionUncheckedUpdateWithoutVersionsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   documentId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -759,20 +760,19 @@ export type DocumentRevisionUncheckedUpdateWithoutVersionsInput = {
   status?: Prisma.EnumRevisionStatusFieldUpdateOperationsInput | $Enums.RevisionStatus
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   workflow?: Prisma.ReviewWorkflowUncheckedUpdateOneWithoutRevisionNestedInput
   transmittalItems?: Prisma.TransmittalItemUncheckedUpdateManyWithoutDocumentRevisionNestedInput
 }
 
 export type DocumentRevisionCreateWithoutWorkflowInput = {
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   revisionCode: string
   status?: $Enums.RevisionStatus
   approvedById?: number | null
   approvedAt?: Date | string | null
-  createdById: number
   document: Prisma.DocumentCreateNestedOneWithoutRevisionsInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutRevisionInput
   transmittalItems?: Prisma.TransmittalItemCreateNestedManyWithoutDocumentRevisionInput
@@ -781,6 +781,7 @@ export type DocumentRevisionCreateWithoutWorkflowInput = {
 export type DocumentRevisionUncheckedCreateWithoutWorkflowInput = {
   id?: number
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   documentId: number
@@ -788,7 +789,6 @@ export type DocumentRevisionUncheckedCreateWithoutWorkflowInput = {
   status?: $Enums.RevisionStatus
   approvedById?: number | null
   approvedAt?: Date | string | null
-  createdById: number
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutRevisionInput
   transmittalItems?: Prisma.TransmittalItemUncheckedCreateNestedManyWithoutDocumentRevisionInput
 }
@@ -811,13 +811,13 @@ export type DocumentRevisionUpdateToOneWithWhereWithoutWorkflowInput = {
 
 export type DocumentRevisionUpdateWithoutWorkflowInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   revisionCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumRevisionStatusFieldUpdateOperationsInput | $Enums.RevisionStatus
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   document?: Prisma.DocumentUpdateOneRequiredWithoutRevisionsNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutRevisionNestedInput
   transmittalItems?: Prisma.TransmittalItemUpdateManyWithoutDocumentRevisionNestedInput
@@ -826,6 +826,7 @@ export type DocumentRevisionUpdateWithoutWorkflowInput = {
 export type DocumentRevisionUncheckedUpdateWithoutWorkflowInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   documentId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -833,20 +834,19 @@ export type DocumentRevisionUncheckedUpdateWithoutWorkflowInput = {
   status?: Prisma.EnumRevisionStatusFieldUpdateOperationsInput | $Enums.RevisionStatus
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutRevisionNestedInput
   transmittalItems?: Prisma.TransmittalItemUncheckedUpdateManyWithoutDocumentRevisionNestedInput
 }
 
 export type DocumentRevisionCreateWithoutTransmittalItemsInput = {
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   revisionCode: string
   status?: $Enums.RevisionStatus
   approvedById?: number | null
   approvedAt?: Date | string | null
-  createdById: number
   document: Prisma.DocumentCreateNestedOneWithoutRevisionsInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutRevisionInput
   workflow?: Prisma.ReviewWorkflowCreateNestedOneWithoutRevisionInput
@@ -855,6 +855,7 @@ export type DocumentRevisionCreateWithoutTransmittalItemsInput = {
 export type DocumentRevisionUncheckedCreateWithoutTransmittalItemsInput = {
   id?: number
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   documentId: number
@@ -862,7 +863,6 @@ export type DocumentRevisionUncheckedCreateWithoutTransmittalItemsInput = {
   status?: $Enums.RevisionStatus
   approvedById?: number | null
   approvedAt?: Date | string | null
-  createdById: number
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutRevisionInput
   workflow?: Prisma.ReviewWorkflowUncheckedCreateNestedOneWithoutRevisionInput
 }
@@ -885,13 +885,13 @@ export type DocumentRevisionUpdateToOneWithWhereWithoutTransmittalItemsInput = {
 
 export type DocumentRevisionUpdateWithoutTransmittalItemsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   revisionCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumRevisionStatusFieldUpdateOperationsInput | $Enums.RevisionStatus
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   document?: Prisma.DocumentUpdateOneRequiredWithoutRevisionsNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutRevisionNestedInput
   workflow?: Prisma.ReviewWorkflowUpdateOneWithoutRevisionNestedInput
@@ -900,6 +900,7 @@ export type DocumentRevisionUpdateWithoutTransmittalItemsInput = {
 export type DocumentRevisionUncheckedUpdateWithoutTransmittalItemsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   documentId?: Prisma.IntFieldUpdateOperationsInput | number
@@ -907,7 +908,6 @@ export type DocumentRevisionUncheckedUpdateWithoutTransmittalItemsInput = {
   status?: Prisma.EnumRevisionStatusFieldUpdateOperationsInput | $Enums.RevisionStatus
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutRevisionNestedInput
   workflow?: Prisma.ReviewWorkflowUncheckedUpdateOneWithoutRevisionNestedInput
 }
@@ -915,24 +915,24 @@ export type DocumentRevisionUncheckedUpdateWithoutTransmittalItemsInput = {
 export type DocumentRevisionCreateManyDocumentInput = {
   id?: number
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   revisionCode: string
   status?: $Enums.RevisionStatus
   approvedById?: number | null
   approvedAt?: Date | string | null
-  createdById: number
 }
 
 export type DocumentRevisionUpdateWithoutDocumentInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   revisionCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumRevisionStatusFieldUpdateOperationsInput | $Enums.RevisionStatus
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   versions?: Prisma.DocumentVersionUpdateManyWithoutRevisionNestedInput
   workflow?: Prisma.ReviewWorkflowUpdateOneWithoutRevisionNestedInput
   transmittalItems?: Prisma.TransmittalItemUpdateManyWithoutDocumentRevisionNestedInput
@@ -941,13 +941,13 @@ export type DocumentRevisionUpdateWithoutDocumentInput = {
 export type DocumentRevisionUncheckedUpdateWithoutDocumentInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   revisionCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumRevisionStatusFieldUpdateOperationsInput | $Enums.RevisionStatus
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutRevisionNestedInput
   workflow?: Prisma.ReviewWorkflowUncheckedUpdateOneWithoutRevisionNestedInput
   transmittalItems?: Prisma.TransmittalItemUncheckedUpdateManyWithoutDocumentRevisionNestedInput
@@ -956,13 +956,13 @@ export type DocumentRevisionUncheckedUpdateWithoutDocumentInput = {
 export type DocumentRevisionUncheckedUpdateManyWithoutDocumentInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   revisionCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumRevisionStatusFieldUpdateOperationsInput | $Enums.RevisionStatus
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 
@@ -1008,6 +1008,7 @@ export type DocumentRevisionCountOutputTypeCountTransmittalItemsArgs<ExtArgs ext
 export type DocumentRevisionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   createdAt?: boolean
+  createdById?: boolean
   updatedAt?: boolean
   updatedById?: boolean
   documentId?: boolean
@@ -1015,7 +1016,6 @@ export type DocumentRevisionSelect<ExtArgs extends runtime.Types.Extensions.Inte
   status?: boolean
   approvedById?: boolean
   approvedAt?: boolean
-  createdById?: boolean
   document?: boolean | Prisma.DocumentDefaultArgs<ExtArgs>
   versions?: boolean | Prisma.DocumentRevision$versionsArgs<ExtArgs>
   workflow?: boolean | Prisma.DocumentRevision$workflowArgs<ExtArgs>
@@ -1028,6 +1028,7 @@ export type DocumentRevisionSelect<ExtArgs extends runtime.Types.Extensions.Inte
 export type DocumentRevisionSelectScalar = {
   id?: boolean
   createdAt?: boolean
+  createdById?: boolean
   updatedAt?: boolean
   updatedById?: boolean
   documentId?: boolean
@@ -1035,10 +1036,9 @@ export type DocumentRevisionSelectScalar = {
   status?: boolean
   approvedById?: boolean
   approvedAt?: boolean
-  createdById?: boolean
 }
 
-export type DocumentRevisionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "updatedById" | "documentId" | "revisionCode" | "status" | "approvedById" | "approvedAt" | "createdById", ExtArgs["result"]["documentRevision"]>
+export type DocumentRevisionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "documentId" | "revisionCode" | "status" | "approvedById" | "approvedAt", ExtArgs["result"]["documentRevision"]>
 export type DocumentRevisionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   document?: boolean | Prisma.DocumentDefaultArgs<ExtArgs>
   versions?: boolean | Prisma.DocumentRevision$versionsArgs<ExtArgs>
@@ -1058,6 +1058,7 @@ export type $DocumentRevisionPayload<ExtArgs extends runtime.Types.Extensions.In
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     createdAt: Date
+    createdById: number
     updatedAt: Date | null
     updatedById: number
     documentId: number
@@ -1065,7 +1066,6 @@ export type $DocumentRevisionPayload<ExtArgs extends runtime.Types.Extensions.In
     status: $Enums.RevisionStatus
     approvedById: number | null
     approvedAt: Date | null
-    createdById: number
   }, ExtArgs["result"]["documentRevision"]>
   composites: {}
 }
@@ -1441,6 +1441,7 @@ export interface Prisma__DocumentRevisionClient<T, Null = never, ExtArgs extends
 export interface DocumentRevisionFieldRefs {
   readonly id: Prisma.FieldRef<"DocumentRevision", 'Int'>
   readonly createdAt: Prisma.FieldRef<"DocumentRevision", 'DateTime'>
+  readonly createdById: Prisma.FieldRef<"DocumentRevision", 'Int'>
   readonly updatedAt: Prisma.FieldRef<"DocumentRevision", 'DateTime'>
   readonly updatedById: Prisma.FieldRef<"DocumentRevision", 'Int'>
   readonly documentId: Prisma.FieldRef<"DocumentRevision", 'Int'>
@@ -1448,7 +1449,6 @@ export interface DocumentRevisionFieldRefs {
   readonly status: Prisma.FieldRef<"DocumentRevision", 'RevisionStatus'>
   readonly approvedById: Prisma.FieldRef<"DocumentRevision", 'Int'>
   readonly approvedAt: Prisma.FieldRef<"DocumentRevision", 'DateTime'>
-  readonly createdById: Prisma.FieldRef<"DocumentRevision", 'Int'>
 }
     
 

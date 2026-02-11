@@ -9,6 +9,7 @@ import { versionResolvers } from "./versions.js"
 import { workflowResolvers } from "./workflows.js"
 import { transmittalResolvers } from "./transmittals.js"
 import { documentSysLogResolvers } from "./documentSysLogs.js"
+import { attachmentResolvers } from "./attachments.js"
 
 export const resolvers: GraphQLResolverMap<ResolverContext> = {
   ...scalars,
@@ -19,6 +20,7 @@ export const resolvers: GraphQLResolverMap<ResolverContext> = {
     ...workflowResolvers.Query,
     ...transmittalResolvers.Query,
     ...documentSysLogResolvers.Query,
+    ...attachmentResolvers.Query,
   },
   Mutation: {
     ...documentResolvers.Mutation,
@@ -27,6 +29,8 @@ export const resolvers: GraphQLResolverMap<ResolverContext> = {
     ...revisionResolvers.Mutation,
     ...workflowResolvers.Mutation,
     ...transmittalResolvers.Mutation,
+    ...documentSysLogResolvers.Mutation,
+    ...attachmentResolvers.Mutation,
   },
   ...resolverTypes,
 }

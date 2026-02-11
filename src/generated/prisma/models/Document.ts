@@ -28,23 +28,24 @@ export type AggregateDocument = {
 
 export type DocumentAvgAggregateOutputType = {
   id: number | null
+  createdById: number | null
   updatedById: number | null
   entityId: number | null
   documentTypeId: number | null
-  createdById: number | null
 }
 
 export type DocumentSumAggregateOutputType = {
   id: number | null
+  createdById: number | null
   updatedById: number | null
   entityId: number | null
   documentTypeId: number | null
-  createdById: number | null
 }
 
 export type DocumentMinAggregateOutputType = {
   id: number | null
   createdAt: Date | null
+  createdById: number | null
   updatedAt: Date | null
   updatedById: number | null
   terminatedAt: Date | null
@@ -56,12 +57,12 @@ export type DocumentMinAggregateOutputType = {
   entityType: string | null
   entityId: number | null
   documentTypeId: number | null
-  createdById: number | null
 }
 
 export type DocumentMaxAggregateOutputType = {
   id: number | null
   createdAt: Date | null
+  createdById: number | null
   updatedAt: Date | null
   updatedById: number | null
   terminatedAt: Date | null
@@ -73,12 +74,12 @@ export type DocumentMaxAggregateOutputType = {
   entityType: string | null
   entityId: number | null
   documentTypeId: number | null
-  createdById: number | null
 }
 
 export type DocumentCountAggregateOutputType = {
   id: number
   createdAt: number
+  createdById: number
   updatedAt: number
   updatedById: number
   terminatedAt: number
@@ -90,30 +91,30 @@ export type DocumentCountAggregateOutputType = {
   entityType: number
   entityId: number
   documentTypeId: number
-  createdById: number
   _all: number
 }
 
 
 export type DocumentAvgAggregateInputType = {
   id?: true
+  createdById?: true
   updatedById?: true
   entityId?: true
   documentTypeId?: true
-  createdById?: true
 }
 
 export type DocumentSumAggregateInputType = {
   id?: true
+  createdById?: true
   updatedById?: true
   entityId?: true
   documentTypeId?: true
-  createdById?: true
 }
 
 export type DocumentMinAggregateInputType = {
   id?: true
   createdAt?: true
+  createdById?: true
   updatedAt?: true
   updatedById?: true
   terminatedAt?: true
@@ -125,12 +126,12 @@ export type DocumentMinAggregateInputType = {
   entityType?: true
   entityId?: true
   documentTypeId?: true
-  createdById?: true
 }
 
 export type DocumentMaxAggregateInputType = {
   id?: true
   createdAt?: true
+  createdById?: true
   updatedAt?: true
   updatedById?: true
   terminatedAt?: true
@@ -142,12 +143,12 @@ export type DocumentMaxAggregateInputType = {
   entityType?: true
   entityId?: true
   documentTypeId?: true
-  createdById?: true
 }
 
 export type DocumentCountAggregateInputType = {
   id?: true
   createdAt?: true
+  createdById?: true
   updatedAt?: true
   updatedById?: true
   terminatedAt?: true
@@ -159,7 +160,6 @@ export type DocumentCountAggregateInputType = {
   entityType?: true
   entityId?: true
   documentTypeId?: true
-  createdById?: true
   _all?: true
 }
 
@@ -252,6 +252,7 @@ export type DocumentGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
 export type DocumentGroupByOutputType = {
   id: number
   createdAt: Date
+  createdById: number
   updatedAt: Date | null
   updatedById: number
   terminatedAt: Date | null
@@ -263,7 +264,6 @@ export type DocumentGroupByOutputType = {
   entityType: string | null
   entityId: number | null
   documentTypeId: number
-  createdById: number
   _count: DocumentCountAggregateOutputType | null
   _avg: DocumentAvgAggregateOutputType | null
   _sum: DocumentSumAggregateOutputType | null
@@ -292,6 +292,7 @@ export type DocumentWhereInput = {
   NOT?: Prisma.DocumentWhereInput | Prisma.DocumentWhereInput[]
   id?: Prisma.IntFilter<"Document"> | number
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
+  createdById?: Prisma.IntFilter<"Document"> | number
   updatedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
   updatedById?: Prisma.IntFilter<"Document"> | number
   terminatedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
@@ -303,7 +304,6 @@ export type DocumentWhereInput = {
   entityType?: Prisma.StringNullableFilter<"Document"> | string | null
   entityId?: Prisma.IntNullableFilter<"Document"> | number | null
   documentTypeId?: Prisma.IntFilter<"Document"> | number
-  createdById?: Prisma.IntFilter<"Document"> | number
   documentType?: Prisma.XOR<Prisma.DocumentTypeScalarRelationFilter, Prisma.DocumentTypeWhereInput>
   revisions?: Prisma.DocumentRevisionListRelationFilter
 }
@@ -311,6 +311,7 @@ export type DocumentWhereInput = {
 export type DocumentOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   terminatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -322,7 +323,6 @@ export type DocumentOrderByWithRelationInput = {
   entityType?: Prisma.SortOrderInput | Prisma.SortOrder
   entityId?: Prisma.SortOrderInput | Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
-  createdById?: Prisma.SortOrder
   documentType?: Prisma.DocumentTypeOrderByWithRelationInput
   revisions?: Prisma.DocumentRevisionOrderByRelationAggregateInput
   _relevance?: Prisma.DocumentOrderByRelevanceInput
@@ -335,6 +335,7 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.DocumentWhereInput[]
   NOT?: Prisma.DocumentWhereInput | Prisma.DocumentWhereInput[]
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
+  createdById?: Prisma.IntFilter<"Document"> | number
   updatedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
   updatedById?: Prisma.IntFilter<"Document"> | number
   terminatedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
@@ -345,7 +346,6 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   entityType?: Prisma.StringNullableFilter<"Document"> | string | null
   entityId?: Prisma.IntNullableFilter<"Document"> | number | null
   documentTypeId?: Prisma.IntFilter<"Document"> | number
-  createdById?: Prisma.IntFilter<"Document"> | number
   documentType?: Prisma.XOR<Prisma.DocumentTypeScalarRelationFilter, Prisma.DocumentTypeWhereInput>
   revisions?: Prisma.DocumentRevisionListRelationFilter
 }, "id" | "code">
@@ -353,6 +353,7 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
 export type DocumentOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   terminatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -364,7 +365,6 @@ export type DocumentOrderByWithAggregationInput = {
   entityType?: Prisma.SortOrderInput | Prisma.SortOrder
   entityId?: Prisma.SortOrderInput | Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
-  createdById?: Prisma.SortOrder
   _count?: Prisma.DocumentCountOrderByAggregateInput
   _avg?: Prisma.DocumentAvgOrderByAggregateInput
   _max?: Prisma.DocumentMaxOrderByAggregateInput
@@ -378,6 +378,7 @@ export type DocumentScalarWhereWithAggregatesInput = {
   NOT?: Prisma.DocumentScalarWhereWithAggregatesInput | Prisma.DocumentScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"Document"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Document"> | Date | string
+  createdById?: Prisma.IntWithAggregatesFilter<"Document"> | number
   updatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Document"> | Date | string | null
   updatedById?: Prisma.IntWithAggregatesFilter<"Document"> | number
   terminatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Document"> | Date | string | null
@@ -389,11 +390,11 @@ export type DocumentScalarWhereWithAggregatesInput = {
   entityType?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
   entityId?: Prisma.IntNullableWithAggregatesFilter<"Document"> | number | null
   documentTypeId?: Prisma.IntWithAggregatesFilter<"Document"> | number
-  createdById?: Prisma.IntWithAggregatesFilter<"Document"> | number
 }
 
 export type DocumentCreateInput = {
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   terminatedAt?: Date | string | null
@@ -404,7 +405,6 @@ export type DocumentCreateInput = {
   module: $Enums.ModuleType
   entityType?: string | null
   entityId?: number | null
-  createdById: number
   documentType: Prisma.DocumentTypeCreateNestedOneWithoutDocumentsInput
   revisions?: Prisma.DocumentRevisionCreateNestedManyWithoutDocumentInput
 }
@@ -412,6 +412,7 @@ export type DocumentCreateInput = {
 export type DocumentUncheckedCreateInput = {
   id?: number
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   terminatedAt?: Date | string | null
@@ -423,12 +424,12 @@ export type DocumentUncheckedCreateInput = {
   entityType?: string | null
   entityId?: number | null
   documentTypeId: number
-  createdById: number
   revisions?: Prisma.DocumentRevisionUncheckedCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -439,7 +440,6 @@ export type DocumentUpdateInput = {
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   documentType?: Prisma.DocumentTypeUpdateOneRequiredWithoutDocumentsNestedInput
   revisions?: Prisma.DocumentRevisionUpdateManyWithoutDocumentNestedInput
 }
@@ -447,6 +447,7 @@ export type DocumentUpdateInput = {
 export type DocumentUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -458,13 +459,13 @@ export type DocumentUncheckedUpdateInput = {
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   revisions?: Prisma.DocumentRevisionUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentCreateManyInput = {
   id?: number
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   terminatedAt?: Date | string | null
@@ -476,11 +477,11 @@ export type DocumentCreateManyInput = {
   entityType?: string | null
   entityId?: number | null
   documentTypeId: number
-  createdById: number
 }
 
 export type DocumentUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -491,12 +492,12 @@ export type DocumentUpdateManyMutationInput = {
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type DocumentUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -508,7 +509,6 @@ export type DocumentUncheckedUpdateManyInput = {
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type DocumentListRelationFilter = {
@@ -530,6 +530,7 @@ export type DocumentOrderByRelevanceInput = {
 export type DocumentCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   terminatedAt?: Prisma.SortOrder
@@ -541,20 +542,20 @@ export type DocumentCountOrderByAggregateInput = {
   entityType?: Prisma.SortOrder
   entityId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
-  createdById?: Prisma.SortOrder
 }
 
 export type DocumentAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   entityId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
-  createdById?: Prisma.SortOrder
 }
 
 export type DocumentMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   terminatedAt?: Prisma.SortOrder
@@ -566,12 +567,12 @@ export type DocumentMaxOrderByAggregateInput = {
   entityType?: Prisma.SortOrder
   entityId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
-  createdById?: Prisma.SortOrder
 }
 
 export type DocumentMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   terminatedAt?: Prisma.SortOrder
@@ -583,15 +584,14 @@ export type DocumentMinOrderByAggregateInput = {
   entityType?: Prisma.SortOrder
   entityId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
-  createdById?: Prisma.SortOrder
 }
 
 export type DocumentSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   entityId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
-  createdById?: Prisma.SortOrder
 }
 
 export type DocumentScalarRelationFilter = {
@@ -669,6 +669,7 @@ export type DocumentUpdateOneRequiredWithoutRevisionsNestedInput = {
 
 export type DocumentCreateWithoutDocumentTypeInput = {
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   terminatedAt?: Date | string | null
@@ -679,13 +680,13 @@ export type DocumentCreateWithoutDocumentTypeInput = {
   module: $Enums.ModuleType
   entityType?: string | null
   entityId?: number | null
-  createdById: number
   revisions?: Prisma.DocumentRevisionCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutDocumentTypeInput = {
   id?: number
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   terminatedAt?: Date | string | null
@@ -696,7 +697,6 @@ export type DocumentUncheckedCreateWithoutDocumentTypeInput = {
   module: $Enums.ModuleType
   entityType?: string | null
   entityId?: number | null
-  createdById: number
   revisions?: Prisma.DocumentRevisionUncheckedCreateNestedManyWithoutDocumentInput
 }
 
@@ -732,6 +732,7 @@ export type DocumentScalarWhereInput = {
   NOT?: Prisma.DocumentScalarWhereInput | Prisma.DocumentScalarWhereInput[]
   id?: Prisma.IntFilter<"Document"> | number
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
+  createdById?: Prisma.IntFilter<"Document"> | number
   updatedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
   updatedById?: Prisma.IntFilter<"Document"> | number
   terminatedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
@@ -743,11 +744,11 @@ export type DocumentScalarWhereInput = {
   entityType?: Prisma.StringNullableFilter<"Document"> | string | null
   entityId?: Prisma.IntNullableFilter<"Document"> | number | null
   documentTypeId?: Prisma.IntFilter<"Document"> | number
-  createdById?: Prisma.IntFilter<"Document"> | number
 }
 
 export type DocumentCreateWithoutRevisionsInput = {
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   terminatedAt?: Date | string | null
@@ -758,13 +759,13 @@ export type DocumentCreateWithoutRevisionsInput = {
   module: $Enums.ModuleType
   entityType?: string | null
   entityId?: number | null
-  createdById: number
   documentType: Prisma.DocumentTypeCreateNestedOneWithoutDocumentsInput
 }
 
 export type DocumentUncheckedCreateWithoutRevisionsInput = {
   id?: number
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   terminatedAt?: Date | string | null
@@ -776,7 +777,6 @@ export type DocumentUncheckedCreateWithoutRevisionsInput = {
   entityType?: string | null
   entityId?: number | null
   documentTypeId: number
-  createdById: number
 }
 
 export type DocumentCreateOrConnectWithoutRevisionsInput = {
@@ -797,6 +797,7 @@ export type DocumentUpdateToOneWithWhereWithoutRevisionsInput = {
 
 export type DocumentUpdateWithoutRevisionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -807,13 +808,13 @@ export type DocumentUpdateWithoutRevisionsInput = {
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   documentType?: Prisma.DocumentTypeUpdateOneRequiredWithoutDocumentsNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutRevisionsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -825,12 +826,12 @@ export type DocumentUncheckedUpdateWithoutRevisionsInput = {
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type DocumentCreateManyDocumentTypeInput = {
   id?: number
   createdAt?: Date | string
+  createdById: number
   updatedAt?: Date | string | null
   updatedById?: number
   terminatedAt?: Date | string | null
@@ -841,11 +842,11 @@ export type DocumentCreateManyDocumentTypeInput = {
   module: $Enums.ModuleType
   entityType?: string | null
   entityId?: number | null
-  createdById: number
 }
 
 export type DocumentUpdateWithoutDocumentTypeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -856,13 +857,13 @@ export type DocumentUpdateWithoutDocumentTypeInput = {
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   revisions?: Prisma.DocumentRevisionUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutDocumentTypeInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -873,13 +874,13 @@ export type DocumentUncheckedUpdateWithoutDocumentTypeInput = {
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   revisions?: Prisma.DocumentRevisionUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateManyWithoutDocumentTypeInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -890,7 +891,6 @@ export type DocumentUncheckedUpdateManyWithoutDocumentTypeInput = {
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  createdById?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 
@@ -927,6 +927,7 @@ export type DocumentCountOutputTypeCountRevisionsArgs<ExtArgs extends runtime.Ty
 export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   createdAt?: boolean
+  createdById?: boolean
   updatedAt?: boolean
   updatedById?: boolean
   terminatedAt?: boolean
@@ -938,7 +939,6 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   entityType?: boolean
   entityId?: boolean
   documentTypeId?: boolean
-  createdById?: boolean
   documentType?: boolean | Prisma.DocumentTypeDefaultArgs<ExtArgs>
   revisions?: boolean | Prisma.Document$revisionsArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentCountOutputTypeDefaultArgs<ExtArgs>
@@ -949,6 +949,7 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
 export type DocumentSelectScalar = {
   id?: boolean
   createdAt?: boolean
+  createdById?: boolean
   updatedAt?: boolean
   updatedById?: boolean
   terminatedAt?: boolean
@@ -960,10 +961,9 @@ export type DocumentSelectScalar = {
   entityType?: boolean
   entityId?: boolean
   documentTypeId?: boolean
-  createdById?: boolean
 }
 
-export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "code" | "title" | "description" | "module" | "entityType" | "entityId" | "documentTypeId" | "createdById", ExtArgs["result"]["document"]>
+export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "code" | "title" | "description" | "module" | "entityType" | "entityId" | "documentTypeId", ExtArgs["result"]["document"]>
 export type DocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documentType?: boolean | Prisma.DocumentTypeDefaultArgs<ExtArgs>
   revisions?: boolean | Prisma.Document$revisionsArgs<ExtArgs>
@@ -979,6 +979,7 @@ export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     createdAt: Date
+    createdById: number
     updatedAt: Date | null
     updatedById: number
     terminatedAt: Date | null
@@ -990,7 +991,6 @@ export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     entityType: string | null
     entityId: number | null
     documentTypeId: number
-    createdById: number
   }, ExtArgs["result"]["document"]>
   composites: {}
 }
@@ -1364,6 +1364,7 @@ export interface Prisma__DocumentClient<T, Null = never, ExtArgs extends runtime
 export interface DocumentFieldRefs {
   readonly id: Prisma.FieldRef<"Document", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Document", 'DateTime'>
+  readonly createdById: Prisma.FieldRef<"Document", 'Int'>
   readonly updatedAt: Prisma.FieldRef<"Document", 'DateTime'>
   readonly updatedById: Prisma.FieldRef<"Document", 'Int'>
   readonly terminatedAt: Prisma.FieldRef<"Document", 'DateTime'>
@@ -1375,7 +1376,6 @@ export interface DocumentFieldRefs {
   readonly entityType: Prisma.FieldRef<"Document", 'String'>
   readonly entityId: Prisma.FieldRef<"Document", 'Int'>
   readonly documentTypeId: Prisma.FieldRef<"Document", 'Int'>
-  readonly createdById: Prisma.FieldRef<"Document", 'Int'>
 }
     
 

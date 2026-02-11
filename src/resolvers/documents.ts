@@ -264,7 +264,7 @@ export const documentResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_LIST],
+        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_SELECT],
         context,
       })
 

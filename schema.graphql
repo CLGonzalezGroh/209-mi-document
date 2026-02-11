@@ -8,7 +8,12 @@ extend schema
 scalar DateTime
 
 "Recupera el nombre de usuario"
-type UserRef @key(fields: "id") {
+type UserName @key(fields: "id") {
+  id: Int
+}
+
+"Empresa para darle seguimiento comercial"
+type Company @key(fields: "id") {
   id: Int!
 }
 
@@ -120,6 +125,98 @@ enum ClientStatus {
   REVIEWED_NO_EXCEPTION
 }
 
+"Módulos de la aplicación para inputs"
+enum ModuleTypeInput {
+  "Calidad"
+  QUALITY
+  "Proyectos"
+  PROJECTS
+  "Tags / Equipos"
+  TAGS
+  "Operaciones"
+  OPERATIONS
+  "Gestión"
+  MANAGEMENT
+  "Comercial"
+  COMERCIAL
+}
+
+"Estado de las revisiones para inputs"
+enum RevisionStatusInput {
+  "En borrador"
+  DRAFT
+  "En revisión"
+  IN_REVIEW
+  "Aprobado"
+  APPROVED
+  "Reemplazado"
+  SUPERSEDED
+  "Obsoleto"
+  OBSOLETE
+}
+
+"Estado del workflow para inputs"
+enum WorkflowStatusInput {
+  "Pendiente"
+  PENDING
+  "En progreso"
+  IN_PROGRESS
+  "Completado"
+  COMPLETED
+  "Rechazado"
+  REJECTED
+}
+
+"Tipo de paso del workflow para inputs"
+enum StepTypeInput {
+  "Revisión técnica"
+  REVIEW
+  "Aprobación formal"
+  APPROVE
+  "Toma de conocimiento"
+  ACKNOWLEDGE
+}
+
+"Estado del transmittal para inputs"
+enum TransmittalStatusInput {
+  "En preparación"
+  DRAFT
+  "Enviado al cliente"
+  ISSUED
+  "Cliente acusó recibo"
+  ACKNOWLEDGED
+  "Cliente respondió con comentarios"
+  RESPONDED
+  "Cerrado"
+  CLOSED
+}
+
+"Código de propósito para inputs"
+enum PurposeCodeInput {
+  "Para aprobación del cliente"
+  FOR_APPROVAL
+  "Solo informativo"
+  FOR_INFORMATION
+  "Aprobado para construcción"
+  FOR_CONSTRUCTION
+  "Para revisión y comentarios"
+  FOR_REVIEW
+  "Documentación as-built"
+  AS_BUILT
+}
+
+"Estado de respuesta del cliente para inputs"
+enum ClientStatusInput {
+  "Aprobado sin comentarios"
+  APPROVED
+  "Aprobado con comentarios"
+  APPROVED_WITH_COMMENTS
+  "Rechazado"
+  REJECTED
+  "Revisado sin objeción"
+  REVIEWED_NO_EXCEPTION
+}
+
 "Estado de los registros a filtrar utilizando el campo terminatedAt"
 enum TerminatedFilterInput {
   "Todos los registros"
@@ -130,35 +227,80 @@ enum TerminatedFilterInput {
   DISABLED
 }
 
-"Dirección de ordenamiento"
-enum OrderDirection {
+"Dirección del ordenamiento"
+enum SortDirectionInput {
+  "Ascendente"
   ASC
+  "Descendente"
   DESC
 }
 
 "Campos de ordenamiento para documentos"
-enum DocumentOrderField {
+enum DocumentOrderFieldInput {
+  "Por código"
   CODE
+  "Por título"
   TITLE
+  "Por fecha de creación"
   CREATED_AT
+  "Por fecha de actualización"
   UPDATED_AT
+  "Por módulo"
   MODULE
 }
 
 "Campos de ordenamiento para tipos de documento"
-enum DocumentTypeOrderField {
+enum DocumentTypeOrderFieldInput {
+  "Por nombre"
   NAME
+  "Por código"
   CODE
+  "Por fecha de creación"
   CREATED_AT
+  "Por fecha de actualización"
   UPDATED_AT
 }
 
 "Campos de ordenamiento para transmittals"
-enum TransmittalOrderField {
+enum TransmittalOrderFieldInput {
+  "Por código"
   CODE
+  "Por fecha de creación"
   CREATED_AT
+  "Por fecha de emisión"
   ISSUED_AT
+  "Por estado"
   STATUS
+}
+
+"Nivel del log"
+enum LogLevel {
+  "Información"
+  INFO
+  "Advertencia"
+  WARNING
+  "Error"
+  ERROR
+}
+
+"Nivel del log para inputs"
+enum LogLevelInput {
+  "Información"
+  INFO
+  "Advertencia"
+  WARNING
+  "Error"
+  ERROR
+}
+
+"Campos de ordenamiento para logs del sistema"
+enum DocumentSysLogSortFieldInput {
+  "Por fecha de creación"
+  CREATED_AT
+  "Por nivel"
+  LEVEL
+  "Por nombre"
+  NAME
 }
 
 # ═══════════════════════════════════════════════════════
@@ -167,68 +309,118 @@ enum TransmittalOrderField {
 
 "Tipo de documento (Procedimiento, Plano, Informe, etc.)"
 type DocumentType @key(fields: "id") {
+  "Identificador único"
   id: Int!
+  "Fecha de creación"
   createdAt: DateTime!
+  "Fecha de última actualización"
   updatedAt: DateTime
-  updatedBy: UserRef!
+  "Usuario que realizó la última actualización"
+  updatedBy: UserName!
+  "Fecha de deshabilitación"
   terminatedAt: DateTime
+  "Indica si es un registro del sistema"
   isSys: Boolean!
+  "Nombre del tipo de documento"
   name: String!
+  "Código identificador del tipo"
   code: String!
+  "Módulo al que pertenece (null = disponible para todos)"
   module: ModuleType
+  "Descripción del tipo de documento"
   description: String
+  "Indica si requiere workflow de aprobación"
   requiresWorkflow: Boolean!
 }
 
 "Documento maestro"
 type Document @key(fields: "id") {
+  "Identificador único"
   id: Int!
+  "Fecha de creación"
   createdAt: DateTime!
+  "Usuario que creó el documento"
+  createdBy: UserName!
+  "Fecha de última actualización"
   updatedAt: DateTime
-  updatedBy: UserRef!
+  "Usuario que realizó la última actualización"
+  updatedBy: UserName!
+  "Fecha de deshabilitación"
   terminatedAt: DateTime
+  "Indica si es un registro del sistema"
   isSys: Boolean!
+  "Código único del documento (ej: PR-001)"
   code: String!
+  "Título del documento"
   title: String!
+  "Descripción del documento"
   description: String
+  "Módulo al que pertenece"
   module: ModuleType!
+  "Tipo de entidad asociada en el módulo (ej: finding, action)"
   entityType: String
+  "ID de la entidad asociada en otro subgraph"
   entityId: Int
+  "Tipo de documento"
   documentType: DocumentType!
+  "Revisión vigente del documento"
   currentRevision: DocumentRevision
+  "Historial de revisiones del documento"
   revisions: [DocumentRevision!]!
-  createdBy: UserRef!
 }
 
 "Revisión de un documento"
 type DocumentRevision @key(fields: "id") {
+  "Identificador único"
   id: Int!
+  "Fecha de creación"
   createdAt: DateTime!
+  "Usuario que creó la revisión"
+  createdBy: UserName!
+  "Fecha de última actualización"
   updatedAt: DateTime
+  "Documento al que pertenece la revisión"
   document: Document!
+  "Código de la revisión (A, B, C...)"
   revisionCode: String!
+  "Estado actual de la revisión"
   status: RevisionStatus!
+  "Versiones de archivo de esta revisión"
   versions: [DocumentVersion!]!
+  "Versión actual (la más reciente)"
   currentVersion: DocumentVersion
+  "Workflow de revisión asociado"
   workflow: ReviewWorkflow
+  "Fecha de aprobación"
   approvedAt: DateTime
-  approvedBy: UserRef
-  createdBy: UserRef!
+  "Usuario que aprobó la revisión"
+  approvedBy: UserName
 }
 
 "Versión de archivo dentro de una revisión"
 type DocumentVersion @key(fields: "id") {
+  "Identificador único"
   id: Int!
+  "Fecha de creación"
   createdAt: DateTime!
+  "Usuario que subió esta versión"
+  createdBy: UserName!
+  "Revisión a la que pertenece"
   revision: DocumentRevision!
+  "Número de versión (1, 2, 3...)"
   versionNumber: Int!
+  "Key del archivo en DO Spaces"
   fileKey: String!
+  "Nombre original del archivo"
   fileName: String!
+  "Tamaño del archivo en bytes"
   fileSize: Int!
+  "Tipo MIME del archivo"
   mimeType: String!
+  "Hash SHA-256 para verificación de integridad"
   checksum: String
+  "Comentario sobre los cambios de esta versión"
   comment: String
-  createdBy: UserRef!
 }
 
 # ═══════════════════════════════════════════════════════
@@ -237,27 +429,45 @@ type DocumentVersion @key(fields: "id") {
 
 "Workflow de revisión de un documento"
 type ReviewWorkflow @key(fields: "id") {
+  "Identificador único"
   id: Int!
+  "Fecha de creación"
   createdAt: DateTime!
+  "Revisión asociada al workflow"
   revision: DocumentRevision!
+  "Estado actual del workflow"
   status: WorkflowStatus!
+  "Pasos del workflow de revisión"
   steps: [ReviewStep!]!
+  "Fecha en que se inició el workflow"
   initiatedAt: DateTime!
-  initiatedBy: UserRef!
+  "Usuario que inició el workflow"
+  initiatedBy: UserName!
+  "Fecha de finalización del workflow"
   completedAt: DateTime
 }
 
 "Paso individual del workflow de revisión"
 type ReviewStep {
+  "Identificador único"
   id: Int!
+  "Fecha de creación"
   createdAt: DateTime!
+  "Workflow al que pertenece"
   workflow: ReviewWorkflow!
+  "Orden de ejecución del paso"
   stepOrder: Int!
+  "Tipo de paso (revisión, aprobación, toma de conocimiento)"
   stepType: StepType!
-  assignedTo: UserRef!
+  "Usuario asignado al paso"
+  assignedTo: UserName!
+  "Estado actual del paso"
   status: StepStatus!
+  "Comentarios del evaluador"
   comments: String
+  "Fecha de completación del paso"
   completedAt: DateTime
+  "Hash de firma para trazabilidad ISO 9001"
   signatureHash: String
 }
 
@@ -267,29 +477,78 @@ type ReviewStep {
 
 "Transmittal de ingeniería"
 type Transmittal @key(fields: "id") {
+  "Identificador único"
   id: Int!
+  "Fecha de creación"
   createdAt: DateTime!
+  "Fecha de última actualización"
   updatedAt: DateTime
-  updatedBy: UserRef!
+  "Usuario que realizó la última actualización"
+  updatedBy: UserName!
+  "Código del transmittal (ej: TR-001)"
   code: String!
+  "ID del proyecto asociado"
   projectId: Int!
+  "Estado actual del transmittal"
   status: TransmittalStatus!
+  "Items incluidos en el transmittal"
   items: [TransmittalItem!]!
+  "Destinatario del transmittal"
   issuedTo: String!
+  "Fecha de emisión"
   issuedAt: DateTime
-  issuedBy: UserRef!
+  "Usuario que emitió el transmittal"
+  issuedBy: UserName!
+  "Fecha de respuesta del cliente"
   responseAt: DateTime
+  "Comentarios de la respuesta del cliente"
   responseComments: String
 }
 
 "Item de un transmittal"
 type TransmittalItem {
+  "Identificador único"
   id: Int!
+  "Transmittal al que pertenece"
   transmittal: Transmittal!
+  "Revisión del documento incluida"
   documentRevision: DocumentRevision!
+  "Propósito del envío del documento"
   purposeCode: PurposeCode!
+  "Estado de respuesta del cliente"
   clientStatus: ClientStatus
+  "Comentarios del cliente"
   clientComments: String
+}
+
+# ═══════════════════════════════════════════════════════
+# ADJUNTOS (Archivos simples sin workflow ni revisiones)
+# ═══════════════════════════════════════════════════════
+
+"Adjunto simple (evidencia, foto, archivo de soporte)"
+type Attachment @key(fields: "id") {
+  "Identificador único"
+  id: Int!
+  "Fecha de creación"
+  createdAt: DateTime!
+  "Usuario que subió el adjunto"
+  createdBy: UserName!
+  "Módulo al que pertenece"
+  module: ModuleType!
+  "Tipo de entidad asociada"
+  entityType: String!
+  "ID de la entidad asociada"
+  entityId: Int!
+  "Key del archivo en DO Spaces"
+  fileKey: String!
+  "Nombre original del archivo"
+  fileName: String!
+  "Tamaño del archivo en bytes"
+  fileSize: Int!
+  "Tipo MIME del archivo"
+  mimeType: String!
+  "Descripción del adjunto"
+  description: String
 }
 
 # ═══════════════════════════════════════════════════════
@@ -298,12 +557,37 @@ type TransmittalItem {
 
 "Registro de log del sistema"
 type DocumentSysLog {
+  "Identificador único del log"
   id: Int!
+  "Fecha de creación del log"
   createdAt: DateTime!
-  user: UserRef!
-  level: String!
+  "Usuario que generó el log"
+  user: UserName
+  "Nivel de severidad del log"
+  level: LogLevel!
+  "Nombre del log"
   name: String
+  "Mensaje del log"
   message: String!
+  "Metadatos adicionales del log"
+  meta: String
+}
+
+"Logs archivados del sistema"
+type DocumentSysLogArchive {
+  "Identificador único del log archivado"
+  id: Int!
+  "Fecha de creación del log archivado"
+  createdAt: DateTime!
+  "Usuario que generó el log archivado"
+  user: UserName
+  "Nivel de severidad del log archivado"
+  level: LogLevel!
+  "Nombre del log archivado"
+  name: String
+  "Mensaje del log archivado"
+  message: String!
+  "Metadatos adicionales del log archivado"
   meta: String
 }
 
@@ -312,29 +596,64 @@ type DocumentSysLog {
 # ═══════════════════════════════════════════════════════
 
 "Información de paginación"
-type PaginationInfo {
-  currentPage: Int!
-  totalPages: Int!
-  totalItems: Int!
-  hasNext: Boolean!
-  hasPrev: Boolean!
+type PaginationInfo @shareable {
+  "Página actual"
+  currentPage: Int! @shareable
+  "Total de páginas"
+  totalPages: Int! @shareable
+  "Total de elementos"
+  totalItems: Int! @shareable
+  "Indica si hay una página siguiente"
+  hasNext: Boolean! @shareable
+  "Indica si hay una página anterior"
+  hasPrev: Boolean! @shareable
 }
 
 "Respuesta paginada de documentos"
 type DocumentConnection {
+  "Documentos en la página actual"
   items: [Document!]!
+  "Información de paginación"
+  pagination: PaginationInfo!
+}
+
+"Respuesta paginada de tipos de documento"
+type DocumentTypeConnection {
+  "Tipos de documento en la página actual"
+  items: [DocumentType!]!
+  "Información de paginación"
   pagination: PaginationInfo!
 }
 
 "Respuesta paginada de transmittals"
 type TransmittalConnection {
+  "Transmittals en la página actual"
   items: [Transmittal!]!
+  "Información de paginación"
   pagination: PaginationInfo!
 }
 
 "Respuesta paginada de logs"
 type DocumentSysLogConnection {
+  "Logs del sistema en la página actual"
   items: [DocumentSysLog!]!
+  "Información de paginación"
+  pagination: PaginationInfo!
+}
+
+"Respuesta paginada de logs archivados"
+type DocumentSysLogArchiveConnection {
+  "Logs archivados en la página actual"
+  items: [DocumentSysLogArchive!]!
+  "Información de paginación"
+  pagination: PaginationInfo!
+}
+
+"Respuesta paginada de adjuntos"
+type AttachmentConnection {
+  "Adjuntos en la página actual"
+  items: [Attachment!]!
+  "Información de paginación"
   pagination: PaginationInfo!
 }
 
@@ -350,155 +669,262 @@ type SelectList @shareable {
 # INPUTS
 # ═══════════════════════════════════════════════════════
 
-"Entrada de paginación"
+"Input para paginación"
 input PaginationInput {
-  skip: Int
-  take: Int
+  "Número de elementos a omitir"
+  skip: Int = 0
+  "Número de elementos a tomar"
+  take: Int = 10
 }
 
 "Filtro de documentos"
 input DocumentFilterInput {
   "Búsqueda en code + title"
   query: String
-  module: ModuleType
+  "Filtrar por módulo"
+  module: ModuleTypeInput
+  "Filtrar por tipo de documento"
   documentTypeId: Int
   "Filtra por status de revisión vigente"
-  status: RevisionStatus
+  status: RevisionStatusInput
+  "Filtrar por estado de habilitación"
   terminatedFilter: TerminatedFilterInput
 }
 
 "Ordenamiento de documentos"
 input DocumentOrderByInput {
-  field: DocumentOrderField!
-  direction: OrderDirection!
+  "Campo por el cual ordenar"
+  field: DocumentOrderFieldInput!
+  "Dirección del ordenamiento"
+  direction: SortDirectionInput!
 }
 
 "Filtro de tipos de documento"
 input DocumentTypeFilterInput {
+  "Búsqueda en nombre o código"
   query: String
-  module: ModuleType
+  "Filtrar por módulo"
+  module: ModuleTypeInput
+  "Filtrar por estado de habilitación"
   terminatedFilter: TerminatedFilterInput
 }
 
 "Ordenamiento de tipos de documento"
 input DocumentTypeOrderByInput {
-  field: DocumentTypeOrderField!
-  direction: OrderDirection!
+  "Campo por el cual ordenar"
+  field: DocumentTypeOrderFieldInput!
+  "Dirección del ordenamiento"
+  direction: SortDirectionInput!
 }
 
 "Filtro de transmittals"
 input TransmittalFilterInput {
+  "Búsqueda en código o destinatario"
   query: String
+  "Filtrar por proyecto"
   projectId: Int
-  status: TransmittalStatus
+  "Filtrar por estado"
+  status: TransmittalStatusInput
 }
 
 "Ordenamiento de transmittals"
 input TransmittalOrderByInput {
-  field: TransmittalOrderField!
-  direction: OrderDirection!
+  "Campo por el cual ordenar"
+  field: TransmittalOrderFieldInput!
+  "Dirección del ordenamiento"
+  direction: SortDirectionInput!
 }
 
 "Input para crear un documento"
 input CreateDocumentInput {
+  "Código único del documento"
   code: String!
+  "Título del documento"
   title: String!
+  "Descripción del documento"
   description: String
-  module: ModuleType!
+  "Módulo al que pertenece"
+  module: ModuleTypeInput!
+  "Tipo de entidad asociada"
   entityType: String
+  "ID de la entidad asociada"
   entityId: Int
+  "ID del tipo de documento"
   documentTypeId: Int!
-  "Datos del primer archivo"
+  "Key del archivo en DO Spaces"
   fileKey: String!
+  "Nombre original del archivo"
   fileName: String!
+  "Tamaño del archivo en bytes"
   fileSize: Int!
+  "Tipo MIME del archivo"
   mimeType: String!
+  "Hash SHA-256 para verificación de integridad"
   checksum: String
 }
 
 "Input para actualizar un documento"
 input UpdateDocumentInput {
+  "Nuevo título del documento"
   title: String
+  "Nueva descripción del documento"
   description: String
 }
 
 "Input para crear una revisión"
 input CreateRevisionInput {
-  "Auto-generado si no se provee"
+  "Código de revisión (auto-generado si no se provee)"
   revisionCode: String
+  "Comentario sobre la revisión"
   comment: String
-  "Datos del archivo de la primera versión"
+  "Key del archivo en DO Spaces"
   fileKey: String!
+  "Nombre original del archivo"
   fileName: String!
+  "Tamaño del archivo en bytes"
   fileSize: Int!
+  "Tipo MIME del archivo"
   mimeType: String!
+  "Hash SHA-256 para verificación de integridad"
   checksum: String
 }
 
 "Input para registrar una nueva versión de archivo"
 input RegisterVersionInput {
+  "Key del archivo en DO Spaces"
   fileKey: String!
+  "Nombre original del archivo"
   fileName: String!
+  "Tamaño del archivo en bytes"
   fileSize: Int!
+  "Tipo MIME del archivo"
   mimeType: String!
+  "Hash SHA-256 para verificación de integridad"
   checksum: String
+  "Comentario sobre los cambios de esta versión"
   comment: String
 }
 
 "Input para iniciar un workflow de revisión"
 input InitiateReviewInput {
+  "Pasos del workflow a crear"
   steps: [ReviewStepInput!]!
 }
 
 "Input para un paso del workflow"
 input ReviewStepInput {
+  "Orden de ejecución del paso"
   stepOrder: Int!
-  stepType: StepType!
+  "Tipo de paso"
+  stepType: StepTypeInput!
+  "ID del usuario asignado"
   assignedToId: Int!
 }
 
 "Input para crear un tipo de documento"
 input CreateDocumentTypeInput {
+  "Nombre del tipo de documento"
   name: String!
+  "Código identificador"
   code: String!
-  module: ModuleType
+  "Módulo al que pertenece"
+  module: ModuleTypeInput
+  "Descripción del tipo"
   description: String
+  "Indica si requiere workflow de aprobación"
   requiresWorkflow: Boolean
 }
 
 "Input para actualizar un tipo de documento"
 input UpdateDocumentTypeInput {
+  "Nuevo nombre del tipo"
   name: String
+  "Nuevo código identificador"
   code: String
-  module: ModuleType
+  "Nuevo módulo al que pertenece"
+  module: ModuleTypeInput
+  "Nueva descripción"
   description: String
+  "Indica si requiere workflow"
   requiresWorkflow: Boolean
 }
 
 "Input para crear un transmittal"
 input CreateTransmittalInput {
+  "ID del proyecto asociado"
   projectId: Int!
+  "Nombre del destinatario"
   issuedTo: String!
+  "Items a incluir en el transmittal"
   items: [TransmittalItemInput!]!
 }
 
 "Input de item para transmittal"
 input TransmittalItemInput {
+  "ID de la revisión del documento a incluir"
   documentRevisionId: Int!
-  purposeCode: PurposeCode!
+  "Propósito del envío"
+  purposeCode: PurposeCodeInput!
 }
 
 "Input para responder un transmittal"
 input RespondTransmittalInput {
+  "Comentarios generales de la respuesta"
   responseComments: String
+  "Respuestas por cada item"
   items: [TransmittalItemResponseInput!]!
 }
 
 "Input de respuesta por item del transmittal"
 input TransmittalItemResponseInput {
+  "ID del item del transmittal"
   itemId: Int!
-  clientStatus: ClientStatus!
+  "Estado de respuesta del cliente"
+  clientStatus: ClientStatusInput!
+  "Comentarios del cliente para este item"
   clientComments: String
+}
+
+"Input para crear un adjunto"
+input CreateAttachmentInput {
+  "Módulo al que pertenece"
+  module: ModuleTypeInput!
+  "Tipo de entidad asociada"
+  entityType: String!
+  "ID de la entidad asociada"
+  entityId: Int!
+  "Key del archivo en DO Spaces"
+  fileKey: String!
+  "Nombre original del archivo"
+  fileName: String!
+  "Tamaño del archivo en bytes"
+  fileSize: Int!
+  "Tipo MIME del archivo"
+  mimeType: String!
+  "Descripción del adjunto"
+  description: String
+}
+
+"Filtro de logs del sistema"
+input DocumentSysLogFilterInput {
+  "Buscar en mensaje o nombre"
+  query: String
+  "Filtrar por usuario"
+  userId: Int
+  "Filtrar por nivel"
+  level: LogLevelInput
+  "Fecha desde"
+  createdFrom: DateTime
+  "Fecha hasta"
+  createdTo: DateTime
+}
+
+"Input para ordenamiento de logs del sistema"
+input DocumentSysLogOrderByInput {
+  "Campo por el cual ordenar"
+  field: DocumentSysLogSortFieldInput!
+  "Dirección del ordenamiento"
+  direction: SortDirectionInput! = ASC
 }
 
 # ═══════════════════════════════════════════════════════
@@ -519,7 +945,7 @@ type Query {
 
   "Documentos filtrados por referencia de módulo"
   documentsByModule(
-    module: ModuleType!
+    module: ModuleTypeInput!
     entityType: String
     entityId: Int
     pagination: PaginationInput
@@ -535,13 +961,13 @@ type Query {
     filter: DocumentTypeFilterInput
     pagination: PaginationInput
     orderBy: DocumentTypeOrderByInput
-  ): [DocumentType!]!
+  ): DocumentTypeConnection!
 
   "Obtener un tipo de documento por ID"
   documentTypeById(id: Int!): DocumentType
 
   "Listado de tipos de documento para selectores"
-  documentTypesSelectList(module: ModuleType): [SelectList!]!
+  documentTypesSelectList(module: ModuleTypeInput): [SelectList!]!
 
   # ─── Revisiones ───
   "Obtener una revisión por ID"
@@ -569,11 +995,41 @@ type Query {
   pendingReviewSteps(userId: Int!): [ReviewStep!]!
 
   "Workflows filtrados por estado"
-  workflowsByStatus(status: WorkflowStatus!): [ReviewWorkflow!]!
+  workflowsByStatus(status: WorkflowStatusInput!): [ReviewWorkflow!]!
 
-  # ─── Logs ───
-  "Listar logs del sistema"
-  documentSysLogs(pagination: PaginationInput): DocumentSysLogConnection!
+  # ─── Adjuntos ───
+  "Obtener un adjunto por ID"
+  attachmentById(id: Int!): Attachment
+
+  "Listar adjuntos por referencia de módulo"
+  attachmentsByModule(
+    module: ModuleTypeInput!
+    entityType: String!
+    entityId: Int!
+    pagination: PaginationInput
+  ): AttachmentConnection!
+
+  # ─── Logs del Sistema ───
+  "Obtiene un log del sistema por su identificador"
+  documentSysLogById(id: Int!): DocumentSysLog
+
+  "Obtiene una lista paginada de logs del sistema"
+  documentSysLogs(
+    filter: DocumentSysLogFilterInput
+    pagination: PaginationInput
+    orderBy: DocumentSysLogOrderByInput
+  ): DocumentSysLogConnection!
+
+  # ─── Logs Archivados del Sistema ───
+  "Obtiene un log archivado del sistema por su identificador"
+  documentSysLogArchiveById(id: Int!): DocumentSysLogArchive
+
+  "Obtiene una lista paginada de logs archivados del sistema"
+  documentSysLogsArchive(
+    filter: DocumentSysLogFilterInput
+    pagination: PaginationInput
+    orderBy: DocumentSysLogOrderByInput
+  ): DocumentSysLogArchiveConnection!
 }
 
 # ═══════════════════════════════════════════════════════
@@ -646,4 +1102,18 @@ type Mutation {
 
   "Reactivar un tipo de documento"
   activateDocumentType(id: Int!): DocumentType!
+
+  # ─── Adjuntos ───
+  "Crear un nuevo adjunto"
+  createAttachment(input: CreateAttachmentInput!): Attachment!
+
+  "Eliminar un adjunto"
+  deleteAttachment(id: Int!): Boolean!
+
+  # ─── Logs del Sistema ───
+  "Archiva logs del sistema antiguos (mueve de DocumentSysLog a DocumentSysLogArchive)"
+  archiveDocumentSysLogs(olderThanDays: Int!): Int!
+
+  "Elimina logs archivados antiguos permanentemente"
+  deleteArchivedDocumentSysLogs(olderThanDays: Int!): Int!
 }

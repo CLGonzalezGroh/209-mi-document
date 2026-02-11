@@ -9,6 +9,7 @@ import {
   ReviewStep,
   Transmittal,
   TransmittalItem,
+  Attachment,
   DocumentSysLog,
   DocumentSysLogArchive,
 } from "../../generated/prisma/client.js"
@@ -35,10 +36,10 @@ export const resolverTypes = {
       })
     },
     updatedBy: (parent: Document) => {
-      return { __typename: "UserRef", id: parent.updatedById }
+      return { __typename: "UserName", id: parent.updatedById }
     },
     createdBy: (parent: Document) => {
-      return { __typename: "UserRef", id: parent.createdById }
+      return { __typename: "UserName", id: parent.createdById }
     },
     currentRevision: async (parent: any) => {
       // Si ya viene con revisions incluidas
@@ -81,7 +82,7 @@ export const resolverTypes = {
       })
     },
     updatedBy: (parent: DocumentType) => {
-      return { __typename: "UserRef", id: parent.updatedById }
+      return { __typename: "UserName", id: parent.updatedById }
     },
   },
 
@@ -101,11 +102,11 @@ export const resolverTypes = {
       })
     },
     createdBy: (parent: DocumentRevision) => {
-      return { __typename: "UserRef", id: parent.createdById }
+      return { __typename: "UserName", id: parent.createdById }
     },
     approvedBy: (parent: DocumentRevision) => {
       return parent.approvedById
-        ? { __typename: "UserRef", id: parent.approvedById }
+        ? { __typename: "UserName", id: parent.approvedById }
         : null
     },
     currentVersion: async (parent: any) => {
@@ -136,7 +137,7 @@ export const resolverTypes = {
       })
     },
     createdBy: (parent: DocumentVersion) => {
-      return { __typename: "UserRef", id: parent.createdById }
+      return { __typename: "UserName", id: parent.createdById }
     },
   },
 
@@ -153,7 +154,7 @@ export const resolverTypes = {
       })
     },
     initiatedBy: (parent: ReviewWorkflow) => {
-      return { __typename: "UserRef", id: parent.initiatedById }
+      return { __typename: "UserName", id: parent.initiatedById }
     },
     initiatedAt: (parent: ReviewWorkflow) => {
       return parent.initiatedAt || parent.createdAt
@@ -162,7 +163,7 @@ export const resolverTypes = {
 
   ReviewStep: {
     assignedTo: (parent: ReviewStep) => {
-      return { __typename: "UserRef", id: parent.assignedToId }
+      return { __typename: "UserName", id: parent.assignedToId }
     },
   },
 
@@ -188,22 +189,33 @@ export const resolverTypes = {
       })
     },
     updatedBy: (parent: Transmittal) => {
-      return { __typename: "UserRef", id: parent.updatedById }
+      return { __typename: "UserName", id: parent.updatedById }
     },
     issuedBy: (parent: Transmittal) => {
-      return { __typename: "UserRef", id: parent.issuedById }
+      return { __typename: "UserName", id: parent.issuedById }
     },
   },
 
   DocumentSysLog: {
     user: (parent: DocumentSysLog) => {
-      return { __typename: "UserRef", id: parent.userId }
+      return { __typename: "UserName", id: parent.userId }
+    },
+  },
+
+  Attachment: {
+    __resolveReference: async (ref: { id: number }) => {
+      return prisma.attachment.findFirst({
+        where: { id: ref.id },
+      })
+    },
+    createdBy: (parent: Attachment) => {
+      return { __typename: "UserName", id: parent.createdById }
     },
   },
 
   DocumentSysLogsArchive: {
     user: (parent: DocumentSysLogArchive) => {
-      return { __typename: "UserRef", id: parent.userId }
+      return { __typename: "UserName", id: parent.userId }
     },
   },
 }
