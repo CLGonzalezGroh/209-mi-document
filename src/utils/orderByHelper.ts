@@ -1,7 +1,9 @@
 import { DocumentOrderByInput } from "../resolvers/documents.js"
 import { DocumentTypeOrderByInput } from "../resolvers/documentTypes.js"
+import { DocumentClassOrderByInput } from "../resolvers/documentClasses.js"
 import { TransmittalOrderByInput } from "../resolvers/transmittals.js"
 import { DocumentSysLogOrderByInput } from "../resolvers/documentSysLogs.js"
+import { ScannedFileOrderByInput } from "../resolvers/scannedFiles.js"
 
 // Mapeo de campos GraphQL a campos de Prisma para documentos
 const documentFieldMap: Record<string, string> = {
@@ -64,6 +66,38 @@ export function buildDocumentSysLogOrderBy(
 ): Record<string, string> | undefined {
   if (!orderBy) return undefined
   const field = documentSysLogFieldMap[orderBy.field]
+  if (!field) return undefined
+  return { [field]: orderBy.direction.toLowerCase() }
+}
+
+const scannedFileFieldMap: Record<string, string> = {
+  TITLE: "title",
+  CREATED_AT: "createdAt",
+  CLASSIFIED_AT: "classifiedAt",
+  DIGITAL_DISPOSITION: "digitalDisposition",
+}
+
+export function buildScannedFileOrderBy(
+  orderBy?: ScannedFileOrderByInput,
+): Record<string, string> | undefined {
+  if (!orderBy) return undefined
+  const field = scannedFileFieldMap[orderBy.field]
+  if (!field) return undefined
+  return { [field]: orderBy.direction.toLowerCase() }
+}
+
+const documentClassFieldMap: Record<string, string> = {
+  NAME: "name",
+  CODE: "code",
+  SORT_ORDER: "sortOrder",
+  CREATED_AT: "createdAt",
+}
+
+export function buildDocumentClassOrderBy(
+  orderBy?: DocumentClassOrderByInput,
+): Record<string, string> | undefined {
+  if (!orderBy) return undefined
+  const field = documentClassFieldMap[orderBy.field]
   if (!field) return undefined
   return { [field]: orderBy.direction.toLowerCase() }
 }

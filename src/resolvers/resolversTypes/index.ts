@@ -3,6 +3,7 @@ const { prisma } = await import("../../lib/prisma.js")
 import {
   Document,
   DocumentType,
+  DocumentClass,
   DocumentRevision,
   DocumentVersion,
   ReviewWorkflow,
@@ -10,6 +11,7 @@ import {
   Transmittal,
   TransmittalItem,
   Attachment,
+  ScannedFile,
   DocumentSysLog,
   DocumentSysLogArchive,
 } from "../../generated/prisma/client.js"
@@ -79,9 +81,27 @@ export const resolverTypes = {
     __resolveReference: async (ref: { id: number }) => {
       return prisma.documentType.findFirst({
         where: { id: ref.id },
+        include: { class: true },
       })
     },
     updatedBy: (parent: DocumentType) => {
+      return { __typename: "UserName", id: parent.updatedById }
+    },
+  },
+
+  DocumentClass: {
+    __resolveReference: async (ref: { id: number }) => {
+      return prisma.documentClass.findFirst({
+        where: { id: ref.id },
+        include: {
+          documentTypes: {
+            where: { terminatedAt: null },
+            orderBy: { name: "asc" },
+          },
+        },
+      })
+    },
+    updatedBy: (parent: DocumentClass) => {
       return { __typename: "UserName", id: parent.updatedById }
     },
   },
@@ -216,6 +236,37 @@ export const resolverTypes = {
   DocumentSysLogsArchive: {
     user: (parent: DocumentSysLogArchive) => {
       return { __typename: "UserName", id: parent.userId }
+    },
+  },
+
+  ScannedFile: {
+    __resolveReference: async (ref: { id: number }) => {
+      return prisma.scannedFile.findFirst({
+        where: { id: ref.id },
+        include: { documentType: true },
+      })
+    },
+    createdBy: (parent: ScannedFile) => {
+      return { __typename: "UserName", id: parent.createdById }
+    },
+    updatedBy: (parent: ScannedFile) => {
+      return { __typename: "UserName", id: parent.updatedById }
+    },
+    classifiedBy: (parent: ScannedFile) => {
+      return parent.classifiedById
+        ? { __typename: "UserName", id: parent.classifiedById }
+        : null
+    },
+    physicalConfirmedBy: (parent: ScannedFile) => {
+      return parent.physicalConfirmedById
+        ? { __typename: "UserName", id: parent.physicalConfirmedById }
+        : null
+    },
+    externalUrl: (parent: ScannedFile) => {
+      const baseUrl = process.env.EXTERNAL_SYSTEM_BASE_URL || ""
+      return parent.externalReference && baseUrl
+        ? `${baseUrl}${parent.externalReference}`
+        : null
     },
   },
 }

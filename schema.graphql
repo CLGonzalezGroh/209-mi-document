@@ -273,6 +273,70 @@ enum TransmittalOrderFieldInput {
   STATUS
 }
 
+"Estado de clasificación digital del archivo escaneado"
+enum DigitalDisposition {
+  "Pendiente de clasificación"
+  PENDING
+  "Aceptado, pendiente de carga en sistema externo"
+  ACCEPTED
+  "Cargado en sistema externo, ciclo cerrado"
+  UPLOADED
+  "Descartado, sin valor documental"
+  DISCARDED
+}
+
+"Estado de clasificación digital para inputs"
+enum DigitalDispositionInput {
+  "Pendiente de clasificación"
+  PENDING
+  "Aceptado, pendiente de carga en sistema externo"
+  ACCEPTED
+  "Cargado en sistema externo, ciclo cerrado"
+  UPLOADED
+  "Descartado, sin valor documental"
+  DISCARDED
+}
+
+"Disposición física del papel original"
+enum PhysicalDisposition {
+  "Pendiente de decisión"
+  PENDING
+  "Programado para destrucción"
+  DESTROY
+  "Destrucción confirmada"
+  DESTROYED
+  "Programado para almacenamiento físico"
+  ARCHIVE
+  "Almacenamiento confirmado"
+  ARCHIVED
+}
+
+"Disposición física para inputs"
+enum PhysicalDispositionInput {
+  "Pendiente de decisión"
+  PENDING
+  "Programado para destrucción"
+  DESTROY
+  "Destrucción confirmada"
+  DESTROYED
+  "Programado para almacenamiento físico"
+  ARCHIVE
+  "Almacenamiento confirmado"
+  ARCHIVED
+}
+
+"Campos de ordenamiento para archivos escaneados"
+enum ScannedFileOrderFieldInput {
+  "Por título"
+  TITLE
+  "Por fecha de creación"
+  CREATED_AT
+  "Por fecha de clasificación"
+  CLASSIFIED_AT
+  "Por disposición digital"
+  DIGITAL_DISPOSITION
+}
+
 "Nivel del log"
 enum LogLevel {
   "Información"
@@ -307,6 +371,34 @@ enum DocumentSysLogSortFieldInput {
 # ENTIDADES PRINCIPALES
 # ═══════════════════════════════════════════════════════
 
+"Clase de documento (nivel 1: Especialidad, Categoría)"
+type DocumentClass @key(fields: "id") {
+  "Identificador único"
+  id: Int!
+  "Fecha de creación"
+  createdAt: DateTime!
+  "Fecha de última actualización"
+  updatedAt: DateTime
+  "Usuario que realizó la última actualización"
+  updatedBy: UserName!
+  "Fecha de deshabilitación"
+  terminatedAt: DateTime
+  "Indica si es un registro del sistema"
+  isSys: Boolean!
+  "Nombre de la clase de documento"
+  name: String!
+  "Código identificador de la clase"
+  code: String!
+  "Módulo al que pertenece (null = disponible para todos)"
+  module: ModuleType
+  "Descripción de la clase de documento"
+  description: String
+  "Orden de visualización"
+  sortOrder: Int!
+  "Tipos de documento que pertenecen a esta clase"
+  documentTypes: [DocumentType!]!
+}
+
 "Tipo de documento (Procedimiento, Plano, Informe, etc.)"
 type DocumentType @key(fields: "id") {
   "Identificador único"
@@ -327,6 +419,8 @@ type DocumentType @key(fields: "id") {
   code: String!
   "Módulo al que pertenece (null = disponible para todos)"
   module: ModuleType
+  "Clase de documento a la que pertenece (null = disponible para todas)"
+  class: DocumentClass
   "Descripción del tipo de documento"
   description: String
   "Indica si requiere workflow de aprobación"
@@ -552,6 +646,90 @@ type Attachment @key(fields: "id") {
 }
 
 # ═══════════════════════════════════════════════════════
+# DIGITALIZACIÓN Y CLASIFICACIÓN
+# ═══════════════════════════════════════════════════════
+
+"Archivo digitalizado pendiente de clasificación"
+type ScannedFile @key(fields: "id") {
+  "Identificador único"
+  id: Int!
+  "Fecha de creación (escaneo/subida)"
+  createdAt: DateTime!
+  "Usuario que subió el archivo"
+  createdBy: UserName!
+  "Fecha de última modificación"
+  updatedAt: DateTime!
+  "Usuario que modificó por última vez"
+  updatedBy: UserName!
+  "ID del proyecto asociado"
+  projectId: Int!
+  "Tipo de documento asignado durante clasificación"
+  documentType: DocumentType
+  "Título descriptivo del archivo"
+  title: String!
+  "Descripción o contexto del archivo físico original"
+  description: String
+  "Código o referencia del documento original en papel"
+  originalReference: String
+  "Ubicación física donde se encontró el papel"
+  physicalLocation: String
+  "Key del archivo en DO Spaces"
+  fileKey: String!
+  "Nombre original del archivo digitalizado"
+  fileName: String!
+  "Tamaño del archivo en bytes"
+  fileSize: Int!
+  "Tipo MIME del archivo"
+  mimeType: String!
+  "Estado de clasificación digital"
+  digitalDisposition: DigitalDisposition!
+  "Disposición del papel físico original"
+  physicalDisposition: PhysicalDisposition!
+  "Referencia del documento en el sistema externo"
+  externalReference: String
+  "Enlace completo al documento en el sistema externo"
+  externalUrl: String
+  "Motivo de descarte (si fue descartado)"
+  discardReason: String
+  "Notas del clasificador"
+  classificationNotes: String
+  "Usuario que clasificó el archivo"
+  classifiedBy: UserName
+  "Fecha de clasificación"
+  classifiedAt: DateTime
+  "Usuario que confirmó la disposición física"
+  physicalConfirmedBy: UserName
+  "Fecha de confirmación de la disposición física"
+  physicalConfirmedAt: DateTime
+  "Fecha de deshabilitación"
+  terminatedAt: DateTime
+}
+
+"Estadísticas de archivos escaneados por estado"
+type ScannedFileStats {
+  "Total de archivos pendientes de clasificación"
+  pending: Int!
+  "Total de archivos aceptados pendientes de carga"
+  accepted: Int!
+  "Total de archivos cargados en sistema externo"
+  uploaded: Int!
+  "Total de archivos descartados"
+  discarded: Int!
+  "Total general"
+  total: Int!
+  "Papel pendiente de decisión"
+  physicalPending: Int!
+  "Papel programado para destrucción"
+  physicalDestroy: Int!
+  "Papel con destrucción confirmada"
+  physicalDestroyed: Int!
+  "Papel programado para almacenamiento"
+  physicalArchive: Int!
+  "Papel con almacenamiento confirmado"
+  physicalArchived: Int!
+}
+
+# ═══════════════════════════════════════════════════════
 # LOGS
 # ═══════════════════════════════════════════════════════
 
@@ -625,6 +803,14 @@ type DocumentTypeConnection {
   pagination: PaginationInfo!
 }
 
+"Respuesta paginada de clases de documento"
+type DocumentClassConnection {
+  "Clases de documento en la página actual"
+  items: [DocumentClass!]!
+  "Información de paginación"
+  pagination: PaginationInfo!
+}
+
 "Respuesta paginada de transmittals"
 type TransmittalConnection {
   "Transmittals en la página actual"
@@ -653,6 +839,14 @@ type DocumentSysLogArchiveConnection {
 type AttachmentConnection {
   "Adjuntos en la página actual"
   items: [Attachment!]!
+  "Información de paginación"
+  pagination: PaginationInfo!
+}
+
+"Respuesta paginada de archivos escaneados"
+type ScannedFileConnection {
+  "Archivos escaneados en la página actual"
+  items: [ScannedFile!]!
   "Información de paginación"
   pagination: PaginationInfo!
 }
@@ -705,6 +899,8 @@ input DocumentTypeFilterInput {
   query: String
   "Filtrar por módulo"
   module: ModuleTypeInput
+  "Filtrar por clase de documento"
+  classId: Int
   "Filtrar por estado de habilitación"
   terminatedFilter: TerminatedFilterInput
 }
@@ -715,6 +911,36 @@ input DocumentTypeOrderByInput {
   field: DocumentTypeOrderFieldInput!
   "Dirección del ordenamiento"
   direction: SortDirectionInput!
+}
+
+"Filtro de clases de documento"
+input DocumentClassFilterInput {
+  "Búsqueda en nombre o código"
+  query: String
+  "Filtrar por módulo"
+  module: ModuleTypeInput
+  "Filtrar por estado de habilitación"
+  terminatedFilter: TerminatedFilterInput
+}
+
+"Ordenamiento de clases de documento"
+input DocumentClassOrderByInput {
+  "Campo por el cual ordenar"
+  field: DocumentClassOrderFieldInput!
+  "Dirección del ordenamiento"
+  direction: SortDirectionInput!
+}
+
+"Campos de ordenamiento para clases de documento"
+enum DocumentClassOrderFieldInput {
+  "Por nombre"
+  NAME
+  "Por código"
+  CODE
+  "Por orden"
+  SORT_ORDER
+  "Por fecha de creación"
+  CREATED_AT
 }
 
 "Filtro de transmittals"
@@ -829,6 +1055,8 @@ input CreateDocumentTypeInput {
   code: String!
   "Módulo al que pertenece"
   module: ModuleTypeInput
+  "Clase de documento a la que pertenece"
+  classId: Int
   "Descripción del tipo"
   description: String
   "Indica si requiere workflow de aprobación"
@@ -843,10 +1071,40 @@ input UpdateDocumentTypeInput {
   code: String
   "Nuevo módulo al que pertenece"
   module: ModuleTypeInput
+  "Nueva clase de documento"
+  classId: Int
   "Nueva descripción"
   description: String
   "Indica si requiere workflow"
   requiresWorkflow: Boolean
+}
+
+"Input para crear una clase de documento"
+input CreateDocumentClassInput {
+  "Nombre de la clase de documento"
+  name: String!
+  "Código identificador"
+  code: String!
+  "Módulo al que pertenece"
+  module: ModuleTypeInput
+  "Descripción de la clase"
+  description: String
+  "Orden de visualización"
+  sortOrder: Int
+}
+
+"Input para actualizar una clase de documento"
+input UpdateDocumentClassInput {
+  "Nuevo nombre de la clase"
+  name: String
+  "Nuevo código identificador"
+  code: String
+  "Nuevo módulo al que pertenece"
+  module: ModuleTypeInput
+  "Nueva descripción"
+  description: String
+  "Nuevo orden de visualización"
+  sortOrder: Int
 }
 
 "Input para crear un transmittal"
@@ -903,6 +1161,70 @@ input CreateAttachmentInput {
   mimeType: String!
   "Descripción del adjunto"
   description: String
+}
+
+"Filtro de archivos escaneados"
+input ScannedFileFilterInput {
+  "Búsqueda por título, referencia original o referencia externa"
+  query: String
+  "Filtrar por proyecto"
+  projectId: Int
+  "Filtrar por tipo de documento"
+  documentTypeId: Int
+  "Filtrar por disposición digital"
+  digitalDisposition: DigitalDispositionInput
+  "Filtrar por disposición física"
+  physicalDisposition: PhysicalDispositionInput
+  "Filtrar por estado de habilitación"
+  terminatedFilter: TerminatedFilterInput
+}
+
+"Ordenamiento de archivos escaneados"
+input ScannedFileOrderByInput {
+  "Campo por el cual ordenar"
+  field: ScannedFileOrderFieldInput!
+  "Dirección del ordenamiento"
+  direction: SortDirectionInput!
+}
+
+"Datos para subir un archivo escaneado"
+input CreateScannedFileInput {
+  "ID del proyecto"
+  projectId: Int!
+  "Título descriptivo"
+  title: String!
+  "Descripción o contexto"
+  description: String
+  "Código o referencia del documento original en papel"
+  originalReference: String
+  "Ubicación física donde se encontró"
+  physicalLocation: String
+  "Key del archivo en DO Spaces"
+  fileKey: String!
+  "Nombre original del archivo"
+  fileName: String!
+  "Tamaño en bytes"
+  fileSize: Int!
+  "Tipo MIME"
+  mimeType: String!
+}
+
+"Datos para clasificar un archivo escaneado"
+input ClassifyScannedFileInput {
+  "Disposición digital: ACCEPTED o DISCARDED"
+  digitalDisposition: DigitalDispositionInput!
+  "ID del tipo de documento (requerido si ACCEPTED)"
+  documentTypeId: Int
+  "Notas de clasificación"
+  classificationNotes: String
+  "Motivo de descarte (requerido si DISCARDED)"
+  discardReason: String
+}
+
+"Datos para marcar como cargado en sistema externo"
+input MarkAsUploadedInput {
+  "Referencia del documento en el sistema externo"
+  externalReference: String!
 }
 
 "Filtro de logs del sistema"
@@ -967,7 +1289,21 @@ type Query {
   documentTypeById(id: Int!): DocumentType
 
   "Listado de tipos de documento para selectores"
-  documentTypesSelectList(module: ModuleTypeInput): [SelectList!]!
+  documentTypesSelectList(module: ModuleTypeInput, classId: Int): [SelectList!]!
+
+  # ─── Clases de documento ───
+  "Listar clases de documento"
+  documentClasses(
+    filter: DocumentClassFilterInput
+    pagination: PaginationInput
+    orderBy: DocumentClassOrderByInput
+  ): DocumentClassConnection!
+
+  "Obtener una clase de documento por ID"
+  documentClassById(id: Int!): DocumentClass
+
+  "Listado de clases de documento para selectores"
+  documentClassesSelectList(module: ModuleTypeInput): [SelectList!]!
 
   # ─── Revisiones ───
   "Obtener una revisión por ID"
@@ -1103,12 +1439,47 @@ type Mutation {
   "Reactivar un tipo de documento"
   activateDocumentType(id: Int!): DocumentType!
 
+  # ─── Clases de documento ───
+  "Crear una clase de documento"
+  createDocumentClass(input: CreateDocumentClassInput!): DocumentClass!
+
+  "Actualizar una clase de documento"
+  updateDocumentClass(id: Int!, input: UpdateDocumentClassInput!): DocumentClass!
+
+  "Deshabilitar una clase de documento"
+  terminateDocumentClass(id: Int!): DocumentClass!
+
+  "Reactivar una clase de documento"
+  activateDocumentClass(id: Int!): DocumentClass!
+
   # ─── Adjuntos ───
   "Crear un nuevo adjunto"
   createAttachment(input: CreateAttachmentInput!): Attachment!
 
   "Eliminar un adjunto"
   deleteAttachment(id: Int!): Boolean!
+
+  # ─── Archivos escaneados ───
+  "Subir un archivo escaneado"
+  createScannedFile(input: CreateScannedFileInput!): ScannedFile!
+
+  "Clasificar un archivo escaneado (ACCEPTED o DISCARDED)"
+  classifyScannedFile(id: Int!, input: ClassifyScannedFileInput!): ScannedFile!
+
+  "Marcar archivo como cargado en sistema externo"
+  markAsUploaded(id: Int!, input: MarkAsUploadedInput!): ScannedFile!
+
+  "Actualizar disposición física del papel"
+  updatePhysicalDisposition(id: Int!, disposition: PhysicalDispositionInput!): ScannedFile!
+
+  "Confirmar ejecución de la disposición física (DESTROY→DESTROYED, ARCHIVE→ARCHIVED)"
+  confirmPhysicalDisposition(id: Int!): ScannedFile!
+
+  "Dar de baja un archivo escaneado"
+  terminateScannedFile(id: Int!): ScannedFile!
+
+  "Reactivar un archivo escaneado"
+  activateScannedFile(id: Int!): ScannedFile!
 
   # ─── Logs del Sistema ───
   "Archiva logs del sistema antiguos (mueve de DocumentSysLog a DocumentSysLogArchive)"

@@ -384,6 +384,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
+  DocumentClass: 'DocumentClass',
   DocumentType: 'DocumentType',
   Document: 'Document',
   DocumentRevision: 'DocumentRevision',
@@ -393,6 +394,7 @@ export const ModelName = {
   Transmittal: 'Transmittal',
   TransmittalItem: 'TransmittalItem',
   Attachment: 'Attachment',
+  ScannedFile: 'ScannedFile',
   DocumentSysLog: 'DocumentSysLog',
   DocumentSysLogArchive: 'DocumentSysLogArchive'
 } as const
@@ -410,10 +412,76 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "documentType" | "document" | "documentRevision" | "documentVersion" | "reviewWorkflow" | "reviewStep" | "transmittal" | "transmittalItem" | "attachment" | "documentSysLog" | "documentSysLogArchive"
+    modelProps: "documentClass" | "documentType" | "document" | "documentRevision" | "documentVersion" | "reviewWorkflow" | "reviewStep" | "transmittal" | "transmittalItem" | "attachment" | "scannedFile" | "documentSysLog" | "documentSysLogArchive"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
+    DocumentClass: {
+      payload: Prisma.$DocumentClassPayload<ExtArgs>
+      fields: Prisma.DocumentClassFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocumentClassFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentClassPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocumentClassFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentClassPayload>
+        }
+        findFirst: {
+          args: Prisma.DocumentClassFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentClassPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocumentClassFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentClassPayload>
+        }
+        findMany: {
+          args: Prisma.DocumentClassFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentClassPayload>[]
+        }
+        create: {
+          args: Prisma.DocumentClassCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentClassPayload>
+        }
+        createMany: {
+          args: Prisma.DocumentClassCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.DocumentClassDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentClassPayload>
+        }
+        update: {
+          args: Prisma.DocumentClassUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentClassPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocumentClassDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocumentClassUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.DocumentClassUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentClassPayload>
+        }
+        aggregate: {
+          args: Prisma.DocumentClassAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocumentClass>
+        }
+        groupBy: {
+          args: Prisma.DocumentClassGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentClassGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocumentClassCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentClassCountAggregateOutputType> | number
+        }
+      }
+    }
     DocumentType: {
       payload: Prisma.$DocumentTypePayload<ExtArgs>
       fields: Prisma.DocumentTypeFieldRefs
@@ -1008,6 +1076,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ScannedFile: {
+      payload: Prisma.$ScannedFilePayload<ExtArgs>
+      fields: Prisma.ScannedFileFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ScannedFileFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScannedFilePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ScannedFileFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScannedFilePayload>
+        }
+        findFirst: {
+          args: Prisma.ScannedFileFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScannedFilePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ScannedFileFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScannedFilePayload>
+        }
+        findMany: {
+          args: Prisma.ScannedFileFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScannedFilePayload>[]
+        }
+        create: {
+          args: Prisma.ScannedFileCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScannedFilePayload>
+        }
+        createMany: {
+          args: Prisma.ScannedFileCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.ScannedFileDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScannedFilePayload>
+        }
+        update: {
+          args: Prisma.ScannedFileUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScannedFilePayload>
+        }
+        deleteMany: {
+          args: Prisma.ScannedFileDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ScannedFileUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.ScannedFileUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ScannedFilePayload>
+        }
+        aggregate: {
+          args: Prisma.ScannedFileAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateScannedFile>
+        }
+        groupBy: {
+          args: Prisma.ScannedFileGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ScannedFileGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ScannedFileCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ScannedFileCountAggregateOutputType> | number
+        }
+      }
+    }
     DocumentSysLog: {
       payload: Prisma.$DocumentSysLogPayload<ExtArgs>
       fields: Prisma.DocumentSysLogFieldRefs
@@ -1179,6 +1313,23 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const DocumentClassScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  terminatedAt: 'terminatedAt',
+  isSys: 'isSys',
+  name: 'name',
+  code: 'code',
+  module: 'module',
+  description: 'description',
+  sortOrder: 'sortOrder'
+} as const
+
+export type DocumentClassScalarFieldEnum = (typeof DocumentClassScalarFieldEnum)[keyof typeof DocumentClassScalarFieldEnum]
+
+
 export const DocumentTypeScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -1189,6 +1340,7 @@ export const DocumentTypeScalarFieldEnum = {
   name: 'name',
   code: 'code',
   module: 'module',
+  classId: 'classId',
   description: 'description',
   requiresWorkflow: 'requiresWorkflow'
 } as const
@@ -1325,6 +1477,37 @@ export const AttachmentScalarFieldEnum = {
 export type AttachmentScalarFieldEnum = (typeof AttachmentScalarFieldEnum)[keyof typeof AttachmentScalarFieldEnum]
 
 
+export const ScannedFileScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  projectId: 'projectId',
+  documentTypeId: 'documentTypeId',
+  title: 'title',
+  description: 'description',
+  originalReference: 'originalReference',
+  physicalLocation: 'physicalLocation',
+  fileKey: 'fileKey',
+  fileName: 'fileName',
+  fileSize: 'fileSize',
+  mimeType: 'mimeType',
+  digitalDisposition: 'digitalDisposition',
+  physicalDisposition: 'physicalDisposition',
+  externalReference: 'externalReference',
+  discardReason: 'discardReason',
+  classificationNotes: 'classificationNotes',
+  classifiedById: 'classifiedById',
+  classifiedAt: 'classifiedAt',
+  physicalConfirmedById: 'physicalConfirmedById',
+  physicalConfirmedAt: 'physicalConfirmedAt',
+  terminatedAt: 'terminatedAt'
+} as const
+
+export type ScannedFileScalarFieldEnum = (typeof ScannedFileScalarFieldEnum)[keyof typeof ScannedFileScalarFieldEnum]
+
+
 export const DocumentSysLogScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -1365,6 +1548,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const DocumentClassOrderByRelevanceFieldEnum = {
+  name: 'name',
+  code: 'code',
+  description: 'description'
+} as const
+
+export type DocumentClassOrderByRelevanceFieldEnum = (typeof DocumentClassOrderByRelevanceFieldEnum)[keyof typeof DocumentClassOrderByRelevanceFieldEnum]
 
 
 export const DocumentTypeOrderByRelevanceFieldEnum = {
@@ -1437,6 +1629,22 @@ export const AttachmentOrderByRelevanceFieldEnum = {
 } as const
 
 export type AttachmentOrderByRelevanceFieldEnum = (typeof AttachmentOrderByRelevanceFieldEnum)[keyof typeof AttachmentOrderByRelevanceFieldEnum]
+
+
+export const ScannedFileOrderByRelevanceFieldEnum = {
+  title: 'title',
+  description: 'description',
+  originalReference: 'originalReference',
+  physicalLocation: 'physicalLocation',
+  fileKey: 'fileKey',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  externalReference: 'externalReference',
+  discardReason: 'discardReason',
+  classificationNotes: 'classificationNotes'
+} as const
+
+export type ScannedFileOrderByRelevanceFieldEnum = (typeof ScannedFileOrderByRelevanceFieldEnum)[keyof typeof ScannedFileOrderByRelevanceFieldEnum]
 
 
 export const DocumentSysLogOrderByRelevanceFieldEnum = {
@@ -1548,6 +1756,20 @@ export type EnumClientStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
 
 
 /**
+ * Reference to a field of type 'DigitalDisposition'
+ */
+export type EnumDigitalDispositionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DigitalDisposition'>
+    
+
+
+/**
+ * Reference to a field of type 'PhysicalDisposition'
+ */
+export type EnumPhysicalDispositionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PhysicalDisposition'>
+    
+
+
+/**
  * Reference to a field of type 'LogLevel'
  */
 export type EnumLogLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LogLevel'>
@@ -1655,6 +1877,7 @@ export type PrismaClientOptions = ({
   comments?: runtime.SqlCommenterPlugin[]
 }
 export type GlobalOmitConfig = {
+  documentClass?: Prisma.DocumentClassOmit
   documentType?: Prisma.DocumentTypeOmit
   document?: Prisma.DocumentOmit
   documentRevision?: Prisma.DocumentRevisionOmit
@@ -1664,6 +1887,7 @@ export type GlobalOmitConfig = {
   transmittal?: Prisma.TransmittalOmit
   transmittalItem?: Prisma.TransmittalItemOmit
   attachment?: Prisma.AttachmentOmit
+  scannedFile?: Prisma.ScannedFileOmit
   documentSysLog?: Prisma.DocumentSysLogOmit
   documentSysLogArchive?: Prisma.DocumentSysLogArchiveOmit
 }

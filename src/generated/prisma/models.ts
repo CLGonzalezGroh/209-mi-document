@@ -8,6 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/DocumentClass.js'
 export type * from './models/DocumentType.js'
 export type * from './models/Document.js'
 export type * from './models/DocumentRevision.js'
@@ -17,6 +18,7 @@ export type * from './models/ReviewStep.js'
 export type * from './models/Transmittal.js'
 export type * from './models/TransmittalItem.js'
 export type * from './models/Attachment.js'
+export type * from './models/ScannedFile.js'
 export type * from './models/DocumentSysLog.js'
 export type * from './models/DocumentSysLogArchive.js'
 export type * from './commonInputTypes.js'

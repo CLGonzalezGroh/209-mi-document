@@ -10,27 +10,33 @@ import { workflowResolvers } from "./workflows.js"
 import { transmittalResolvers } from "./transmittals.js"
 import { documentSysLogResolvers } from "./documentSysLogs.js"
 import { attachmentResolvers } from "./attachments.js"
+import { scannedFileResolvers } from "./scannedFiles.js"
+import { documentClassResolvers } from "./documentClasses.js"
 
 export const resolvers: GraphQLResolverMap<ResolverContext> = {
   ...scalars,
   Query: {
     ...documentResolvers.Query,
     ...documentTypeResolvers.Query,
+    ...documentClassResolvers.Query,
     ...revisionResolvers.Query,
     ...workflowResolvers.Query,
     ...transmittalResolvers.Query,
     ...documentSysLogResolvers.Query,
     ...attachmentResolvers.Query,
+    ...scannedFileResolvers.Query,
   },
   Mutation: {
     ...documentResolvers.Mutation,
     ...documentTypeResolvers.Mutation,
+    ...documentClassResolvers.Mutation,
     ...versionResolvers.Mutation,
     ...revisionResolvers.Mutation,
     ...workflowResolvers.Mutation,
     ...transmittalResolvers.Mutation,
     ...documentSysLogResolvers.Mutation,
     ...attachmentResolvers.Mutation,
+    ...scannedFileResolvers.Mutation,
   },
   ...resolverTypes,
 }

@@ -84,6 +84,29 @@ enum LogLevel {
 // MODELOS
 // ================================
 
+// Clases de documento (nivel 1: Especialidad, Categoría, etc.)
+model DocumentClass {
+    id           Int       @id @default(autoincrement())
+    createdAt    DateTime  @default(now())
+    updatedAt    DateTime? @updatedAt
+    updatedById  Int       @default(1)
+    terminatedAt DateTime?
+    isSys        Boolean   @default(false)
+
+    name        String // "Ingeniería Civil", "Eléctrica", "Gestión"
+    code        String // "CIVIL", "ELEC", "GEST"
+    module      ModuleType? // null = disponible para todos los módulos
+    description String?
+    sortOrder   Int         @default(0)
+
+    // Relaciones
+    documentTypes DocumentType[]
+
+    @@unique([name, module]) // Único dentro del mismo módulo
+    @@unique([code, module]) // Único dentro del mismo módulo
+    @@map("document_classes")
+}
+
 // Tipos de documento (Procedimiento, Plano, Informe, etc.)
 model DocumentType {
     id           Int       @id @default(autoincrement())
@@ -93,15 +116,21 @@ model DocumentType {
     terminatedAt DateTime?
     isSys        Boolean   @default(false)
 
-    name             String      @unique // "Procedimiento", "Plano", "Informe"
-    code             String      @unique // "PROC", "DWG", "RPT"
+    name             String // "Procedimiento", "Plano", "Informe"
+    code             String // "PROC", "DWG", "RPT"
     module           ModuleType? // null = disponible para todos los módulos
+    classId          Int? // null = disponible para todas las clases
     description      String?
-    requiresWorkflow Boolean     @default(false)
+    requiresWorkflow Boolean        @default(false)
 
     // Relaciones
-    documents Document[]
+    class        DocumentClass? @relation(fields: [classId], references: [id])
+    documents    Document[]
+    scannedFiles ScannedFile[]
 
+    @@unique([name, classId, module]) // Único dentro de la misma clase y módulo
+    @@unique([code, classId, module]) // Único dentro de la misma clase y módulo
+    @@index([classId])
     @@map("document_types")
 }
 
@@ -273,6 +302,58 @@ model Attachment {
 
     @@index([module, entityType, entityId])
     @@map("attachments")
+}
+
+enum DigitalDisposition {
+    PENDING // Sin clasificar
+    ACCEPTED // Aceptado, pendiente de carga en sistema externo
+    UPLOADED // Cargado en sistema externo, ciclo cerrado
+    DISCARDED // Descartado, sin valor documental
+}
+
+enum PhysicalDisposition {
+    PENDING // Sin decisión
+    DESTROY // Programado para destrucción
+    DESTROYED // Destrucción confirmada
+    ARCHIVE // Programado para almacenamiento físico
+    ARCHIVED // Almacenamiento confirmado
+}
+
+// Archivos digitalizados pendientes de clasificación
+model ScannedFile {
+    id                  Int                  @id @default(autoincrement())
+    createdAt           DateTime             @default(now())
+    createdById         Int
+    updatedAt           DateTime             @updatedAt
+    updatedById         Int                  @default(1)
+    projectId           Int
+    documentTypeId      Int?
+    title               String               @db.VarChar(500)
+    description         String?              @db.Text
+    originalReference   String?              @db.VarChar(255)
+    physicalLocation    String?              @db.VarChar(500)
+    fileKey             String               @db.VarChar(500)
+    fileName            String               @db.VarChar(255)
+    fileSize            Int
+    mimeType            String               @db.VarChar(100)
+    digitalDisposition  DigitalDisposition   @default(PENDING)
+    physicalDisposition PhysicalDisposition  @default(PENDING)
+    externalReference   String?              @db.VarChar(500)
+    discardReason       String?              @db.Text
+    classificationNotes String?              @db.Text
+    classifiedById      Int?
+    classifiedAt        DateTime?
+    physicalConfirmedById Int?
+    physicalConfirmedAt  DateTime?
+    terminatedAt        DateTime?
+
+    documentType DocumentType? @relation(fields: [documentTypeId], references: [id])
+
+    @@index([projectId])
+    @@index([digitalDisposition])
+    @@index([physicalDisposition])
+    @@index([projectId, digitalDisposition])
+    @@map("scanned_files")
 }
 
 // Logs generales del sistema (operacionales)

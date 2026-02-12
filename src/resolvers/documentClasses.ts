@@ -8,40 +8,46 @@ import {
   PERMISSIONS,
   TerminatedFilter,
 } from "@CLGonzalezGroh/mi-common"
-import { DocumentType } from "../generated/prisma/client.js"
+import { DocumentClass } from "../generated/prisma/client.js"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
-import { buildDocumentTypeOrderBy } from "../utils/orderByHelper.js"
+import { buildDocumentClassOrderBy } from "../utils/orderByHelper.js"
 import { ModuleType } from "../generated/prisma/enums.js"
 
-export interface DocumentTypeOrderByInput extends OrderByInput {
-  field: "NAME" | "CODE" | "CREATED_AT" | "UPDATED_AT"
+export interface DocumentClassOrderByInput extends OrderByInput {
+  field: "NAME" | "CODE" | "SORT_ORDER" | "CREATED_AT"
 }
 
-interface DocumentTypeFilterInput {
+interface DocumentClassFilterInput {
   query?: string
   module?: ModuleType
-  classId?: number
   terminatedFilter?: TerminatedFilter
 }
 
-export const documentTypeResolvers = {
+const documentClassIncludes = {
+  documentTypes: {
+    where: { terminatedAt: null },
+    orderBy: { name: "asc" as const },
+  },
+}
+
+export const documentClassResolvers = {
   Query: {
-    documentTypes: async (
+    documentClasses: async (
       _: any,
       {
         filter,
         pagination,
         orderBy,
       }: {
-        filter?: DocumentTypeFilterInput
+        filter?: DocumentClassFilterInput
         pagination?: PaginationInput
-        orderBy?: DocumentTypeOrderByInput
+        orderBy?: DocumentClassOrderByInput
       },
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_LIST],
+        requiredPermissions: ["document:documentClass:list"],
         context,
       })
 
@@ -65,12 +71,9 @@ export const documentTypeResolvers = {
         }
 
         if (filter?.module) {
-          where.OR = [
-            ...(where.OR || []),
-            { module: filter.module },
-            { module: null }, // Disponible para todos
-          ]
-          // Si ya había un OR, necesitamos usar AND
+          const moduleCondition = {
+            OR: [{ module: filter.module }, { module: null }],
+          }
           if (where.OR && filter?.query) {
             where.AND = [
               {
@@ -80,52 +83,36 @@ export const documentTypeResolvers = {
                   { description: { contains: filter.query } },
                 ],
               },
-              {
-                OR: [{ module: filter.module }, { module: null }],
-              },
-            ]
-            delete where.OR
-          }
-        }
-
-        if (filter?.classId) {
-          // Filtrar por clase específica O tipos sin clase (universales)
-          const classCondition = {
-            OR: [{ classId: filter.classId }, { classId: null }],
-          }
-          if (where.AND) {
-            where.AND.push(classCondition)
-          } else if (where.OR) {
-            where.AND = [
-              { OR: where.OR },
-              classCondition,
+              moduleCondition,
             ]
             delete where.OR
           } else {
-            Object.assign(where, classCondition)
+            Object.assign(where, moduleCondition)
           }
         }
 
         const skip = pagination?.skip || 0
         const take = pagination?.take || 10
 
-        const orderByClause = buildDocumentTypeOrderBy(orderBy)
+        const orderByClause = buildDocumentClassOrderBy(orderBy)
 
-        const totalItems = await context.orm.documentType.count({ where })
+        const totalItems = await context.orm.documentClass.count({
+          where,
+        })
 
-        const documentTypes = await context.orm.documentType.findMany({
+        const documentClasses = await context.orm.documentClass.findMany({
           where,
           skip,
           take,
-          orderBy: orderByClause || { name: "asc" },
-          include: { class: true },
+          orderBy: orderByClause || { sortOrder: "asc" },
+          include: documentClassIncludes,
         })
 
         const totalPages = Math.ceil(totalItems / take)
         const currentPage = Math.floor(skip / take) + 1
 
-        const response: ListResponse<DocumentType> = {
-          items: documentTypes,
+        const response: ListResponse<DocumentClass> = {
+          items: documentClasses,
           pagination: {
             currentPage,
             totalPages,
@@ -141,59 +128,58 @@ export const documentTypeResolvers = {
           error,
           userId,
           context,
-          logName: "GET_DOCUMENT_TYPES",
+          logName: "GET_DOCUMENT_CLASSES",
           messages: {
-            default: "Error al obtener los tipos de documento.",
+            default: "Error al obtener las clases de documento.",
           },
         })
       }
     },
 
-    documentTypeById: async (
+    documentClassById: async (
       _: any,
       { id }: { id: number },
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_READ],
+        requiredPermissions: ["document:documentClass:read"],
         context,
       })
 
       try {
-        const documentType = await context.orm.documentType.findFirst({
+        const documentClass = await context.orm.documentClass.findFirst({
           where: { id },
-          include: { class: true },
+          include: documentClassIncludes,
         })
 
-        if (!documentType) {
-          throw new GraphQLError("Tipo de documento no encontrado", {
+        if (!documentClass) {
+          throw new GraphQLError("Clase de documento no encontrada", {
             extensions: { code: "NOT_FOUND" },
           })
         }
 
-        return documentType
+        return documentClass
       } catch (error) {
         return handleError({
           error,
           userId,
           context,
-          logName: "GET_DOCUMENT_TYPE_BY_ID",
+          logName: "GET_DOCUMENT_CLASS_BY_ID",
           messages: {
-            notFound:
-              "El tipo de documento solicitado no existe o no está disponible.",
-            default: "Error al obtener el tipo de documento.",
+            notFound: "La clase de documento solicitada no existe.",
+            default: "Error al obtener la clase de documento.",
           },
         })
       }
     },
 
-    documentTypesSelectList: async (
+    documentClassesSelectList: async (
       _: any,
-      { module, classId }: { module?: ModuleType; classId?: number },
+      { module }: { module?: ModuleType },
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_SELECT],
+        requiredPermissions: ["document:documentClass:select"],
         context,
       })
 
@@ -204,31 +190,16 @@ export const documentTypeResolvers = {
           where.OR = [{ module }, { module: null }]
         }
 
-        if (classId) {
-          const classCondition = {
-            OR: [{ classId }, { classId: null }],
-          }
-          if (where.OR) {
-            where.AND = [
-              { OR: where.OR },
-              classCondition,
-            ]
-            delete where.OR
-          } else {
-            Object.assign(where, classCondition)
-          }
-        }
-
-        const documentTypes = await context.orm.documentType.findMany({
+        const documentClasses = await context.orm.documentClass.findMany({
           where,
           select: { id: true, name: true },
-          orderBy: { name: "asc" },
+          orderBy: { sortOrder: "asc" },
         })
 
-        return documentTypes.map(
-          (dt): SelectOption => ({
-            value: String(dt.id),
-            label: dt.name,
+        return documentClasses.map(
+          (dc): SelectOption => ({
+            value: String(dc.id),
+            label: dc.name,
           }),
         )
       } catch (error) {
@@ -236,9 +207,9 @@ export const documentTypeResolvers = {
           error,
           userId,
           context,
-          logName: "GET_DOCUMENT_TYPES_SELECT_LIST",
+          logName: "GET_DOCUMENT_CLASSES_SELECT_LIST",
           messages: {
-            default: "Error al obtener la lista de tipos de documento.",
+            default: "Error al obtener la lista de clases de documento.",
           },
         })
       }
@@ -246,7 +217,7 @@ export const documentTypeResolvers = {
   },
 
   Mutation: {
-    createDocumentType: async (
+    createDocumentClass: async (
       _: any,
       {
         input,
@@ -255,49 +226,47 @@ export const documentTypeResolvers = {
           name: string
           code: string
           module?: ModuleType
-          classId?: number
           description?: string
-          requiresWorkflow?: boolean
+          sortOrder?: number
         }
       },
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_CREATE],
+        requiredPermissions: ["document:documentClass:create"],
         context,
       })
 
       try {
-        const documentType = await context.orm.documentType.create({
+        const documentClass = await context.orm.documentClass.create({
           data: {
             name: input.name,
             code: input.code,
             module: input.module,
-            classId: input.classId,
             description: input.description,
-            requiresWorkflow: input.requiresWorkflow ?? false,
+            sortOrder: input.sortOrder ?? 0,
             updatedById: userId,
           },
-          include: { class: true },
+          include: documentClassIncludes,
         })
 
-        return documentType
+        return documentClass
       } catch (error) {
         return handleError({
           error,
           userId,
           context,
-          logName: "CREATE_DOCUMENT_TYPE",
+          logName: "CREATE_DOCUMENT_CLASS",
           messages: {
             uniqueConstraint:
-              "Ya existe un tipo de documento con ese nombre o código.",
-            default: "Error al crear el tipo de documento.",
+              "Ya existe una clase de documento con ese nombre o código.",
+            default: "Error al crear la clase de documento.",
           },
         })
       }
     },
 
-    updateDocumentType: async (
+    updateDocumentClass: async (
       _: any,
       {
         id,
@@ -308,110 +277,109 @@ export const documentTypeResolvers = {
           name?: string
           code?: string
           module?: ModuleType
-          classId?: number
           description?: string
-          requiresWorkflow?: boolean
+          sortOrder?: number
         }
       },
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_UPDATE],
+        requiredPermissions: ["document:documentClass:update"],
         context,
       })
 
       try {
-        const documentType = await context.orm.documentType.update({
+        const documentClass = await context.orm.documentClass.update({
           where: { id },
           data: {
             ...input,
             updatedById: userId,
           },
-          include: { class: true },
+          include: documentClassIncludes,
         })
 
-        return documentType
+        return documentClass
       } catch (error) {
         return handleError({
           error,
           userId,
           context,
-          logName: "UPDATE_DOCUMENT_TYPE",
+          logName: "UPDATE_DOCUMENT_CLASS",
           messages: {
-            notFound: "El tipo de documento no existe.",
+            notFound: "La clase de documento no existe.",
             uniqueConstraint:
-              "Ya existe un tipo de documento con ese nombre o código.",
-            default: "Error al actualizar el tipo de documento.",
+              "Ya existe una clase de documento con ese nombre o código.",
+            default: "Error al actualizar la clase de documento.",
           },
         })
       }
     },
 
-    terminateDocumentType: async (
+    terminateDocumentClass: async (
       _: any,
       { id }: { id: number },
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_DELETE],
+        requiredPermissions: ["document:documentClass:delete"],
         context,
       })
 
       try {
-        const documentType = await context.orm.documentType.update({
+        const documentClass = await context.orm.documentClass.update({
           where: { id },
           data: {
             terminatedAt: new Date(),
             updatedById: userId,
           },
-          include: { class: true },
+          include: documentClassIncludes,
         })
 
-        return documentType
+        return documentClass
       } catch (error) {
         return handleError({
           error,
           userId,
           context,
-          logName: "TERMINATE_DOCUMENT_TYPE",
+          logName: "TERMINATE_DOCUMENT_CLASS",
           messages: {
-            notFound: "El tipo de documento no existe.",
-            default: "Error al deshabilitar el tipo de documento.",
+            notFound: "La clase de documento no existe.",
+            default: "Error al deshabilitar la clase de documento.",
           },
         })
       }
     },
 
-    activateDocumentType: async (
+    activateDocumentClass: async (
       _: any,
       { id }: { id: number },
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_UPDATE],
+        requiredPermissions: ["document:documentClass:update"],
         context,
       })
 
       try {
-        const documentType = await context.orm.documentType.update({
+        const documentClass = await context.orm.documentClass.update({
           where: { id },
           data: {
             terminatedAt: null,
             updatedById: userId,
           },
-          include: { class: true },
+          include: documentClassIncludes,
         })
 
-        return documentType
+        return documentClass
       } catch (error) {
         return handleError({
           error,
           userId,
           context,
-          logName: "ACTIVATE_DOCUMENT_TYPE",
+          logName: "ACTIVATE_DOCUMENT_CLASS",
           messages: {
-            notFound: "El tipo de documento no existe.",
-            default: "Error al reactivar el tipo de documento.",
+            notFound: "La clase de documento no existe.",
+            default: "Error al reactivar la clase de documento.",
           },
         })
       }

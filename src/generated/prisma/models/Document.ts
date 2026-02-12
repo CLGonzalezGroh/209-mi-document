@@ -645,14 +645,6 @@ export type EnumModuleTypeFieldUpdateOperationsInput = {
   set?: $Enums.ModuleType
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type DocumentCreateNestedOneWithoutRevisionsInput = {
   create?: Prisma.XOR<Prisma.DocumentCreateWithoutRevisionsInput, Prisma.DocumentUncheckedCreateWithoutRevisionsInput>
   connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutRevisionsInput

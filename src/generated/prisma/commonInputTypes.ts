@@ -192,13 +192,6 @@ export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedStringNullableFilter<$PrismaModel>
 }
 
-export type EnumModuleTypeFilter<$PrismaModel = never> = {
-  equals?: $Enums.ModuleType | Prisma.EnumModuleTypeFieldRefInput<$PrismaModel>
-  in?: $Enums.ModuleType[]
-  notIn?: $Enums.ModuleType[]
-  not?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel> | $Enums.ModuleType
-}
-
 export type IntNullableFilter<$PrismaModel = never> = {
   equals?: number | Prisma.IntFieldRefInput<$PrismaModel> | null
   in?: number[] | null
@@ -208,16 +201,6 @@ export type IntNullableFilter<$PrismaModel = never> = {
   gt?: number | Prisma.IntFieldRefInput<$PrismaModel>
   gte?: number | Prisma.IntFieldRefInput<$PrismaModel>
   not?: Prisma.NestedIntNullableFilter<$PrismaModel> | number | null
-}
-
-export type EnumModuleTypeWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.ModuleType | Prisma.EnumModuleTypeFieldRefInput<$PrismaModel>
-  in?: $Enums.ModuleType[]
-  notIn?: $Enums.ModuleType[]
-  not?: Prisma.NestedEnumModuleTypeWithAggregatesFilter<$PrismaModel> | $Enums.ModuleType
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
 }
 
 export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -234,6 +217,23 @@ export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _max?: Prisma.NestedIntNullableFilter<$PrismaModel>
+}
+
+export type EnumModuleTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.ModuleType | Prisma.EnumModuleTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ModuleType[]
+  notIn?: $Enums.ModuleType[]
+  not?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel> | $Enums.ModuleType
+}
+
+export type EnumModuleTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ModuleType | Prisma.EnumModuleTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ModuleType[]
+  notIn?: $Enums.ModuleType[]
+  not?: Prisma.NestedEnumModuleTypeWithAggregatesFilter<$PrismaModel> | $Enums.ModuleType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
 }
 
 export type EnumRevisionStatusFilter<$PrismaModel = never> = {
@@ -353,6 +353,40 @@ export type EnumClientStatusNullableWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumClientStatusNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumClientStatusNullableFilter<$PrismaModel>
+}
+
+export type EnumDigitalDispositionFilter<$PrismaModel = never> = {
+  equals?: $Enums.DigitalDisposition | Prisma.EnumDigitalDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.DigitalDisposition[]
+  notIn?: $Enums.DigitalDisposition[]
+  not?: Prisma.NestedEnumDigitalDispositionFilter<$PrismaModel> | $Enums.DigitalDisposition
+}
+
+export type EnumPhysicalDispositionFilter<$PrismaModel = never> = {
+  equals?: $Enums.PhysicalDisposition | Prisma.EnumPhysicalDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.PhysicalDisposition[]
+  notIn?: $Enums.PhysicalDisposition[]
+  not?: Prisma.NestedEnumPhysicalDispositionFilter<$PrismaModel> | $Enums.PhysicalDisposition
+}
+
+export type EnumDigitalDispositionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DigitalDisposition | Prisma.EnumDigitalDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.DigitalDisposition[]
+  notIn?: $Enums.DigitalDisposition[]
+  not?: Prisma.NestedEnumDigitalDispositionWithAggregatesFilter<$PrismaModel> | $Enums.DigitalDisposition
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDigitalDispositionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDigitalDispositionFilter<$PrismaModel>
+}
+
+export type EnumPhysicalDispositionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PhysicalDisposition | Prisma.EnumPhysicalDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.PhysicalDisposition[]
+  notIn?: $Enums.PhysicalDisposition[]
+  not?: Prisma.NestedEnumPhysicalDispositionWithAggregatesFilter<$PrismaModel> | $Enums.PhysicalDisposition
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPhysicalDispositionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPhysicalDispositionFilter<$PrismaModel>
 }
 
 export type EnumLogLevelFilter<$PrismaModel = never> = {
@@ -567,23 +601,6 @@ export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedStringNullableFilter<$PrismaModel>
 }
 
-export type NestedEnumModuleTypeFilter<$PrismaModel = never> = {
-  equals?: $Enums.ModuleType | Prisma.EnumModuleTypeFieldRefInput<$PrismaModel>
-  in?: $Enums.ModuleType[]
-  notIn?: $Enums.ModuleType[]
-  not?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel> | $Enums.ModuleType
-}
-
-export type NestedEnumModuleTypeWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.ModuleType | Prisma.EnumModuleTypeFieldRefInput<$PrismaModel>
-  in?: $Enums.ModuleType[]
-  notIn?: $Enums.ModuleType[]
-  not?: Prisma.NestedEnumModuleTypeWithAggregatesFilter<$PrismaModel> | $Enums.ModuleType
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
-}
-
 export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: number | Prisma.IntFieldRefInput<$PrismaModel> | null
   in?: number[] | null
@@ -609,6 +626,23 @@ export type NestedFloatNullableFilter<$PrismaModel = never> = {
   gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   not?: Prisma.NestedFloatNullableFilter<$PrismaModel> | number | null
+}
+
+export type NestedEnumModuleTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.ModuleType | Prisma.EnumModuleTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ModuleType[]
+  notIn?: $Enums.ModuleType[]
+  not?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel> | $Enums.ModuleType
+}
+
+export type NestedEnumModuleTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ModuleType | Prisma.EnumModuleTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ModuleType[]
+  notIn?: $Enums.ModuleType[]
+  not?: Prisma.NestedEnumModuleTypeWithAggregatesFilter<$PrismaModel> | $Enums.ModuleType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
 }
 
 export type NestedEnumRevisionStatusFilter<$PrismaModel = never> = {
@@ -728,6 +762,40 @@ export type NestedEnumClientStatusNullableWithAggregatesFilter<$PrismaModel = ne
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumClientStatusNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumClientStatusNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumDigitalDispositionFilter<$PrismaModel = never> = {
+  equals?: $Enums.DigitalDisposition | Prisma.EnumDigitalDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.DigitalDisposition[]
+  notIn?: $Enums.DigitalDisposition[]
+  not?: Prisma.NestedEnumDigitalDispositionFilter<$PrismaModel> | $Enums.DigitalDisposition
+}
+
+export type NestedEnumPhysicalDispositionFilter<$PrismaModel = never> = {
+  equals?: $Enums.PhysicalDisposition | Prisma.EnumPhysicalDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.PhysicalDisposition[]
+  notIn?: $Enums.PhysicalDisposition[]
+  not?: Prisma.NestedEnumPhysicalDispositionFilter<$PrismaModel> | $Enums.PhysicalDisposition
+}
+
+export type NestedEnumDigitalDispositionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DigitalDisposition | Prisma.EnumDigitalDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.DigitalDisposition[]
+  notIn?: $Enums.DigitalDisposition[]
+  not?: Prisma.NestedEnumDigitalDispositionWithAggregatesFilter<$PrismaModel> | $Enums.DigitalDisposition
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDigitalDispositionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDigitalDispositionFilter<$PrismaModel>
+}
+
+export type NestedEnumPhysicalDispositionWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PhysicalDisposition | Prisma.EnumPhysicalDispositionFieldRefInput<$PrismaModel>
+  in?: $Enums.PhysicalDisposition[]
+  notIn?: $Enums.PhysicalDisposition[]
+  not?: Prisma.NestedEnumPhysicalDispositionWithAggregatesFilter<$PrismaModel> | $Enums.PhysicalDisposition
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPhysicalDispositionFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPhysicalDispositionFilter<$PrismaModel>
 }
 
 export type NestedEnumLogLevelFilter<$PrismaModel = never> = {

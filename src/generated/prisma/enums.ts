@@ -100,3 +100,24 @@ export const LogLevel = {
 } as const
 
 export type LogLevel = (typeof LogLevel)[keyof typeof LogLevel]
+
+
+export const DigitalDisposition = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  UPLOADED: 'UPLOADED',
+  DISCARDED: 'DISCARDED'
+} as const
+
+export type DigitalDisposition = (typeof DigitalDisposition)[keyof typeof DigitalDisposition]
+
+
+export const PhysicalDisposition = {
+  PENDING: 'PENDING',
+  DESTROY: 'DESTROY',
+  DESTROYED: 'DESTROYED',
+  ARCHIVE: 'ARCHIVE',
+  ARCHIVED: 'ARCHIVED'
+} as const
+
+export type PhysicalDisposition = (typeof PhysicalDisposition)[keyof typeof PhysicalDisposition]

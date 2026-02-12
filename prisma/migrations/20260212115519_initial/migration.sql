@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE `document_types` (
+CREATE TABLE `document_classes` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NULL,
@@ -10,10 +10,31 @@ CREATE TABLE `document_types` (
     `code` VARCHAR(191) NOT NULL,
     `module` ENUM('QUALITY', 'PROJECTS', 'TAGS', 'OPERATIONS', 'MANAGEMENT', 'COMERCIAL') NULL,
     `description` VARCHAR(191) NULL,
+    `sortOrder` INTEGER NOT NULL DEFAULT 0,
+
+    UNIQUE INDEX `document_classes_name_module_key`(`name`, `module`),
+    UNIQUE INDEX `document_classes_code_module_key`(`code`, `module`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `document_types` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NULL,
+    `updatedById` INTEGER NOT NULL DEFAULT 1,
+    `terminatedAt` DATETIME(3) NULL,
+    `isSys` BOOLEAN NOT NULL DEFAULT false,
+    `name` VARCHAR(191) NOT NULL,
+    `code` VARCHAR(191) NOT NULL,
+    `module` ENUM('QUALITY', 'PROJECTS', 'TAGS', 'OPERATIONS', 'MANAGEMENT', 'COMERCIAL') NULL,
+    `classId` INTEGER NULL,
+    `description` VARCHAR(191) NULL,
     `requiresWorkflow` BOOLEAN NOT NULL DEFAULT false,
 
-    UNIQUE INDEX `document_types_name_key`(`name`),
-    UNIQUE INDEX `document_types_code_key`(`code`),
+    INDEX `document_types_classId_idx`(`classId`),
+    UNIQUE INDEX `document_types_name_classId_module_key`(`name`, `classId`, `module`),
+    UNIQUE INDEX `document_types_code_classId_module_key`(`code`, `classId`, `module`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -21,6 +42,7 @@ CREATE TABLE `document_types` (
 CREATE TABLE `documents` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `createdById` INTEGER NOT NULL,
     `updatedAt` DATETIME(3) NULL,
     `updatedById` INTEGER NOT NULL DEFAULT 1,
     `terminatedAt` DATETIME(3) NULL,
@@ -32,7 +54,6 @@ CREATE TABLE `documents` (
     `entityType` VARCHAR(191) NULL,
     `entityId` INTEGER NULL,
     `documentTypeId` INTEGER NOT NULL,
-    `createdById` INTEGER NOT NULL,
 
     UNIQUE INDEX `documents_code_key`(`code`),
     INDEX `documents_module_entityType_entityId_idx`(`module`, `entityType`, `entityId`),
@@ -43,6 +64,7 @@ CREATE TABLE `documents` (
 CREATE TABLE `document_revisions` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `createdById` INTEGER NOT NULL,
     `updatedAt` DATETIME(3) NULL,
     `updatedById` INTEGER NOT NULL DEFAULT 1,
     `documentId` INTEGER NOT NULL,
@@ -50,7 +72,6 @@ CREATE TABLE `document_revisions` (
     `status` ENUM('DRAFT', 'IN_REVIEW', 'APPROVED', 'SUPERSEDED', 'OBSOLETE') NOT NULL DEFAULT 'DRAFT',
     `approvedById` INTEGER NULL,
     `approvedAt` DATETIME(3) NULL,
-    `createdById` INTEGER NOT NULL,
 
     UNIQUE INDEX `document_revisions_documentId_revisionCode_key`(`documentId`, `revisionCode`),
     PRIMARY KEY (`id`)
@@ -139,6 +160,59 @@ CREATE TABLE `transmittal_items` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `attachments` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `createdById` INTEGER NOT NULL,
+    `module` ENUM('QUALITY', 'PROJECTS', 'TAGS', 'OPERATIONS', 'MANAGEMENT', 'COMERCIAL') NOT NULL,
+    `entityType` VARCHAR(100) NOT NULL,
+    `entityId` INTEGER NOT NULL,
+    `fileKey` VARCHAR(500) NOT NULL,
+    `fileName` VARCHAR(300) NOT NULL,
+    `fileSize` INTEGER NOT NULL,
+    `mimeType` VARCHAR(100) NOT NULL,
+    `description` VARCHAR(500) NULL,
+
+    INDEX `attachments_module_entityType_entityId_idx`(`module`, `entityType`, `entityId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `scanned_files` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `createdById` INTEGER NOT NULL,
+    `updatedAt` DATETIME(3) NOT NULL,
+    `updatedById` INTEGER NOT NULL DEFAULT 1,
+    `projectId` INTEGER NOT NULL,
+    `documentTypeId` INTEGER NULL,
+    `title` VARCHAR(500) NOT NULL,
+    `description` TEXT NULL,
+    `originalReference` VARCHAR(255) NULL,
+    `physicalLocation` VARCHAR(500) NULL,
+    `fileKey` VARCHAR(500) NOT NULL,
+    `fileName` VARCHAR(255) NOT NULL,
+    `fileSize` INTEGER NOT NULL,
+    `mimeType` VARCHAR(100) NOT NULL,
+    `digitalDisposition` ENUM('PENDING', 'ACCEPTED', 'UPLOADED', 'DISCARDED') NOT NULL DEFAULT 'PENDING',
+    `physicalDisposition` ENUM('PENDING', 'DESTROY', 'DESTROYED', 'ARCHIVE', 'ARCHIVED') NOT NULL DEFAULT 'PENDING',
+    `externalReference` VARCHAR(500) NULL,
+    `discardReason` TEXT NULL,
+    `classificationNotes` TEXT NULL,
+    `classifiedById` INTEGER NULL,
+    `classifiedAt` DATETIME(3) NULL,
+    `physicalConfirmedById` INTEGER NULL,
+    `physicalConfirmedAt` DATETIME(3) NULL,
+    `terminatedAt` DATETIME(3) NULL,
+
+    INDEX `scanned_files_projectId_idx`(`projectId`),
+    INDEX `scanned_files_digitalDisposition_idx`(`digitalDisposition`),
+    INDEX `scanned_files_physicalDisposition_idx`(`physicalDisposition`),
+    INDEX `scanned_files_projectId_digitalDisposition_idx`(`projectId`, `digitalDisposition`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `document_sys_logs` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -167,6 +241,9 @@ CREATE TABLE `document_sys_logs_archive` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
+ALTER TABLE `document_types` ADD CONSTRAINT `document_types_classId_fkey` FOREIGN KEY (`classId`) REFERENCES `document_classes`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `documents` ADD CONSTRAINT `documents_documentTypeId_fkey` FOREIGN KEY (`documentTypeId`) REFERENCES `document_types`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -186,3 +263,6 @@ ALTER TABLE `transmittal_items` ADD CONSTRAINT `transmittal_items_transmittalId_
 
 -- AddForeignKey
 ALTER TABLE `transmittal_items` ADD CONSTRAINT `transmittal_items_documentRevisionId_fkey` FOREIGN KEY (`documentRevisionId`) REFERENCES `document_revisions`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `scanned_files` ADD CONSTRAINT `scanned_files_documentTypeId_fkey` FOREIGN KEY (`documentTypeId`) REFERENCES `document_types`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

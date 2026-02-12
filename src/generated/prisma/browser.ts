@@ -18,6 +18,11 @@ export { Prisma }
 export * as $Enums from './enums.js'
 export * from './enums.js';
 /**
+ * Model DocumentClass
+ * 
+ */
+export type DocumentClass = Prisma.DocumentClassModel
+/**
  * Model DocumentType
  * 
  */
@@ -62,6 +67,11 @@ export type TransmittalItem = Prisma.TransmittalItemModel
  * 
  */
 export type Attachment = Prisma.AttachmentModel
+/**
+ * Model ScannedFile
+ * 
+ */
+export type ScannedFile = Prisma.ScannedFileModel
 /**
  * Model DocumentSysLog
  * 

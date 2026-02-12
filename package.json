@@ -1,6 +1,6 @@
 {
   "name": "209-mi-document",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "María Ingeniería API de Gestión Documental",
   "type": "module",
   "main": "index.js",
@@ -28,7 +28,7 @@
   "dependencies": {
     "@apollo/server": "^5.4.0",
     "@apollo/subgraph": "^2.13.0",
-    "@CLGonzalezGroh/mi-common": "^1.0.26",
+    "@CLGonzalezGroh/mi-common": "^1.0.28",
     "@prisma/adapter-mariadb": "^7.4.0",
     "@prisma/client": "^7.4.0",
     "graphql": "^16.12.0",

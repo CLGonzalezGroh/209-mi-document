@@ -51,6 +51,7 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  DocumentClass: 'DocumentClass',
   DocumentType: 'DocumentType',
   Document: 'Document',
   DocumentRevision: 'DocumentRevision',
@@ -60,6 +61,7 @@ export const ModelName = {
   Transmittal: 'Transmittal',
   TransmittalItem: 'TransmittalItem',
   Attachment: 'Attachment',
+  ScannedFile: 'ScannedFile',
   DocumentSysLog: 'DocumentSysLog',
   DocumentSysLogArchive: 'DocumentSysLogArchive'
 } as const
@@ -80,6 +82,23 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const DocumentClassScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  terminatedAt: 'terminatedAt',
+  isSys: 'isSys',
+  name: 'name',
+  code: 'code',
+  module: 'module',
+  description: 'description',
+  sortOrder: 'sortOrder'
+} as const
+
+export type DocumentClassScalarFieldEnum = (typeof DocumentClassScalarFieldEnum)[keyof typeof DocumentClassScalarFieldEnum]
+
+
 export const DocumentTypeScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -90,6 +109,7 @@ export const DocumentTypeScalarFieldEnum = {
   name: 'name',
   code: 'code',
   module: 'module',
+  classId: 'classId',
   description: 'description',
   requiresWorkflow: 'requiresWorkflow'
 } as const
@@ -226,6 +246,37 @@ export const AttachmentScalarFieldEnum = {
 export type AttachmentScalarFieldEnum = (typeof AttachmentScalarFieldEnum)[keyof typeof AttachmentScalarFieldEnum]
 
 
+export const ScannedFileScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  projectId: 'projectId',
+  documentTypeId: 'documentTypeId',
+  title: 'title',
+  description: 'description',
+  originalReference: 'originalReference',
+  physicalLocation: 'physicalLocation',
+  fileKey: 'fileKey',
+  fileName: 'fileName',
+  fileSize: 'fileSize',
+  mimeType: 'mimeType',
+  digitalDisposition: 'digitalDisposition',
+  physicalDisposition: 'physicalDisposition',
+  externalReference: 'externalReference',
+  discardReason: 'discardReason',
+  classificationNotes: 'classificationNotes',
+  classifiedById: 'classifiedById',
+  classifiedAt: 'classifiedAt',
+  physicalConfirmedById: 'physicalConfirmedById',
+  physicalConfirmedAt: 'physicalConfirmedAt',
+  terminatedAt: 'terminatedAt'
+} as const
+
+export type ScannedFileScalarFieldEnum = (typeof ScannedFileScalarFieldEnum)[keyof typeof ScannedFileScalarFieldEnum]
+
+
 export const DocumentSysLogScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -266,6 +317,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const DocumentClassOrderByRelevanceFieldEnum = {
+  name: 'name',
+  code: 'code',
+  description: 'description'
+} as const
+
+export type DocumentClassOrderByRelevanceFieldEnum = (typeof DocumentClassOrderByRelevanceFieldEnum)[keyof typeof DocumentClassOrderByRelevanceFieldEnum]
 
 
 export const DocumentTypeOrderByRelevanceFieldEnum = {
@@ -338,6 +398,22 @@ export const AttachmentOrderByRelevanceFieldEnum = {
 } as const
 
 export type AttachmentOrderByRelevanceFieldEnum = (typeof AttachmentOrderByRelevanceFieldEnum)[keyof typeof AttachmentOrderByRelevanceFieldEnum]
+
+
+export const ScannedFileOrderByRelevanceFieldEnum = {
+  title: 'title',
+  description: 'description',
+  originalReference: 'originalReference',
+  physicalLocation: 'physicalLocation',
+  fileKey: 'fileKey',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  externalReference: 'externalReference',
+  discardReason: 'discardReason',
+  classificationNotes: 'classificationNotes'
+} as const
+
+export type ScannedFileOrderByRelevanceFieldEnum = (typeof ScannedFileOrderByRelevanceFieldEnum)[keyof typeof ScannedFileOrderByRelevanceFieldEnum]
 
 
 export const DocumentSysLogOrderByRelevanceFieldEnum = {
