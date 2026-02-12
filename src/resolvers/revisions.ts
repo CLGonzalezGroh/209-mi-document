@@ -3,7 +3,7 @@ import { ResolverContext } from "../types.js"
 import { PERMISSIONS } from "@CLGonzalezGroh/mi-common"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
-import { RevisionStatus } from "../generated/prisma/enums.js"
+import { RevisionStatus, RevisionScheme } from "../generated/prisma/enums.js"
 
 const revisionIncludes = {
   document: {
@@ -24,10 +24,10 @@ const revisionIncludes = {
 }
 
 /**
- * Genera el siguiente revisionCode automáticamente.
+ * Genera el siguiente revisionCode alfabético.
  * Secuencia: A, B, C, ..., Z, AA, AB, ...
  */
-function getNextRevisionCode(currentCode: string): string {
+function getNextAlphabeticCode(currentCode: string): string {
   if (!currentCode) return "A"
 
   const chars = currentCode.split("")
@@ -47,6 +47,36 @@ function getNextRevisionCode(currentCode: string): string {
   }
 
   return chars.join("")
+}
+
+/**
+ * Genera el siguiente revisionCode numérico.
+ * Secuencia: 0, 1, 2, 3, ...
+ */
+function getNextNumericCode(currentCode: string): string {
+  const num = parseInt(currentCode, 10)
+  if (isNaN(num)) return "0"
+  return String(num + 1)
+}
+
+/**
+ * Genera el siguiente revisionCode según el esquema del documento.
+ */
+function getNextRevisionCode(
+  currentCode: string,
+  scheme: RevisionScheme,
+): string {
+  if (scheme === RevisionScheme.NUMERIC) {
+    return getNextNumericCode(currentCode)
+  }
+  return getNextAlphabeticCode(currentCode)
+}
+
+/**
+ * Obtiene el código de revisión por defecto según el esquema.
+ */
+function getDefaultRevisionCode(scheme: RevisionScheme): string {
+  return scheme === RevisionScheme.NUMERIC ? "0" : "A"
 }
 
 export const revisionResolvers = {
@@ -147,13 +177,16 @@ export const revisionResolvers = {
           )
         }
 
-        // Determinar el revisionCode
+        // Determinar el revisionCode según el esquema del documento
         let revisionCode = input.revisionCode
         if (!revisionCode) {
           const lastRevision = document.revisions[0]
           revisionCode = lastRevision
-            ? getNextRevisionCode(lastRevision.revisionCode)
-            : "A"
+            ? getNextRevisionCode(
+                lastRevision.revisionCode,
+                document.revisionScheme,
+              )
+            : getDefaultRevisionCode(document.revisionScheme)
         }
 
         // Crear la revisión con su primera versión

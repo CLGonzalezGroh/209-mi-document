@@ -293,8 +293,8 @@ export type DocumentClassOrderByWithRelationInput = {
 
 export type DocumentClassWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  name?: string
-  code?: string
+  name_module?: Prisma.DocumentClassNameModuleCompoundUniqueInput
+  code_module?: Prisma.DocumentClassCodeModuleCompoundUniqueInput
   AND?: Prisma.DocumentClassWhereInput | Prisma.DocumentClassWhereInput[]
   OR?: Prisma.DocumentClassWhereInput[]
   NOT?: Prisma.DocumentClassWhereInput | Prisma.DocumentClassWhereInput[]
@@ -303,11 +303,13 @@ export type DocumentClassWhereUniqueInput = Prisma.AtLeast<{
   updatedById?: Prisma.IntFilter<"DocumentClass"> | number
   terminatedAt?: Prisma.DateTimeNullableFilter<"DocumentClass"> | Date | string | null
   isSys?: Prisma.BoolFilter<"DocumentClass"> | boolean
+  name?: Prisma.StringFilter<"DocumentClass"> | string
+  code?: Prisma.StringFilter<"DocumentClass"> | string
   module?: Prisma.EnumModuleTypeNullableFilter<"DocumentClass"> | $Enums.ModuleType | null
   description?: Prisma.StringNullableFilter<"DocumentClass"> | string | null
   sortOrder?: Prisma.IntFilter<"DocumentClass"> | number
   documentTypes?: Prisma.DocumentTypeListRelationFilter
-}, "id" | "name" | "code">
+}, "id" | "name_module" | "code_module">
 
 export type DocumentClassOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -448,6 +450,16 @@ export type DocumentClassOrderByRelevanceInput = {
   fields: Prisma.DocumentClassOrderByRelevanceFieldEnum | Prisma.DocumentClassOrderByRelevanceFieldEnum[]
   sort: Prisma.SortOrder
   search: string
+}
+
+export type DocumentClassNameModuleCompoundUniqueInput = {
+  name: string
+  module: $Enums.ModuleType
+}
+
+export type DocumentClassCodeModuleCompoundUniqueInput = {
+  code: string
+  module: $Enums.ModuleType
 }
 
 export type DocumentClassCountOrderByAggregateInput = {

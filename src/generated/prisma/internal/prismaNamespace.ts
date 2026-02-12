@@ -1362,7 +1362,8 @@ export const DocumentScalarFieldEnum = {
   module: 'module',
   entityType: 'entityType',
   entityId: 'entityId',
-  documentTypeId: 'documentTypeId'
+  documentTypeId: 'documentTypeId',
+  revisionScheme: 'revisionScheme'
 } as const
 
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
@@ -1703,6 +1704,13 @@ export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 
  * Reference to a field of type 'ModuleType'
  */
 export type EnumModuleTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ModuleType'>
+    
+
+
+/**
+ * Reference to a field of type 'RevisionScheme'
+ */
+export type EnumRevisionSchemeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RevisionScheme'>
     
 
 

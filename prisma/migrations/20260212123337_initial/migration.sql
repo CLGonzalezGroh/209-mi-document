@@ -54,9 +54,10 @@ CREATE TABLE `documents` (
     `entityType` VARCHAR(191) NULL,
     `entityId` INTEGER NULL,
     `documentTypeId` INTEGER NOT NULL,
+    `revisionScheme` ENUM('ALPHABETICAL', 'NUMERIC') NOT NULL DEFAULT 'ALPHABETICAL',
 
-    UNIQUE INDEX `documents_code_key`(`code`),
     INDEX `documents_module_entityType_entityId_idx`(`module`, `entityType`, `entityId`),
+    UNIQUE INDEX `documents_code_module_entityType_entityId_key`(`code`, `module`, `entityType`, `entityId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

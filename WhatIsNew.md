@@ -27,3 +27,13 @@
 - Agregar DocumentClass y ScannedFiles a prisma y a graphql
 
 ---
+
+# What's new in María Ingeniería API Documents 1.0.3
+
+2026-02-12
+
+## RevisionSchema
+
+- Agregar RevisionSchema a los Documentos
+
+---

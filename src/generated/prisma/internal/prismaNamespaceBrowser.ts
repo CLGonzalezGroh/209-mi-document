@@ -131,7 +131,8 @@ export const DocumentScalarFieldEnum = {
   module: 'module',
   entityType: 'entityType',
   entityId: 'entityId',
-  documentTypeId: 'documentTypeId'
+  documentTypeId: 'documentTypeId',
+  revisionScheme: 'revisionScheme'
 } as const
 
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]

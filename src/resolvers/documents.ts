@@ -11,7 +11,7 @@ import {
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentOrderBy } from "../utils/orderByHelper.js"
-import { ModuleType, RevisionStatus } from "../generated/prisma/enums.js"
+import { ModuleType, RevisionStatus, RevisionScheme } from "../generated/prisma/enums.js"
 import { Document } from "../generated/prisma/client.js"
 
 export interface DocumentOrderByInput extends OrderByInput {
@@ -322,6 +322,8 @@ export const documentResolvers = {
           entityType?: string
           entityId?: number
           documentTypeId: number
+          revisionScheme?: RevisionScheme
+          initialRevisionCode?: string
           fileKey: string
           fileName: string
           fileSize: number
@@ -337,6 +339,13 @@ export const documentResolvers = {
       })
 
       try {
+        // Determinar esquema de revisión y código inicial
+        const revisionScheme =
+          input.revisionScheme || RevisionScheme.ALPHABETICAL
+        const initialRevisionCode =
+          input.initialRevisionCode ||
+          (revisionScheme === RevisionScheme.NUMERIC ? "0" : "A")
+
         // Crear documento con primera revisión y primera versión en una transacción
         const document = await context.orm.document.create({
           data: {
@@ -347,11 +356,12 @@ export const documentResolvers = {
             entityType: input.entityType,
             entityId: input.entityId,
             documentTypeId: input.documentTypeId,
+            revisionScheme,
             createdById: userId,
             updatedById: userId,
             revisions: {
               create: {
-                revisionCode: "A",
+                revisionCode: initialRevisionCode,
                 status: "DRAFT",
                 createdById: userId,
                 updatedById: userId,
@@ -380,7 +390,7 @@ export const documentResolvers = {
           context,
           logName: "CREATE_DOCUMENT",
           messages: {
-            uniqueConstraint: "Ya existe un documento con ese código.",
+            uniqueConstraint: "Ya existe un documento con ese código en este contexto.",
             foreignKeyConstraint:
               "El tipo de documento especificado no existe.",
             default: "Error al crear el documento.",
@@ -498,6 +508,58 @@ export const documentResolvers = {
           messages: {
             notFound: "El documento no existe.",
             default: "Error al reactivar el documento.",
+          },
+        })
+      }
+    },
+
+    switchRevisionScheme: async (
+      _: any,
+      { id, scheme }: { id: number; scheme: RevisionScheme },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_UPDATE],
+        context,
+      })
+
+      try {
+        const existing = await context.orm.document.findFirst({
+          where: { id },
+        })
+
+        if (!existing) {
+          throw new GraphQLError("Documento no encontrado", {
+            extensions: { code: "NOT_FOUND" },
+          })
+        }
+
+        if (existing.revisionScheme === scheme) {
+          throw new GraphQLError(
+            `El documento ya tiene el esquema de revisión ${scheme}.`,
+            { extensions: { code: "BAD_USER_INPUT" } },
+          )
+        }
+
+        const document = await context.orm.document.update({
+          where: { id },
+          data: {
+            revisionScheme: scheme,
+            updatedById: userId,
+          },
+          include: documentIncludes,
+        })
+
+        return document
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "SWITCH_REVISION_SCHEME",
+          messages: {
+            notFound: "El documento no existe.",
+            default: "Error al cambiar el esquema de revisión.",
           },
         })
       }

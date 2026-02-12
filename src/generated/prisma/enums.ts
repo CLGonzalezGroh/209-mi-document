@@ -21,6 +21,14 @@ export const ModuleType = {
 export type ModuleType = (typeof ModuleType)[keyof typeof ModuleType]
 
 
+export const RevisionScheme = {
+  ALPHABETICAL: 'ALPHABETICAL',
+  NUMERIC: 'NUMERIC'
+} as const
+
+export type RevisionScheme = (typeof RevisionScheme)[keyof typeof RevisionScheme]
+
+
 export const RevisionStatus = {
   DRAFT: 'DRAFT',
   IN_REVIEW: 'IN_REVIEW',

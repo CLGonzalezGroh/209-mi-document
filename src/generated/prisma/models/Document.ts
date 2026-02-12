@@ -57,6 +57,7 @@ export type DocumentMinAggregateOutputType = {
   entityType: string | null
   entityId: number | null
   documentTypeId: number | null
+  revisionScheme: $Enums.RevisionScheme | null
 }
 
 export type DocumentMaxAggregateOutputType = {
@@ -74,6 +75,7 @@ export type DocumentMaxAggregateOutputType = {
   entityType: string | null
   entityId: number | null
   documentTypeId: number | null
+  revisionScheme: $Enums.RevisionScheme | null
 }
 
 export type DocumentCountAggregateOutputType = {
@@ -91,6 +93,7 @@ export type DocumentCountAggregateOutputType = {
   entityType: number
   entityId: number
   documentTypeId: number
+  revisionScheme: number
   _all: number
 }
 
@@ -126,6 +129,7 @@ export type DocumentMinAggregateInputType = {
   entityType?: true
   entityId?: true
   documentTypeId?: true
+  revisionScheme?: true
 }
 
 export type DocumentMaxAggregateInputType = {
@@ -143,6 +147,7 @@ export type DocumentMaxAggregateInputType = {
   entityType?: true
   entityId?: true
   documentTypeId?: true
+  revisionScheme?: true
 }
 
 export type DocumentCountAggregateInputType = {
@@ -160,6 +165,7 @@ export type DocumentCountAggregateInputType = {
   entityType?: true
   entityId?: true
   documentTypeId?: true
+  revisionScheme?: true
   _all?: true
 }
 
@@ -264,6 +270,7 @@ export type DocumentGroupByOutputType = {
   entityType: string | null
   entityId: number | null
   documentTypeId: number
+  revisionScheme: $Enums.RevisionScheme
   _count: DocumentCountAggregateOutputType | null
   _avg: DocumentAvgAggregateOutputType | null
   _sum: DocumentSumAggregateOutputType | null
@@ -304,6 +311,7 @@ export type DocumentWhereInput = {
   entityType?: Prisma.StringNullableFilter<"Document"> | string | null
   entityId?: Prisma.IntNullableFilter<"Document"> | number | null
   documentTypeId?: Prisma.IntFilter<"Document"> | number
+  revisionScheme?: Prisma.EnumRevisionSchemeFilter<"Document"> | $Enums.RevisionScheme
   documentType?: Prisma.XOR<Prisma.DocumentTypeScalarRelationFilter, Prisma.DocumentTypeWhereInput>
   revisions?: Prisma.DocumentRevisionListRelationFilter
 }
@@ -323,6 +331,7 @@ export type DocumentOrderByWithRelationInput = {
   entityType?: Prisma.SortOrderInput | Prisma.SortOrder
   entityId?: Prisma.SortOrderInput | Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
+  revisionScheme?: Prisma.SortOrder
   documentType?: Prisma.DocumentTypeOrderByWithRelationInput
   revisions?: Prisma.DocumentRevisionOrderByRelationAggregateInput
   _relevance?: Prisma.DocumentOrderByRelevanceInput
@@ -330,7 +339,7 @@ export type DocumentOrderByWithRelationInput = {
 
 export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  code?: string
+  code_module_entityType_entityId?: Prisma.DocumentCodeModuleEntityTypeEntityIdCompoundUniqueInput
   AND?: Prisma.DocumentWhereInput | Prisma.DocumentWhereInput[]
   OR?: Prisma.DocumentWhereInput[]
   NOT?: Prisma.DocumentWhereInput | Prisma.DocumentWhereInput[]
@@ -340,15 +349,17 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   updatedById?: Prisma.IntFilter<"Document"> | number
   terminatedAt?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
   isSys?: Prisma.BoolFilter<"Document"> | boolean
+  code?: Prisma.StringFilter<"Document"> | string
   title?: Prisma.StringFilter<"Document"> | string
   description?: Prisma.StringNullableFilter<"Document"> | string | null
   module?: Prisma.EnumModuleTypeFilter<"Document"> | $Enums.ModuleType
   entityType?: Prisma.StringNullableFilter<"Document"> | string | null
   entityId?: Prisma.IntNullableFilter<"Document"> | number | null
   documentTypeId?: Prisma.IntFilter<"Document"> | number
+  revisionScheme?: Prisma.EnumRevisionSchemeFilter<"Document"> | $Enums.RevisionScheme
   documentType?: Prisma.XOR<Prisma.DocumentTypeScalarRelationFilter, Prisma.DocumentTypeWhereInput>
   revisions?: Prisma.DocumentRevisionListRelationFilter
-}, "id" | "code">
+}, "id" | "code_module_entityType_entityId">
 
 export type DocumentOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -365,6 +376,7 @@ export type DocumentOrderByWithAggregationInput = {
   entityType?: Prisma.SortOrderInput | Prisma.SortOrder
   entityId?: Prisma.SortOrderInput | Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
+  revisionScheme?: Prisma.SortOrder
   _count?: Prisma.DocumentCountOrderByAggregateInput
   _avg?: Prisma.DocumentAvgOrderByAggregateInput
   _max?: Prisma.DocumentMaxOrderByAggregateInput
@@ -390,6 +402,7 @@ export type DocumentScalarWhereWithAggregatesInput = {
   entityType?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
   entityId?: Prisma.IntNullableWithAggregatesFilter<"Document"> | number | null
   documentTypeId?: Prisma.IntWithAggregatesFilter<"Document"> | number
+  revisionScheme?: Prisma.EnumRevisionSchemeWithAggregatesFilter<"Document"> | $Enums.RevisionScheme
 }
 
 export type DocumentCreateInput = {
@@ -405,6 +418,7 @@ export type DocumentCreateInput = {
   module: $Enums.ModuleType
   entityType?: string | null
   entityId?: number | null
+  revisionScheme?: $Enums.RevisionScheme
   documentType: Prisma.DocumentTypeCreateNestedOneWithoutDocumentsInput
   revisions?: Prisma.DocumentRevisionCreateNestedManyWithoutDocumentInput
 }
@@ -424,6 +438,7 @@ export type DocumentUncheckedCreateInput = {
   entityType?: string | null
   entityId?: number | null
   documentTypeId: number
+  revisionScheme?: $Enums.RevisionScheme
   revisions?: Prisma.DocumentRevisionUncheckedCreateNestedManyWithoutDocumentInput
 }
 
@@ -440,6 +455,7 @@ export type DocumentUpdateInput = {
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  revisionScheme?: Prisma.EnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme
   documentType?: Prisma.DocumentTypeUpdateOneRequiredWithoutDocumentsNestedInput
   revisions?: Prisma.DocumentRevisionUpdateManyWithoutDocumentNestedInput
 }
@@ -459,6 +475,7 @@ export type DocumentUncheckedUpdateInput = {
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
+  revisionScheme?: Prisma.EnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme
   revisions?: Prisma.DocumentRevisionUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
@@ -477,6 +494,7 @@ export type DocumentCreateManyInput = {
   entityType?: string | null
   entityId?: number | null
   documentTypeId: number
+  revisionScheme?: $Enums.RevisionScheme
 }
 
 export type DocumentUpdateManyMutationInput = {
@@ -492,6 +510,7 @@ export type DocumentUpdateManyMutationInput = {
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  revisionScheme?: Prisma.EnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme
 }
 
 export type DocumentUncheckedUpdateManyInput = {
@@ -509,6 +528,7 @@ export type DocumentUncheckedUpdateManyInput = {
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
+  revisionScheme?: Prisma.EnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme
 }
 
 export type DocumentListRelationFilter = {
@@ -527,6 +547,13 @@ export type DocumentOrderByRelevanceInput = {
   search: string
 }
 
+export type DocumentCodeModuleEntityTypeEntityIdCompoundUniqueInput = {
+  code: string
+  module: $Enums.ModuleType
+  entityType: string
+  entityId: number
+}
+
 export type DocumentCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -542,6 +569,7 @@ export type DocumentCountOrderByAggregateInput = {
   entityType?: Prisma.SortOrder
   entityId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
+  revisionScheme?: Prisma.SortOrder
 }
 
 export type DocumentAvgOrderByAggregateInput = {
@@ -567,6 +595,7 @@ export type DocumentMaxOrderByAggregateInput = {
   entityType?: Prisma.SortOrder
   entityId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
+  revisionScheme?: Prisma.SortOrder
 }
 
 export type DocumentMinOrderByAggregateInput = {
@@ -584,6 +613,7 @@ export type DocumentMinOrderByAggregateInput = {
   entityType?: Prisma.SortOrder
   entityId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
+  revisionScheme?: Prisma.SortOrder
 }
 
 export type DocumentSumOrderByAggregateInput = {
@@ -645,6 +675,10 @@ export type EnumModuleTypeFieldUpdateOperationsInput = {
   set?: $Enums.ModuleType
 }
 
+export type EnumRevisionSchemeFieldUpdateOperationsInput = {
+  set?: $Enums.RevisionScheme
+}
+
 export type DocumentCreateNestedOneWithoutRevisionsInput = {
   create?: Prisma.XOR<Prisma.DocumentCreateWithoutRevisionsInput, Prisma.DocumentUncheckedCreateWithoutRevisionsInput>
   connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutRevisionsInput
@@ -672,6 +706,7 @@ export type DocumentCreateWithoutDocumentTypeInput = {
   module: $Enums.ModuleType
   entityType?: string | null
   entityId?: number | null
+  revisionScheme?: $Enums.RevisionScheme
   revisions?: Prisma.DocumentRevisionCreateNestedManyWithoutDocumentInput
 }
 
@@ -689,6 +724,7 @@ export type DocumentUncheckedCreateWithoutDocumentTypeInput = {
   module: $Enums.ModuleType
   entityType?: string | null
   entityId?: number | null
+  revisionScheme?: $Enums.RevisionScheme
   revisions?: Prisma.DocumentRevisionUncheckedCreateNestedManyWithoutDocumentInput
 }
 
@@ -736,6 +772,7 @@ export type DocumentScalarWhereInput = {
   entityType?: Prisma.StringNullableFilter<"Document"> | string | null
   entityId?: Prisma.IntNullableFilter<"Document"> | number | null
   documentTypeId?: Prisma.IntFilter<"Document"> | number
+  revisionScheme?: Prisma.EnumRevisionSchemeFilter<"Document"> | $Enums.RevisionScheme
 }
 
 export type DocumentCreateWithoutRevisionsInput = {
@@ -751,6 +788,7 @@ export type DocumentCreateWithoutRevisionsInput = {
   module: $Enums.ModuleType
   entityType?: string | null
   entityId?: number | null
+  revisionScheme?: $Enums.RevisionScheme
   documentType: Prisma.DocumentTypeCreateNestedOneWithoutDocumentsInput
 }
 
@@ -769,6 +807,7 @@ export type DocumentUncheckedCreateWithoutRevisionsInput = {
   entityType?: string | null
   entityId?: number | null
   documentTypeId: number
+  revisionScheme?: $Enums.RevisionScheme
 }
 
 export type DocumentCreateOrConnectWithoutRevisionsInput = {
@@ -800,6 +839,7 @@ export type DocumentUpdateWithoutRevisionsInput = {
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  revisionScheme?: Prisma.EnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme
   documentType?: Prisma.DocumentTypeUpdateOneRequiredWithoutDocumentsNestedInput
 }
 
@@ -818,6 +858,7 @@ export type DocumentUncheckedUpdateWithoutRevisionsInput = {
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
+  revisionScheme?: Prisma.EnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme
 }
 
 export type DocumentCreateManyDocumentTypeInput = {
@@ -834,6 +875,7 @@ export type DocumentCreateManyDocumentTypeInput = {
   module: $Enums.ModuleType
   entityType?: string | null
   entityId?: number | null
+  revisionScheme?: $Enums.RevisionScheme
 }
 
 export type DocumentUpdateWithoutDocumentTypeInput = {
@@ -849,6 +891,7 @@ export type DocumentUpdateWithoutDocumentTypeInput = {
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  revisionScheme?: Prisma.EnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme
   revisions?: Prisma.DocumentRevisionUpdateManyWithoutDocumentNestedInput
 }
 
@@ -866,6 +909,7 @@ export type DocumentUncheckedUpdateWithoutDocumentTypeInput = {
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  revisionScheme?: Prisma.EnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme
   revisions?: Prisma.DocumentRevisionUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
@@ -883,6 +927,7 @@ export type DocumentUncheckedUpdateManyWithoutDocumentTypeInput = {
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
   entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entityId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  revisionScheme?: Prisma.EnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme
 }
 
 
@@ -931,6 +976,7 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   entityType?: boolean
   entityId?: boolean
   documentTypeId?: boolean
+  revisionScheme?: boolean
   documentType?: boolean | Prisma.DocumentTypeDefaultArgs<ExtArgs>
   revisions?: boolean | Prisma.Document$revisionsArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentCountOutputTypeDefaultArgs<ExtArgs>
@@ -953,9 +999,10 @@ export type DocumentSelectScalar = {
   entityType?: boolean
   entityId?: boolean
   documentTypeId?: boolean
+  revisionScheme?: boolean
 }
 
-export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "code" | "title" | "description" | "module" | "entityType" | "entityId" | "documentTypeId", ExtArgs["result"]["document"]>
+export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "code" | "title" | "description" | "module" | "entityType" | "entityId" | "documentTypeId" | "revisionScheme", ExtArgs["result"]["document"]>
 export type DocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documentType?: boolean | Prisma.DocumentTypeDefaultArgs<ExtArgs>
   revisions?: boolean | Prisma.Document$revisionsArgs<ExtArgs>
@@ -983,6 +1030,7 @@ export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     entityType: string | null
     entityId: number | null
     documentTypeId: number
+    revisionScheme: $Enums.RevisionScheme
   }, ExtArgs["result"]["document"]>
   composites: {}
 }
@@ -1368,6 +1416,7 @@ export interface DocumentFieldRefs {
   readonly entityType: Prisma.FieldRef<"Document", 'String'>
   readonly entityId: Prisma.FieldRef<"Document", 'Int'>
   readonly documentTypeId: Prisma.FieldRef<"Document", 'Int'>
+  readonly revisionScheme: Prisma.FieldRef<"Document", 'RevisionScheme'>
 }
     
 

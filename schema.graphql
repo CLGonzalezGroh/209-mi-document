@@ -37,6 +37,14 @@ enum ModuleType {
   COMERCIAL
 }
 
+"Esquema de revisión del documento"
+enum RevisionScheme {
+  "Alfabético: A, B, C, ..., Z, AA, AB, ..."
+  ALPHABETICAL
+  "Numérico: 0, 1, 2, 3, ..."
+  NUMERIC
+}
+
 "Estado de las revisiones de un documento"
 enum RevisionStatus {
   "En borrador, se pueden subir nuevas versiones"
@@ -139,6 +147,14 @@ enum ModuleTypeInput {
   MANAGEMENT
   "Comercial"
   COMERCIAL
+}
+
+"Esquema de revisión para inputs"
+enum RevisionSchemeInput {
+  "Alfabético: A, B, C, ..., Z, AA, AB, ..."
+  ALPHABETICAL
+  "Numérico: 0, 1, 2, 3, ..."
+  NUMERIC
 }
 
 "Estado de las revisiones para inputs"
@@ -457,6 +473,8 @@ type Document @key(fields: "id") {
   entityId: Int
   "Tipo de documento"
   documentType: DocumentType!
+  "Esquema de revisión actual (ALPHABETICAL o NUMERIC)"
+  revisionScheme: RevisionScheme!
   "Revisión vigente del documento"
   currentRevision: DocumentRevision
   "Historial de revisiones del documento"
@@ -977,6 +995,10 @@ input CreateDocumentInput {
   entityId: Int
   "ID del tipo de documento"
   documentTypeId: Int!
+  "Esquema de revisión inicial (por defecto ALPHABETICAL)"
+  revisionScheme: RevisionSchemeInput
+  "Código de revisión inicial (por defecto 'A' para ALPHABETICAL o '0' para NUMERIC)"
+  initialRevisionCode: String
   "Key del archivo en DO Spaces"
   fileKey: String!
   "Nombre original del archivo"
@@ -1385,6 +1407,14 @@ type Mutation {
 
   "Reactivar un documento"
   activateDocument(id: Int!): Document!
+
+  "Cambiar el esquema de revisión de un documento (ej: de ALPHABETICAL a NUMERIC)"
+  switchRevisionScheme(
+    "ID del documento"
+    id: Int!
+    "Nuevo esquema de revisión"
+    scheme: RevisionSchemeInput!
+  ): Document!
 
   # ─── Revisiones ───
   "Crear una nueva revisión para un documento"

@@ -306,8 +306,8 @@ export type DocumentTypeOrderByWithRelationInput = {
 
 export type DocumentTypeWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  name?: string
-  code?: string
+  name_classId_module?: Prisma.DocumentTypeNameClassIdModuleCompoundUniqueInput
+  code_classId_module?: Prisma.DocumentTypeCodeClassIdModuleCompoundUniqueInput
   AND?: Prisma.DocumentTypeWhereInput | Prisma.DocumentTypeWhereInput[]
   OR?: Prisma.DocumentTypeWhereInput[]
   NOT?: Prisma.DocumentTypeWhereInput | Prisma.DocumentTypeWhereInput[]
@@ -316,6 +316,8 @@ export type DocumentTypeWhereUniqueInput = Prisma.AtLeast<{
   updatedById?: Prisma.IntFilter<"DocumentType"> | number
   terminatedAt?: Prisma.DateTimeNullableFilter<"DocumentType"> | Date | string | null
   isSys?: Prisma.BoolFilter<"DocumentType"> | boolean
+  name?: Prisma.StringFilter<"DocumentType"> | string
+  code?: Prisma.StringFilter<"DocumentType"> | string
   module?: Prisma.EnumModuleTypeNullableFilter<"DocumentType"> | $Enums.ModuleType | null
   classId?: Prisma.IntNullableFilter<"DocumentType"> | number | null
   description?: Prisma.StringNullableFilter<"DocumentType"> | string | null
@@ -323,7 +325,7 @@ export type DocumentTypeWhereUniqueInput = Prisma.AtLeast<{
   class?: Prisma.XOR<Prisma.DocumentClassNullableScalarRelationFilter, Prisma.DocumentClassWhereInput> | null
   documents?: Prisma.DocumentListRelationFilter
   scannedFiles?: Prisma.ScannedFileListRelationFilter
-}, "id" | "name" | "code">
+}, "id" | "name_classId_module" | "code_classId_module">
 
 export type DocumentTypeOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -486,6 +488,18 @@ export type DocumentTypeOrderByRelevanceInput = {
   fields: Prisma.DocumentTypeOrderByRelevanceFieldEnum | Prisma.DocumentTypeOrderByRelevanceFieldEnum[]
   sort: Prisma.SortOrder
   search: string
+}
+
+export type DocumentTypeNameClassIdModuleCompoundUniqueInput = {
+  name: string
+  classId: number
+  module: $Enums.ModuleType
+}
+
+export type DocumentTypeCodeClassIdModuleCompoundUniqueInput = {
+  code: string
+  classId: number
+  module: $Enums.ModuleType
 }
 
 export type DocumentTypeCountOrderByAggregateInput = {

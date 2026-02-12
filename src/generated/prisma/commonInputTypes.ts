@@ -226,6 +226,13 @@ export type EnumModuleTypeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel> | $Enums.ModuleType
 }
 
+export type EnumRevisionSchemeFilter<$PrismaModel = never> = {
+  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel>
+  in?: $Enums.RevisionScheme[]
+  notIn?: $Enums.RevisionScheme[]
+  not?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel> | $Enums.RevisionScheme
+}
+
 export type EnumModuleTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.ModuleType | Prisma.EnumModuleTypeFieldRefInput<$PrismaModel>
   in?: $Enums.ModuleType[]
@@ -234,6 +241,16 @@ export type EnumModuleTypeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
+}
+
+export type EnumRevisionSchemeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel>
+  in?: $Enums.RevisionScheme[]
+  notIn?: $Enums.RevisionScheme[]
+  not?: Prisma.NestedEnumRevisionSchemeWithAggregatesFilter<$PrismaModel> | $Enums.RevisionScheme
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel>
 }
 
 export type EnumRevisionStatusFilter<$PrismaModel = never> = {
@@ -635,6 +652,13 @@ export type NestedEnumModuleTypeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel> | $Enums.ModuleType
 }
 
+export type NestedEnumRevisionSchemeFilter<$PrismaModel = never> = {
+  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel>
+  in?: $Enums.RevisionScheme[]
+  notIn?: $Enums.RevisionScheme[]
+  not?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel> | $Enums.RevisionScheme
+}
+
 export type NestedEnumModuleTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.ModuleType | Prisma.EnumModuleTypeFieldRefInput<$PrismaModel>
   in?: $Enums.ModuleType[]
@@ -643,6 +667,16 @@ export type NestedEnumModuleTypeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumRevisionSchemeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel>
+  in?: $Enums.RevisionScheme[]
+  notIn?: $Enums.RevisionScheme[]
+  not?: Prisma.NestedEnumRevisionSchemeWithAggregatesFilter<$PrismaModel> | $Enums.RevisionScheme
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel>
 }
 
 export type NestedEnumRevisionStatusFilter<$PrismaModel = never> = {

@@ -23,6 +23,11 @@ enum ModuleType {
     COMERCIAL
 }
 
+enum RevisionScheme {
+    ALPHABETICAL // A, B, C, ..., Z, AA, AB, ...
+    NUMERIC // 0, 1, 2, 3, ...
+}
+
 enum RevisionStatus {
     DRAFT // En borrador, se pueden subir nuevas versiones
     IN_REVIEW // Enviado a workflow de revisión
@@ -144,18 +149,20 @@ model Document {
     terminatedAt DateTime?
     isSys        Boolean   @default(false)
 
-    code           String     @unique // Código único (ej: "PR-001")
+    code           String // Código del documento (ej: "PR-001")
     title          String
     description    String?
     module         ModuleType // Quality, Projects, Tags, etc.
     entityType     String? // "finding", "action", "project"...
     entityId       Int? // ID de la entidad en otro subgraph
     documentTypeId Int
+    revisionScheme RevisionScheme @default(ALPHABETICAL) // Esquema de revisión actual
 
     // Relaciones
     documentType DocumentType       @relation(fields: [documentTypeId], references: [id])
     revisions    DocumentRevision[]
 
+    @@unique([code, module, entityType, entityId]) // Único dentro del mismo contexto (módulo + entidad)
     @@index([module, entityType, entityId])
     @@map("documents")
 }
