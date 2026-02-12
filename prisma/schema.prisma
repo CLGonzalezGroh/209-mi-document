@@ -106,6 +106,7 @@ model DocumentClass {
 
     // Relaciones
     documentTypes DocumentType[]
+    scannedFiles  ScannedFile[]
 
     @@unique([name, module]) // Único dentro del mismo módulo
     @@unique([code, module]) // Único dentro del mismo módulo
@@ -335,6 +336,8 @@ model ScannedFile {
     updatedById         Int                  @default(1)
     projectId           Int
     documentTypeId      Int?
+    documentClassId     Int?
+    areaId              Int?
     title               String               @db.VarChar(500)
     description         String?              @db.Text
     originalReference   String?              @db.VarChar(255)
@@ -354,13 +357,40 @@ model ScannedFile {
     physicalConfirmedAt  DateTime?
     terminatedAt        DateTime?
 
-    documentType DocumentType? @relation(fields: [documentTypeId], references: [id])
+    documentType  DocumentType?  @relation(fields: [documentTypeId], references: [id])
+    documentClass DocumentClass? @relation(fields: [documentClassId], references: [id])
+    area          Area?          @relation(fields: [areaId], references: [id])
 
     @@index([projectId])
+    @@index([documentClassId])
+    @@index([areaId])
     @@index([digitalDisposition])
     @@index([physicalDisposition])
     @@index([projectId, digitalDisposition])
     @@map("scanned_files")
+}
+
+// Áreas físicas o ubicaciones en planta
+model Area {
+    id           Int       @id @default(autoincrement())
+    createdAt    DateTime  @default(now())
+    updatedAt    DateTime? @updatedAt
+    updatedById  Int       @default(1)
+    terminatedAt DateTime?
+    isSys        Boolean   @default(false)
+
+    name        String // "01 - Urea", "02 - Amoníaco"
+    code        String // "01", "02"
+    projectId   Int // Proyecto al que pertenece
+    description String?
+    sortOrder   Int    @default(0)
+
+    // Relaciones
+    scannedFiles ScannedFile[]
+
+    @@unique([code, projectId]) // Único dentro del mismo proyecto
+    @@index([projectId])
+    @@map("areas")
 }
 
 // Logs generales del sistema (operacionales)

@@ -73,6 +73,11 @@ export type Attachment = Prisma.AttachmentModel
  */
 export type ScannedFile = Prisma.ScannedFileModel
 /**
+ * Model Area
+ * 
+ */
+export type Area = Prisma.AreaModel
+/**
  * Model DocumentSysLog
  * 
  */

@@ -683,6 +683,10 @@ type ScannedFile @key(fields: "id") {
   projectId: Int!
   "Tipo de documento asignado durante clasificación"
   documentType: DocumentType
+  "Clase de documento asignada durante clasificación"
+  documentClass: DocumentClass
+  "Área física o ubicación en planta"
+  area: Area
   "Título descriptivo del archivo"
   title: String!
   "Descripción o contexto del archivo físico original"
@@ -721,6 +725,32 @@ type ScannedFile @key(fields: "id") {
   physicalConfirmedAt: DateTime
   "Fecha de deshabilitación"
   terminatedAt: DateTime
+}
+
+"Área física o ubicación en planta"
+type Area @key(fields: "id") {
+  "Identificador único"
+  id: Int!
+  "Fecha de creación"
+  createdAt: DateTime!
+  "Fecha de última actualización"
+  updatedAt: DateTime
+  "Usuario que realizó la última actualización"
+  updatedBy: UserName!
+  "Fecha de deshabilitación"
+  terminatedAt: DateTime
+  "Indica si es un registro del sistema"
+  isSys: Boolean!
+  "Nombre del área (ej: 01 - Urea)"
+  name: String!
+  "Código del área (ej: 01)"
+  code: String!
+  "ID del proyecto al que pertenece"
+  projectId: Int!
+  "Descripción del área"
+  description: String
+  "Orden de visualización"
+  sortOrder: Int!
 }
 
 "Estadísticas de archivos escaneados por estado"
@@ -861,6 +891,14 @@ type AttachmentConnection {
   pagination: PaginationInfo!
 }
 
+"Respuesta paginada de áreas"
+type AreaConnection {
+  "Áreas en la página actual"
+  items: [Area!]!
+  "Información de paginación"
+  pagination: PaginationInfo!
+}
+
 "Respuesta paginada de archivos escaneados"
 type ScannedFileConnection {
   "Archivos escaneados en la página actual"
@@ -969,6 +1007,36 @@ input TransmittalFilterInput {
   projectId: Int
   "Filtrar por estado"
   status: TransmittalStatusInput
+}
+
+"Filtro de áreas"
+input AreaFilterInput {
+  "Búsqueda en nombre o código"
+  query: String
+  "Filtrar por proyecto"
+  projectId: Int
+  "Filtrar por estado de habilitación"
+  terminatedFilter: TerminatedFilterInput
+}
+
+"Ordenamiento de áreas"
+input AreaOrderByInput {
+  "Campo por el cual ordenar"
+  field: AreaOrderFieldInput!
+  "Dirección del ordenamiento"
+  direction: SortDirectionInput!
+}
+
+"Campos de ordenamiento para áreas"
+enum AreaOrderFieldInput {
+  "Por nombre"
+  NAME
+  "Por código"
+  CODE
+  "Por orden"
+  SORT_ORDER
+  "Por fecha de creación"
+  CREATED_AT
 }
 
 "Ordenamiento de transmittals"
@@ -1139,6 +1207,32 @@ input CreateTransmittalInput {
   items: [TransmittalItemInput!]!
 }
 
+"Input para crear un área"
+input CreateAreaInput {
+  "Nombre del área"
+  name: String!
+  "Código del área"
+  code: String!
+  "ID del proyecto"
+  projectId: Int!
+  "Descripción del área"
+  description: String
+  "Orden de visualización"
+  sortOrder: Int
+}
+
+"Input para actualizar un área"
+input UpdateAreaInput {
+  "Nuevo nombre del área"
+  name: String
+  "Nuevo código del área"
+  code: String
+  "Nueva descripción"
+  description: String
+  "Nuevo orden de visualización"
+  sortOrder: Int
+}
+
 "Input de item para transmittal"
 input TransmittalItemInput {
   "ID de la revisión del documento a incluir"
@@ -1193,6 +1287,10 @@ input ScannedFileFilterInput {
   projectId: Int
   "Filtrar por tipo de documento"
   documentTypeId: Int
+  "Filtrar por clase de documento"
+  documentClassId: Int
+  "Filtrar por área"
+  areaId: Int
   "Filtrar por disposición digital"
   digitalDisposition: DigitalDispositionInput
   "Filtrar por disposición física"
@@ -1221,6 +1319,8 @@ input CreateScannedFileInput {
   originalReference: String
   "Ubicación física donde se encontró"
   physicalLocation: String
+  "ID del área física o ubicación en planta"
+  areaId: Int
   "Key del archivo en DO Spaces"
   fileKey: String!
   "Nombre original del archivo"
@@ -1237,6 +1337,10 @@ input ClassifyScannedFileInput {
   digitalDisposition: DigitalDispositionInput!
   "ID del tipo de documento (requerido si ACCEPTED)"
   documentTypeId: Int
+  "ID de la clase de documento"
+  documentClassId: Int
+  "ID del área"
+  areaId: Int
   "Notas de clasificación"
   classificationNotes: String
   "Motivo de descarte (requerido si DISCARDED)"
@@ -1326,6 +1430,20 @@ type Query {
 
   "Listado de clases de documento para selectores"
   documentClassesSelectList(module: ModuleTypeInput): [SelectList!]!
+
+  # ─── Áreas ───
+  "Listar áreas"
+  areas(
+    filter: AreaFilterInput
+    pagination: PaginationInput
+    orderBy: AreaOrderByInput
+  ): AreaConnection!
+
+  "Obtener un área por ID"
+  areaById(id: Int!): Area
+
+  "Listado de áreas para selectores"
+  areasSelectList(projectId: Int!): [SelectList!]!
 
   # ─── Revisiones ───
   "Obtener una revisión por ID"
@@ -1481,6 +1599,19 @@ type Mutation {
 
   "Reactivar una clase de documento"
   activateDocumentClass(id: Int!): DocumentClass!
+
+  # ─── Áreas ───
+  "Crear un área"
+  createArea(input: CreateAreaInput!): Area!
+
+  "Actualizar un área"
+  updateArea(id: Int!, input: UpdateAreaInput!): Area!
+
+  "Deshabilitar un área"
+  terminateArea(id: Int!): Area!
+
+  "Reactivar un área"
+  activateArea(id: Int!): Area!
 
   # ─── Adjuntos ───
   "Crear un nuevo adjunto"

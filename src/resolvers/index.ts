@@ -12,6 +12,7 @@ import { documentSysLogResolvers } from "./documentSysLogs.js"
 import { attachmentResolvers } from "./attachments.js"
 import { scannedFileResolvers } from "./scannedFiles.js"
 import { documentClassResolvers } from "./documentClasses.js"
+import { areaResolvers } from "./areas.js"
 
 export const resolvers: GraphQLResolverMap<ResolverContext> = {
   ...scalars,
@@ -19,6 +20,7 @@ export const resolvers: GraphQLResolverMap<ResolverContext> = {
     ...documentResolvers.Query,
     ...documentTypeResolvers.Query,
     ...documentClassResolvers.Query,
+    ...areaResolvers.Query,
     ...revisionResolvers.Query,
     ...workflowResolvers.Query,
     ...transmittalResolvers.Query,
@@ -30,6 +32,7 @@ export const resolvers: GraphQLResolverMap<ResolverContext> = {
     ...documentResolvers.Mutation,
     ...documentTypeResolvers.Mutation,
     ...documentClassResolvers.Mutation,
+    ...areaResolvers.Mutation,
     ...versionResolvers.Mutation,
     ...revisionResolvers.Mutation,
     ...workflowResolvers.Mutation,

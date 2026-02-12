@@ -9,9 +9,9 @@ import {
   ReviewWorkflow,
   ReviewStep,
   Transmittal,
-  TransmittalItem,
   Attachment,
   ScannedFile,
+  Area,
   DocumentSysLog,
   DocumentSysLogArchive,
 } from "../../generated/prisma/client.js"
@@ -243,7 +243,7 @@ export const resolverTypes = {
     __resolveReference: async (ref: { id: number }) => {
       return prisma.scannedFile.findFirst({
         where: { id: ref.id },
-        include: { documentType: true },
+        include: { documentType: true, documentClass: true, area: true },
       })
     },
     createdBy: (parent: ScannedFile) => {
@@ -267,6 +267,17 @@ export const resolverTypes = {
       return parent.externalReference && baseUrl
         ? `${baseUrl}${parent.externalReference}`
         : null
+    },
+  },
+
+  Area: {
+    __resolveReference: async (ref: { id: number }) => {
+      return prisma.area.findFirst({
+        where: { id: ref.id },
+      })
+    },
+    updatedBy: (parent: Area) => {
+      return { __typename: "UserName", id: parent.updatedById }
     },
   },
 }

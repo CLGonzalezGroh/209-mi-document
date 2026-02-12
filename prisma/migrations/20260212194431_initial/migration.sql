@@ -187,6 +187,8 @@ CREATE TABLE `scanned_files` (
     `updatedById` INTEGER NOT NULL DEFAULT 1,
     `projectId` INTEGER NOT NULL,
     `documentTypeId` INTEGER NULL,
+    `documentClassId` INTEGER NULL,
+    `areaId` INTEGER NULL,
     `title` VARCHAR(500) NOT NULL,
     `description` TEXT NULL,
     `originalReference` VARCHAR(255) NULL,
@@ -207,9 +209,30 @@ CREATE TABLE `scanned_files` (
     `terminatedAt` DATETIME(3) NULL,
 
     INDEX `scanned_files_projectId_idx`(`projectId`),
+    INDEX `scanned_files_documentClassId_idx`(`documentClassId`),
+    INDEX `scanned_files_areaId_idx`(`areaId`),
     INDEX `scanned_files_digitalDisposition_idx`(`digitalDisposition`),
     INDEX `scanned_files_physicalDisposition_idx`(`physicalDisposition`),
     INDEX `scanned_files_projectId_digitalDisposition_idx`(`projectId`, `digitalDisposition`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `areas` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NULL,
+    `updatedById` INTEGER NOT NULL DEFAULT 1,
+    `terminatedAt` DATETIME(3) NULL,
+    `isSys` BOOLEAN NOT NULL DEFAULT false,
+    `name` VARCHAR(191) NOT NULL,
+    `code` VARCHAR(191) NOT NULL,
+    `projectId` INTEGER NOT NULL,
+    `description` VARCHAR(191) NULL,
+    `sortOrder` INTEGER NOT NULL DEFAULT 0,
+
+    INDEX `areas_projectId_idx`(`projectId`),
+    UNIQUE INDEX `areas_code_projectId_key`(`code`, `projectId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -267,3 +290,9 @@ ALTER TABLE `transmittal_items` ADD CONSTRAINT `transmittal_items_documentRevisi
 
 -- AddForeignKey
 ALTER TABLE `scanned_files` ADD CONSTRAINT `scanned_files_documentTypeId_fkey` FOREIGN KEY (`documentTypeId`) REFERENCES `document_types`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `scanned_files` ADD CONSTRAINT `scanned_files_documentClassId_fkey` FOREIGN KEY (`documentClassId`) REFERENCES `document_classes`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `scanned_files` ADD CONSTRAINT `scanned_files_areaId_fkey` FOREIGN KEY (`areaId`) REFERENCES `areas`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

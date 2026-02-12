@@ -395,6 +395,7 @@ export const ModelName = {
   TransmittalItem: 'TransmittalItem',
   Attachment: 'Attachment',
   ScannedFile: 'ScannedFile',
+  Area: 'Area',
   DocumentSysLog: 'DocumentSysLog',
   DocumentSysLogArchive: 'DocumentSysLogArchive'
 } as const
@@ -412,7 +413,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "documentClass" | "documentType" | "document" | "documentRevision" | "documentVersion" | "reviewWorkflow" | "reviewStep" | "transmittal" | "transmittalItem" | "attachment" | "scannedFile" | "documentSysLog" | "documentSysLogArchive"
+    modelProps: "documentClass" | "documentType" | "document" | "documentRevision" | "documentVersion" | "reviewWorkflow" | "reviewStep" | "transmittal" | "transmittalItem" | "attachment" | "scannedFile" | "area" | "documentSysLog" | "documentSysLogArchive"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1142,6 +1143,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Area: {
+      payload: Prisma.$AreaPayload<ExtArgs>
+      fields: Prisma.AreaFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AreaFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AreaPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AreaFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AreaPayload>
+        }
+        findFirst: {
+          args: Prisma.AreaFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AreaPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AreaFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AreaPayload>
+        }
+        findMany: {
+          args: Prisma.AreaFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AreaPayload>[]
+        }
+        create: {
+          args: Prisma.AreaCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AreaPayload>
+        }
+        createMany: {
+          args: Prisma.AreaCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.AreaDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AreaPayload>
+        }
+        update: {
+          args: Prisma.AreaUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AreaPayload>
+        }
+        deleteMany: {
+          args: Prisma.AreaDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AreaUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.AreaUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AreaPayload>
+        }
+        aggregate: {
+          args: Prisma.AreaAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateArea>
+        }
+        groupBy: {
+          args: Prisma.AreaGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AreaGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AreaCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AreaCountAggregateOutputType> | number
+        }
+      }
+    }
     DocumentSysLog: {
       payload: Prisma.$DocumentSysLogPayload<ExtArgs>
       fields: Prisma.DocumentSysLogFieldRefs
@@ -1486,6 +1553,8 @@ export const ScannedFileScalarFieldEnum = {
   updatedById: 'updatedById',
   projectId: 'projectId',
   documentTypeId: 'documentTypeId',
+  documentClassId: 'documentClassId',
+  areaId: 'areaId',
   title: 'title',
   description: 'description',
   originalReference: 'originalReference',
@@ -1507,6 +1576,23 @@ export const ScannedFileScalarFieldEnum = {
 } as const
 
 export type ScannedFileScalarFieldEnum = (typeof ScannedFileScalarFieldEnum)[keyof typeof ScannedFileScalarFieldEnum]
+
+
+export const AreaScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  terminatedAt: 'terminatedAt',
+  isSys: 'isSys',
+  name: 'name',
+  code: 'code',
+  projectId: 'projectId',
+  description: 'description',
+  sortOrder: 'sortOrder'
+} as const
+
+export type AreaScalarFieldEnum = (typeof AreaScalarFieldEnum)[keyof typeof AreaScalarFieldEnum]
 
 
 export const DocumentSysLogScalarFieldEnum = {
@@ -1646,6 +1732,15 @@ export const ScannedFileOrderByRelevanceFieldEnum = {
 } as const
 
 export type ScannedFileOrderByRelevanceFieldEnum = (typeof ScannedFileOrderByRelevanceFieldEnum)[keyof typeof ScannedFileOrderByRelevanceFieldEnum]
+
+
+export const AreaOrderByRelevanceFieldEnum = {
+  name: 'name',
+  code: 'code',
+  description: 'description'
+} as const
+
+export type AreaOrderByRelevanceFieldEnum = (typeof AreaOrderByRelevanceFieldEnum)[keyof typeof AreaOrderByRelevanceFieldEnum]
 
 
 export const DocumentSysLogOrderByRelevanceFieldEnum = {
@@ -1896,6 +1991,7 @@ export type GlobalOmitConfig = {
   transmittalItem?: Prisma.TransmittalItemOmit
   attachment?: Prisma.AttachmentOmit
   scannedFile?: Prisma.ScannedFileOmit
+  area?: Prisma.AreaOmit
   documentSysLog?: Prisma.DocumentSysLogOmit
   documentSysLogArchive?: Prisma.DocumentSysLogArchiveOmit
 }

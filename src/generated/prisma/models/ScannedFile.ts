@@ -32,6 +32,8 @@ export type ScannedFileAvgAggregateOutputType = {
   updatedById: number | null
   projectId: number | null
   documentTypeId: number | null
+  documentClassId: number | null
+  areaId: number | null
   fileSize: number | null
   classifiedById: number | null
   physicalConfirmedById: number | null
@@ -43,6 +45,8 @@ export type ScannedFileSumAggregateOutputType = {
   updatedById: number | null
   projectId: number | null
   documentTypeId: number | null
+  documentClassId: number | null
+  areaId: number | null
   fileSize: number | null
   classifiedById: number | null
   physicalConfirmedById: number | null
@@ -56,6 +60,8 @@ export type ScannedFileMinAggregateOutputType = {
   updatedById: number | null
   projectId: number | null
   documentTypeId: number | null
+  documentClassId: number | null
+  areaId: number | null
   title: string | null
   description: string | null
   originalReference: string | null
@@ -84,6 +90,8 @@ export type ScannedFileMaxAggregateOutputType = {
   updatedById: number | null
   projectId: number | null
   documentTypeId: number | null
+  documentClassId: number | null
+  areaId: number | null
   title: string | null
   description: string | null
   originalReference: string | null
@@ -112,6 +120,8 @@ export type ScannedFileCountAggregateOutputType = {
   updatedById: number
   projectId: number
   documentTypeId: number
+  documentClassId: number
+  areaId: number
   title: number
   description: number
   originalReference: number
@@ -140,6 +150,8 @@ export type ScannedFileAvgAggregateInputType = {
   updatedById?: true
   projectId?: true
   documentTypeId?: true
+  documentClassId?: true
+  areaId?: true
   fileSize?: true
   classifiedById?: true
   physicalConfirmedById?: true
@@ -151,6 +163,8 @@ export type ScannedFileSumAggregateInputType = {
   updatedById?: true
   projectId?: true
   documentTypeId?: true
+  documentClassId?: true
+  areaId?: true
   fileSize?: true
   classifiedById?: true
   physicalConfirmedById?: true
@@ -164,6 +178,8 @@ export type ScannedFileMinAggregateInputType = {
   updatedById?: true
   projectId?: true
   documentTypeId?: true
+  documentClassId?: true
+  areaId?: true
   title?: true
   description?: true
   originalReference?: true
@@ -192,6 +208,8 @@ export type ScannedFileMaxAggregateInputType = {
   updatedById?: true
   projectId?: true
   documentTypeId?: true
+  documentClassId?: true
+  areaId?: true
   title?: true
   description?: true
   originalReference?: true
@@ -220,6 +238,8 @@ export type ScannedFileCountAggregateInputType = {
   updatedById?: true
   projectId?: true
   documentTypeId?: true
+  documentClassId?: true
+  areaId?: true
   title?: true
   description?: true
   originalReference?: true
@@ -335,6 +355,8 @@ export type ScannedFileGroupByOutputType = {
   updatedById: number
   projectId: number
   documentTypeId: number | null
+  documentClassId: number | null
+  areaId: number | null
   title: string
   description: string | null
   originalReference: string | null
@@ -386,6 +408,8 @@ export type ScannedFileWhereInput = {
   updatedById?: Prisma.IntFilter<"ScannedFile"> | number
   projectId?: Prisma.IntFilter<"ScannedFile"> | number
   documentTypeId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
+  documentClassId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
+  areaId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
   title?: Prisma.StringFilter<"ScannedFile"> | string
   description?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
   originalReference?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
@@ -405,6 +429,8 @@ export type ScannedFileWhereInput = {
   physicalConfirmedAt?: Prisma.DateTimeNullableFilter<"ScannedFile"> | Date | string | null
   terminatedAt?: Prisma.DateTimeNullableFilter<"ScannedFile"> | Date | string | null
   documentType?: Prisma.XOR<Prisma.DocumentTypeNullableScalarRelationFilter, Prisma.DocumentTypeWhereInput> | null
+  documentClass?: Prisma.XOR<Prisma.DocumentClassNullableScalarRelationFilter, Prisma.DocumentClassWhereInput> | null
+  area?: Prisma.XOR<Prisma.AreaNullableScalarRelationFilter, Prisma.AreaWhereInput> | null
 }
 
 export type ScannedFileOrderByWithRelationInput = {
@@ -415,6 +441,8 @@ export type ScannedFileOrderByWithRelationInput = {
   updatedById?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  documentClassId?: Prisma.SortOrderInput | Prisma.SortOrder
+  areaId?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   originalReference?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -434,6 +462,8 @@ export type ScannedFileOrderByWithRelationInput = {
   physicalConfirmedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   terminatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   documentType?: Prisma.DocumentTypeOrderByWithRelationInput
+  documentClass?: Prisma.DocumentClassOrderByWithRelationInput
+  area?: Prisma.AreaOrderByWithRelationInput
   _relevance?: Prisma.ScannedFileOrderByRelevanceInput
 }
 
@@ -448,6 +478,8 @@ export type ScannedFileWhereUniqueInput = Prisma.AtLeast<{
   updatedById?: Prisma.IntFilter<"ScannedFile"> | number
   projectId?: Prisma.IntFilter<"ScannedFile"> | number
   documentTypeId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
+  documentClassId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
+  areaId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
   title?: Prisma.StringFilter<"ScannedFile"> | string
   description?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
   originalReference?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
@@ -467,6 +499,8 @@ export type ScannedFileWhereUniqueInput = Prisma.AtLeast<{
   physicalConfirmedAt?: Prisma.DateTimeNullableFilter<"ScannedFile"> | Date | string | null
   terminatedAt?: Prisma.DateTimeNullableFilter<"ScannedFile"> | Date | string | null
   documentType?: Prisma.XOR<Prisma.DocumentTypeNullableScalarRelationFilter, Prisma.DocumentTypeWhereInput> | null
+  documentClass?: Prisma.XOR<Prisma.DocumentClassNullableScalarRelationFilter, Prisma.DocumentClassWhereInput> | null
+  area?: Prisma.XOR<Prisma.AreaNullableScalarRelationFilter, Prisma.AreaWhereInput> | null
 }, "id">
 
 export type ScannedFileOrderByWithAggregationInput = {
@@ -477,6 +511,8 @@ export type ScannedFileOrderByWithAggregationInput = {
   updatedById?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  documentClassId?: Prisma.SortOrderInput | Prisma.SortOrder
+  areaId?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   originalReference?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -513,6 +549,8 @@ export type ScannedFileScalarWhereWithAggregatesInput = {
   updatedById?: Prisma.IntWithAggregatesFilter<"ScannedFile"> | number
   projectId?: Prisma.IntWithAggregatesFilter<"ScannedFile"> | number
   documentTypeId?: Prisma.IntNullableWithAggregatesFilter<"ScannedFile"> | number | null
+  documentClassId?: Prisma.IntNullableWithAggregatesFilter<"ScannedFile"> | number | null
+  areaId?: Prisma.IntNullableWithAggregatesFilter<"ScannedFile"> | number | null
   title?: Prisma.StringWithAggregatesFilter<"ScannedFile"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"ScannedFile"> | string | null
   originalReference?: Prisma.StringNullableWithAggregatesFilter<"ScannedFile"> | string | null
@@ -558,6 +596,8 @@ export type ScannedFileCreateInput = {
   physicalConfirmedAt?: Date | string | null
   terminatedAt?: Date | string | null
   documentType?: Prisma.DocumentTypeCreateNestedOneWithoutScannedFilesInput
+  documentClass?: Prisma.DocumentClassCreateNestedOneWithoutScannedFilesInput
+  area?: Prisma.AreaCreateNestedOneWithoutScannedFilesInput
 }
 
 export type ScannedFileUncheckedCreateInput = {
@@ -568,6 +608,8 @@ export type ScannedFileUncheckedCreateInput = {
   updatedById?: number
   projectId: number
   documentTypeId?: number | null
+  documentClassId?: number | null
+  areaId?: number | null
   title: string
   description?: string | null
   originalReference?: string | null
@@ -613,6 +655,8 @@ export type ScannedFileUpdateInput = {
   physicalConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   documentType?: Prisma.DocumentTypeUpdateOneWithoutScannedFilesNestedInput
+  documentClass?: Prisma.DocumentClassUpdateOneWithoutScannedFilesNestedInput
+  area?: Prisma.AreaUpdateOneWithoutScannedFilesNestedInput
 }
 
 export type ScannedFileUncheckedUpdateInput = {
@@ -623,6 +667,8 @@ export type ScannedFileUncheckedUpdateInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
   documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  areaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -651,6 +697,8 @@ export type ScannedFileCreateManyInput = {
   updatedById?: number
   projectId: number
   documentTypeId?: number | null
+  documentClassId?: number | null
+  areaId?: number | null
   title: string
   description?: string | null
   originalReference?: string | null
@@ -705,6 +753,8 @@ export type ScannedFileUncheckedUpdateManyInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
   documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  areaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -749,6 +799,8 @@ export type ScannedFileCountOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
+  documentClassId?: Prisma.SortOrder
+  areaId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   originalReference?: Prisma.SortOrder
@@ -775,6 +827,8 @@ export type ScannedFileAvgOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
+  documentClassId?: Prisma.SortOrder
+  areaId?: Prisma.SortOrder
   fileSize?: Prisma.SortOrder
   classifiedById?: Prisma.SortOrder
   physicalConfirmedById?: Prisma.SortOrder
@@ -788,6 +842,8 @@ export type ScannedFileMaxOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
+  documentClassId?: Prisma.SortOrder
+  areaId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   originalReference?: Prisma.SortOrder
@@ -816,6 +872,8 @@ export type ScannedFileMinOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
+  documentClassId?: Prisma.SortOrder
+  areaId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   originalReference?: Prisma.SortOrder
@@ -842,9 +900,53 @@ export type ScannedFileSumOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
+  documentClassId?: Prisma.SortOrder
+  areaId?: Prisma.SortOrder
   fileSize?: Prisma.SortOrder
   classifiedById?: Prisma.SortOrder
   physicalConfirmedById?: Prisma.SortOrder
+}
+
+export type ScannedFileCreateNestedManyWithoutDocumentClassInput = {
+  create?: Prisma.XOR<Prisma.ScannedFileCreateWithoutDocumentClassInput, Prisma.ScannedFileUncheckedCreateWithoutDocumentClassInput> | Prisma.ScannedFileCreateWithoutDocumentClassInput[] | Prisma.ScannedFileUncheckedCreateWithoutDocumentClassInput[]
+  connectOrCreate?: Prisma.ScannedFileCreateOrConnectWithoutDocumentClassInput | Prisma.ScannedFileCreateOrConnectWithoutDocumentClassInput[]
+  createMany?: Prisma.ScannedFileCreateManyDocumentClassInputEnvelope
+  connect?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+}
+
+export type ScannedFileUncheckedCreateNestedManyWithoutDocumentClassInput = {
+  create?: Prisma.XOR<Prisma.ScannedFileCreateWithoutDocumentClassInput, Prisma.ScannedFileUncheckedCreateWithoutDocumentClassInput> | Prisma.ScannedFileCreateWithoutDocumentClassInput[] | Prisma.ScannedFileUncheckedCreateWithoutDocumentClassInput[]
+  connectOrCreate?: Prisma.ScannedFileCreateOrConnectWithoutDocumentClassInput | Prisma.ScannedFileCreateOrConnectWithoutDocumentClassInput[]
+  createMany?: Prisma.ScannedFileCreateManyDocumentClassInputEnvelope
+  connect?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+}
+
+export type ScannedFileUpdateManyWithoutDocumentClassNestedInput = {
+  create?: Prisma.XOR<Prisma.ScannedFileCreateWithoutDocumentClassInput, Prisma.ScannedFileUncheckedCreateWithoutDocumentClassInput> | Prisma.ScannedFileCreateWithoutDocumentClassInput[] | Prisma.ScannedFileUncheckedCreateWithoutDocumentClassInput[]
+  connectOrCreate?: Prisma.ScannedFileCreateOrConnectWithoutDocumentClassInput | Prisma.ScannedFileCreateOrConnectWithoutDocumentClassInput[]
+  upsert?: Prisma.ScannedFileUpsertWithWhereUniqueWithoutDocumentClassInput | Prisma.ScannedFileUpsertWithWhereUniqueWithoutDocumentClassInput[]
+  createMany?: Prisma.ScannedFileCreateManyDocumentClassInputEnvelope
+  set?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  disconnect?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  delete?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  connect?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  update?: Prisma.ScannedFileUpdateWithWhereUniqueWithoutDocumentClassInput | Prisma.ScannedFileUpdateWithWhereUniqueWithoutDocumentClassInput[]
+  updateMany?: Prisma.ScannedFileUpdateManyWithWhereWithoutDocumentClassInput | Prisma.ScannedFileUpdateManyWithWhereWithoutDocumentClassInput[]
+  deleteMany?: Prisma.ScannedFileScalarWhereInput | Prisma.ScannedFileScalarWhereInput[]
+}
+
+export type ScannedFileUncheckedUpdateManyWithoutDocumentClassNestedInput = {
+  create?: Prisma.XOR<Prisma.ScannedFileCreateWithoutDocumentClassInput, Prisma.ScannedFileUncheckedCreateWithoutDocumentClassInput> | Prisma.ScannedFileCreateWithoutDocumentClassInput[] | Prisma.ScannedFileUncheckedCreateWithoutDocumentClassInput[]
+  connectOrCreate?: Prisma.ScannedFileCreateOrConnectWithoutDocumentClassInput | Prisma.ScannedFileCreateOrConnectWithoutDocumentClassInput[]
+  upsert?: Prisma.ScannedFileUpsertWithWhereUniqueWithoutDocumentClassInput | Prisma.ScannedFileUpsertWithWhereUniqueWithoutDocumentClassInput[]
+  createMany?: Prisma.ScannedFileCreateManyDocumentClassInputEnvelope
+  set?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  disconnect?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  delete?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  connect?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  update?: Prisma.ScannedFileUpdateWithWhereUniqueWithoutDocumentClassInput | Prisma.ScannedFileUpdateWithWhereUniqueWithoutDocumentClassInput[]
+  updateMany?: Prisma.ScannedFileUpdateManyWithWhereWithoutDocumentClassInput | Prisma.ScannedFileUpdateManyWithWhereWithoutDocumentClassInput[]
+  deleteMany?: Prisma.ScannedFileScalarWhereInput | Prisma.ScannedFileScalarWhereInput[]
 }
 
 export type ScannedFileCreateNestedManyWithoutDocumentTypeInput = {
@@ -897,6 +999,164 @@ export type EnumPhysicalDispositionFieldUpdateOperationsInput = {
   set?: $Enums.PhysicalDisposition
 }
 
+export type ScannedFileCreateNestedManyWithoutAreaInput = {
+  create?: Prisma.XOR<Prisma.ScannedFileCreateWithoutAreaInput, Prisma.ScannedFileUncheckedCreateWithoutAreaInput> | Prisma.ScannedFileCreateWithoutAreaInput[] | Prisma.ScannedFileUncheckedCreateWithoutAreaInput[]
+  connectOrCreate?: Prisma.ScannedFileCreateOrConnectWithoutAreaInput | Prisma.ScannedFileCreateOrConnectWithoutAreaInput[]
+  createMany?: Prisma.ScannedFileCreateManyAreaInputEnvelope
+  connect?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+}
+
+export type ScannedFileUncheckedCreateNestedManyWithoutAreaInput = {
+  create?: Prisma.XOR<Prisma.ScannedFileCreateWithoutAreaInput, Prisma.ScannedFileUncheckedCreateWithoutAreaInput> | Prisma.ScannedFileCreateWithoutAreaInput[] | Prisma.ScannedFileUncheckedCreateWithoutAreaInput[]
+  connectOrCreate?: Prisma.ScannedFileCreateOrConnectWithoutAreaInput | Prisma.ScannedFileCreateOrConnectWithoutAreaInput[]
+  createMany?: Prisma.ScannedFileCreateManyAreaInputEnvelope
+  connect?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+}
+
+export type ScannedFileUpdateManyWithoutAreaNestedInput = {
+  create?: Prisma.XOR<Prisma.ScannedFileCreateWithoutAreaInput, Prisma.ScannedFileUncheckedCreateWithoutAreaInput> | Prisma.ScannedFileCreateWithoutAreaInput[] | Prisma.ScannedFileUncheckedCreateWithoutAreaInput[]
+  connectOrCreate?: Prisma.ScannedFileCreateOrConnectWithoutAreaInput | Prisma.ScannedFileCreateOrConnectWithoutAreaInput[]
+  upsert?: Prisma.ScannedFileUpsertWithWhereUniqueWithoutAreaInput | Prisma.ScannedFileUpsertWithWhereUniqueWithoutAreaInput[]
+  createMany?: Prisma.ScannedFileCreateManyAreaInputEnvelope
+  set?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  disconnect?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  delete?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  connect?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  update?: Prisma.ScannedFileUpdateWithWhereUniqueWithoutAreaInput | Prisma.ScannedFileUpdateWithWhereUniqueWithoutAreaInput[]
+  updateMany?: Prisma.ScannedFileUpdateManyWithWhereWithoutAreaInput | Prisma.ScannedFileUpdateManyWithWhereWithoutAreaInput[]
+  deleteMany?: Prisma.ScannedFileScalarWhereInput | Prisma.ScannedFileScalarWhereInput[]
+}
+
+export type ScannedFileUncheckedUpdateManyWithoutAreaNestedInput = {
+  create?: Prisma.XOR<Prisma.ScannedFileCreateWithoutAreaInput, Prisma.ScannedFileUncheckedCreateWithoutAreaInput> | Prisma.ScannedFileCreateWithoutAreaInput[] | Prisma.ScannedFileUncheckedCreateWithoutAreaInput[]
+  connectOrCreate?: Prisma.ScannedFileCreateOrConnectWithoutAreaInput | Prisma.ScannedFileCreateOrConnectWithoutAreaInput[]
+  upsert?: Prisma.ScannedFileUpsertWithWhereUniqueWithoutAreaInput | Prisma.ScannedFileUpsertWithWhereUniqueWithoutAreaInput[]
+  createMany?: Prisma.ScannedFileCreateManyAreaInputEnvelope
+  set?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  disconnect?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  delete?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  connect?: Prisma.ScannedFileWhereUniqueInput | Prisma.ScannedFileWhereUniqueInput[]
+  update?: Prisma.ScannedFileUpdateWithWhereUniqueWithoutAreaInput | Prisma.ScannedFileUpdateWithWhereUniqueWithoutAreaInput[]
+  updateMany?: Prisma.ScannedFileUpdateManyWithWhereWithoutAreaInput | Prisma.ScannedFileUpdateManyWithWhereWithoutAreaInput[]
+  deleteMany?: Prisma.ScannedFileScalarWhereInput | Prisma.ScannedFileScalarWhereInput[]
+}
+
+export type ScannedFileCreateWithoutDocumentClassInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string
+  updatedById?: number
+  projectId: number
+  title: string
+  description?: string | null
+  originalReference?: string | null
+  physicalLocation?: string | null
+  fileKey: string
+  fileName: string
+  fileSize: number
+  mimeType: string
+  digitalDisposition?: $Enums.DigitalDisposition
+  physicalDisposition?: $Enums.PhysicalDisposition
+  externalReference?: string | null
+  discardReason?: string | null
+  classificationNotes?: string | null
+  classifiedById?: number | null
+  classifiedAt?: Date | string | null
+  physicalConfirmedById?: number | null
+  physicalConfirmedAt?: Date | string | null
+  terminatedAt?: Date | string | null
+  documentType?: Prisma.DocumentTypeCreateNestedOneWithoutScannedFilesInput
+  area?: Prisma.AreaCreateNestedOneWithoutScannedFilesInput
+}
+
+export type ScannedFileUncheckedCreateWithoutDocumentClassInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string
+  updatedById?: number
+  projectId: number
+  documentTypeId?: number | null
+  areaId?: number | null
+  title: string
+  description?: string | null
+  originalReference?: string | null
+  physicalLocation?: string | null
+  fileKey: string
+  fileName: string
+  fileSize: number
+  mimeType: string
+  digitalDisposition?: $Enums.DigitalDisposition
+  physicalDisposition?: $Enums.PhysicalDisposition
+  externalReference?: string | null
+  discardReason?: string | null
+  classificationNotes?: string | null
+  classifiedById?: number | null
+  classifiedAt?: Date | string | null
+  physicalConfirmedById?: number | null
+  physicalConfirmedAt?: Date | string | null
+  terminatedAt?: Date | string | null
+}
+
+export type ScannedFileCreateOrConnectWithoutDocumentClassInput = {
+  where: Prisma.ScannedFileWhereUniqueInput
+  create: Prisma.XOR<Prisma.ScannedFileCreateWithoutDocumentClassInput, Prisma.ScannedFileUncheckedCreateWithoutDocumentClassInput>
+}
+
+export type ScannedFileCreateManyDocumentClassInputEnvelope = {
+  data: Prisma.ScannedFileCreateManyDocumentClassInput | Prisma.ScannedFileCreateManyDocumentClassInput[]
+  skipDuplicates?: boolean
+}
+
+export type ScannedFileUpsertWithWhereUniqueWithoutDocumentClassInput = {
+  where: Prisma.ScannedFileWhereUniqueInput
+  update: Prisma.XOR<Prisma.ScannedFileUpdateWithoutDocumentClassInput, Prisma.ScannedFileUncheckedUpdateWithoutDocumentClassInput>
+  create: Prisma.XOR<Prisma.ScannedFileCreateWithoutDocumentClassInput, Prisma.ScannedFileUncheckedCreateWithoutDocumentClassInput>
+}
+
+export type ScannedFileUpdateWithWhereUniqueWithoutDocumentClassInput = {
+  where: Prisma.ScannedFileWhereUniqueInput
+  data: Prisma.XOR<Prisma.ScannedFileUpdateWithoutDocumentClassInput, Prisma.ScannedFileUncheckedUpdateWithoutDocumentClassInput>
+}
+
+export type ScannedFileUpdateManyWithWhereWithoutDocumentClassInput = {
+  where: Prisma.ScannedFileScalarWhereInput
+  data: Prisma.XOR<Prisma.ScannedFileUpdateManyMutationInput, Prisma.ScannedFileUncheckedUpdateManyWithoutDocumentClassInput>
+}
+
+export type ScannedFileScalarWhereInput = {
+  AND?: Prisma.ScannedFileScalarWhereInput | Prisma.ScannedFileScalarWhereInput[]
+  OR?: Prisma.ScannedFileScalarWhereInput[]
+  NOT?: Prisma.ScannedFileScalarWhereInput | Prisma.ScannedFileScalarWhereInput[]
+  id?: Prisma.IntFilter<"ScannedFile"> | number
+  createdAt?: Prisma.DateTimeFilter<"ScannedFile"> | Date | string
+  createdById?: Prisma.IntFilter<"ScannedFile"> | number
+  updatedAt?: Prisma.DateTimeFilter<"ScannedFile"> | Date | string
+  updatedById?: Prisma.IntFilter<"ScannedFile"> | number
+  projectId?: Prisma.IntFilter<"ScannedFile"> | number
+  documentTypeId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
+  documentClassId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
+  areaId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
+  title?: Prisma.StringFilter<"ScannedFile"> | string
+  description?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
+  originalReference?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
+  physicalLocation?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
+  fileKey?: Prisma.StringFilter<"ScannedFile"> | string
+  fileName?: Prisma.StringFilter<"ScannedFile"> | string
+  fileSize?: Prisma.IntFilter<"ScannedFile"> | number
+  mimeType?: Prisma.StringFilter<"ScannedFile"> | string
+  digitalDisposition?: Prisma.EnumDigitalDispositionFilter<"ScannedFile"> | $Enums.DigitalDisposition
+  physicalDisposition?: Prisma.EnumPhysicalDispositionFilter<"ScannedFile"> | $Enums.PhysicalDisposition
+  externalReference?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
+  discardReason?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
+  classificationNotes?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
+  classifiedById?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
+  classifiedAt?: Prisma.DateTimeNullableFilter<"ScannedFile"> | Date | string | null
+  physicalConfirmedById?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
+  physicalConfirmedAt?: Prisma.DateTimeNullableFilter<"ScannedFile"> | Date | string | null
+  terminatedAt?: Prisma.DateTimeNullableFilter<"ScannedFile"> | Date | string | null
+}
+
 export type ScannedFileCreateWithoutDocumentTypeInput = {
   createdAt?: Date | string
   createdById: number
@@ -921,6 +1181,8 @@ export type ScannedFileCreateWithoutDocumentTypeInput = {
   physicalConfirmedById?: number | null
   physicalConfirmedAt?: Date | string | null
   terminatedAt?: Date | string | null
+  documentClass?: Prisma.DocumentClassCreateNestedOneWithoutScannedFilesInput
+  area?: Prisma.AreaCreateNestedOneWithoutScannedFilesInput
 }
 
 export type ScannedFileUncheckedCreateWithoutDocumentTypeInput = {
@@ -930,6 +1192,8 @@ export type ScannedFileUncheckedCreateWithoutDocumentTypeInput = {
   updatedAt?: Date | string
   updatedById?: number
   projectId: number
+  documentClassId?: number | null
+  areaId?: number | null
   title: string
   description?: string | null
   originalReference?: string | null
@@ -976,35 +1240,202 @@ export type ScannedFileUpdateManyWithWhereWithoutDocumentTypeInput = {
   data: Prisma.XOR<Prisma.ScannedFileUpdateManyMutationInput, Prisma.ScannedFileUncheckedUpdateManyWithoutDocumentTypeInput>
 }
 
-export type ScannedFileScalarWhereInput = {
-  AND?: Prisma.ScannedFileScalarWhereInput | Prisma.ScannedFileScalarWhereInput[]
-  OR?: Prisma.ScannedFileScalarWhereInput[]
-  NOT?: Prisma.ScannedFileScalarWhereInput | Prisma.ScannedFileScalarWhereInput[]
-  id?: Prisma.IntFilter<"ScannedFile"> | number
-  createdAt?: Prisma.DateTimeFilter<"ScannedFile"> | Date | string
-  createdById?: Prisma.IntFilter<"ScannedFile"> | number
-  updatedAt?: Prisma.DateTimeFilter<"ScannedFile"> | Date | string
-  updatedById?: Prisma.IntFilter<"ScannedFile"> | number
-  projectId?: Prisma.IntFilter<"ScannedFile"> | number
-  documentTypeId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
-  title?: Prisma.StringFilter<"ScannedFile"> | string
-  description?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
-  originalReference?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
-  physicalLocation?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
-  fileKey?: Prisma.StringFilter<"ScannedFile"> | string
-  fileName?: Prisma.StringFilter<"ScannedFile"> | string
-  fileSize?: Prisma.IntFilter<"ScannedFile"> | number
-  mimeType?: Prisma.StringFilter<"ScannedFile"> | string
-  digitalDisposition?: Prisma.EnumDigitalDispositionFilter<"ScannedFile"> | $Enums.DigitalDisposition
-  physicalDisposition?: Prisma.EnumPhysicalDispositionFilter<"ScannedFile"> | $Enums.PhysicalDisposition
-  externalReference?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
-  discardReason?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
-  classificationNotes?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
-  classifiedById?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
-  classifiedAt?: Prisma.DateTimeNullableFilter<"ScannedFile"> | Date | string | null
-  physicalConfirmedById?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
-  physicalConfirmedAt?: Prisma.DateTimeNullableFilter<"ScannedFile"> | Date | string | null
-  terminatedAt?: Prisma.DateTimeNullableFilter<"ScannedFile"> | Date | string | null
+export type ScannedFileCreateWithoutAreaInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string
+  updatedById?: number
+  projectId: number
+  title: string
+  description?: string | null
+  originalReference?: string | null
+  physicalLocation?: string | null
+  fileKey: string
+  fileName: string
+  fileSize: number
+  mimeType: string
+  digitalDisposition?: $Enums.DigitalDisposition
+  physicalDisposition?: $Enums.PhysicalDisposition
+  externalReference?: string | null
+  discardReason?: string | null
+  classificationNotes?: string | null
+  classifiedById?: number | null
+  classifiedAt?: Date | string | null
+  physicalConfirmedById?: number | null
+  physicalConfirmedAt?: Date | string | null
+  terminatedAt?: Date | string | null
+  documentType?: Prisma.DocumentTypeCreateNestedOneWithoutScannedFilesInput
+  documentClass?: Prisma.DocumentClassCreateNestedOneWithoutScannedFilesInput
+}
+
+export type ScannedFileUncheckedCreateWithoutAreaInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string
+  updatedById?: number
+  projectId: number
+  documentTypeId?: number | null
+  documentClassId?: number | null
+  title: string
+  description?: string | null
+  originalReference?: string | null
+  physicalLocation?: string | null
+  fileKey: string
+  fileName: string
+  fileSize: number
+  mimeType: string
+  digitalDisposition?: $Enums.DigitalDisposition
+  physicalDisposition?: $Enums.PhysicalDisposition
+  externalReference?: string | null
+  discardReason?: string | null
+  classificationNotes?: string | null
+  classifiedById?: number | null
+  classifiedAt?: Date | string | null
+  physicalConfirmedById?: number | null
+  physicalConfirmedAt?: Date | string | null
+  terminatedAt?: Date | string | null
+}
+
+export type ScannedFileCreateOrConnectWithoutAreaInput = {
+  where: Prisma.ScannedFileWhereUniqueInput
+  create: Prisma.XOR<Prisma.ScannedFileCreateWithoutAreaInput, Prisma.ScannedFileUncheckedCreateWithoutAreaInput>
+}
+
+export type ScannedFileCreateManyAreaInputEnvelope = {
+  data: Prisma.ScannedFileCreateManyAreaInput | Prisma.ScannedFileCreateManyAreaInput[]
+  skipDuplicates?: boolean
+}
+
+export type ScannedFileUpsertWithWhereUniqueWithoutAreaInput = {
+  where: Prisma.ScannedFileWhereUniqueInput
+  update: Prisma.XOR<Prisma.ScannedFileUpdateWithoutAreaInput, Prisma.ScannedFileUncheckedUpdateWithoutAreaInput>
+  create: Prisma.XOR<Prisma.ScannedFileCreateWithoutAreaInput, Prisma.ScannedFileUncheckedCreateWithoutAreaInput>
+}
+
+export type ScannedFileUpdateWithWhereUniqueWithoutAreaInput = {
+  where: Prisma.ScannedFileWhereUniqueInput
+  data: Prisma.XOR<Prisma.ScannedFileUpdateWithoutAreaInput, Prisma.ScannedFileUncheckedUpdateWithoutAreaInput>
+}
+
+export type ScannedFileUpdateManyWithWhereWithoutAreaInput = {
+  where: Prisma.ScannedFileScalarWhereInput
+  data: Prisma.XOR<Prisma.ScannedFileUpdateManyMutationInput, Prisma.ScannedFileUncheckedUpdateManyWithoutAreaInput>
+}
+
+export type ScannedFileCreateManyDocumentClassInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string
+  updatedById?: number
+  projectId: number
+  documentTypeId?: number | null
+  areaId?: number | null
+  title: string
+  description?: string | null
+  originalReference?: string | null
+  physicalLocation?: string | null
+  fileKey: string
+  fileName: string
+  fileSize: number
+  mimeType: string
+  digitalDisposition?: $Enums.DigitalDisposition
+  physicalDisposition?: $Enums.PhysicalDisposition
+  externalReference?: string | null
+  discardReason?: string | null
+  classificationNotes?: string | null
+  classifiedById?: number | null
+  classifiedAt?: Date | string | null
+  physicalConfirmedById?: number | null
+  physicalConfirmedAt?: Date | string | null
+  terminatedAt?: Date | string | null
+}
+
+export type ScannedFileUpdateWithoutDocumentClassInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
+  physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
+  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discardReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  classificationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  classifiedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  classifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  physicalConfirmedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  physicalConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentType?: Prisma.DocumentTypeUpdateOneWithoutScannedFilesNestedInput
+  area?: Prisma.AreaUpdateOneWithoutScannedFilesNestedInput
+}
+
+export type ScannedFileUncheckedUpdateWithoutDocumentClassInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  areaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
+  physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
+  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discardReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  classificationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  classifiedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  classifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  physicalConfirmedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  physicalConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type ScannedFileUncheckedUpdateManyWithoutDocumentClassInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  areaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
+  physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
+  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discardReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  classificationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  classifiedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  classifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  physicalConfirmedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  physicalConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ScannedFileCreateManyDocumentTypeInput = {
@@ -1014,6 +1445,8 @@ export type ScannedFileCreateManyDocumentTypeInput = {
   updatedAt?: Date | string
   updatedById?: number
   projectId: number
+  documentClassId?: number | null
+  areaId?: number | null
   title: string
   description?: string | null
   originalReference?: string | null
@@ -1058,6 +1491,8 @@ export type ScannedFileUpdateWithoutDocumentTypeInput = {
   physicalConfirmedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   physicalConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentClass?: Prisma.DocumentClassUpdateOneWithoutScannedFilesNestedInput
+  area?: Prisma.AreaUpdateOneWithoutScannedFilesNestedInput
 }
 
 export type ScannedFileUncheckedUpdateWithoutDocumentTypeInput = {
@@ -1067,6 +1502,8 @@ export type ScannedFileUncheckedUpdateWithoutDocumentTypeInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  areaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1094,6 +1531,123 @@ export type ScannedFileUncheckedUpdateManyWithoutDocumentTypeInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  areaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
+  physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
+  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discardReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  classificationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  classifiedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  classifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  physicalConfirmedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  physicalConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type ScannedFileCreateManyAreaInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string
+  updatedById?: number
+  projectId: number
+  documentTypeId?: number | null
+  documentClassId?: number | null
+  title: string
+  description?: string | null
+  originalReference?: string | null
+  physicalLocation?: string | null
+  fileKey: string
+  fileName: string
+  fileSize: number
+  mimeType: string
+  digitalDisposition?: $Enums.DigitalDisposition
+  physicalDisposition?: $Enums.PhysicalDisposition
+  externalReference?: string | null
+  discardReason?: string | null
+  classificationNotes?: string | null
+  classifiedById?: number | null
+  classifiedAt?: Date | string | null
+  physicalConfirmedById?: number | null
+  physicalConfirmedAt?: Date | string | null
+  terminatedAt?: Date | string | null
+}
+
+export type ScannedFileUpdateWithoutAreaInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
+  physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
+  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discardReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  classificationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  classifiedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  classifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  physicalConfirmedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  physicalConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  documentType?: Prisma.DocumentTypeUpdateOneWithoutScannedFilesNestedInput
+  documentClass?: Prisma.DocumentClassUpdateOneWithoutScannedFilesNestedInput
+}
+
+export type ScannedFileUncheckedUpdateWithoutAreaInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
+  physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
+  externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discardReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  classificationNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  classifiedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  classifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  physicalConfirmedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  physicalConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type ScannedFileUncheckedUpdateManyWithoutAreaInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1124,6 +1678,8 @@ export type ScannedFileSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   updatedById?: boolean
   projectId?: boolean
   documentTypeId?: boolean
+  documentClassId?: boolean
+  areaId?: boolean
   title?: boolean
   description?: boolean
   originalReference?: boolean
@@ -1143,6 +1699,8 @@ export type ScannedFileSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   physicalConfirmedAt?: boolean
   terminatedAt?: boolean
   documentType?: boolean | Prisma.ScannedFile$documentTypeArgs<ExtArgs>
+  documentClass?: boolean | Prisma.ScannedFile$documentClassArgs<ExtArgs>
+  area?: boolean | Prisma.ScannedFile$areaArgs<ExtArgs>
 }, ExtArgs["result"]["scannedFile"]>
 
 
@@ -1155,6 +1713,8 @@ export type ScannedFileSelectScalar = {
   updatedById?: boolean
   projectId?: boolean
   documentTypeId?: boolean
+  documentClassId?: boolean
+  areaId?: boolean
   title?: boolean
   description?: boolean
   originalReference?: boolean
@@ -1175,15 +1735,19 @@ export type ScannedFileSelectScalar = {
   terminatedAt?: boolean
 }
 
-export type ScannedFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "projectId" | "documentTypeId" | "title" | "description" | "originalReference" | "physicalLocation" | "fileKey" | "fileName" | "fileSize" | "mimeType" | "digitalDisposition" | "physicalDisposition" | "externalReference" | "discardReason" | "classificationNotes" | "classifiedById" | "classifiedAt" | "physicalConfirmedById" | "physicalConfirmedAt" | "terminatedAt", ExtArgs["result"]["scannedFile"]>
+export type ScannedFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "projectId" | "documentTypeId" | "documentClassId" | "areaId" | "title" | "description" | "originalReference" | "physicalLocation" | "fileKey" | "fileName" | "fileSize" | "mimeType" | "digitalDisposition" | "physicalDisposition" | "externalReference" | "discardReason" | "classificationNotes" | "classifiedById" | "classifiedAt" | "physicalConfirmedById" | "physicalConfirmedAt" | "terminatedAt", ExtArgs["result"]["scannedFile"]>
 export type ScannedFileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documentType?: boolean | Prisma.ScannedFile$documentTypeArgs<ExtArgs>
+  documentClass?: boolean | Prisma.ScannedFile$documentClassArgs<ExtArgs>
+  area?: boolean | Prisma.ScannedFile$areaArgs<ExtArgs>
 }
 
 export type $ScannedFilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ScannedFile"
   objects: {
     documentType: Prisma.$DocumentTypePayload<ExtArgs> | null
+    documentClass: Prisma.$DocumentClassPayload<ExtArgs> | null
+    area: Prisma.$AreaPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1193,6 +1757,8 @@ export type $ScannedFilePayload<ExtArgs extends runtime.Types.Extensions.Interna
     updatedById: number
     projectId: number
     documentTypeId: number | null
+    documentClassId: number | null
+    areaId: number | null
     title: string
     description: string | null
     originalReference: string | null
@@ -1552,6 +2118,8 @@ readonly fields: ScannedFileFieldRefs;
 export interface Prisma__ScannedFileClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   documentType<T extends Prisma.ScannedFile$documentTypeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ScannedFile$documentTypeArgs<ExtArgs>>): Prisma.Prisma__DocumentTypeClient<runtime.Types.Result.GetResult<Prisma.$DocumentTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  documentClass<T extends Prisma.ScannedFile$documentClassArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ScannedFile$documentClassArgs<ExtArgs>>): Prisma.Prisma__DocumentClassClient<runtime.Types.Result.GetResult<Prisma.$DocumentClassPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  area<T extends Prisma.ScannedFile$areaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ScannedFile$areaArgs<ExtArgs>>): Prisma.Prisma__AreaClient<runtime.Types.Result.GetResult<Prisma.$AreaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1588,6 +2156,8 @@ export interface ScannedFileFieldRefs {
   readonly updatedById: Prisma.FieldRef<"ScannedFile", 'Int'>
   readonly projectId: Prisma.FieldRef<"ScannedFile", 'Int'>
   readonly documentTypeId: Prisma.FieldRef<"ScannedFile", 'Int'>
+  readonly documentClassId: Prisma.FieldRef<"ScannedFile", 'Int'>
+  readonly areaId: Prisma.FieldRef<"ScannedFile", 'Int'>
   readonly title: Prisma.FieldRef<"ScannedFile", 'String'>
   readonly description: Prisma.FieldRef<"ScannedFile", 'String'>
   readonly originalReference: Prisma.FieldRef<"ScannedFile", 'String'>
@@ -1965,6 +2535,44 @@ export type ScannedFile$documentTypeArgs<ExtArgs extends runtime.Types.Extension
    */
   include?: Prisma.DocumentTypeInclude<ExtArgs> | null
   where?: Prisma.DocumentTypeWhereInput
+}
+
+/**
+ * ScannedFile.documentClass
+ */
+export type ScannedFile$documentClassArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentClass
+   */
+  select?: Prisma.DocumentClassSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentClass
+   */
+  omit?: Prisma.DocumentClassOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentClassInclude<ExtArgs> | null
+  where?: Prisma.DocumentClassWhereInput
+}
+
+/**
+ * ScannedFile.area
+ */
+export type ScannedFile$areaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Area
+   */
+  select?: Prisma.AreaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Area
+   */
+  omit?: Prisma.AreaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AreaInclude<ExtArgs> | null
+  where?: Prisma.AreaWhereInput
 }
 
 /**

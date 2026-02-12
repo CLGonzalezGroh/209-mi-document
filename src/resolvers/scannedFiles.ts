@@ -26,6 +26,8 @@ interface ScannedFileFilterInput {
   query?: string
   projectId?: number
   documentTypeId?: number
+  documentClassId?: number
+  areaId?: number
   digitalDisposition?: DigitalDisposition
   physicalDisposition?: PhysicalDisposition
   terminatedFilter?: TerminatedFilter
@@ -33,6 +35,8 @@ interface ScannedFileFilterInput {
 
 const scannedFileIncludes = {
   documentType: true,
+  documentClass: true,
+  area: true,
 }
 
 export const scannedFileResolvers = {
@@ -119,6 +123,14 @@ export const scannedFileResolvers = {
 
         if (filter?.documentTypeId) {
           where.documentTypeId = filter.documentTypeId
+        }
+
+        if (filter?.documentClassId) {
+          where.documentClassId = filter.documentClassId
+        }
+
+        if (filter?.areaId) {
+          where.areaId = filter.areaId
         }
 
         if (filter?.digitalDisposition) {
@@ -262,6 +274,7 @@ export const scannedFileResolvers = {
           description?: string
           originalReference?: string
           physicalLocation?: string
+          areaId?: number
           fileKey: string
           fileName: string
           fileSize: number
@@ -283,6 +296,7 @@ export const scannedFileResolvers = {
             description: input.description,
             originalReference: input.originalReference,
             physicalLocation: input.physicalLocation,
+            areaId: input.areaId,
             fileKey: input.fileKey,
             fileName: input.fileName,
             fileSize: input.fileSize,
@@ -319,6 +333,8 @@ export const scannedFileResolvers = {
         input: {
           digitalDisposition: DigitalDisposition
           documentTypeId?: number
+          documentClassId?: number
+          areaId?: number
           classificationNotes?: string
           discardReason?: string
         }
@@ -381,6 +397,8 @@ export const scannedFileResolvers = {
           data: {
             digitalDisposition: input.digitalDisposition,
             documentTypeId: input.documentTypeId,
+            documentClassId: input.documentClassId,
+            areaId: input.areaId,
             classificationNotes: input.classificationNotes,
             discardReason: input.discardReason,
             classifiedById: userId,

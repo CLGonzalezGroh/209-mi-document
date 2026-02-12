@@ -62,6 +62,7 @@ export const ModelName = {
   TransmittalItem: 'TransmittalItem',
   Attachment: 'Attachment',
   ScannedFile: 'ScannedFile',
+  Area: 'Area',
   DocumentSysLog: 'DocumentSysLog',
   DocumentSysLogArchive: 'DocumentSysLogArchive'
 } as const
@@ -255,6 +256,8 @@ export const ScannedFileScalarFieldEnum = {
   updatedById: 'updatedById',
   projectId: 'projectId',
   documentTypeId: 'documentTypeId',
+  documentClassId: 'documentClassId',
+  areaId: 'areaId',
   title: 'title',
   description: 'description',
   originalReference: 'originalReference',
@@ -276,6 +279,23 @@ export const ScannedFileScalarFieldEnum = {
 } as const
 
 export type ScannedFileScalarFieldEnum = (typeof ScannedFileScalarFieldEnum)[keyof typeof ScannedFileScalarFieldEnum]
+
+
+export const AreaScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  terminatedAt: 'terminatedAt',
+  isSys: 'isSys',
+  name: 'name',
+  code: 'code',
+  projectId: 'projectId',
+  description: 'description',
+  sortOrder: 'sortOrder'
+} as const
+
+export type AreaScalarFieldEnum = (typeof AreaScalarFieldEnum)[keyof typeof AreaScalarFieldEnum]
 
 
 export const DocumentSysLogScalarFieldEnum = {
@@ -415,6 +435,15 @@ export const ScannedFileOrderByRelevanceFieldEnum = {
 } as const
 
 export type ScannedFileOrderByRelevanceFieldEnum = (typeof ScannedFileOrderByRelevanceFieldEnum)[keyof typeof ScannedFileOrderByRelevanceFieldEnum]
+
+
+export const AreaOrderByRelevanceFieldEnum = {
+  name: 'name',
+  code: 'code',
+  description: 'description'
+} as const
+
+export type AreaOrderByRelevanceFieldEnum = (typeof AreaOrderByRelevanceFieldEnum)[keyof typeof AreaOrderByRelevanceFieldEnum]
 
 
 export const DocumentSysLogOrderByRelevanceFieldEnum = {

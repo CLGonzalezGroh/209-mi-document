@@ -37,3 +37,13 @@
 - Agregar RevisionSchema a los Documentos
 
 ---
+
+# What's new in María Ingeniería API Documents 1.0.4
+
+2026-02-12
+
+## Areas
+
+- Agregar Area a los ScannedDocuments
+
+---

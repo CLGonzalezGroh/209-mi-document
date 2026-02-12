@@ -101,3 +101,21 @@ export function buildDocumentClassOrderBy(
   if (!field) return undefined
   return { [field]: orderBy.direction.toLowerCase() }
 }
+
+import type { AreaOrderByInput } from "../resolvers/areas.js"
+
+const areaFieldMap: Record<string, string> = {
+  NAME: "name",
+  CODE: "code",
+  SORT_ORDER: "sortOrder",
+  CREATED_AT: "createdAt",
+}
+
+export function buildAreaOrderBy(
+  orderBy?: AreaOrderByInput,
+): Record<string, string> | undefined {
+  if (!orderBy) return undefined
+  const field = areaFieldMap[orderBy.field]
+  if (!field) return undefined
+  return { [field]: orderBy.direction.toLowerCase() }
+}
