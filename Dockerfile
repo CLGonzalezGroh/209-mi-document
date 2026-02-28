@@ -9,14 +9,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Configurar acceso a GitHub Packages para @CLGonzalezGroh/mi-common
-ARG GITHUB_TOKEN
-RUN echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" > .npmrc && \
-    echo "@CLGonzalezGroh:registry=https://npm.pkg.github.com" >> .npmrc
-
-# Instalar dependencias
+# Instalar dependencias (el token se monta como secret, no queda en la imagen)
 COPY package*.json ./
-RUN npm ci
+RUN --mount=type=secret,id=npmrc,target=/app/.npmrc npm ci
 
 # Copiar código fuente y schema de Prisma
 COPY prisma/ ./prisma/
@@ -28,9 +23,6 @@ COPY schema.graphql ./
 RUN npx prisma generate
 RUN npm run build
 
-# Limpiar token de .npmrc
-RUN rm -f .npmrc
-
 # -- Stage 2: Production --
 FROM node:20-alpine
 
@@ -40,17 +32,9 @@ WORKDIR /app
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S api -u 1001
 
-# Configurar acceso a GitHub Packages (necesario para npm ci --omit=dev)
-ARG GITHUB_TOKEN
-RUN echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" > .npmrc && \
-    echo "@CLGonzalezGroh:registry=https://npm.pkg.github.com" >> .npmrc
-
 # Instalar solo dependencias de producción
 COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
-
-# Limpiar token
-RUN rm -f .npmrc
+RUN --mount=type=secret,id=npmrc,target=/app/.npmrc npm ci --omit=dev && npm cache clean --force
 
 # Copiar build y archivos necesarios
 COPY --from=builder /app/dist ./dist
