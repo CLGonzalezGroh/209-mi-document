@@ -301,7 +301,6 @@ export type TransmittalOrderByWithRelationInput = {
   responseAt?: Prisma.SortOrderInput | Prisma.SortOrder
   responseComments?: Prisma.SortOrderInput | Prisma.SortOrder
   items?: Prisma.TransmittalItemOrderByRelationAggregateInput
-  _relevance?: Prisma.TransmittalOrderByRelevanceInput
 }
 
 export type TransmittalWhereUniqueInput = Prisma.AtLeast<{
@@ -465,12 +464,6 @@ export type TransmittalUncheckedUpdateManyInput = {
   issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   responseAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   responseComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-}
-
-export type TransmittalOrderByRelevanceInput = {
-  fields: Prisma.TransmittalOrderByRelevanceFieldEnum | Prisma.TransmittalOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type TransmittalCountOrderByAggregateInput = {
@@ -677,7 +670,35 @@ export type TransmittalSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   _count?: boolean | Prisma.TransmittalCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["transmittal"]>
 
+export type TransmittalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  updatedById?: boolean
+  code?: boolean
+  projectId?: boolean
+  status?: boolean
+  issuedTo?: boolean
+  issuedById?: boolean
+  issuedAt?: boolean
+  responseAt?: boolean
+  responseComments?: boolean
+}, ExtArgs["result"]["transmittal"]>
 
+export type TransmittalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  updatedById?: boolean
+  code?: boolean
+  projectId?: boolean
+  status?: boolean
+  issuedTo?: boolean
+  issuedById?: boolean
+  issuedAt?: boolean
+  responseAt?: boolean
+  responseComments?: boolean
+}, ExtArgs["result"]["transmittal"]>
 
 export type TransmittalSelectScalar = {
   id?: boolean
@@ -699,6 +720,8 @@ export type TransmittalInclude<ExtArgs extends runtime.Types.Extensions.Internal
   items?: boolean | Prisma.Transmittal$itemsArgs<ExtArgs>
   _count?: boolean | Prisma.TransmittalCountOutputTypeDefaultArgs<ExtArgs>
 }
+export type TransmittalIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type TransmittalIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $TransmittalPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Transmittal"
@@ -836,6 +859,30 @@ export interface TransmittalDelegate<ExtArgs extends runtime.Types.Extensions.In
   createMany<T extends TransmittalCreateManyArgs>(args?: Prisma.SelectSubset<T, TransmittalCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Transmittals and returns the data saved in the database.
+   * @param {TransmittalCreateManyAndReturnArgs} args - Arguments to create many Transmittals.
+   * @example
+   * // Create many Transmittals
+   * const transmittal = await prisma.transmittal.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Transmittals and only return the `id`
+   * const transmittalWithIdOnly = await prisma.transmittal.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends TransmittalCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, TransmittalCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransmittalPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Transmittal.
    * @param {TransmittalDeleteArgs} args - Arguments to delete one Transmittal.
    * @example
@@ -898,6 +945,36 @@ export interface TransmittalDelegate<ExtArgs extends runtime.Types.Extensions.In
    * 
    */
   updateMany<T extends TransmittalUpdateManyArgs>(args: Prisma.SelectSubset<T, TransmittalUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Transmittals and returns the data updated in the database.
+   * @param {TransmittalUpdateManyAndReturnArgs} args - Arguments to update many Transmittals.
+   * @example
+   * // Update many Transmittals
+   * const transmittal = await prisma.transmittal.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Transmittals and only return the `id`
+   * const transmittalWithIdOnly = await prisma.transmittal.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends TransmittalUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, TransmittalUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransmittalPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Transmittal.
@@ -1333,6 +1410,25 @@ export type TransmittalCreateManyArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
+ * Transmittal createManyAndReturn
+ */
+export type TransmittalCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Transmittal
+   */
+  select?: Prisma.TransmittalSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Transmittal
+   */
+  omit?: Prisma.TransmittalOmit<ExtArgs> | null
+  /**
+   * The data used to create many Transmittals.
+   */
+  data: Prisma.TransmittalCreateManyInput | Prisma.TransmittalCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
  * Transmittal update
  */
 export type TransmittalUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1362,6 +1458,32 @@ export type TransmittalUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inter
  * Transmittal updateMany
  */
 export type TransmittalUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to update Transmittals.
+   */
+  data: Prisma.XOR<Prisma.TransmittalUpdateManyMutationInput, Prisma.TransmittalUncheckedUpdateManyInput>
+  /**
+   * Filter which Transmittals to update
+   */
+  where?: Prisma.TransmittalWhereInput
+  /**
+   * Limit how many Transmittals to update.
+   */
+  limit?: number
+}
+
+/**
+ * Transmittal updateManyAndReturn
+ */
+export type TransmittalUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Transmittal
+   */
+  select?: Prisma.TransmittalSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Transmittal
+   */
+  omit?: Prisma.TransmittalOmit<ExtArgs> | null
   /**
    * The data used to update Transmittals.
    */

@@ -1,0 +1,19 @@
+# Docker Compose para desarrollo local
+# Levanta solo PostgreSQL. La API se corre en el host.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: mi-document-pg
+    restart: unless-stopped
+    ports:
+      - "5409:5432"
+    environment:
+      POSTGRES_USER: mi_document
+      POSTGRES_PASSWORD: mi_document_dev
+      POSTGRES_DB: mi_document_db
+    volumes:
+      - mi_document_pgdata:/var/lib/postgresql/data
+
+volumes:
+  mi_document_pgdata:

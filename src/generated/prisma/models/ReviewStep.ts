@@ -283,7 +283,6 @@ export type ReviewStepOrderByWithRelationInput = {
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   signatureHash?: Prisma.SortOrderInput | Prisma.SortOrder
   workflow?: Prisma.ReviewWorkflowOrderByWithRelationInput
-  _relevance?: Prisma.ReviewStepOrderByRelevanceInput
 }
 
 export type ReviewStepWhereUniqueInput = Prisma.AtLeast<{
@@ -433,12 +432,6 @@ export type ReviewStepListRelationFilter = {
 
 export type ReviewStepOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type ReviewStepOrderByRelevanceInput = {
-  fields: Prisma.ReviewStepOrderByRelevanceFieldEnum | Prisma.ReviewStepOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type ReviewStepWorkflowIdStepOrderCompoundUniqueInput = {
@@ -677,7 +670,33 @@ export type ReviewStepSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   workflow?: boolean | Prisma.ReviewWorkflowDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reviewStep"]>
 
+export type ReviewStepSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  workflowId?: boolean
+  stepOrder?: boolean
+  stepType?: boolean
+  assignedToId?: boolean
+  status?: boolean
+  comments?: boolean
+  completedAt?: boolean
+  signatureHash?: boolean
+  workflow?: boolean | Prisma.ReviewWorkflowDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["reviewStep"]>
 
+export type ReviewStepSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  workflowId?: boolean
+  stepOrder?: boolean
+  stepType?: boolean
+  assignedToId?: boolean
+  status?: boolean
+  comments?: boolean
+  completedAt?: boolean
+  signatureHash?: boolean
+  workflow?: boolean | Prisma.ReviewWorkflowDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["reviewStep"]>
 
 export type ReviewStepSelectScalar = {
   id?: boolean
@@ -694,6 +713,12 @@ export type ReviewStepSelectScalar = {
 
 export type ReviewStepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "workflowId" | "stepOrder" | "stepType" | "assignedToId" | "status" | "comments" | "completedAt" | "signatureHash", ExtArgs["result"]["reviewStep"]>
 export type ReviewStepInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  workflow?: boolean | Prisma.ReviewWorkflowDefaultArgs<ExtArgs>
+}
+export type ReviewStepIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  workflow?: boolean | Prisma.ReviewWorkflowDefaultArgs<ExtArgs>
+}
+export type ReviewStepIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   workflow?: boolean | Prisma.ReviewWorkflowDefaultArgs<ExtArgs>
 }
 
@@ -831,6 +856,30 @@ export interface ReviewStepDelegate<ExtArgs extends runtime.Types.Extensions.Int
   createMany<T extends ReviewStepCreateManyArgs>(args?: Prisma.SelectSubset<T, ReviewStepCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many ReviewSteps and returns the data saved in the database.
+   * @param {ReviewStepCreateManyAndReturnArgs} args - Arguments to create many ReviewSteps.
+   * @example
+   * // Create many ReviewSteps
+   * const reviewStep = await prisma.reviewStep.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many ReviewSteps and only return the `id`
+   * const reviewStepWithIdOnly = await prisma.reviewStep.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends ReviewStepCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ReviewStepCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewStepPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a ReviewStep.
    * @param {ReviewStepDeleteArgs} args - Arguments to delete one ReviewStep.
    * @example
@@ -893,6 +942,36 @@ export interface ReviewStepDelegate<ExtArgs extends runtime.Types.Extensions.Int
    * 
    */
   updateMany<T extends ReviewStepUpdateManyArgs>(args: Prisma.SelectSubset<T, ReviewStepUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more ReviewSteps and returns the data updated in the database.
+   * @param {ReviewStepUpdateManyAndReturnArgs} args - Arguments to update many ReviewSteps.
+   * @example
+   * // Update many ReviewSteps
+   * const reviewStep = await prisma.reviewStep.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more ReviewSteps and only return the `id`
+   * const reviewStepWithIdOnly = await prisma.reviewStep.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends ReviewStepUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ReviewStepUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewStepPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ReviewStep.
@@ -1326,6 +1405,29 @@ export type ReviewStepCreateManyArgs<ExtArgs extends runtime.Types.Extensions.In
 }
 
 /**
+ * ReviewStep createManyAndReturn
+ */
+export type ReviewStepCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReviewStep
+   */
+  select?: Prisma.ReviewStepSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReviewStep
+   */
+  omit?: Prisma.ReviewStepOmit<ExtArgs> | null
+  /**
+   * The data used to create many ReviewSteps.
+   */
+  data: Prisma.ReviewStepCreateManyInput | Prisma.ReviewStepCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReviewStepIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * ReviewStep update
  */
 export type ReviewStepUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1367,6 +1469,36 @@ export type ReviewStepUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many ReviewSteps to update.
    */
   limit?: number
+}
+
+/**
+ * ReviewStep updateManyAndReturn
+ */
+export type ReviewStepUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReviewStep
+   */
+  select?: Prisma.ReviewStepSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReviewStep
+   */
+  omit?: Prisma.ReviewStepOmit<ExtArgs> | null
+  /**
+   * The data used to update ReviewSteps.
+   */
+  data: Prisma.XOR<Prisma.ReviewStepUpdateManyMutationInput, Prisma.ReviewStepUncheckedUpdateManyInput>
+  /**
+   * Filter which ReviewSteps to update
+   */
+  where?: Prisma.ReviewStepWhereInput
+  /**
+   * Limit how many ReviewSteps to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReviewStepIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

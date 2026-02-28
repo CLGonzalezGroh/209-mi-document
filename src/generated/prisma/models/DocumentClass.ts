@@ -273,6 +273,7 @@ export type DocumentClassWhereInput = {
   description?: Prisma.StringNullableFilter<"DocumentClass"> | string | null
   sortOrder?: Prisma.IntFilter<"DocumentClass"> | number
   documentTypes?: Prisma.DocumentTypeListRelationFilter
+  documents?: Prisma.DocumentListRelationFilter
   scannedFiles?: Prisma.ScannedFileListRelationFilter
 }
 
@@ -289,8 +290,8 @@ export type DocumentClassOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   documentTypes?: Prisma.DocumentTypeOrderByRelationAggregateInput
+  documents?: Prisma.DocumentOrderByRelationAggregateInput
   scannedFiles?: Prisma.ScannedFileOrderByRelationAggregateInput
-  _relevance?: Prisma.DocumentClassOrderByRelevanceInput
 }
 
 export type DocumentClassWhereUniqueInput = Prisma.AtLeast<{
@@ -311,6 +312,7 @@ export type DocumentClassWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringNullableFilter<"DocumentClass"> | string | null
   sortOrder?: Prisma.IntFilter<"DocumentClass"> | number
   documentTypes?: Prisma.DocumentTypeListRelationFilter
+  documents?: Prisma.DocumentListRelationFilter
   scannedFiles?: Prisma.ScannedFileListRelationFilter
 }, "id" | "name_module" | "code_module">
 
@@ -362,6 +364,7 @@ export type DocumentClassCreateInput = {
   description?: string | null
   sortOrder?: number
   documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutClassInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutDocumentClassInput
   scannedFiles?: Prisma.ScannedFileCreateNestedManyWithoutDocumentClassInput
 }
 
@@ -378,6 +381,7 @@ export type DocumentClassUncheckedCreateInput = {
   description?: string | null
   sortOrder?: number
   documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutClassInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocumentClassInput
   scannedFiles?: Prisma.ScannedFileUncheckedCreateNestedManyWithoutDocumentClassInput
 }
 
@@ -393,6 +397,7 @@ export type DocumentClassUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   documentTypes?: Prisma.DocumentTypeUpdateManyWithoutClassNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutDocumentClassNestedInput
   scannedFiles?: Prisma.ScannedFileUpdateManyWithoutDocumentClassNestedInput
 }
 
@@ -409,6 +414,7 @@ export type DocumentClassUncheckedUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutClassNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocumentClassNestedInput
   scannedFiles?: Prisma.ScannedFileUncheckedUpdateManyWithoutDocumentClassNestedInput
 }
 
@@ -451,12 +457,6 @@ export type DocumentClassUncheckedUpdateManyInput = {
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
-}
-
-export type DocumentClassOrderByRelevanceInput = {
-  fields: Prisma.DocumentClassOrderByRelevanceFieldEnum | Prisma.DocumentClassOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type DocumentClassNameModuleCompoundUniqueInput = {
@@ -576,6 +576,22 @@ export type DocumentClassUpdateOneWithoutDocumentTypesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentClassUpdateToOneWithWhereWithoutDocumentTypesInput, Prisma.DocumentClassUpdateWithoutDocumentTypesInput>, Prisma.DocumentClassUncheckedUpdateWithoutDocumentTypesInput>
 }
 
+export type DocumentClassCreateNestedOneWithoutDocumentsInput = {
+  create?: Prisma.XOR<Prisma.DocumentClassCreateWithoutDocumentsInput, Prisma.DocumentClassUncheckedCreateWithoutDocumentsInput>
+  connectOrCreate?: Prisma.DocumentClassCreateOrConnectWithoutDocumentsInput
+  connect?: Prisma.DocumentClassWhereUniqueInput
+}
+
+export type DocumentClassUpdateOneWithoutDocumentsNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentClassCreateWithoutDocumentsInput, Prisma.DocumentClassUncheckedCreateWithoutDocumentsInput>
+  connectOrCreate?: Prisma.DocumentClassCreateOrConnectWithoutDocumentsInput
+  upsert?: Prisma.DocumentClassUpsertWithoutDocumentsInput
+  disconnect?: Prisma.DocumentClassWhereInput | boolean
+  delete?: Prisma.DocumentClassWhereInput | boolean
+  connect?: Prisma.DocumentClassWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentClassUpdateToOneWithWhereWithoutDocumentsInput, Prisma.DocumentClassUpdateWithoutDocumentsInput>, Prisma.DocumentClassUncheckedUpdateWithoutDocumentsInput>
+}
+
 export type DocumentClassCreateNestedOneWithoutScannedFilesInput = {
   create?: Prisma.XOR<Prisma.DocumentClassCreateWithoutScannedFilesInput, Prisma.DocumentClassUncheckedCreateWithoutScannedFilesInput>
   connectOrCreate?: Prisma.DocumentClassCreateOrConnectWithoutScannedFilesInput
@@ -603,6 +619,7 @@ export type DocumentClassCreateWithoutDocumentTypesInput = {
   module?: $Enums.ModuleType | null
   description?: string | null
   sortOrder?: number
+  documents?: Prisma.DocumentCreateNestedManyWithoutDocumentClassInput
   scannedFiles?: Prisma.ScannedFileCreateNestedManyWithoutDocumentClassInput
 }
 
@@ -618,6 +635,7 @@ export type DocumentClassUncheckedCreateWithoutDocumentTypesInput = {
   module?: $Enums.ModuleType | null
   description?: string | null
   sortOrder?: number
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocumentClassInput
   scannedFiles?: Prisma.ScannedFileUncheckedCreateNestedManyWithoutDocumentClassInput
 }
 
@@ -648,6 +666,7 @@ export type DocumentClassUpdateWithoutDocumentTypesInput = {
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  documents?: Prisma.DocumentUpdateManyWithoutDocumentClassNestedInput
   scannedFiles?: Prisma.ScannedFileUpdateManyWithoutDocumentClassNestedInput
 }
 
@@ -663,6 +682,85 @@ export type DocumentClassUncheckedUpdateWithoutDocumentTypesInput = {
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocumentClassNestedInput
+  scannedFiles?: Prisma.ScannedFileUncheckedUpdateManyWithoutDocumentClassNestedInput
+}
+
+export type DocumentClassCreateWithoutDocumentsInput = {
+  createdAt?: Date | string
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  name: string
+  code: string
+  module?: $Enums.ModuleType | null
+  description?: string | null
+  sortOrder?: number
+  documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutClassInput
+  scannedFiles?: Prisma.ScannedFileCreateNestedManyWithoutDocumentClassInput
+}
+
+export type DocumentClassUncheckedCreateWithoutDocumentsInput = {
+  id?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  name: string
+  code: string
+  module?: $Enums.ModuleType | null
+  description?: string | null
+  sortOrder?: number
+  documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutClassInput
+  scannedFiles?: Prisma.ScannedFileUncheckedCreateNestedManyWithoutDocumentClassInput
+}
+
+export type DocumentClassCreateOrConnectWithoutDocumentsInput = {
+  where: Prisma.DocumentClassWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocumentClassCreateWithoutDocumentsInput, Prisma.DocumentClassUncheckedCreateWithoutDocumentsInput>
+}
+
+export type DocumentClassUpsertWithoutDocumentsInput = {
+  update: Prisma.XOR<Prisma.DocumentClassUpdateWithoutDocumentsInput, Prisma.DocumentClassUncheckedUpdateWithoutDocumentsInput>
+  create: Prisma.XOR<Prisma.DocumentClassCreateWithoutDocumentsInput, Prisma.DocumentClassUncheckedCreateWithoutDocumentsInput>
+  where?: Prisma.DocumentClassWhereInput
+}
+
+export type DocumentClassUpdateToOneWithWhereWithoutDocumentsInput = {
+  where?: Prisma.DocumentClassWhereInput
+  data: Prisma.XOR<Prisma.DocumentClassUpdateWithoutDocumentsInput, Prisma.DocumentClassUncheckedUpdateWithoutDocumentsInput>
+}
+
+export type DocumentClassUpdateWithoutDocumentsInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  documentTypes?: Prisma.DocumentTypeUpdateManyWithoutClassNestedInput
+  scannedFiles?: Prisma.ScannedFileUpdateManyWithoutDocumentClassNestedInput
+}
+
+export type DocumentClassUncheckedUpdateWithoutDocumentsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutClassNestedInput
   scannedFiles?: Prisma.ScannedFileUncheckedUpdateManyWithoutDocumentClassNestedInput
 }
 
@@ -678,6 +776,7 @@ export type DocumentClassCreateWithoutScannedFilesInput = {
   description?: string | null
   sortOrder?: number
   documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutClassInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutDocumentClassInput
 }
 
 export type DocumentClassUncheckedCreateWithoutScannedFilesInput = {
@@ -693,6 +792,7 @@ export type DocumentClassUncheckedCreateWithoutScannedFilesInput = {
   description?: string | null
   sortOrder?: number
   documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutClassInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocumentClassInput
 }
 
 export type DocumentClassCreateOrConnectWithoutScannedFilesInput = {
@@ -723,6 +823,7 @@ export type DocumentClassUpdateWithoutScannedFilesInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   documentTypes?: Prisma.DocumentTypeUpdateManyWithoutClassNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutDocumentClassNestedInput
 }
 
 export type DocumentClassUncheckedUpdateWithoutScannedFilesInput = {
@@ -738,6 +839,7 @@ export type DocumentClassUncheckedUpdateWithoutScannedFilesInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutClassNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocumentClassNestedInput
 }
 
 
@@ -747,11 +849,13 @@ export type DocumentClassUncheckedUpdateWithoutScannedFilesInput = {
 
 export type DocumentClassCountOutputType = {
   documentTypes: number
+  documents: number
   scannedFiles: number
 }
 
 export type DocumentClassCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documentTypes?: boolean | DocumentClassCountOutputTypeCountDocumentTypesArgs
+  documents?: boolean | DocumentClassCountOutputTypeCountDocumentsArgs
   scannedFiles?: boolean | DocumentClassCountOutputTypeCountScannedFilesArgs
 }
 
@@ -775,6 +879,13 @@ export type DocumentClassCountOutputTypeCountDocumentTypesArgs<ExtArgs extends r
 /**
  * DocumentClassCountOutputType without action
  */
+export type DocumentClassCountOutputTypeCountDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentWhereInput
+}
+
+/**
+ * DocumentClassCountOutputType without action
+ */
 export type DocumentClassCountOutputTypeCountScannedFilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ScannedFileWhereInput
 }
@@ -793,11 +904,38 @@ export type DocumentClassSelect<ExtArgs extends runtime.Types.Extensions.Interna
   description?: boolean
   sortOrder?: boolean
   documentTypes?: boolean | Prisma.DocumentClass$documentTypesArgs<ExtArgs>
+  documents?: boolean | Prisma.DocumentClass$documentsArgs<ExtArgs>
   scannedFiles?: boolean | Prisma.DocumentClass$scannedFilesArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentClassCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["documentClass"]>
 
+export type DocumentClassSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  updatedById?: boolean
+  terminatedAt?: boolean
+  isSys?: boolean
+  name?: boolean
+  code?: boolean
+  module?: boolean
+  description?: boolean
+  sortOrder?: boolean
+}, ExtArgs["result"]["documentClass"]>
 
+export type DocumentClassSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  updatedById?: boolean
+  terminatedAt?: boolean
+  isSys?: boolean
+  name?: boolean
+  code?: boolean
+  module?: boolean
+  description?: boolean
+  sortOrder?: boolean
+}, ExtArgs["result"]["documentClass"]>
 
 export type DocumentClassSelectScalar = {
   id?: boolean
@@ -816,14 +954,18 @@ export type DocumentClassSelectScalar = {
 export type DocumentClassOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "name" | "code" | "module" | "description" | "sortOrder", ExtArgs["result"]["documentClass"]>
 export type DocumentClassInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documentTypes?: boolean | Prisma.DocumentClass$documentTypesArgs<ExtArgs>
+  documents?: boolean | Prisma.DocumentClass$documentsArgs<ExtArgs>
   scannedFiles?: boolean | Prisma.DocumentClass$scannedFilesArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentClassCountOutputTypeDefaultArgs<ExtArgs>
 }
+export type DocumentClassIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type DocumentClassIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $DocumentClassPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DocumentClass"
   objects: {
     documentTypes: Prisma.$DocumentTypePayload<ExtArgs>[]
+    documents: Prisma.$DocumentPayload<ExtArgs>[]
     scannedFiles: Prisma.$ScannedFilePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -956,6 +1098,30 @@ export interface DocumentClassDelegate<ExtArgs extends runtime.Types.Extensions.
   createMany<T extends DocumentClassCreateManyArgs>(args?: Prisma.SelectSubset<T, DocumentClassCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many DocumentClasses and returns the data saved in the database.
+   * @param {DocumentClassCreateManyAndReturnArgs} args - Arguments to create many DocumentClasses.
+   * @example
+   * // Create many DocumentClasses
+   * const documentClass = await prisma.documentClass.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many DocumentClasses and only return the `id`
+   * const documentClassWithIdOnly = await prisma.documentClass.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends DocumentClassCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, DocumentClassCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentClassPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a DocumentClass.
    * @param {DocumentClassDeleteArgs} args - Arguments to delete one DocumentClass.
    * @example
@@ -1018,6 +1184,36 @@ export interface DocumentClassDelegate<ExtArgs extends runtime.Types.Extensions.
    * 
    */
   updateMany<T extends DocumentClassUpdateManyArgs>(args: Prisma.SelectSubset<T, DocumentClassUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more DocumentClasses and returns the data updated in the database.
+   * @param {DocumentClassUpdateManyAndReturnArgs} args - Arguments to update many DocumentClasses.
+   * @example
+   * // Update many DocumentClasses
+   * const documentClass = await prisma.documentClass.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more DocumentClasses and only return the `id`
+   * const documentClassWithIdOnly = await prisma.documentClass.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends DocumentClassUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, DocumentClassUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentClassPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one DocumentClass.
@@ -1179,6 +1375,7 @@ readonly fields: DocumentClassFieldRefs;
 export interface Prisma__DocumentClassClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   documentTypes<T extends Prisma.DocumentClass$documentTypesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentClass$documentTypesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentTypePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documents<T extends Prisma.DocumentClass$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentClass$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   scannedFiles<T extends Prisma.DocumentClass$scannedFilesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentClass$scannedFilesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScannedFilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1453,6 +1650,25 @@ export type DocumentClassCreateManyArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 /**
+ * DocumentClass createManyAndReturn
+ */
+export type DocumentClassCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentClass
+   */
+  select?: Prisma.DocumentClassSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentClass
+   */
+  omit?: Prisma.DocumentClassOmit<ExtArgs> | null
+  /**
+   * The data used to create many DocumentClasses.
+   */
+  data: Prisma.DocumentClassCreateManyInput | Prisma.DocumentClassCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
  * DocumentClass update
  */
 export type DocumentClassUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1482,6 +1698,32 @@ export type DocumentClassUpdateArgs<ExtArgs extends runtime.Types.Extensions.Int
  * DocumentClass updateMany
  */
 export type DocumentClassUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to update DocumentClasses.
+   */
+  data: Prisma.XOR<Prisma.DocumentClassUpdateManyMutationInput, Prisma.DocumentClassUncheckedUpdateManyInput>
+  /**
+   * Filter which DocumentClasses to update
+   */
+  where?: Prisma.DocumentClassWhereInput
+  /**
+   * Limit how many DocumentClasses to update.
+   */
+  limit?: number
+}
+
+/**
+ * DocumentClass updateManyAndReturn
+ */
+export type DocumentClassUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentClass
+   */
+  select?: Prisma.DocumentClassSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentClass
+   */
+  omit?: Prisma.DocumentClassOmit<ExtArgs> | null
   /**
    * The data used to update DocumentClasses.
    */
@@ -1584,6 +1826,30 @@ export type DocumentClass$documentTypesArgs<ExtArgs extends runtime.Types.Extens
   take?: number
   skip?: number
   distinct?: Prisma.DocumentTypeScalarFieldEnum | Prisma.DocumentTypeScalarFieldEnum[]
+}
+
+/**
+ * DocumentClass.documents
+ */
+export type DocumentClass$documentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Document
+   */
+  select?: Prisma.DocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Document
+   */
+  omit?: Prisma.DocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentInclude<ExtArgs> | null
+  where?: Prisma.DocumentWhereInput
+  orderBy?: Prisma.DocumentOrderByWithRelationInput | Prisma.DocumentOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
 }
 
 /**

@@ -47,3 +47,13 @@
 - Agregar Area a los ScannedDocuments
 
 ---
+
+# What's new in María Ingeniería API Documents 1.0.5
+
+2026-02-28
+
+## Postgres & Docker
+
+- Migración a Postgres. Incorporar Docker
+
+---

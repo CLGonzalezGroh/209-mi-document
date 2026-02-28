@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-    provider = "mysql"
+    provider = "postgresql"
 }
 
 // ================================
@@ -106,6 +106,7 @@ model DocumentClass {
 
     // Relaciones
     documentTypes DocumentType[]
+    documents     Document[]
     scannedFiles  ScannedFile[]
 
     @@unique([name, module]) // Único dentro del mismo módulo
@@ -157,14 +158,17 @@ model Document {
     entityType     String? // "finding", "action", "project"...
     entityId       Int? // ID de la entidad en otro subgraph
     documentTypeId Int
+    documentClassId Int? // Clase de documento (null = sin clasificar)
     revisionScheme RevisionScheme @default(ALPHABETICAL) // Esquema de revisión actual
 
     // Relaciones
-    documentType DocumentType       @relation(fields: [documentTypeId], references: [id])
-    revisions    DocumentRevision[]
+    documentType  DocumentType       @relation(fields: [documentTypeId], references: [id])
+    documentClass DocumentClass?     @relation(fields: [documentClassId], references: [id])
+    revisions     DocumentRevision[]
 
     @@unique([code, module, entityType, entityId]) // Único dentro del mismo contexto (módulo + entidad)
     @@index([module, entityType, entityId])
+    @@index([documentClassId])
     @@map("documents")
 }
 

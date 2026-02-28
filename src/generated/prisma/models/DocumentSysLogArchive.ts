@@ -246,7 +246,6 @@ export type DocumentSysLogArchiveOrderByWithRelationInput = {
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   message?: Prisma.SortOrder
   meta?: Prisma.SortOrderInput | Prisma.SortOrder
-  _relevance?: Prisma.DocumentSysLogArchiveOrderByRelevanceInput
 }
 
 export type DocumentSysLogArchiveWhereUniqueInput = Prisma.AtLeast<{
@@ -357,12 +356,6 @@ export type DocumentSysLogArchiveUncheckedUpdateManyInput = {
   meta?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
-export type DocumentSysLogArchiveOrderByRelevanceInput = {
-  fields: Prisma.DocumentSysLogArchiveOrderByRelevanceFieldEnum | Prisma.DocumentSysLogArchiveOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
-}
-
 export type DocumentSysLogArchiveCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -415,7 +408,25 @@ export type DocumentSysLogArchiveSelect<ExtArgs extends runtime.Types.Extensions
   meta?: boolean
 }, ExtArgs["result"]["documentSysLogArchive"]>
 
+export type DocumentSysLogArchiveSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  userId?: boolean
+  level?: boolean
+  name?: boolean
+  message?: boolean
+  meta?: boolean
+}, ExtArgs["result"]["documentSysLogArchive"]>
 
+export type DocumentSysLogArchiveSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  userId?: boolean
+  level?: boolean
+  name?: boolean
+  message?: boolean
+  meta?: boolean
+}, ExtArgs["result"]["documentSysLogArchive"]>
 
 export type DocumentSysLogArchiveSelectScalar = {
   id?: boolean
@@ -558,6 +569,30 @@ export interface DocumentSysLogArchiveDelegate<ExtArgs extends runtime.Types.Ext
   createMany<T extends DocumentSysLogArchiveCreateManyArgs>(args?: Prisma.SelectSubset<T, DocumentSysLogArchiveCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many DocumentSysLogArchives and returns the data saved in the database.
+   * @param {DocumentSysLogArchiveCreateManyAndReturnArgs} args - Arguments to create many DocumentSysLogArchives.
+   * @example
+   * // Create many DocumentSysLogArchives
+   * const documentSysLogArchive = await prisma.documentSysLogArchive.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many DocumentSysLogArchives and only return the `id`
+   * const documentSysLogArchiveWithIdOnly = await prisma.documentSysLogArchive.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends DocumentSysLogArchiveCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, DocumentSysLogArchiveCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentSysLogArchivePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a DocumentSysLogArchive.
    * @param {DocumentSysLogArchiveDeleteArgs} args - Arguments to delete one DocumentSysLogArchive.
    * @example
@@ -620,6 +655,36 @@ export interface DocumentSysLogArchiveDelegate<ExtArgs extends runtime.Types.Ext
    * 
    */
   updateMany<T extends DocumentSysLogArchiveUpdateManyArgs>(args: Prisma.SelectSubset<T, DocumentSysLogArchiveUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more DocumentSysLogArchives and returns the data updated in the database.
+   * @param {DocumentSysLogArchiveUpdateManyAndReturnArgs} args - Arguments to update many DocumentSysLogArchives.
+   * @example
+   * // Update many DocumentSysLogArchives
+   * const documentSysLogArchive = await prisma.documentSysLogArchive.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more DocumentSysLogArchives and only return the `id`
+   * const documentSysLogArchiveWithIdOnly = await prisma.documentSysLogArchive.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends DocumentSysLogArchiveUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, DocumentSysLogArchiveUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentSysLogArchivePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one DocumentSysLogArchive.
@@ -1025,6 +1090,25 @@ export type DocumentSysLogArchiveCreateManyArgs<ExtArgs extends runtime.Types.Ex
 }
 
 /**
+ * DocumentSysLogArchive createManyAndReturn
+ */
+export type DocumentSysLogArchiveCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentSysLogArchive
+   */
+  select?: Prisma.DocumentSysLogArchiveSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentSysLogArchive
+   */
+  omit?: Prisma.DocumentSysLogArchiveOmit<ExtArgs> | null
+  /**
+   * The data used to create many DocumentSysLogArchives.
+   */
+  data: Prisma.DocumentSysLogArchiveCreateManyInput | Prisma.DocumentSysLogArchiveCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
  * DocumentSysLogArchive update
  */
 export type DocumentSysLogArchiveUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1050,6 +1134,32 @@ export type DocumentSysLogArchiveUpdateArgs<ExtArgs extends runtime.Types.Extens
  * DocumentSysLogArchive updateMany
  */
 export type DocumentSysLogArchiveUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to update DocumentSysLogArchives.
+   */
+  data: Prisma.XOR<Prisma.DocumentSysLogArchiveUpdateManyMutationInput, Prisma.DocumentSysLogArchiveUncheckedUpdateManyInput>
+  /**
+   * Filter which DocumentSysLogArchives to update
+   */
+  where?: Prisma.DocumentSysLogArchiveWhereInput
+  /**
+   * Limit how many DocumentSysLogArchives to update.
+   */
+  limit?: number
+}
+
+/**
+ * DocumentSysLogArchive updateManyAndReturn
+ */
+export type DocumentSysLogArchiveUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentSysLogArchive
+   */
+  select?: Prisma.DocumentSysLogArchiveSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentSysLogArchive
+   */
+  omit?: Prisma.DocumentSysLogArchiveOmit<ExtArgs> | null
   /**
    * The data used to update DocumentSysLogArchives.
    */

@@ -133,6 +133,7 @@ export const DocumentScalarFieldEnum = {
   entityType: 'entityType',
   entityId: 'entityId',
   documentTypeId: 'documentTypeId',
+  documentClassId: 'documentClassId',
   revisionScheme: 'revisionScheme'
 } as const
 
@@ -332,134 +333,18 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
 export const NullsOrder = {
   first: 'first',
   last: 'last'
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
-
-
-export const DocumentClassOrderByRelevanceFieldEnum = {
-  name: 'name',
-  code: 'code',
-  description: 'description'
-} as const
-
-export type DocumentClassOrderByRelevanceFieldEnum = (typeof DocumentClassOrderByRelevanceFieldEnum)[keyof typeof DocumentClassOrderByRelevanceFieldEnum]
-
-
-export const DocumentTypeOrderByRelevanceFieldEnum = {
-  name: 'name',
-  code: 'code',
-  description: 'description'
-} as const
-
-export type DocumentTypeOrderByRelevanceFieldEnum = (typeof DocumentTypeOrderByRelevanceFieldEnum)[keyof typeof DocumentTypeOrderByRelevanceFieldEnum]
-
-
-export const DocumentOrderByRelevanceFieldEnum = {
-  code: 'code',
-  title: 'title',
-  description: 'description',
-  entityType: 'entityType'
-} as const
-
-export type DocumentOrderByRelevanceFieldEnum = (typeof DocumentOrderByRelevanceFieldEnum)[keyof typeof DocumentOrderByRelevanceFieldEnum]
-
-
-export const DocumentRevisionOrderByRelevanceFieldEnum = {
-  revisionCode: 'revisionCode'
-} as const
-
-export type DocumentRevisionOrderByRelevanceFieldEnum = (typeof DocumentRevisionOrderByRelevanceFieldEnum)[keyof typeof DocumentRevisionOrderByRelevanceFieldEnum]
-
-
-export const DocumentVersionOrderByRelevanceFieldEnum = {
-  fileKey: 'fileKey',
-  fileName: 'fileName',
-  mimeType: 'mimeType',
-  checksum: 'checksum',
-  comment: 'comment'
-} as const
-
-export type DocumentVersionOrderByRelevanceFieldEnum = (typeof DocumentVersionOrderByRelevanceFieldEnum)[keyof typeof DocumentVersionOrderByRelevanceFieldEnum]
-
-
-export const ReviewStepOrderByRelevanceFieldEnum = {
-  comments: 'comments',
-  signatureHash: 'signatureHash'
-} as const
-
-export type ReviewStepOrderByRelevanceFieldEnum = (typeof ReviewStepOrderByRelevanceFieldEnum)[keyof typeof ReviewStepOrderByRelevanceFieldEnum]
-
-
-export const TransmittalOrderByRelevanceFieldEnum = {
-  code: 'code',
-  issuedTo: 'issuedTo',
-  responseComments: 'responseComments'
-} as const
-
-export type TransmittalOrderByRelevanceFieldEnum = (typeof TransmittalOrderByRelevanceFieldEnum)[keyof typeof TransmittalOrderByRelevanceFieldEnum]
-
-
-export const TransmittalItemOrderByRelevanceFieldEnum = {
-  clientComments: 'clientComments'
-} as const
-
-export type TransmittalItemOrderByRelevanceFieldEnum = (typeof TransmittalItemOrderByRelevanceFieldEnum)[keyof typeof TransmittalItemOrderByRelevanceFieldEnum]
-
-
-export const AttachmentOrderByRelevanceFieldEnum = {
-  entityType: 'entityType',
-  fileKey: 'fileKey',
-  fileName: 'fileName',
-  mimeType: 'mimeType',
-  description: 'description'
-} as const
-
-export type AttachmentOrderByRelevanceFieldEnum = (typeof AttachmentOrderByRelevanceFieldEnum)[keyof typeof AttachmentOrderByRelevanceFieldEnum]
-
-
-export const ScannedFileOrderByRelevanceFieldEnum = {
-  title: 'title',
-  description: 'description',
-  originalReference: 'originalReference',
-  physicalLocation: 'physicalLocation',
-  fileKey: 'fileKey',
-  fileName: 'fileName',
-  mimeType: 'mimeType',
-  externalReference: 'externalReference',
-  discardReason: 'discardReason',
-  classificationNotes: 'classificationNotes'
-} as const
-
-export type ScannedFileOrderByRelevanceFieldEnum = (typeof ScannedFileOrderByRelevanceFieldEnum)[keyof typeof ScannedFileOrderByRelevanceFieldEnum]
-
-
-export const AreaOrderByRelevanceFieldEnum = {
-  name: 'name',
-  code: 'code',
-  description: 'description'
-} as const
-
-export type AreaOrderByRelevanceFieldEnum = (typeof AreaOrderByRelevanceFieldEnum)[keyof typeof AreaOrderByRelevanceFieldEnum]
-
-
-export const DocumentSysLogOrderByRelevanceFieldEnum = {
-  name: 'name',
-  message: 'message',
-  meta: 'meta'
-} as const
-
-export type DocumentSysLogOrderByRelevanceFieldEnum = (typeof DocumentSysLogOrderByRelevanceFieldEnum)[keyof typeof DocumentSysLogOrderByRelevanceFieldEnum]
-
-
-export const DocumentSysLogArchiveOrderByRelevanceFieldEnum = {
-  name: 'name',
-  message: 'message',
-  meta: 'meta'
-} as const
-
-export type DocumentSysLogArchiveOrderByRelevanceFieldEnum = (typeof DocumentSysLogArchiveOrderByRelevanceFieldEnum)[keyof typeof DocumentSysLogArchiveOrderByRelevanceFieldEnum]
 

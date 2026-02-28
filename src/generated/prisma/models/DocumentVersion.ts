@@ -296,7 +296,6 @@ export type DocumentVersionOrderByWithRelationInput = {
   checksum?: Prisma.SortOrderInput | Prisma.SortOrder
   comment?: Prisma.SortOrderInput | Prisma.SortOrder
   revision?: Prisma.DocumentRevisionOrderByWithRelationInput
-  _relevance?: Prisma.DocumentVersionOrderByRelevanceInput
 }
 
 export type DocumentVersionWhereUniqueInput = Prisma.AtLeast<{
@@ -456,12 +455,6 @@ export type DocumentVersionListRelationFilter = {
 
 export type DocumentVersionOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type DocumentVersionOrderByRelevanceInput = {
-  fields: Prisma.DocumentVersionOrderByRelevanceFieldEnum | Prisma.DocumentVersionOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type DocumentVersionRevisionIdVersionNumberCompoundUniqueInput = {
@@ -705,7 +698,35 @@ export type DocumentVersionSelect<ExtArgs extends runtime.Types.Extensions.Inter
   revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["documentVersion"]>
 
+export type DocumentVersionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  createdById?: boolean
+  revisionId?: boolean
+  versionNumber?: boolean
+  fileKey?: boolean
+  fileName?: boolean
+  fileSize?: boolean
+  mimeType?: boolean
+  checksum?: boolean
+  comment?: boolean
+  revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["documentVersion"]>
 
+export type DocumentVersionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  createdById?: boolean
+  revisionId?: boolean
+  versionNumber?: boolean
+  fileKey?: boolean
+  fileName?: boolean
+  fileSize?: boolean
+  mimeType?: boolean
+  checksum?: boolean
+  comment?: boolean
+  revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["documentVersion"]>
 
 export type DocumentVersionSelectScalar = {
   id?: boolean
@@ -723,6 +744,12 @@ export type DocumentVersionSelectScalar = {
 
 export type DocumentVersionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "revisionId" | "versionNumber" | "fileKey" | "fileName" | "fileSize" | "mimeType" | "checksum" | "comment", ExtArgs["result"]["documentVersion"]>
 export type DocumentVersionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
+}
+export type DocumentVersionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
+}
+export type DocumentVersionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
 }
 
@@ -861,6 +888,30 @@ export interface DocumentVersionDelegate<ExtArgs extends runtime.Types.Extension
   createMany<T extends DocumentVersionCreateManyArgs>(args?: Prisma.SelectSubset<T, DocumentVersionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many DocumentVersions and returns the data saved in the database.
+   * @param {DocumentVersionCreateManyAndReturnArgs} args - Arguments to create many DocumentVersions.
+   * @example
+   * // Create many DocumentVersions
+   * const documentVersion = await prisma.documentVersion.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many DocumentVersions and only return the `id`
+   * const documentVersionWithIdOnly = await prisma.documentVersion.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends DocumentVersionCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, DocumentVersionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentVersionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a DocumentVersion.
    * @param {DocumentVersionDeleteArgs} args - Arguments to delete one DocumentVersion.
    * @example
@@ -923,6 +974,36 @@ export interface DocumentVersionDelegate<ExtArgs extends runtime.Types.Extension
    * 
    */
   updateMany<T extends DocumentVersionUpdateManyArgs>(args: Prisma.SelectSubset<T, DocumentVersionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more DocumentVersions and returns the data updated in the database.
+   * @param {DocumentVersionUpdateManyAndReturnArgs} args - Arguments to update many DocumentVersions.
+   * @example
+   * // Update many DocumentVersions
+   * const documentVersion = await prisma.documentVersion.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more DocumentVersions and only return the `id`
+   * const documentVersionWithIdOnly = await prisma.documentVersion.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends DocumentVersionUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, DocumentVersionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentVersionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one DocumentVersion.
@@ -1357,6 +1438,29 @@ export type DocumentVersionCreateManyArgs<ExtArgs extends runtime.Types.Extensio
 }
 
 /**
+ * DocumentVersion createManyAndReturn
+ */
+export type DocumentVersionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentVersion
+   */
+  select?: Prisma.DocumentVersionSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentVersion
+   */
+  omit?: Prisma.DocumentVersionOmit<ExtArgs> | null
+  /**
+   * The data used to create many DocumentVersions.
+   */
+  data: Prisma.DocumentVersionCreateManyInput | Prisma.DocumentVersionCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentVersionIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * DocumentVersion update
  */
 export type DocumentVersionUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1398,6 +1502,36 @@ export type DocumentVersionUpdateManyArgs<ExtArgs extends runtime.Types.Extensio
    * Limit how many DocumentVersions to update.
    */
   limit?: number
+}
+
+/**
+ * DocumentVersion updateManyAndReturn
+ */
+export type DocumentVersionUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentVersion
+   */
+  select?: Prisma.DocumentVersionSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentVersion
+   */
+  omit?: Prisma.DocumentVersionOmit<ExtArgs> | null
+  /**
+   * The data used to update DocumentVersions.
+   */
+  data: Prisma.XOR<Prisma.DocumentVersionUpdateManyMutationInput, Prisma.DocumentVersionUncheckedUpdateManyInput>
+  /**
+   * Filter which DocumentVersions to update
+   */
+  where?: Prisma.DocumentVersionWhereInput
+  /**
+   * Limit how many DocumentVersions to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentVersionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

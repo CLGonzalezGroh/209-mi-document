@@ -293,7 +293,6 @@ export type DocumentRevisionOrderByWithRelationInput = {
   versions?: Prisma.DocumentVersionOrderByRelationAggregateInput
   workflow?: Prisma.ReviewWorkflowOrderByWithRelationInput
   transmittalItems?: Prisma.TransmittalItemOrderByRelationAggregateInput
-  _relevance?: Prisma.DocumentRevisionOrderByRelevanceInput
 }
 
 export type DocumentRevisionWhereUniqueInput = Prisma.AtLeast<{
@@ -458,12 +457,6 @@ export type DocumentRevisionListRelationFilter = {
 
 export type DocumentRevisionOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type DocumentRevisionOrderByRelevanceInput = {
-  fields: Prisma.DocumentRevisionOrderByRelevanceFieldEnum | Prisma.DocumentRevisionOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type DocumentRevisionDocumentIdRevisionCodeCompoundUniqueInput = {
@@ -1023,7 +1016,33 @@ export type DocumentRevisionSelect<ExtArgs extends runtime.Types.Extensions.Inte
   _count?: boolean | Prisma.DocumentRevisionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["documentRevision"]>
 
+export type DocumentRevisionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  createdById?: boolean
+  updatedAt?: boolean
+  updatedById?: boolean
+  documentId?: boolean
+  revisionCode?: boolean
+  status?: boolean
+  approvedById?: boolean
+  approvedAt?: boolean
+  document?: boolean | Prisma.DocumentDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["documentRevision"]>
 
+export type DocumentRevisionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  createdById?: boolean
+  updatedAt?: boolean
+  updatedById?: boolean
+  documentId?: boolean
+  revisionCode?: boolean
+  status?: boolean
+  approvedById?: boolean
+  approvedAt?: boolean
+  document?: boolean | Prisma.DocumentDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["documentRevision"]>
 
 export type DocumentRevisionSelectScalar = {
   id?: boolean
@@ -1045,6 +1064,12 @@ export type DocumentRevisionInclude<ExtArgs extends runtime.Types.Extensions.Int
   workflow?: boolean | Prisma.DocumentRevision$workflowArgs<ExtArgs>
   transmittalItems?: boolean | Prisma.DocumentRevision$transmittalItemsArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentRevisionCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type DocumentRevisionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  document?: boolean | Prisma.DocumentDefaultArgs<ExtArgs>
+}
+export type DocumentRevisionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  document?: boolean | Prisma.DocumentDefaultArgs<ExtArgs>
 }
 
 export type $DocumentRevisionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1184,6 +1209,30 @@ export interface DocumentRevisionDelegate<ExtArgs extends runtime.Types.Extensio
   createMany<T extends DocumentRevisionCreateManyArgs>(args?: Prisma.SelectSubset<T, DocumentRevisionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many DocumentRevisions and returns the data saved in the database.
+   * @param {DocumentRevisionCreateManyAndReturnArgs} args - Arguments to create many DocumentRevisions.
+   * @example
+   * // Create many DocumentRevisions
+   * const documentRevision = await prisma.documentRevision.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many DocumentRevisions and only return the `id`
+   * const documentRevisionWithIdOnly = await prisma.documentRevision.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends DocumentRevisionCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, DocumentRevisionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentRevisionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a DocumentRevision.
    * @param {DocumentRevisionDeleteArgs} args - Arguments to delete one DocumentRevision.
    * @example
@@ -1246,6 +1295,36 @@ export interface DocumentRevisionDelegate<ExtArgs extends runtime.Types.Extensio
    * 
    */
   updateMany<T extends DocumentRevisionUpdateManyArgs>(args: Prisma.SelectSubset<T, DocumentRevisionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more DocumentRevisions and returns the data updated in the database.
+   * @param {DocumentRevisionUpdateManyAndReturnArgs} args - Arguments to update many DocumentRevisions.
+   * @example
+   * // Update many DocumentRevisions
+   * const documentRevision = await prisma.documentRevision.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more DocumentRevisions and only return the `id`
+   * const documentRevisionWithIdOnly = await prisma.documentRevision.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends DocumentRevisionUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, DocumentRevisionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentRevisionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one DocumentRevision.
@@ -1682,6 +1761,29 @@ export type DocumentRevisionCreateManyArgs<ExtArgs extends runtime.Types.Extensi
 }
 
 /**
+ * DocumentRevision createManyAndReturn
+ */
+export type DocumentRevisionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentRevision
+   */
+  select?: Prisma.DocumentRevisionSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentRevision
+   */
+  omit?: Prisma.DocumentRevisionOmit<ExtArgs> | null
+  /**
+   * The data used to create many DocumentRevisions.
+   */
+  data: Prisma.DocumentRevisionCreateManyInput | Prisma.DocumentRevisionCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentRevisionIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * DocumentRevision update
  */
 export type DocumentRevisionUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1723,6 +1825,36 @@ export type DocumentRevisionUpdateManyArgs<ExtArgs extends runtime.Types.Extensi
    * Limit how many DocumentRevisions to update.
    */
   limit?: number
+}
+
+/**
+ * DocumentRevision updateManyAndReturn
+ */
+export type DocumentRevisionUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentRevision
+   */
+  select?: Prisma.DocumentRevisionSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentRevision
+   */
+  omit?: Prisma.DocumentRevisionOmit<ExtArgs> | null
+  /**
+   * The data used to update DocumentRevisions.
+   */
+  data: Prisma.XOR<Prisma.DocumentRevisionUpdateManyMutationInput, Prisma.DocumentRevisionUncheckedUpdateManyInput>
+  /**
+   * Filter which DocumentRevisions to update
+   */
+  where?: Prisma.DocumentRevisionWhereInput
+  /**
+   * Limit how many DocumentRevisions to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentRevisionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

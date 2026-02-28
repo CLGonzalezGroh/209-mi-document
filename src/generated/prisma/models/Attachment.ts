@@ -290,7 +290,6 @@ export type AttachmentOrderByWithRelationInput = {
   fileSize?: Prisma.SortOrder
   mimeType?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  _relevance?: Prisma.AttachmentOrderByRelevanceInput
 }
 
 export type AttachmentWhereUniqueInput = Prisma.AtLeast<{
@@ -441,12 +440,6 @@ export type AttachmentUncheckedUpdateManyInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
-export type AttachmentOrderByRelevanceInput = {
-  fields: Prisma.AttachmentOrderByRelevanceFieldEnum | Prisma.AttachmentOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
-}
-
 export type AttachmentCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -519,7 +512,33 @@ export type AttachmentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   description?: boolean
 }, ExtArgs["result"]["attachment"]>
 
+export type AttachmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  createdById?: boolean
+  module?: boolean
+  entityType?: boolean
+  entityId?: boolean
+  fileKey?: boolean
+  fileName?: boolean
+  fileSize?: boolean
+  mimeType?: boolean
+  description?: boolean
+}, ExtArgs["result"]["attachment"]>
 
+export type AttachmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  createdById?: boolean
+  module?: boolean
+  entityType?: boolean
+  entityId?: boolean
+  fileKey?: boolean
+  fileName?: boolean
+  fileSize?: boolean
+  mimeType?: boolean
+  description?: boolean
+}, ExtArgs["result"]["attachment"]>
 
 export type AttachmentSelectScalar = {
   id?: boolean
@@ -670,6 +689,30 @@ export interface AttachmentDelegate<ExtArgs extends runtime.Types.Extensions.Int
   createMany<T extends AttachmentCreateManyArgs>(args?: Prisma.SelectSubset<T, AttachmentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Attachments and returns the data saved in the database.
+   * @param {AttachmentCreateManyAndReturnArgs} args - Arguments to create many Attachments.
+   * @example
+   * // Create many Attachments
+   * const attachment = await prisma.attachment.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Attachments and only return the `id`
+   * const attachmentWithIdOnly = await prisma.attachment.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends AttachmentCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, AttachmentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttachmentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Attachment.
    * @param {AttachmentDeleteArgs} args - Arguments to delete one Attachment.
    * @example
@@ -732,6 +775,36 @@ export interface AttachmentDelegate<ExtArgs extends runtime.Types.Extensions.Int
    * 
    */
   updateMany<T extends AttachmentUpdateManyArgs>(args: Prisma.SelectSubset<T, AttachmentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Attachments and returns the data updated in the database.
+   * @param {AttachmentUpdateManyAndReturnArgs} args - Arguments to update many Attachments.
+   * @example
+   * // Update many Attachments
+   * const attachment = await prisma.attachment.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Attachments and only return the `id`
+   * const attachmentWithIdOnly = await prisma.attachment.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends AttachmentUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, AttachmentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttachmentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Attachment.
@@ -1141,6 +1214,25 @@ export type AttachmentCreateManyArgs<ExtArgs extends runtime.Types.Extensions.In
 }
 
 /**
+ * Attachment createManyAndReturn
+ */
+export type AttachmentCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Attachment
+   */
+  select?: Prisma.AttachmentSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Attachment
+   */
+  omit?: Prisma.AttachmentOmit<ExtArgs> | null
+  /**
+   * The data used to create many Attachments.
+   */
+  data: Prisma.AttachmentCreateManyInput | Prisma.AttachmentCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
  * Attachment update
  */
 export type AttachmentUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1166,6 +1258,32 @@ export type AttachmentUpdateArgs<ExtArgs extends runtime.Types.Extensions.Intern
  * Attachment updateMany
  */
 export type AttachmentUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to update Attachments.
+   */
+  data: Prisma.XOR<Prisma.AttachmentUpdateManyMutationInput, Prisma.AttachmentUncheckedUpdateManyInput>
+  /**
+   * Filter which Attachments to update
+   */
+  where?: Prisma.AttachmentWhereInput
+  /**
+   * Limit how many Attachments to update.
+   */
+  limit?: number
+}
+
+/**
+ * Attachment updateManyAndReturn
+ */
+export type AttachmentUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Attachment
+   */
+  select?: Prisma.AttachmentSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Attachment
+   */
+  omit?: Prisma.AttachmentOmit<ExtArgs> | null
   /**
    * The data used to update Attachments.
    */

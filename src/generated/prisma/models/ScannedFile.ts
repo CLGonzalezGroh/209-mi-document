@@ -464,7 +464,6 @@ export type ScannedFileOrderByWithRelationInput = {
   documentType?: Prisma.DocumentTypeOrderByWithRelationInput
   documentClass?: Prisma.DocumentClassOrderByWithRelationInput
   area?: Prisma.AreaOrderByWithRelationInput
-  _relevance?: Prisma.ScannedFileOrderByRelevanceInput
 }
 
 export type ScannedFileWhereUniqueInput = Prisma.AtLeast<{
@@ -783,12 +782,6 @@ export type ScannedFileListRelationFilter = {
 
 export type ScannedFileOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type ScannedFileOrderByRelevanceInput = {
-  fields: Prisma.ScannedFileOrderByRelevanceFieldEnum | Prisma.ScannedFileOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type ScannedFileCountOrderByAggregateInput = {
@@ -1703,7 +1696,71 @@ export type ScannedFileSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   area?: boolean | Prisma.ScannedFile$areaArgs<ExtArgs>
 }, ExtArgs["result"]["scannedFile"]>
 
+export type ScannedFileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  createdById?: boolean
+  updatedAt?: boolean
+  updatedById?: boolean
+  projectId?: boolean
+  documentTypeId?: boolean
+  documentClassId?: boolean
+  areaId?: boolean
+  title?: boolean
+  description?: boolean
+  originalReference?: boolean
+  physicalLocation?: boolean
+  fileKey?: boolean
+  fileName?: boolean
+  fileSize?: boolean
+  mimeType?: boolean
+  digitalDisposition?: boolean
+  physicalDisposition?: boolean
+  externalReference?: boolean
+  discardReason?: boolean
+  classificationNotes?: boolean
+  classifiedById?: boolean
+  classifiedAt?: boolean
+  physicalConfirmedById?: boolean
+  physicalConfirmedAt?: boolean
+  terminatedAt?: boolean
+  documentType?: boolean | Prisma.ScannedFile$documentTypeArgs<ExtArgs>
+  documentClass?: boolean | Prisma.ScannedFile$documentClassArgs<ExtArgs>
+  area?: boolean | Prisma.ScannedFile$areaArgs<ExtArgs>
+}, ExtArgs["result"]["scannedFile"]>
 
+export type ScannedFileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  createdById?: boolean
+  updatedAt?: boolean
+  updatedById?: boolean
+  projectId?: boolean
+  documentTypeId?: boolean
+  documentClassId?: boolean
+  areaId?: boolean
+  title?: boolean
+  description?: boolean
+  originalReference?: boolean
+  physicalLocation?: boolean
+  fileKey?: boolean
+  fileName?: boolean
+  fileSize?: boolean
+  mimeType?: boolean
+  digitalDisposition?: boolean
+  physicalDisposition?: boolean
+  externalReference?: boolean
+  discardReason?: boolean
+  classificationNotes?: boolean
+  classifiedById?: boolean
+  classifiedAt?: boolean
+  physicalConfirmedById?: boolean
+  physicalConfirmedAt?: boolean
+  terminatedAt?: boolean
+  documentType?: boolean | Prisma.ScannedFile$documentTypeArgs<ExtArgs>
+  documentClass?: boolean | Prisma.ScannedFile$documentClassArgs<ExtArgs>
+  area?: boolean | Prisma.ScannedFile$areaArgs<ExtArgs>
+}, ExtArgs["result"]["scannedFile"]>
 
 export type ScannedFileSelectScalar = {
   id?: boolean
@@ -1737,6 +1794,16 @@ export type ScannedFileSelectScalar = {
 
 export type ScannedFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "projectId" | "documentTypeId" | "documentClassId" | "areaId" | "title" | "description" | "originalReference" | "physicalLocation" | "fileKey" | "fileName" | "fileSize" | "mimeType" | "digitalDisposition" | "physicalDisposition" | "externalReference" | "discardReason" | "classificationNotes" | "classifiedById" | "classifiedAt" | "physicalConfirmedById" | "physicalConfirmedAt" | "terminatedAt", ExtArgs["result"]["scannedFile"]>
 export type ScannedFileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  documentType?: boolean | Prisma.ScannedFile$documentTypeArgs<ExtArgs>
+  documentClass?: boolean | Prisma.ScannedFile$documentClassArgs<ExtArgs>
+  area?: boolean | Prisma.ScannedFile$areaArgs<ExtArgs>
+}
+export type ScannedFileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  documentType?: boolean | Prisma.ScannedFile$documentTypeArgs<ExtArgs>
+  documentClass?: boolean | Prisma.ScannedFile$documentClassArgs<ExtArgs>
+  area?: boolean | Prisma.ScannedFile$areaArgs<ExtArgs>
+}
+export type ScannedFileIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documentType?: boolean | Prisma.ScannedFile$documentTypeArgs<ExtArgs>
   documentClass?: boolean | Prisma.ScannedFile$documentClassArgs<ExtArgs>
   area?: boolean | Prisma.ScannedFile$areaArgs<ExtArgs>
@@ -1895,6 +1962,30 @@ export interface ScannedFileDelegate<ExtArgs extends runtime.Types.Extensions.In
   createMany<T extends ScannedFileCreateManyArgs>(args?: Prisma.SelectSubset<T, ScannedFileCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many ScannedFiles and returns the data saved in the database.
+   * @param {ScannedFileCreateManyAndReturnArgs} args - Arguments to create many ScannedFiles.
+   * @example
+   * // Create many ScannedFiles
+   * const scannedFile = await prisma.scannedFile.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many ScannedFiles and only return the `id`
+   * const scannedFileWithIdOnly = await prisma.scannedFile.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends ScannedFileCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ScannedFileCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScannedFilePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a ScannedFile.
    * @param {ScannedFileDeleteArgs} args - Arguments to delete one ScannedFile.
    * @example
@@ -1957,6 +2048,36 @@ export interface ScannedFileDelegate<ExtArgs extends runtime.Types.Extensions.In
    * 
    */
   updateMany<T extends ScannedFileUpdateManyArgs>(args: Prisma.SelectSubset<T, ScannedFileUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more ScannedFiles and returns the data updated in the database.
+   * @param {ScannedFileUpdateManyAndReturnArgs} args - Arguments to update many ScannedFiles.
+   * @example
+   * // Update many ScannedFiles
+   * const scannedFile = await prisma.scannedFile.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more ScannedFiles and only return the `id`
+   * const scannedFileWithIdOnly = await prisma.scannedFile.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends ScannedFileUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ScannedFileUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScannedFilePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ScannedFile.
@@ -2409,6 +2530,29 @@ export type ScannedFileCreateManyArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
+ * ScannedFile createManyAndReturn
+ */
+export type ScannedFileCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ScannedFile
+   */
+  select?: Prisma.ScannedFileSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ScannedFile
+   */
+  omit?: Prisma.ScannedFileOmit<ExtArgs> | null
+  /**
+   * The data used to create many ScannedFiles.
+   */
+  data: Prisma.ScannedFileCreateManyInput | Prisma.ScannedFileCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScannedFileIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * ScannedFile update
  */
 export type ScannedFileUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2450,6 +2594,36 @@ export type ScannedFileUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many ScannedFiles to update.
    */
   limit?: number
+}
+
+/**
+ * ScannedFile updateManyAndReturn
+ */
+export type ScannedFileUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ScannedFile
+   */
+  select?: Prisma.ScannedFileSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ScannedFile
+   */
+  omit?: Prisma.ScannedFileOmit<ExtArgs> | null
+  /**
+   * The data used to update ScannedFiles.
+   */
+  data: Prisma.XOR<Prisma.ScannedFileUpdateManyMutationInput, Prisma.ScannedFileUncheckedUpdateManyInput>
+  /**
+   * Filter which ScannedFiles to update
+   */
+  where?: Prisma.ScannedFileWhereInput
+  /**
+   * Limit how many ScannedFiles to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScannedFileIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

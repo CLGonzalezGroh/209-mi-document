@@ -623,7 +623,27 @@ export type ReviewWorkflowSelect<ExtArgs extends runtime.Types.Extensions.Intern
   _count?: boolean | Prisma.ReviewWorkflowCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reviewWorkflow"]>
 
+export type ReviewWorkflowSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  revisionId?: boolean
+  status?: boolean
+  initiatedById?: boolean
+  initiatedAt?: boolean
+  completedAt?: boolean
+  revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["reviewWorkflow"]>
 
+export type ReviewWorkflowSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  revisionId?: boolean
+  status?: boolean
+  initiatedById?: boolean
+  initiatedAt?: boolean
+  completedAt?: boolean
+  revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
+}, ExtArgs["result"]["reviewWorkflow"]>
 
 export type ReviewWorkflowSelectScalar = {
   id?: boolean
@@ -640,6 +660,12 @@ export type ReviewWorkflowInclude<ExtArgs extends runtime.Types.Extensions.Inter
   revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
   steps?: boolean | Prisma.ReviewWorkflow$stepsArgs<ExtArgs>
   _count?: boolean | Prisma.ReviewWorkflowCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type ReviewWorkflowIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
+}
+export type ReviewWorkflowIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
 }
 
 export type $ReviewWorkflowPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -774,6 +800,30 @@ export interface ReviewWorkflowDelegate<ExtArgs extends runtime.Types.Extensions
   createMany<T extends ReviewWorkflowCreateManyArgs>(args?: Prisma.SelectSubset<T, ReviewWorkflowCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many ReviewWorkflows and returns the data saved in the database.
+   * @param {ReviewWorkflowCreateManyAndReturnArgs} args - Arguments to create many ReviewWorkflows.
+   * @example
+   * // Create many ReviewWorkflows
+   * const reviewWorkflow = await prisma.reviewWorkflow.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many ReviewWorkflows and only return the `id`
+   * const reviewWorkflowWithIdOnly = await prisma.reviewWorkflow.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends ReviewWorkflowCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ReviewWorkflowCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewWorkflowPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a ReviewWorkflow.
    * @param {ReviewWorkflowDeleteArgs} args - Arguments to delete one ReviewWorkflow.
    * @example
@@ -836,6 +886,36 @@ export interface ReviewWorkflowDelegate<ExtArgs extends runtime.Types.Extensions
    * 
    */
   updateMany<T extends ReviewWorkflowUpdateManyArgs>(args: Prisma.SelectSubset<T, ReviewWorkflowUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more ReviewWorkflows and returns the data updated in the database.
+   * @param {ReviewWorkflowUpdateManyAndReturnArgs} args - Arguments to update many ReviewWorkflows.
+   * @example
+   * // Update many ReviewWorkflows
+   * const reviewWorkflow = await prisma.reviewWorkflow.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more ReviewWorkflows and only return the `id`
+   * const reviewWorkflowWithIdOnly = await prisma.reviewWorkflow.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends ReviewWorkflowUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ReviewWorkflowUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewWorkflowPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ReviewWorkflow.
@@ -1267,6 +1347,29 @@ export type ReviewWorkflowCreateManyArgs<ExtArgs extends runtime.Types.Extension
 }
 
 /**
+ * ReviewWorkflow createManyAndReturn
+ */
+export type ReviewWorkflowCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReviewWorkflow
+   */
+  select?: Prisma.ReviewWorkflowSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReviewWorkflow
+   */
+  omit?: Prisma.ReviewWorkflowOmit<ExtArgs> | null
+  /**
+   * The data used to create many ReviewWorkflows.
+   */
+  data: Prisma.ReviewWorkflowCreateManyInput | Prisma.ReviewWorkflowCreateManyInput[]
+  skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReviewWorkflowIncludeCreateManyAndReturn<ExtArgs> | null
+}
+
+/**
  * ReviewWorkflow update
  */
 export type ReviewWorkflowUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1308,6 +1411,36 @@ export type ReviewWorkflowUpdateManyArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many ReviewWorkflows to update.
    */
   limit?: number
+}
+
+/**
+ * ReviewWorkflow updateManyAndReturn
+ */
+export type ReviewWorkflowUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReviewWorkflow
+   */
+  select?: Prisma.ReviewWorkflowSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReviewWorkflow
+   */
+  omit?: Prisma.ReviewWorkflowOmit<ExtArgs> | null
+  /**
+   * The data used to update ReviewWorkflows.
+   */
+  data: Prisma.XOR<Prisma.ReviewWorkflowUpdateManyMutationInput, Prisma.ReviewWorkflowUncheckedUpdateManyInput>
+  /**
+   * Filter which ReviewWorkflows to update
+   */
+  where?: Prisma.ReviewWorkflowWhereInput
+  /**
+   * Limit how many ReviewWorkflows to update.
+   */
+  limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReviewWorkflowIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

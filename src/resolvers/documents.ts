@@ -22,12 +22,14 @@ interface DocumentFilterInput {
   query?: string
   module?: ModuleType
   documentTypeId?: number
+  documentClassId?: number
   status?: RevisionStatus
   terminatedFilter?: TerminatedFilter
 }
 
 const documentIncludes = {
   documentType: true,
+  documentClass: true,
   revisions: {
     include: {
       versions: true,
@@ -128,6 +130,10 @@ export const documentResolvers = {
 
         if (filter?.documentTypeId) {
           where.documentTypeId = filter.documentTypeId
+        }
+
+        if (filter?.documentClassId) {
+          where.documentClassId = filter.documentClassId
         }
 
         if (filter?.status) {
@@ -322,6 +328,7 @@ export const documentResolvers = {
           entityType?: string
           entityId?: number
           documentTypeId: number
+          documentClassId?: number
           revisionScheme?: RevisionScheme
           initialRevisionCode?: string
           fileKey: string
@@ -356,6 +363,7 @@ export const documentResolvers = {
             entityType: input.entityType,
             entityId: input.entityId,
             documentTypeId: input.documentTypeId,
+            documentClassId: input.documentClassId,
             revisionScheme,
             createdById: userId,
             updatedById: userId,
@@ -409,6 +417,8 @@ export const documentResolvers = {
         input: {
           title?: string
           description?: string
+          documentTypeId?: number
+          documentClassId?: number
         }
       },
       context: ResolverContext,
@@ -419,11 +429,21 @@ export const documentResolvers = {
       })
 
       try {
+        const { documentTypeId, documentClassId, ...rest } = input
+
         const document = await context.orm.document.update({
           where: { id },
           data: {
-            ...input,
+            ...rest,
             updatedById: userId,
+            ...(documentTypeId !== undefined && {
+              documentType: { connect: { id: documentTypeId } },
+            }),
+            ...(documentClassId !== undefined && {
+              documentClass: documentClassId
+                ? { connect: { id: documentClassId } }
+                : { disconnect: true },
+            }),
           },
           include: documentIncludes,
         })
@@ -437,6 +457,8 @@ export const documentResolvers = {
           logName: "UPDATE_DOCUMENT",
           messages: {
             notFound: "El documento no existe.",
+            foreignKeyConstraint:
+              "El tipo o clase de documento especificado no existe.",
             default: "Error al actualizar el documento.",
           },
         })

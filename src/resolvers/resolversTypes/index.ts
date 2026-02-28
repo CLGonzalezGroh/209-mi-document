@@ -23,6 +23,7 @@ export const resolverTypes = {
         where: { id: ref.id },
         include: {
           documentType: true,
+          documentClass: true,
           revisions: {
             include: {
               versions: true,

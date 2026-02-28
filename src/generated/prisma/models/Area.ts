@@ -292,7 +292,6 @@ export type AreaOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   scannedFiles?: Prisma.ScannedFileOrderByRelationAggregateInput
-  _relevance?: Prisma.AreaOrderByRelevanceInput
 }
 
 export type AreaWhereUniqueInput = Prisma.AtLeast<{
@@ -452,12 +451,6 @@ export type AreaUncheckedUpdateManyInput = {
 export type AreaNullableScalarRelationFilter = {
   is?: Prisma.AreaWhereInput | null
   isNot?: Prisma.AreaWhereInput | null
-}
-
-export type AreaOrderByRelevanceInput = {
-  fields: Prisma.AreaOrderByRelevanceFieldEnum | Prisma.AreaOrderByRelevanceFieldEnum[]
-  sort: Prisma.SortOrder
-  search: string
 }
 
 export type AreaCodeProjectIdCompoundUniqueInput = {
@@ -654,7 +647,33 @@ export type AreaSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   _count?: boolean | Prisma.AreaCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["area"]>
 
+export type AreaSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  updatedById?: boolean
+  terminatedAt?: boolean
+  isSys?: boolean
+  name?: boolean
+  code?: boolean
+  projectId?: boolean
+  description?: boolean
+  sortOrder?: boolean
+}, ExtArgs["result"]["area"]>
 
+export type AreaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  updatedById?: boolean
+  terminatedAt?: boolean
+  isSys?: boolean
+  name?: boolean
+  code?: boolean
+  projectId?: boolean
+  description?: boolean
+  sortOrder?: boolean
+}, ExtArgs["result"]["area"]>
 
 export type AreaSelectScalar = {
   id?: boolean
@@ -675,6 +694,8 @@ export type AreaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   scannedFiles?: boolean | Prisma.Area$scannedFilesArgs<ExtArgs>
   _count?: boolean | Prisma.AreaCountOutputTypeDefaultArgs<ExtArgs>
 }
+export type AreaIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type AreaIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $AreaPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Area"
@@ -811,6 +832,30 @@ export interface AreaDelegate<ExtArgs extends runtime.Types.Extensions.InternalA
   createMany<T extends AreaCreateManyArgs>(args?: Prisma.SelectSubset<T, AreaCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
+   * Create many Areas and returns the data saved in the database.
+   * @param {AreaCreateManyAndReturnArgs} args - Arguments to create many Areas.
+   * @example
+   * // Create many Areas
+   * const area = await prisma.area.createManyAndReturn({
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Create many Areas and only return the `id`
+   * const areaWithIdOnly = await prisma.area.createManyAndReturn({
+   *   select: { id: true },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  createManyAndReturn<T extends AreaCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, AreaCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AreaPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+  /**
    * Delete a Area.
    * @param {AreaDeleteArgs} args - Arguments to delete one Area.
    * @example
@@ -873,6 +918,36 @@ export interface AreaDelegate<ExtArgs extends runtime.Types.Extensions.InternalA
    * 
    */
   updateMany<T extends AreaUpdateManyArgs>(args: Prisma.SelectSubset<T, AreaUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
+
+  /**
+   * Update zero or more Areas and returns the data updated in the database.
+   * @param {AreaUpdateManyAndReturnArgs} args - Arguments to update many Areas.
+   * @example
+   * // Update many Areas
+   * const area = await prisma.area.updateManyAndReturn({
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * 
+   * // Update zero or more Areas and only return the `id`
+   * const areaWithIdOnly = await prisma.area.updateManyAndReturn({
+   *   select: { id: true },
+   *   where: {
+   *     // ... provide filter here
+   *   },
+   *   data: [
+   *     // ... provide data here
+   *   ]
+   * })
+   * Note, that providing `undefined` is treated as the value not being there.
+   * Read more here: https://pris.ly/d/null-undefined
+   * 
+   */
+  updateManyAndReturn<T extends AreaUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, AreaUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AreaPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Area.
@@ -1307,6 +1382,25 @@ export type AreaCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
+ * Area createManyAndReturn
+ */
+export type AreaCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Area
+   */
+  select?: Prisma.AreaSelectCreateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Area
+   */
+  omit?: Prisma.AreaOmit<ExtArgs> | null
+  /**
+   * The data used to create many Areas.
+   */
+  data: Prisma.AreaCreateManyInput | Prisma.AreaCreateManyInput[]
+  skipDuplicates?: boolean
+}
+
+/**
  * Area update
  */
 export type AreaUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1336,6 +1430,32 @@ export type AreaUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
  * Area updateMany
  */
 export type AreaUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * The data used to update Areas.
+   */
+  data: Prisma.XOR<Prisma.AreaUpdateManyMutationInput, Prisma.AreaUncheckedUpdateManyInput>
+  /**
+   * Filter which Areas to update
+   */
+  where?: Prisma.AreaWhereInput
+  /**
+   * Limit how many Areas to update.
+   */
+  limit?: number
+}
+
+/**
+ * Area updateManyAndReturn
+ */
+export type AreaUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Area
+   */
+  select?: Prisma.AreaSelectUpdateManyAndReturn<ExtArgs> | null
+  /**
+   * Omit specific fields from the Area
+   */
+  omit?: Prisma.AreaOmit<ExtArgs> | null
   /**
    * The data used to update Areas.
    */

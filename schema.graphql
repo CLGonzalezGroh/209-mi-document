@@ -473,6 +473,8 @@ type Document @key(fields: "id") {
   entityId: Int
   "Tipo de documento"
   documentType: DocumentType!
+  "Clase de documento"
+  documentClass: DocumentClass
   "Esquema de revisión actual (ALPHABETICAL o NUMERIC)"
   revisionScheme: RevisionScheme!
   "Revisión vigente del documento"
@@ -935,6 +937,8 @@ input DocumentFilterInput {
   module: ModuleTypeInput
   "Filtrar por tipo de documento"
   documentTypeId: Int
+  "Filtrar por clase de documento"
+  documentClassId: Int
   "Filtra por status de revisión vigente"
   status: RevisionStatusInput
   "Filtrar por estado de habilitación"
@@ -1063,6 +1067,8 @@ input CreateDocumentInput {
   entityId: Int
   "ID del tipo de documento"
   documentTypeId: Int!
+  "ID de la clase de documento"
+  documentClassId: Int
   "Esquema de revisión inicial (por defecto ALPHABETICAL)"
   revisionScheme: RevisionSchemeInput
   "Código de revisión inicial (por defecto 'A' para ALPHABETICAL o '0' para NUMERIC)"
@@ -1085,6 +1091,10 @@ input UpdateDocumentInput {
   title: String
   "Nueva descripción del documento"
   description: String
+  "Nuevo tipo de documento"
+  documentTypeId: Int
+  "Nueva clase de documento"
+  documentClassId: Int
 }
 
 "Input para crear una revisión"

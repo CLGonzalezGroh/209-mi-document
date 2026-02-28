@@ -1,18 +1,14 @@
 import "dotenv/config"
-import { PrismaMariaDb } from "@prisma/adapter-mariadb"
+import { PrismaPg } from "@prisma/adapter-pg"
 import { PrismaClient } from "../generated/prisma/client.js"
 
-const adapter = new PrismaMariaDb({
-  host: process.env.DATABASE_HOST,
-  user: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_NAME,
-  connectionLimit: 10,
-  acquireTimeout: 30000,
-  connectTimeout: 10000,
-  idleTimeout: 600000,
-  allowPublicKeyRetrieval: true,
-})
+const connectionString = process.env.DATABASE_URL
+
+if (!connectionString) {
+  throw new Error("DATABASE_URL no está definida en las variables de entorno")
+}
+
+const adapter = new PrismaPg({ connectionString })
 
 // Singleton pattern para evitar múltiples instancias
 const globalForPrisma = globalThis as unknown as {
