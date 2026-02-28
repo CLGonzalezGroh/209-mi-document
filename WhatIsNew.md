@@ -57,3 +57,13 @@
 - Migración a Postgres. Incorporar Docker
 
 ---
+
+# What's new in María Ingeniería API Documents 1.0.6
+
+2026-02-28
+
+## npm update
+
+- Actualización de Librerías
+
+---
