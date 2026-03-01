@@ -44,6 +44,7 @@ RUN --mount=type=secret,id=npmrc,target=/app/.npmrc npm ci --omit=dev && npm cac
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./
+COPY --from=builder /app/schema.graphql ./
 COPY --from=builder /app/src/generated ./src/generated
 
 USER api
