@@ -5,7 +5,7 @@
 # ============================================
 
 # -- Stage 1: Build --
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -13,18 +13,22 @@ WORKDIR /app
 COPY package*.json ./
 RUN --mount=type=secret,id=npmrc,target=/app/.npmrc npm ci
 
-# Copiar código fuente y schema de Prisma
+# Copiar código fuente, schema de Prisma y config
 COPY prisma/ ./prisma/
+COPY prisma.config.ts ./
 COPY tsconfig.json ./
 COPY src/ ./src/
 COPY schema.graphql ./
+
+# Dummy URL para prisma generate/build (no conecta, solo genera el client)
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 
 # Generar Prisma Client y compilar TypeScript
 RUN npx prisma generate
 RUN npm run build
 
 # -- Stage 2: Production --
-FROM node:20-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
@@ -39,6 +43,7 @@ RUN --mount=type=secret,id=npmrc,target=/app/.npmrc npm ci --omit=dev && npm cac
 # Copiar build y archivos necesarios
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./
 COPY --from=builder /app/src/generated ./src/generated
 
 USER api

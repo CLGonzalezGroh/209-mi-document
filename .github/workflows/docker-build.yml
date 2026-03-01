@@ -59,3 +59,12 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           secret-files: |
             npmrc=/tmp/.npmrc
+
+      - name: Notify supergraph update
+        if: success()
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.PAT_GITHUB_PACKAGES }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/CLGonzalezGroh/210-mi-deploy/dispatches" \
+            -d '{"event_type":"schema-updated","client_payload":{"repo":"${{ github.repository }}"}}'
