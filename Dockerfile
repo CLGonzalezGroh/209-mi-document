@@ -52,8 +52,8 @@ USER api
 # Puerto por defecto (se sobreescribe con variable de entorno PORT)
 EXPOSE 4209
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-4209}/.well-known/apollo/server-health || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
+  CMD wget --no-verbose --tries=1 -O /dev/null --post-data='{"query":"{__typename}"}' --header='Content-Type: application/json' http://localhost:${PORT:-4209}/ || exit 1
 
 # Ejecutar migraciones y arrancar
 CMD ["sh", "-c", "npx prisma migrate deploy && node ./dist/src/index.js"]
