@@ -52,8 +52,7 @@ USER api
 # Puerto por defecto (se sobreescribe con variable de entorno PORT)
 EXPOSE 4209
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
-  CMD wget --no-verbose --tries=1 -O /dev/null --post-data='{"query":"{__typename}"}' --header='Content-Type: application/json' http://localhost:${PORT:-4209}/ || exit 1
+# Healthcheck definido en docker-compose (evita zombies al ejecutar dentro del contenedor)
 
 # Ejecutar migraciones y arrancar
 CMD ["sh", "-c", "npx prisma migrate deploy && node ./dist/src/index.js"]

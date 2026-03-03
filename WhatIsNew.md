@@ -67,3 +67,13 @@
 - Actualización de Librerías
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.0
+
+2026-03-03
+
+## Docker
+
+- Sacando el health check del Docker para ejecutarlo en el compose
+
+---
