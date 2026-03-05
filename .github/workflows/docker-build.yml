@@ -11,7 +11,7 @@ name: Build & Push Docker Image
 
 on:
   push:
-    branches: [dev]
+    branches: [main]
   workflow_dispatch: # Permite ejecutar manualmente
 
 env:
@@ -42,7 +42,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=dev
+            type=raw,value=latest
             type=sha,prefix=
 
       - name: Create .npmrc for GitHub Packages
