@@ -62,6 +62,7 @@ export type ScannedFileMinAggregateOutputType = {
   documentTypeId: number | null
   documentClassId: number | null
   areaId: number | null
+  code: string | null
   title: string | null
   description: string | null
   originalReference: string | null
@@ -92,6 +93,7 @@ export type ScannedFileMaxAggregateOutputType = {
   documentTypeId: number | null
   documentClassId: number | null
   areaId: number | null
+  code: string | null
   title: string | null
   description: string | null
   originalReference: string | null
@@ -122,6 +124,7 @@ export type ScannedFileCountAggregateOutputType = {
   documentTypeId: number
   documentClassId: number
   areaId: number
+  code: number
   title: number
   description: number
   originalReference: number
@@ -180,6 +183,7 @@ export type ScannedFileMinAggregateInputType = {
   documentTypeId?: true
   documentClassId?: true
   areaId?: true
+  code?: true
   title?: true
   description?: true
   originalReference?: true
@@ -210,6 +214,7 @@ export type ScannedFileMaxAggregateInputType = {
   documentTypeId?: true
   documentClassId?: true
   areaId?: true
+  code?: true
   title?: true
   description?: true
   originalReference?: true
@@ -240,6 +245,7 @@ export type ScannedFileCountAggregateInputType = {
   documentTypeId?: true
   documentClassId?: true
   areaId?: true
+  code?: true
   title?: true
   description?: true
   originalReference?: true
@@ -357,6 +363,7 @@ export type ScannedFileGroupByOutputType = {
   documentTypeId: number | null
   documentClassId: number | null
   areaId: number | null
+  code: string
   title: string
   description: string | null
   originalReference: string | null
@@ -410,6 +417,7 @@ export type ScannedFileWhereInput = {
   documentTypeId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
   documentClassId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
   areaId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
+  code?: Prisma.StringFilter<"ScannedFile"> | string
   title?: Prisma.StringFilter<"ScannedFile"> | string
   description?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
   originalReference?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
@@ -443,6 +451,7 @@ export type ScannedFileOrderByWithRelationInput = {
   documentTypeId?: Prisma.SortOrderInput | Prisma.SortOrder
   documentClassId?: Prisma.SortOrderInput | Prisma.SortOrder
   areaId?: Prisma.SortOrderInput | Prisma.SortOrder
+  code?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   originalReference?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -468,6 +477,7 @@ export type ScannedFileOrderByWithRelationInput = {
 
 export type ScannedFileWhereUniqueInput = Prisma.AtLeast<{
   id?: number
+  code_projectId?: Prisma.ScannedFileCodeProjectIdCompoundUniqueInput
   AND?: Prisma.ScannedFileWhereInput | Prisma.ScannedFileWhereInput[]
   OR?: Prisma.ScannedFileWhereInput[]
   NOT?: Prisma.ScannedFileWhereInput | Prisma.ScannedFileWhereInput[]
@@ -479,6 +489,7 @@ export type ScannedFileWhereUniqueInput = Prisma.AtLeast<{
   documentTypeId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
   documentClassId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
   areaId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
+  code?: Prisma.StringFilter<"ScannedFile"> | string
   title?: Prisma.StringFilter<"ScannedFile"> | string
   description?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
   originalReference?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
@@ -500,7 +511,7 @@ export type ScannedFileWhereUniqueInput = Prisma.AtLeast<{
   documentType?: Prisma.XOR<Prisma.DocumentTypeNullableScalarRelationFilter, Prisma.DocumentTypeWhereInput> | null
   documentClass?: Prisma.XOR<Prisma.DocumentClassNullableScalarRelationFilter, Prisma.DocumentClassWhereInput> | null
   area?: Prisma.XOR<Prisma.AreaNullableScalarRelationFilter, Prisma.AreaWhereInput> | null
-}, "id">
+}, "id" | "code_projectId">
 
 export type ScannedFileOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -512,6 +523,7 @@ export type ScannedFileOrderByWithAggregationInput = {
   documentTypeId?: Prisma.SortOrderInput | Prisma.SortOrder
   documentClassId?: Prisma.SortOrderInput | Prisma.SortOrder
   areaId?: Prisma.SortOrderInput | Prisma.SortOrder
+  code?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   originalReference?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -550,6 +562,7 @@ export type ScannedFileScalarWhereWithAggregatesInput = {
   documentTypeId?: Prisma.IntNullableWithAggregatesFilter<"ScannedFile"> | number | null
   documentClassId?: Prisma.IntNullableWithAggregatesFilter<"ScannedFile"> | number | null
   areaId?: Prisma.IntNullableWithAggregatesFilter<"ScannedFile"> | number | null
+  code?: Prisma.StringWithAggregatesFilter<"ScannedFile"> | string
   title?: Prisma.StringWithAggregatesFilter<"ScannedFile"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"ScannedFile"> | string | null
   originalReference?: Prisma.StringNullableWithAggregatesFilter<"ScannedFile"> | string | null
@@ -576,6 +589,7 @@ export type ScannedFileCreateInput = {
   updatedAt?: Date | string
   updatedById?: number
   projectId: number
+  code: string
   title: string
   description?: string | null
   originalReference?: string | null
@@ -609,6 +623,7 @@ export type ScannedFileUncheckedCreateInput = {
   documentTypeId?: number | null
   documentClassId?: number | null
   areaId?: number | null
+  code: string
   title: string
   description?: string | null
   originalReference?: string | null
@@ -635,6 +650,7 @@ export type ScannedFileUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -668,6 +684,7 @@ export type ScannedFileUncheckedUpdateInput = {
   documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   areaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -698,6 +715,7 @@ export type ScannedFileCreateManyInput = {
   documentTypeId?: number | null
   documentClassId?: number | null
   areaId?: number | null
+  code: string
   title: string
   description?: string | null
   originalReference?: string | null
@@ -724,6 +742,7 @@ export type ScannedFileUpdateManyMutationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -754,6 +773,7 @@ export type ScannedFileUncheckedUpdateManyInput = {
   documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   areaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -784,6 +804,11 @@ export type ScannedFileOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type ScannedFileCodeProjectIdCompoundUniqueInput = {
+  code: string
+  projectId: number
+}
+
 export type ScannedFileCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -794,6 +819,7 @@ export type ScannedFileCountOrderByAggregateInput = {
   documentTypeId?: Prisma.SortOrder
   documentClassId?: Prisma.SortOrder
   areaId?: Prisma.SortOrder
+  code?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   originalReference?: Prisma.SortOrder
@@ -837,6 +863,7 @@ export type ScannedFileMaxOrderByAggregateInput = {
   documentTypeId?: Prisma.SortOrder
   documentClassId?: Prisma.SortOrder
   areaId?: Prisma.SortOrder
+  code?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   originalReference?: Prisma.SortOrder
@@ -867,6 +894,7 @@ export type ScannedFileMinOrderByAggregateInput = {
   documentTypeId?: Prisma.SortOrder
   documentClassId?: Prisma.SortOrder
   areaId?: Prisma.SortOrder
+  code?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   originalReference?: Prisma.SortOrder
@@ -1040,6 +1068,7 @@ export type ScannedFileCreateWithoutDocumentClassInput = {
   updatedAt?: Date | string
   updatedById?: number
   projectId: number
+  code: string
   title: string
   description?: string | null
   originalReference?: string | null
@@ -1071,6 +1100,7 @@ export type ScannedFileUncheckedCreateWithoutDocumentClassInput = {
   projectId: number
   documentTypeId?: number | null
   areaId?: number | null
+  code: string
   title: string
   description?: string | null
   originalReference?: string | null
@@ -1130,6 +1160,7 @@ export type ScannedFileScalarWhereInput = {
   documentTypeId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
   documentClassId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
   areaId?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
+  code?: Prisma.StringFilter<"ScannedFile"> | string
   title?: Prisma.StringFilter<"ScannedFile"> | string
   description?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
   originalReference?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
@@ -1156,6 +1187,7 @@ export type ScannedFileCreateWithoutDocumentTypeInput = {
   updatedAt?: Date | string
   updatedById?: number
   projectId: number
+  code: string
   title: string
   description?: string | null
   originalReference?: string | null
@@ -1187,6 +1219,7 @@ export type ScannedFileUncheckedCreateWithoutDocumentTypeInput = {
   projectId: number
   documentClassId?: number | null
   areaId?: number | null
+  code: string
   title: string
   description?: string | null
   originalReference?: string | null
@@ -1239,6 +1272,7 @@ export type ScannedFileCreateWithoutAreaInput = {
   updatedAt?: Date | string
   updatedById?: number
   projectId: number
+  code: string
   title: string
   description?: string | null
   originalReference?: string | null
@@ -1270,6 +1304,7 @@ export type ScannedFileUncheckedCreateWithoutAreaInput = {
   projectId: number
   documentTypeId?: number | null
   documentClassId?: number | null
+  code: string
   title: string
   description?: string | null
   originalReference?: string | null
@@ -1325,6 +1360,7 @@ export type ScannedFileCreateManyDocumentClassInput = {
   projectId: number
   documentTypeId?: number | null
   areaId?: number | null
+  code: string
   title: string
   description?: string | null
   originalReference?: string | null
@@ -1351,6 +1387,7 @@ export type ScannedFileUpdateWithoutDocumentClassInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1382,6 +1419,7 @@ export type ScannedFileUncheckedUpdateWithoutDocumentClassInput = {
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
   documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   areaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1411,6 +1449,7 @@ export type ScannedFileUncheckedUpdateManyWithoutDocumentClassInput = {
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
   documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   areaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1440,6 +1479,7 @@ export type ScannedFileCreateManyDocumentTypeInput = {
   projectId: number
   documentClassId?: number | null
   areaId?: number | null
+  code: string
   title: string
   description?: string | null
   originalReference?: string | null
@@ -1466,6 +1506,7 @@ export type ScannedFileUpdateWithoutDocumentTypeInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1497,6 +1538,7 @@ export type ScannedFileUncheckedUpdateWithoutDocumentTypeInput = {
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
   documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   areaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1526,6 +1568,7 @@ export type ScannedFileUncheckedUpdateManyWithoutDocumentTypeInput = {
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
   documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   areaId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1555,6 +1598,7 @@ export type ScannedFileCreateManyAreaInput = {
   projectId: number
   documentTypeId?: number | null
   documentClassId?: number | null
+  code: string
   title: string
   description?: string | null
   originalReference?: string | null
@@ -1581,6 +1625,7 @@ export type ScannedFileUpdateWithoutAreaInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1612,6 +1657,7 @@ export type ScannedFileUncheckedUpdateWithoutAreaInput = {
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
   documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1641,6 +1687,7 @@ export type ScannedFileUncheckedUpdateManyWithoutAreaInput = {
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
   documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1673,6 +1720,7 @@ export type ScannedFileSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   documentTypeId?: boolean
   documentClassId?: boolean
   areaId?: boolean
+  code?: boolean
   title?: boolean
   description?: boolean
   originalReference?: boolean
@@ -1706,6 +1754,7 @@ export type ScannedFileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   documentTypeId?: boolean
   documentClassId?: boolean
   areaId?: boolean
+  code?: boolean
   title?: boolean
   description?: boolean
   originalReference?: boolean
@@ -1739,6 +1788,7 @@ export type ScannedFileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   documentTypeId?: boolean
   documentClassId?: boolean
   areaId?: boolean
+  code?: boolean
   title?: boolean
   description?: boolean
   originalReference?: boolean
@@ -1772,6 +1822,7 @@ export type ScannedFileSelectScalar = {
   documentTypeId?: boolean
   documentClassId?: boolean
   areaId?: boolean
+  code?: boolean
   title?: boolean
   description?: boolean
   originalReference?: boolean
@@ -1792,7 +1843,7 @@ export type ScannedFileSelectScalar = {
   terminatedAt?: boolean
 }
 
-export type ScannedFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "projectId" | "documentTypeId" | "documentClassId" | "areaId" | "title" | "description" | "originalReference" | "physicalLocation" | "fileKey" | "fileName" | "fileSize" | "mimeType" | "digitalDisposition" | "physicalDisposition" | "externalReference" | "discardReason" | "classificationNotes" | "classifiedById" | "classifiedAt" | "physicalConfirmedById" | "physicalConfirmedAt" | "terminatedAt", ExtArgs["result"]["scannedFile"]>
+export type ScannedFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "projectId" | "documentTypeId" | "documentClassId" | "areaId" | "code" | "title" | "description" | "originalReference" | "physicalLocation" | "fileKey" | "fileName" | "fileSize" | "mimeType" | "digitalDisposition" | "physicalDisposition" | "externalReference" | "discardReason" | "classificationNotes" | "classifiedById" | "classifiedAt" | "physicalConfirmedById" | "physicalConfirmedAt" | "terminatedAt", ExtArgs["result"]["scannedFile"]>
 export type ScannedFileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documentType?: boolean | Prisma.ScannedFile$documentTypeArgs<ExtArgs>
   documentClass?: boolean | Prisma.ScannedFile$documentClassArgs<ExtArgs>
@@ -1826,6 +1877,7 @@ export type $ScannedFilePayload<ExtArgs extends runtime.Types.Extensions.Interna
     documentTypeId: number | null
     documentClassId: number | null
     areaId: number | null
+    code: string
     title: string
     description: string | null
     originalReference: string | null
@@ -2279,6 +2331,7 @@ export interface ScannedFileFieldRefs {
   readonly documentTypeId: Prisma.FieldRef<"ScannedFile", 'Int'>
   readonly documentClassId: Prisma.FieldRef<"ScannedFile", 'Int'>
   readonly areaId: Prisma.FieldRef<"ScannedFile", 'Int'>
+  readonly code: Prisma.FieldRef<"ScannedFile", 'String'>
   readonly title: Prisma.FieldRef<"ScannedFile", 'String'>
   readonly description: Prisma.FieldRef<"ScannedFile", 'String'>
   readonly originalReference: Prisma.FieldRef<"ScannedFile", 'String'>

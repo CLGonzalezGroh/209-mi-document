@@ -128,7 +128,7 @@ model DocumentType {
     module           ModuleType? // null = disponible para todos los módulos
     classId          Int? // null = disponible para todas las clases
     description      String?
-    requiresWorkflow Boolean        @default(false)
+    requiresWorkflow Boolean     @default(false)
 
     // Relaciones
     class        DocumentClass? @relation(fields: [classId], references: [id])
@@ -151,15 +151,15 @@ model Document {
     terminatedAt DateTime?
     isSys        Boolean   @default(false)
 
-    code           String // Código del documento (ej: "PR-001")
-    title          String
-    description    String?
-    module         ModuleType // Quality, Projects, Tags, etc.
-    entityType     String? // "finding", "action", "project"...
-    entityId       Int? // ID de la entidad en otro subgraph
-    documentTypeId Int
+    code            String // Código del documento (ej: "PR-001")
+    title           String
+    description     String?
+    module          ModuleType // Quality, Projects, Tags, etc.
+    entityType      String? // "finding", "action", "project"...
+    entityId        Int? // ID de la entidad en otro subgraph
+    documentTypeId  Int
     documentClassId Int? // Clase de documento (null = sin clasificar)
-    revisionScheme RevisionScheme @default(ALPHABETICAL) // Esquema de revisión actual
+    revisionScheme  RevisionScheme @default(ALPHABETICAL) // Esquema de revisión actual
 
     // Relaciones
     documentType  DocumentType       @relation(fields: [documentTypeId], references: [id])
@@ -300,17 +300,17 @@ model TransmittalItem {
 
 // Adjuntos simples (evidencias, fotos, archivos de soporte)
 model Attachment {
-    id          Int      @id @default(autoincrement())
-    createdAt   DateTime @default(now())
+    id          Int        @id @default(autoincrement())
+    createdAt   DateTime   @default(now())
     createdById Int
     module      ModuleType
-    entityType  String   @db.VarChar(100)
+    entityType  String     @db.VarChar(100)
     entityId    Int
-    fileKey     String   @db.VarChar(500)
-    fileName    String   @db.VarChar(300)
+    fileKey     String     @db.VarChar(500)
+    fileName    String     @db.VarChar(300)
     fileSize    Int
-    mimeType    String   @db.VarChar(100)
-    description String?  @db.VarChar(500)
+    mimeType    String     @db.VarChar(100)
+    description String?    @db.VarChar(500)
 
     @@index([module, entityType, entityId])
     @@map("attachments")
@@ -333,33 +333,34 @@ enum PhysicalDisposition {
 
 // Archivos digitalizados pendientes de clasificación
 model ScannedFile {
-    id                  Int                  @id @default(autoincrement())
-    createdAt           DateTime             @default(now())
-    createdById         Int
-    updatedAt           DateTime             @updatedAt
-    updatedById         Int                  @default(1)
-    projectId           Int
-    documentTypeId      Int?
-    documentClassId     Int?
-    areaId              Int?
-    title               String               @db.VarChar(500)
-    description         String?              @db.Text
-    originalReference   String?              @db.VarChar(255)
-    physicalLocation    String?              @db.VarChar(500)
-    fileKey             String               @db.VarChar(500)
-    fileName            String               @db.VarChar(255)
-    fileSize            Int
-    mimeType            String               @db.VarChar(100)
-    digitalDisposition  DigitalDisposition   @default(PENDING)
-    physicalDisposition PhysicalDisposition  @default(PENDING)
-    externalReference   String?              @db.VarChar(500)
-    discardReason       String?              @db.Text
-    classificationNotes String?              @db.Text
-    classifiedById      Int?
-    classifiedAt        DateTime?
+    id                    Int                 @id @default(autoincrement())
+    createdAt             DateTime            @default(now())
+    createdById           Int
+    updatedAt             DateTime            @updatedAt
+    updatedById           Int                 @default(1)
+    projectId             Int
+    documentTypeId        Int?
+    documentClassId       Int?
+    areaId                Int?
+    code                  String              @db.VarChar(50) // Código único dentro del proyecto (ej: "SC-001")
+    title                 String              @db.VarChar(500)
+    description           String?             @db.Text
+    originalReference     String?             @db.VarChar(255)
+    physicalLocation      String?             @db.VarChar(500)
+    fileKey               String              @db.VarChar(500)
+    fileName              String              @db.VarChar(255)
+    fileSize              Int
+    mimeType              String              @db.VarChar(100)
+    digitalDisposition    DigitalDisposition  @default(PENDING)
+    physicalDisposition   PhysicalDisposition @default(PENDING)
+    externalReference     String?             @db.VarChar(500)
+    discardReason         String?             @db.Text
+    classificationNotes   String?             @db.Text
+    classifiedById        Int?
+    classifiedAt          DateTime?
     physicalConfirmedById Int?
-    physicalConfirmedAt  DateTime?
-    terminatedAt        DateTime?
+    physicalConfirmedAt   DateTime?
+    terminatedAt          DateTime?
 
     documentType  DocumentType?  @relation(fields: [documentTypeId], references: [id])
     documentClass DocumentClass? @relation(fields: [documentClassId], references: [id])
@@ -370,6 +371,7 @@ model ScannedFile {
     @@index([areaId])
     @@index([digitalDisposition])
     @@index([physicalDisposition])
+    @@unique([code, projectId])
     @@index([projectId, digitalDisposition])
     @@map("scanned_files")
 }
@@ -387,7 +389,7 @@ model Area {
     code        String // "01", "02"
     projectId   Int // Proyecto al que pertenece
     description String?
-    sortOrder   Int    @default(0)
+    sortOrder   Int     @default(0)
 
     // Relaciones
     scannedFiles ScannedFile[]

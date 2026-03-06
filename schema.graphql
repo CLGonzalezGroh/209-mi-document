@@ -343,6 +343,8 @@ enum PhysicalDispositionInput {
 
 "Campos de ordenamiento para archivos escaneados"
 enum ScannedFileOrderFieldInput {
+  "Por código"
+  CODE
   "Por título"
   TITLE
   "Por fecha de creación"
@@ -689,6 +691,8 @@ type ScannedFile @key(fields: "id") {
   documentClass: DocumentClass
   "Área física o ubicación en planta"
   area: Area
+  "Código único del archivo dentro del proyecto (ej: SC-001)"
+  code: String!
   "Título descriptivo del archivo"
   title: String!
   "Descripción o contexto del archivo físico original"
@@ -1291,7 +1295,7 @@ input CreateAttachmentInput {
 
 "Filtro de archivos escaneados"
 input ScannedFileFilterInput {
-  "Búsqueda por título, referencia original o referencia externa"
+  "Búsqueda por código, título, referencia original o referencia externa"
   query: String
   "Filtrar por proyecto"
   projectId: Int
@@ -1321,6 +1325,8 @@ input ScannedFileOrderByInput {
 input CreateScannedFileInput {
   "ID del proyecto"
   projectId: Int!
+  "Código único dentro del proyecto (ej: SC-001)"
+  code: String!
   "Título descriptivo"
   title: String!
   "Descripción o contexto"

@@ -259,6 +259,7 @@ export const ScannedFileScalarFieldEnum = {
   documentTypeId: 'documentTypeId',
   documentClassId: 'documentClassId',
   areaId: 'areaId',
+  code: 'code',
   title: 'title',
   description: 'description',
   originalReference: 'originalReference',

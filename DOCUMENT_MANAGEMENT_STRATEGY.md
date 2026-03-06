@@ -4,6 +4,7 @@
 > con trazabilidad ISO 9001, workflows de revisión y transmittals de ingeniería.
 >
 > Fecha: 10 de febrero de 2026
+> Actualizado: 6 de marzo de 2026
 
 ---
 
@@ -338,73 +339,166 @@ Permissions:  Private (todo acceso via presigned URLs)
 ### Diagrama ER
 
 ```
-┌──────────────────┐       ┌─────────────────────┐       ┌──────────────────────┐
-│  document_types  │       │     documents        │       │ document_revisions   │
-│──────────────────│       │─────────────────────│        │──────────────────────│
-│ id               │◄──────│ document_type_id     │       │ id                   │
-│ name             │       │ id                   │◄──────│ document_id          │
-│ code             │       │ code                 │       │ revision_code        │
-│ module           │       │ title                │       │ status               │
-│ description      │       │ description          │       │ approved_by_id       │
-│ requires_workflow│       │ module               │       │ approved_at          │
-│ terminated       │       │ entity_type          │       │ created_by_id        │
-└──────────────────┘       │ entity_id            │       │ created_at           │
-                           │ created_by_id        │       └──────────┬───────────┘
-                           │ created_at           │                  │
-                           │ terminated           │                  │
-                           └──────────────────────┘                  │
-                                                                     │
-  ┌──────────────────────────────────────────────────────────────────┤
-  │                                                                  │
-  ▼                                                                  ▼
-┌──────────────────────┐                          ┌──────────────────────┐
-│  document_versions   │                          │  review_workflows    │
-│──────────────────────│                          │──────────────────────│
-│ id                   │                          │ id                   │
-│ revision_id          │                          │ revision_id          │
-│ version_number       │                          │ status               │
-│ file_key             │ ← Key en DO Spaces       │ initiated_by_id      │
-│ file_name            │                          │ initiated_at         │
-│ file_size            │                          │ completed_at         │
-│ mime_type            │                          └──────────┬───────────┘
-│ checksum             │                                     │
-│ comment              │                                     ▼
-│ created_by_id        │                          ┌──────────────────────┐
-│ created_at           │                          │   review_steps       │
-└──────────────────────┘                          │──────────────────────│
-                                                  │ id                   │
-                                                  │ workflow_id          │
-┌──────────────────────┐                          │ step_order           │
-│    transmittals      │                          │ step_type            │
-│──────────────────────│                          │ assigned_to_id       │
-│ id                   │                          │ status               │
-│ code                 │                          │ comments             │
-│ project_id           │ ← ref externa            │ completed_at         │
-│ status               │                          │ signature_hash       │
-│ issued_to            │                          └──────────────────────┘
-│ issued_by_id         │
-│ issued_at            │
+┌──────────────────┐       ┌──────────────────┐
+│ document_classes │       │  document_types   │
+│──────────────────│       │──────────────────│
+│ id               │◄──┐   │ id               │
+│ name             │   │   │ name             │
+│ code             │   │   │ code             │
+│ module           │   ├───│ class_id         │
+│ description      │   │   │ module           │
+│ sort_order       │   │   │ description      │
+│ terminated_at    │   │   │ requires_workflow│
+│ is_sys           │   │   │ terminated_at    │
+└──────┬───────────┘   │   │ is_sys           │
+       │               │   └────────┬─────────┘
+       │               │            │
+       ▼               │            ▼
+┌─────────────────────────────────────────────┐
+│                  documents                   │
+│─────────────────────────────────────────────│
+│ id                                           │
+│ code                  title                  │
+│ description           module                 │
+│ entity_type           entity_id              │
+│ document_type_id ──────────────────────────▶ │ document_types.id
+│ document_class_id ─────────────────────────▶ │ document_classes.id
+│ revision_scheme (ALPHABETICAL | NUMERIC)     │
+│ created_by_id         created_at             │
+│ updated_by_id         terminated_at          │
+└──────────────────────┬───────────────────────┘
+                       │
+                       ▼
+┌──────────────────────────────────────────────┐
+│            document_revisions                │
+│──────────────────────────────────────────────│
+│ id               document_id                 │
+│ revision_code    status (DRAFT|IN_REVIEW|    │
+│                    APPROVED|SUPERSEDED|       │
+│                    OBSOLETE)                  │
+│ approved_by_id   approved_at                 │
+│ created_by_id    created_at                  │
+└──────┬──────────────────┬────────────────────┘
+       │                  │
+       ▼                  ▼
+┌──────────────────┐   ┌──────────────────────┐
+│document_versions │   │  review_workflows    │
+│──────────────────│   │──────────────────────│
+│ id               │   │ id                   │
+│ revision_id      │   │ revision_id (unique) │
+│ version_number   │   │ status               │
+│ file_key         │   │ initiated_by_id      │
+│ file_name        │   │ initiated_at         │
+│ file_size        │   │ completed_at         │
+│ mime_type        │   └──────────┬───────────┘
+│ checksum         │              │
+│ comment          │              ▼
+│ created_by_id    │   ┌──────────────────────┐
+└──────────────────┘   │   review_steps       │
+                       │──────────────────────│
+                       │ id                   │
+                       │ workflow_id          │
+                       │ step_order           │
+                       │ step_type            │
+                       │ assigned_to_id       │
+                       │ status               │
+                       │ comments             │
+                       │ completed_at         │
+                       │ signature_hash       │
+                       └──────────────────────┘
+
+┌──────────────────────┐      ┌──────────────────────┐
+│    transmittals      │      │  transmittal_items   │
+│──────────────────────│      │──────────────────────│
+│ id                   │◄─────│ transmittal_id       │
+│ code (unique)        │      │ id                   │
+│ project_id           │      │ document_revision_id │
+│ status               │      │ purpose_code         │
+│ issued_to            │      │ client_status        │
+│ issued_by_id         │      │ client_comments      │
+│ issued_at            │      └──────────────────────┘
 │ response_at          │
 │ response_comments    │
-└──────────┬───────────┘
-           │
-           ▼
-┌──────────────────────┐
-│  transmittal_items   │
-│──────────────────────│
-│ id                   │
-│ transmittal_id       │
-│ document_revision_id │
-│ purpose_code         │
-│ client_status        │
-│ client_comments      │
 └──────────────────────┘
+
+┌──────────────────────────────────────────────┐
+│              attachments                      │
+│──────────────────────────────────────────────│
+│ id                                            │
+│ module           entity_type     entity_id    │
+│ file_key         file_name       file_size    │
+│ mime_type        description                  │
+│ created_by_id    created_at                   │
+│                                               │
+│ @@index([module, entity_type, entity_id])     │
+└──────────────────────────────────────────────┘
+
+                  ┌──────────────┐
+                  │    areas     │
+                  │──────────────│
+                  │ id           │
+                  │ name         │
+                  │ code         │
+                  │ project_id   │
+                  │ description  │
+                  │ sort_order   │
+                  │ terminated   │
+                  └──────┬───────┘
+                         │
+┌────────────────────────┼─────────────────────┐
+│             scanned_files                     │
+│──────────────────────────────────────────────│
+│ id                                            │
+│ code (unique per project)                     │
+│ project_id           title                    │
+│ description          original_reference       │
+│ physical_location    file_key                 │
+│ file_name            file_size    mime_type    │
+│ document_type_id ──▶ document_types.id        │
+│ document_class_id ─▶ document_classes.id      │
+│ area_id ────────────▶ areas.id                │
+│ digital_disposition (PENDING|ACCEPTED|        │
+│                      UPLOADED|DISCARDED)      │
+│ physical_disposition (PENDING|DESTROY|        │
+│                      DESTROYED|ARCHIVE|       │
+│                      ARCHIVED)                │
+│ external_reference   classification_notes     │
+│ discard_reason       classified_by_id         │
+│ classified_at        physical_confirmed_by_id │
+│ physical_confirmed_at terminated_at           │
+│ created_by_id        created_at               │
+└──────────────────────────────────────────────┘
+
+┌───────────────────────┐    ┌─────────────────────────────┐
+│  document_sys_logs    │    │ document_sys_logs_archive    │
+│───────────────────────│    │─────────────────────────────│
+│ id                    │    │ id                           │
+│ user_id               │    │ user_id                      │
+│ level (INFO|WARN|ERR) │    │ level                        │
+│ name                  │    │ name                         │
+│ message               │    │ message                      │
+│ meta                  │    │ meta                         │
+│ created_at            │    │ created_at                   │
+└───────────────────────┘    └─────────────────────────────┘
 ```
 
 ### Jerarquía: Document → Revision → Version
 
+#### Esquemas de revisión (`revisionScheme`)
+
+Cada documento define su esquema de revisión al crearse. El sistema soporta dos esquemas:
+
+| Esquema        | Secuencia                    | Uso típico                       |
+| -------------- | ---------------------------- | -------------------------------- |
+| `ALPHABETICAL` | A, B, C, ..., Z, AA, AB, ... | Documentos de ingeniería/calidad |
+| `NUMERIC`      | 0, 1, 2, 3, ...              | Procedimientos, informes         |
+
+El esquema se puede cambiar con la mutación `switchRevisionScheme` (solo si no hay revisiones aprobadas).
+
+#### Ejemplo con esquema ALPHABETICAL
+
 ```
-Document (PR-001 "Procedimiento de Auditorías")
+Document (PR-001 "Procedimiento de Auditorías", scheme: ALPHABETICAL)
 │
 ├── Revision A (SUPERSEDED)
 │   ├── Version 1 — PR-001-RevA-v1.pdf (borrador inicial)
@@ -419,405 +513,224 @@ Document (PR-001 "Procedimiento de Auditorías")
     └── Version 1 — PR-001-RevC-v1.pdf (borrador en curso)
 ```
 
-- **Document**: Entidad maestra, inmutable conceptualmente.
+#### Ejemplo con esquema NUMERIC
+
+```
+Document (INF-042 "Informe de Avance", scheme: NUMERIC)
+│
+├── Revision 0 (SUPERSEDED)
+│   └── Version 1 — INF-042-Rev0-v1.pdf
+│
+├── Revision 1 (APPROVED) ← Revisión vigente
+│   └── Version 1 — INF-042-Rev1-v1.pdf
+│
+└── Revision 2 (DRAFT)
+    └── Version 1 — INF-042-Rev2-v1.pdf
+```
+
+- **Document**: Entidad maestra, inmutable conceptualmente. Define el `revisionScheme`
+  (ALPHABETICAL o NUMERIC) y opcionalmente una `DocumentClass` como clasificación.
 - **Revision**: Ciclo de vida completo (draft → review → approved → superseded).
   Se crea nueva revisión cuando hay cambios significativos al documento aprobado.
+  El código de revisión se auto-genera según el `revisionScheme` del documento.
 - **Version**: Iteraciones de archivo dentro de una revisión. Cada vez que se sube
   un archivo nuevo durante el proceso de draft/review, se crea una nueva versión.
+
+### Modelos complementarios
+
+- **Attachment**: Adjuntos simples (evidencias, fotos, archivos de soporte) asociados
+  a cualquier entidad de cualquier módulo. Sin workflow ni revisiones. Vinculados por
+  `module` + `entityType` + `entityId`.
+- **ScannedFile**: Archivos digitalizados (papel escaneado) pendientes de clasificación.
+  Cada uno tiene un `code` único dentro del proyecto (ej: "SC-001").
+  Contienen un flujo de disposición digital (`PENDING → ACCEPTED → UPLOADED` o
+  `PENDING → DISCARDED`) y física (`PENDING → DESTROY → DESTROYED` o
+  `PENDING → ARCHIVE → ARCHIVED`). Vinculados a un proyecto, y opcionalmente a
+  `DocumentType`, `DocumentClass` y `Area`.
+- **Area**: Áreas físicas o ubicaciones en planta (ej: "01 - Urea"). Pertenecen a
+  un proyecto y se usan para catalogar la ubicación de donde provino el papel original.
 
 ---
 
 ## 7. Schema GraphQL del Subgraph Document
 
-### Tipos principales
+> **Nota**: El schema completo y actualizado se encuentra en el archivo `schema.graphql`
+> en la raíz del proyecto. Esta sección documenta los aspectos más relevantes de diseño.
 
-```graphql
-# ═══════════════════════════════════════════════════════
-# ENTIDADES PRINCIPALES
-# ═══════════════════════════════════════════════════════
+### Entidades principales
 
-type Document @key(fields: "id") {
-  id: Int!
-  code: String! # Código único (ej: "PR-001")
-  title: String!
-  description: String
-  module: ModuleType! # Quality, Projects, Tags, etc.
-  entityType: String # "finding", "action", "project"...
-  entityId: Int # ID de la entidad en otro subgraph
-  documentType: DocumentType!
-  currentRevision: DocumentRevision
-  revisions: [DocumentRevision!]!
-  createdAt: DateTime!
-  createdBy: UserRef!
-  terminated: Boolean!
-}
+| Tipo                    | Descripción                                                   | Prisma model                |
+| ----------------------- | ------------------------------------------------------------- | --------------------------- |
+| `DocumentClass`         | Clasificación de nivel 1 (Especialidad, Categoría)            | `document_classes`          |
+| `DocumentType`          | Tipo de documento (Procedimiento, Plano, Informe)             | `document_types`            |
+| `Document`              | Documento maestro con `revisionScheme` (ALPHABETICAL/NUMERIC) | `documents`                 |
+| `DocumentRevision`      | Revisión de un documento (A, B, C... o 0, 1, 2...)            | `document_revisions`        |
+| `DocumentVersion`       | Versión de archivo dentro de una revisión                     | `document_versions`         |
+| `ReviewWorkflow`        | Workflow de revisión ISO 9001 (1:1 con revisión)              | `review_workflows`          |
+| `ReviewStep`            | Paso individual del workflow                                  | `review_steps`              |
+| `Transmittal`           | Transmittal de ingeniería                                     | `transmittals`              |
+| `TransmittalItem`       | Item de un transmittal (referencia a revisión)                | `transmittal_items`         |
+| `Attachment`            | Adjunto simple (sin workflow ni revisiones)                   | `attachments`               |
+| `ScannedFile`           | Archivo digitalizado pendiente de clasificación               | `scanned_files`             |
+| `Area`                  | Área física o ubicación en planta                             | `areas`                     |
+| `DocumentSysLog`        | Log operacional del sistema                                   | `document_sys_logs`         |
+| `DocumentSysLogArchive` | Log archivado del sistema                                     | `document_sys_logs_archive` |
 
-type DocumentType @key(fields: "id") {
-  id: Int!
-  name: String! # "Procedimiento", "Plano", "Informe"
-  code: String! # "PROC", "DWG", "RPT"
-  module: ModuleType # null = disponible para todos
-  description: String
-  requiresWorkflow: Boolean! # true = requiere aprobación
-  terminated: Boolean!
-}
+### Enums relevantes
 
-type DocumentRevision @key(fields: "id") {
-  id: Int!
-  document: Document!
-  revisionCode: String! # "A", "B", "C" o "0", "1", "2"
-  status: RevisionStatus!
-  versions: [DocumentVersion!]!
-  currentVersion: DocumentVersion
-  workflow: ReviewWorkflow
-  approvedAt: DateTime
-  approvedBy: UserRef
-  createdAt: DateTime!
-  createdBy: UserRef!
-}
+| Enum                  | Valores                                                               |
+| --------------------- | --------------------------------------------------------------------- |
+| `ModuleType`          | QUALITY, PROJECTS, TAGS, OPERATIONS, MANAGEMENT, COMERCIAL            |
+| `RevisionScheme`      | ALPHABETICAL, NUMERIC                                                 |
+| `RevisionStatus`      | DRAFT, IN_REVIEW, APPROVED, SUPERSEDED, OBSOLETE                      |
+| `WorkflowStatus`      | PENDING, IN_PROGRESS, COMPLETED, REJECTED                             |
+| `StepType`            | REVIEW, APPROVE, ACKNOWLEDGE                                          |
+| `StepStatus`          | PENDING, APPROVED, REJECTED, SKIPPED                                  |
+| `TransmittalStatus`   | DRAFT, ISSUED, ACKNOWLEDGED, RESPONDED, CLOSED                        |
+| `PurposeCode`         | FOR_APPROVAL, FOR_INFORMATION, FOR_CONSTRUCTION, FOR_REVIEW, AS_BUILT |
+| `ClientStatus`        | APPROVED, APPROVED_WITH_COMMENTS, REJECTED, REVIEWED_NO_EXCEPTION     |
+| `DigitalDisposition`  | PENDING, ACCEPTED, UPLOADED, DISCARDED                                |
+| `PhysicalDisposition` | PENDING, DESTROY, DESTROYED, ARCHIVE, ARCHIVED                        |
+| `LogLevel`            | INFO, WARNING, ERROR                                                  |
 
-type DocumentVersion @key(fields: "id") {
-  id: Int!
-  revision: DocumentRevision!
-  versionNumber: Int! # 1, 2, 3...
-  fileKey: String! # Key en DO Spaces
-  fileName: String! # Nombre original del archivo
-  fileSize: Int! # Tamaño en bytes
-  mimeType: String! # "application/pdf", "image/jpeg"
-  checksum: String # SHA-256 para integridad
-  comment: String # "Corrección de tabla 3"
-  createdAt: DateTime!
-  createdBy: UserRef!
-}
-
-# ═══════════════════════════════════════════════════════
-# WORKFLOW DE REVISIÓN (ISO 9001)
-# ═══════════════════════════════════════════════════════
-
-type ReviewWorkflow @key(fields: "id") {
-  id: Int!
-  revision: DocumentRevision!
-  status: WorkflowStatus!
-  steps: [ReviewStep!]!
-  initiatedAt: DateTime!
-  initiatedBy: UserRef!
-  completedAt: DateTime
-}
-
-type ReviewStep {
-  id: Int!
-  workflow: ReviewWorkflow!
-  stepOrder: Int! # Orden de ejecución
-  stepType: StepType! # REVIEW, APPROVE, ACKNOWLEDGE
-  assignedTo: UserRef!
-  status: StepStatus!
-  comments: String
-  completedAt: DateTime
-  signatureHash: String # Hash para trazabilidad ISO
-}
-
-# ═══════════════════════════════════════════════════════
-# TRANSMITTALS (INGENIERÍA)
-# ═══════════════════════════════════════════════════════
-
-type Transmittal @key(fields: "id") {
-  id: Int!
-  code: String! # "TR-001"
-  projectId: Int! # Referencia externa al subgraph projects
-  status: TransmittalStatus!
-  items: [TransmittalItem!]!
-  issuedTo: String! # Nombre del cliente/destinatario
-  issuedAt: DateTime!
-  issuedBy: UserRef!
-  responseAt: DateTime
-  responseComments: String
-}
-
-type TransmittalItem {
-  id: Int!
-  transmittal: Transmittal!
-  documentRevision: DocumentRevision!
-  purposeCode: PurposeCode!
-  clientStatus: ClientStatus
-  clientComments: String
-}
-
-# ═══════════════════════════════════════════════════════
-# ENTIDADES EXTERNAS (Referencias a otros subgraphs)
-# ═══════════════════════════════════════════════════════
-
-# Solo necesitamos el ID para que Federation resuelva el resto
-type UserRef @key(fields: "id") {
-  id: Int!
-}
-
-# ═══════════════════════════════════════════════════════
-# ENUMS
-# ═══════════════════════════════════════════════════════
-
-enum ModuleType {
-  QUALITY
-  PROJECTS
-  TAGS
-  OPERATIONS
-  MANAGEMENT
-  COMERCIAL
-}
-
-enum RevisionStatus {
-  DRAFT # En borrador, se pueden subir nuevas versiones
-  IN_REVIEW # Enviado a workflow de revisión
-  APPROVED # Aprobado, no se puede modificar
-  SUPERSEDED # Reemplazado por una nueva revisión
-  OBSOLETE # Obsoleto, ya no aplica
-}
-
-enum WorkflowStatus {
-  PENDING # Creado pero no iniciado
-  IN_PROGRESS # Al menos un step en proceso
-  COMPLETED # Todos los steps aprobados
-  REJECTED # Al menos un step rechazado
-}
-
-enum StepType {
-  REVIEW # Revisión técnica
-  APPROVE # Aprobación formal
-  ACKNOWLEDGE # Toma de conocimiento
-}
-
-enum StepStatus {
-  PENDING # No evaluado aún
-  APPROVED # Aprobado por el asignado
-  REJECTED # Rechazado por el asignado
-  SKIPPED # Saltado (ej: aprobador anterior ya rechazó)
-}
-
-enum TransmittalStatus {
-  DRAFT # En preparación
-  ISSUED # Enviado al cliente
-  ACKNOWLEDGED # Cliente acusó recibo
-  RESPONDED # Cliente respondió con comentarios
-  CLOSED # Cerrado
-}
-
-enum PurposeCode {
-  FOR_APPROVAL # Para aprobación del cliente
-  FOR_INFORMATION # Solo informativo
-  FOR_CONSTRUCTION # Aprobado para construcción
-  FOR_REVIEW # Para revisión y comentarios
-  AS_BUILT # Documentación as-built
-}
-
-enum ClientStatus {
-  APPROVED # Aprobado sin comentarios
-  APPROVED_WITH_COMMENTS # Aprobado con comentarios
-  REJECTED # Rechazado
-  REVIEWED_NO_EXCEPTION # Revisado sin objeción
-}
-```
-
-### Queries
+### Queries implementadas
 
 ```graphql
 type Query {
   # ─── Documentos ───
   documentById(id: Int!): Document
-  documents(
-    filter: DocumentFilterInput
-    pagination: PaginationInput
-    orderBy: DocumentOrderByInput
-  ): DocumentConnection!
-
-  # Documentos filtrados por referencia de módulo
-  documentsByModule(
-    module: ModuleType!
-    entityType: String
-    entityId: Int
-    pagination: PaginationInput
-    orderBy: DocumentOrderByInput
-  ): DocumentConnection!
+  documents(filter, pagination, orderBy): DocumentConnection!
+  documentsByModule(module, entityType, entityId, pagination, orderBy): DocumentConnection!
+  documentsSelectList(filter): [SelectList!]!
 
   # ─── Tipos de documento ───
-  documentTypes(module: ModuleType): [DocumentType!]!
+  documentTypes(filter, pagination, orderBy): DocumentTypeConnection!
+  documentTypeById(id: Int!): DocumentType
+  documentTypesSelectList(module, classId): [SelectList!]!
+
+  # ─── Clases de documento ───
+  documentClasses(filter, pagination, orderBy): DocumentClassConnection!
+  documentClassById(id: Int!): DocumentClass
+  documentClassesSelectList(module): [SelectList!]!
+
+  # ─── Áreas ───
+  areas(filter, pagination, orderBy): AreaConnection!
+  areaById(id: Int!): Area
+  areasSelectList(projectId: Int!): [SelectList!]!
+
+  # ─── Revisiones ───
+  revisionById(id: Int!): DocumentRevision
 
   # ─── Transmittals ───
   transmittalById(id: Int!): Transmittal
-  transmittals(
-    filter: TransmittalFilterInput
-    pagination: PaginationInput
-    orderBy: TransmittalOrderByInput
-  ): TransmittalConnection!
-
-  transmittalsByProject(
-    projectId: Int!
-    pagination: PaginationInput
-  ): TransmittalConnection!
+  transmittals(filter, pagination, orderBy): TransmittalConnection!
+  transmittalsByProject(projectId, pagination): TransmittalConnection!
 
   # ─── Workflows ───
   pendingReviewSteps(userId: Int!): [ReviewStep!]!
-  workflowsByStatus(status: WorkflowStatus!): [ReviewWorkflow!]!
-}
+  workflowsByStatus(status): [ReviewWorkflow!]!
 
-# ─── Inputs de filtro ───
+  # ─── Adjuntos ───
+  attachmentById(id: Int!): Attachment
+  attachmentsByModule(module, entityType, entityId, pagination): AttachmentConnection!
 
-input DocumentFilterInput {
-  search: String # Búsqueda en code + title
-  module: ModuleType
-  documentTypeId: Int
-  status: RevisionStatus # Filtra por status de revisión vigente
-  terminated: Boolean
-}
+  # ─── Archivos escaneados ───
+  scannedFileById(id: Int!): ScannedFile
+  scannedFiles(filter, pagination, orderBy): ScannedFileConnection!
+  scannedFileStats(projectId: Int!): ScannedFileStats!
 
-input TransmittalFilterInput {
-  search: String
-  projectId: Int
-  status: TransmittalStatus
-}
-
-input DocumentOrderByInput {
-  field: DocumentOrderField!
-  direction: OrderDirection!
-}
-
-enum DocumentOrderField {
-  CODE
-  TITLE
-  CREATED_AT
-  UPDATED_AT
-  STATUS
-}
-
-# ─── Pagination ───
-
-type DocumentConnection {
-  items: [Document!]!
-  totalCount: Int!
-  pageInfo: PageInfo!
-}
-
-type TransmittalConnection {
-  items: [Transmittal!]!
-  totalCount: Int!
-  pageInfo: PageInfo!
+  # ─── Logs ───
+  documentSysLogById(id: Int!): DocumentSysLog
+  documentSysLogs(filter, pagination, orderBy): DocumentSysLogConnection!
+  documentSysLogArchiveById(id: Int!): DocumentSysLogArchive
+  documentSysLogsArchive(filter, pagination, orderBy): DocumentSysLogArchiveConnection!
 }
 ```
 
-### Mutations
+### Mutations implementadas
 
 ```graphql
 type Mutation {
   # ─── Documentos ───
   createDocument(input: CreateDocumentInput!): Document!
-  updateDocument(id: Int!, input: UpdateDocumentInput!): Document!
-  deleteDocument(id: Int!): Boolean!
-  terminateDocument(id: Int!): Document!
-  activateDocument(id: Int!): Document!
+  updateDocument(id, input): Document!
+  terminateDocument(id): Document!
+  activateDocument(id): Document!
+  switchRevisionScheme(id, scheme): Document!
 
-  # ─── Revisiones ───
-  createRevision(
-    documentId: Int!
-    input: CreateRevisionInput!
-  ): DocumentRevision!
-
-  # ─── Versiones ───
-  # Registra una nueva versión (después de que el browser subió el archivo)
-  registerVersion(
-    revisionId: Int!
-    input: RegisterVersionInput!
-  ): DocumentVersion!
+  # ─── Revisiones y Versiones ───
+  createRevision(documentId, input): DocumentRevision!
+  registerVersion(revisionId, input): DocumentVersion!
 
   # ─── Workflow de revisión ───
-  initiateReview(revisionId: Int!, input: InitiateReviewInput!): ReviewWorkflow!
-  approveStep(stepId: Int!, comments: String): ReviewStep!
-  rejectStep(stepId: Int!, comments: String!): ReviewStep!
-  cancelWorkflow(workflowId: Int!, reason: String!): ReviewWorkflow!
+  initiateReview(revisionId, input): ReviewWorkflow!
+  approveStep(stepId, comments): ReviewStep!
+  rejectStep(stepId, comments!): ReviewStep!
+  cancelWorkflow(workflowId, reason!): ReviewWorkflow!
 
   # ─── Transmittals ───
-  createTransmittal(input: CreateTransmittalInput!): Transmittal!
-  issueTransmittal(id: Int!): Transmittal!
-  respondTransmittal(id: Int!, input: RespondTransmittalInput!): Transmittal!
-  closeTransmittal(id: Int!): Transmittal!
+  createTransmittal(input): Transmittal!
+  issueTransmittal(id): Transmittal!
+  respondTransmittal(id, input): Transmittal!
+  closeTransmittal(id): Transmittal!
 
   # ─── Tipos de documento ───
-  createDocumentType(input: CreateDocumentTypeInput!): DocumentType!
-  updateDocumentType(id: Int!, input: UpdateDocumentTypeInput!): DocumentType!
-  terminateDocumentType(id: Int!): DocumentType!
-}
+  createDocumentType(input): DocumentType!
+  updateDocumentType(id, input): DocumentType!
+  terminateDocumentType(id): DocumentType!
+  activateDocumentType(id): DocumentType!
 
-# ─── Inputs de creación ───
+  # ─── Clases de documento ───
+  createDocumentClass(input): DocumentClass!
+  updateDocumentClass(id, input): DocumentClass!
+  terminateDocumentClass(id): DocumentClass!
+  activateDocumentClass(id): DocumentClass!
 
-input CreateDocumentInput {
-  code: String!
-  title: String!
-  description: String
-  module: ModuleType!
-  entityType: String
-  entityId: Int
-  documentTypeId: Int!
-  # Datos del primer archivo
-  fileKey: String!
-  fileName: String!
-  fileSize: Int!
-  mimeType: String!
-  checksum: String
-}
+  # ─── Áreas ───
+  createArea(input): Area!
+  updateArea(id, input): Area!
+  terminateArea(id): Area!
+  activateArea(id): Area!
 
-input UpdateDocumentInput {
-  title: String
-  description: String
-}
+  # ─── Adjuntos ───
+  createAttachment(input): Attachment!
+  deleteAttachment(id): Boolean!
 
-input CreateRevisionInput {
-  revisionCode: String # Auto-generado si no se provee
-  comment: String
-  # Datos del archivo de la primera versión de esta revisión
-  fileKey: String!
-  fileName: String!
-  fileSize: Int!
-  mimeType: String!
-  checksum: String
-}
+  # ─── Archivos escaneados ───
+  createScannedFile(input): ScannedFile!
+  classifyScannedFile(id, input): ScannedFile!
+  markAsUploaded(id, input): ScannedFile!
+  updatePhysicalDisposition(id, disposition): ScannedFile!
+  confirmPhysicalDisposition(id): ScannedFile!
+  terminateScannedFile(id): ScannedFile!
+  activateScannedFile(id): ScannedFile!
 
-input RegisterVersionInput {
-  fileKey: String!
-  fileName: String!
-  fileSize: Int!
-  mimeType: String!
-  checksum: String
-  comment: String
+  # ─── Logs ───
+  archiveDocumentSysLogs(olderThanDays): Int!
+  deleteArchivedDocumentSysLogs(olderThanDays): Int!
 }
+```
 
-input InitiateReviewInput {
-  steps: [ReviewStepInput!]!
-}
+### Paginación
 
-input ReviewStepInput {
-  stepOrder: Int!
-  stepType: StepType!
-  assignedToId: Int!
-}
+Todas las queries de listado usan `PaginationInput` (`skip`/`take`) y devuelven
+un `*Connection` con `items` y `pagination: PaginationInfo` (currentPage, totalPages,
+totalItems, hasNext, hasPrev).
 
-input CreateTransmittalInput {
-  projectId: Int!
-  issuedTo: String!
-  items: [TransmittalItemInput!]!
-}
+### Flujos de ScannedFiles (Digitalización)
 
-input TransmittalItemInput {
-  documentRevisionId: Int!
-  purposeCode: PurposeCode!
-}
+```
+Subida                    Clasificación                Cierre digital
+──────────                ─────────────                ──────────────
+createScannedFile ──▶  classifyScannedFile         markAsUploaded
+(PENDING)              ├── ACCEPTED (con tipo/clase)  (ACCEPTED → UPLOADED)
+                       └── DISCARDED (con motivo)
 
-input RespondTransmittalInput {
-  responseComments: String
-  items: [TransmittalItemResponseInput!]!
-}
-
-input TransmittalItemResponseInput {
-  itemId: Int!
-  clientStatus: ClientStatus!
-  clientComments: String
-}
+Disposición física
+──────────────────
+updatePhysicalDisposition ──▶ confirmPhysicalDisposition
+├── DESTROY ──────────────▶ DESTROYED
+└── ARCHIVE ──────────────▶ ARCHIVED
 ```
 
 ---
@@ -1361,6 +1274,11 @@ app/(withSidebar)/
 │       ├── documents/
 │       │   ├── page.tsx              # Documentos del proyecto
 │       │   └── [documentId]/page.tsx
+│       ├── scanned-files/
+│       │   ├── page.tsx              # Lista de archivos escaneados del proyecto
+│       │   ├── new/page.tsx          # Subir nuevo archivo escaneado
+│       │   └── [scannedFileId]/
+│       │       └── page.tsx          # Detalle con clasificación y disposición
 │       └── transmittals/
 │           ├── page.tsx              # Lista de transmittals
 │           ├── new/page.tsx          # Crear transmittal
@@ -1376,6 +1294,10 @@ app/(withSidebar)/
     └── documents/
         └── page.tsx                  # Documentos de gestión
 ```
+
+> **Nota sobre Attachments**: Los adjuntos no tienen páginas propias. Se gestionan
+> como componente embebido dentro de las páginas de detalle de cualquier entidad
+> (findings, actions, equipos, etc.) usando `AttachmentPanel`.
 
 ### Componentes reutilizables a crear
 
@@ -1394,15 +1316,82 @@ components/documents/
 ├── TransmittalDetail.tsx          # Detalle con items y respuestas
 ├── TransmittalItemRow.tsx         # Fila de item con status de cliente
 └── UploadProgressBar.tsx          # Barra de progreso de upload
+
+components/attachments/
+├── AttachmentPanel.tsx             # Panel de adjuntos embebible en cualquier detalle
+├── AttachmentList.tsx              # Lista de adjuntos de una entidad
+├── AttachmentUploadButton.tsx      # Botón + diálogo para subir adjunto
+└── AttachmentRow.tsx               # Fila individual con preview, descarga y eliminar
+
+components/scanned-files/
+├── ScannedFileTable.tsx            # Tabla de archivos escaneados (por proyecto)
+├── ScannedFileForm.tsx             # Formulario crear archivo escaneado (code, título, archivo)
+├── ScannedFileDetail.tsx           # Detalle con estado de clasificación y disposición
+├── ScannedFileClassifyForm.tsx     # Formulario de clasificación (ACCEPTED/DISCARDED)
+├── ScannedFileDispositionPanel.tsx # Panel de disposición física (DESTROY/ARCHIVE)
+├── ScannedFileStatsCard.tsx        # Card con estadísticas por proyecto
+└── ScannedFileUploadZone.tsx       # Zona de drag & drop para escaneos
 ```
+
+### Diferencias entre Attachments y ScannedFiles
+
+| Aspecto              | Attachments                           | ScannedFiles                              |
+| -------------------- | ------------------------------------- | ----------------------------------------- |
+| **Propósito**        | Adjuntar evidencias/soporte a entidad | Digitalizar papel y clasificar            |
+| **Ciclo de vida**    | Crear → Eliminar (simple)             | Crear → Clasificar → Cargar/Descartar     |
+| **Código único**     | No tiene                              | `code` único por proyecto (ej: SC-001)    |
+| **Ubicación UI**     | Panel embebido en detalle de entidad  | Páginas propias por proyecto              |
+| **Vinculación**      | module + entityType + entityId        | projectId + opcionalmente tipo/clase/área |
+| **Disposición física** | No aplica                           | DESTROY/ARCHIVE con confirmación          |
+| **Workflow**         | No tiene                              | Flujo de clasificación digital + física   |
 
 ---
 
 ## 14. Plan de Implementación por Fases
 
-### Fase 1: Fundamentos (3-4 semanas)
+### Fase 1: Fundamentos ✅ COMPLETADA
 
-**Objetivo**: Infraestructura base funcional con upload/download en Quality.
+**Objetivo**: Infraestructura base funcional — subgraph document operativo.
+
+- [x] **Crear Subgraph Document**
+  - Setup del nuevo subgraph (Apollo Federation v2.7)
+  - Schema Prisma completo: Document, DocumentClass, DocumentType,
+    DocumentRevision, DocumentVersion, ReviewWorkflow, ReviewStep,
+    Transmittal, TransmittalItem, Attachment, ScannedFile, Area,
+    DocumentSysLog, DocumentSysLogArchive
+  - Esquema de revisión configurable (`revisionScheme`: ALPHABETICAL / NUMERIC)
+  - Implementar resolvers CRUD para todas las entidades
+  - Migrations de base de datos (init migration)
+  - Docker + docker-compose
+
+- [x] **Schema GraphQL completo**
+  - Tipos, enums, inputs, queries y mutations para todas las entidades
+  - Paginación estándar (`PaginationInput` / `PaginationInfo`)
+  - Filtros y ordenamiento por entidad
+  - SelectList queries para selectores del frontend
+  - Enums duplicados para inputs (ej: `ModuleTypeInput`, `RevisionSchemeInput`)
+
+- [x] **Attachments (adjuntos simples)**
+  - Modelo `Attachment`: archivos sin workflow ni revisiones
+  - Vinculado por `module` + `entityType` + `entityId`
+  - Queries: `attachmentById`, `attachmentsByModule`
+  - Mutations: `createAttachment`, `deleteAttachment`
+
+- [x] **ScannedFiles (digitalización)**
+  - Modelo `ScannedFile` con campo `code` único por proyecto y flujo de clasificación digital y física
+  - Enums `DigitalDisposition` y `PhysicalDisposition`
+  - Modelo `Area` para ubicación en planta
+  - Queries: `scannedFileById`, `scannedFiles`, `scannedFileStats`
+  - Mutations: `createScannedFile`, `classifyScannedFile`, `markAsUploaded`,
+    `updatePhysicalDisposition`, `confirmPhysicalDisposition`,
+    `terminateScannedFile`, `activateScannedFile`
+  - Queries de áreas: `areas`, `areaById`, `areasSelectList`
+  - Mutations de áreas: `createArea`, `updateArea`, `terminateArea`, `activateArea`
+
+- [x] **Logs del sistema**
+  - Modelo `DocumentSysLog` y `DocumentSysLogArchive`
+  - Queries paginadas y con filtros
+  - Mutations: `archiveDocumentSysLogs`, `deleteArchivedDocumentSysLogs`
 
 - [ ] **Crear proyecto FileServer API**
   - Setup Node.js + Fastify/Express
@@ -1418,13 +1407,6 @@ components/documents/
   - Configurar políticas de acceso (private)
   - Probar presigned URLs manualmente
 
-- [ ] **Crear Subgraph Document**
-  - Setup del nuevo subgraph (mismo stack que los otros)
-  - Definir schema: Document, DocumentType, DocumentRevision, DocumentVersion
-  - Implementar resolvers CRUD
-  - Registrar en Apollo Gateway/Router
-  - Migrations de base de datos
-
 - [ ] **Integrar en Next.js**
   - Crear `lib/actions/documents/fileserver-client.ts`
   - Crear server actions básicas: create, list, download
@@ -1433,12 +1415,13 @@ components/documents/
   - Reemplazar `quality/documents/page.tsx` con datos dinámicos
   - Regenerar tipos con codegen
 
-### Fase 2: Revisiones y Versionado (2-3 semanas)
+### Fase 2: Revisiones y Versionado
 
 **Objetivo**: Sistema completo de revisiones y versiones.
 
-- [ ] Mutaciones: createRevision, registerVersion
-- [ ] Auto-generación de revisionCode (A → B → C)
+- [x] Schema y resolvers: createRevision, registerVersion
+- [x] Auto-generación de revisionCode según `revisionScheme` (A → B → C o 0 → 1 → 2)
+- [x] Mutation `switchRevisionScheme` para cambiar esquema de revisión
 - [ ] Lógica de SUPERSEDED automático al aprobar nueva revisión
 - [ ] View: `DocumentVersionHistory` component
 - [ ] View: `RevisionTimeline` component
@@ -1446,12 +1429,12 @@ components/documents/
 - [ ] Formulario para subir nueva versión a revisión existente
 - [ ] Formulario para crear nueva revisión
 
-### Fase 3: Workflows de Revisión (3-4 semanas)
+### Fase 3: Workflows de Revisión
 
 **Objetivo**: Flujo de aprobación ISO 9001 completo.
 
-- [ ] Schema: ReviewWorkflow, ReviewStep
-- [ ] Mutaciones: initiateReview, approveStep, rejectStep, cancelWorkflow
+- [x] Schema: ReviewWorkflow, ReviewStep (resolvers implementados)
+- [x] Mutaciones: initiateReview, approveStep, rejectStep, cancelWorkflow
 - [ ] Lógica de ejecución secuencial de steps
 - [ ] Generación de signatureHash para trazabilidad
 - [ ] Reglas de negocio: solo DRAFT puede ir a IN_REVIEW, etc.
@@ -1462,12 +1445,12 @@ components/documents/
 - [ ] Notificaciones al completar/rechazar revisión
 - [ ] Audit log de todas las acciones del workflow
 
-### Fase 4: Transmittals de Ingeniería (2-3 semanas)
+### Fase 4: Transmittals de Ingeniería
 
 **Objetivo**: Gestión de emisiones de documentos a clientes.
 
-- [ ] Schema: Transmittal, TransmittalItem
-- [ ] Mutaciones: createTransmittal, issueTransmittal, respondTransmittal, closeTransmittal
+- [x] Schema: Transmittal, TransmittalItem (resolvers implementados)
+- [x] Mutaciones: createTransmittal, issueTransmittal, respondTransmittal, closeTransmittal
 - [ ] Lógica de estados del transmittal
 - [ ] View: Transmittal pages en projects/[id]/transmittals
 - [ ] Formulario de creación con selección de documentos y purpose codes
@@ -1475,7 +1458,7 @@ components/documents/
 - [ ] Generación de PDF/reporte del transmittal
 - [ ] Dashboard: transmittals pendientes de respuesta
 
-### Fase 5: Extensión a otros Módulos (1-2 semanas por módulo)
+### Fase 5: Extensión a otros Módulos
 
 **Objetivo**: Migrar documentos de todos los módulos al sistema centralizado.
 
@@ -1563,18 +1546,23 @@ supergraph:
 
 ## 16. Decisiones Arquitecturales
 
-| #   | Decisión                  | Elección                                      | Justificación                                              |
-| --- | ------------------------- | --------------------------------------------- | ---------------------------------------------------------- |
-| 1   | **Storage**               | DO Spaces (1 bucket, prefijos por módulo)     | Compatible S3, económico, CDN incluido, simplifica gestión |
-| 2   | **Upload pattern**        | Presigned URLs (browser → S3 directo)         | No sobrecarga servidores, progreso real, sin timeout       |
-| 3   | **Metadata**              | Subgraph `document` nuevo (Apollo Federation) | Centralizado, DRY, un solo workflow engine                 |
-| 4   | **Archivos físicos**      | FileServer API dedicado (REST)                | Separación de concerns, reutilizable, escalable            |
-| 5   | **Orquestación**          | Next.js Server Actions                        | Patrón ya consolidado en el codebase                       |
-| 6   | **Vínculo entre módulos** | `moduleRef` (module + entityType + entityId)  | Desacoplado, el subgraph document no conoce otros tipos    |
-| 7   | **Versionado**            | Document → Revision → Version (3 niveles)     | Estándar para ISO 9001, máxima trazabilidad                |
-| 8   | **Workflows**             | En subgraph document (no externo)             | Simplicidad, los workflows son intrínsecos a documentos    |
-| 9   | **Transmittals**          | En subgraph document                          | Reutilizan las mismas revisiones del sistema de docs       |
-| 10  | **Buckets**               | Un solo bucket con prefijos                   | Menor costo, menor complejidad, misma separación lógica    |
+| #   | Decisión                  | Elección                                          | Justificación                                                        |
+| --- | ------------------------- | ------------------------------------------------- | -------------------------------------------------------------------- |
+| 1   | **Storage**               | DO Spaces (1 bucket, prefijos por módulo)         | Compatible S3, económico, CDN incluido, simplifica gestión           |
+| 2   | **Upload pattern**        | Presigned URLs (browser → S3 directo)             | No sobrecarga servidores, progreso real, sin timeout                 |
+| 3   | **Metadata**              | Subgraph `document` nuevo (Apollo Federation)     | Centralizado, DRY, un solo workflow engine                           |
+| 4   | **Archivos físicos**      | FileServer API dedicado (REST)                    | Separación de concerns, reutilizable, escalable                      |
+| 5   | **Orquestación**          | Next.js Server Actions                            | Patrón ya consolidado en el codebase                                 |
+| 6   | **Vínculo entre módulos** | `moduleRef` (module + entityType + entityId)      | Desacoplado, el subgraph document no conoce otros tipos              |
+| 7   | **Versionado**            | Document → Revision → Version (3 niveles)         | Estándar para ISO 9001, máxima trazabilidad                          |
+| 8   | **Workflows**             | En subgraph document (no externo)                 | Simplicidad, los workflows son intrínsecos a documentos              |
+| 9   | **Transmittals**          | En subgraph document                              | Reutilizan las mismas revisiones del sistema de docs                 |
+| 10  | **Buckets**               | Un solo bucket con prefijos                       | Menor costo, menor complejidad, misma separación lógica              |
+| 11  | **Esquema de revisión**   | Configurable por documento (ALPHABETICAL/NUMERIC) | Flexibilidad: ingeniería usa letras, informes usan números           |
+| 12  | **Adjuntos simples**      | Modelo `Attachment` separado de documentos        | Archivos sin ciclo de revisión ni workflow, vinculados por moduleRef |
+| 13  | **Digitalización**        | Modelo `ScannedFile` con flujo dual               | Clasificación digital + disposición física independientes            |
+| 14  | **Áreas de planta**       | Modelo `Area` vinculado a proyecto                | Catalogar origen físico de documentos escaneados                     |
+| 15  | **Logs**                  | DocumentSysLog + archive con rotación             | Trazabilidad operacional con archivado para performance              |
 
 ---
 

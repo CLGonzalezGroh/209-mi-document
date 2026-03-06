@@ -77,3 +77,13 @@
 - Sacando el health check del Docker para ejecutarlo en el compose
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.1
+
+2026-03-6
+
+## ScannedFiles
+
+- Agregando code a ScannedFiles y Actualizando Documentación
+
+---

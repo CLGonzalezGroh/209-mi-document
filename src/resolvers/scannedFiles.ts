@@ -17,7 +17,7 @@ import {
 } from "../generated/prisma/enums.js"
 
 export interface ScannedFileOrderByInput extends OrderByInput {
-  field: "TITLE" | "CREATED_AT" | "CLASSIFIED_AT" | "DIGITAL_DISPOSITION"
+  field: "CODE" | "TITLE" | "CREATED_AT" | "CLASSIFIED_AT" | "DIGITAL_DISPOSITION"
 }
 
 const EXTERNAL_SYSTEM_BASE_URL = process.env.EXTERNAL_SYSTEM_BASE_URL || ""
@@ -111,6 +111,7 @@ export const scannedFileResolvers = {
 
         if (filter?.query) {
           where.OR = [
+            { code: { contains: filter.query } },
             { title: { contains: filter.query } },
             { originalReference: { contains: filter.query } },
             { externalReference: { contains: filter.query } },
@@ -270,6 +271,7 @@ export const scannedFileResolvers = {
       }: {
         input: {
           projectId: number
+          code: string
           title: string
           description?: string
           originalReference?: string
@@ -292,6 +294,7 @@ export const scannedFileResolvers = {
         const scannedFile = await context.orm.scannedFile.create({
           data: {
             projectId: input.projectId,
+            code: input.code,
             title: input.title,
             description: input.description,
             originalReference: input.originalReference,
