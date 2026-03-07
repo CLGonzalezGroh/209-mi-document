@@ -80,10 +80,20 @@
 
 # What's new in María Ingeniería API Documents 2.0.1
 
-2026-03-6
+2026-03-06
 
 ## ScannedFiles
 
 - Agregando code a ScannedFiles y Actualizando Documentación
+
+---
+
+# What's new in María Ingeniería API Documents 2.0.2
+
+2026-03-07
+
+## Documentación
+
+- Actualiza la documentación del FileServer API: agrega secciones sobre autenticación, endpoints y ejemplos de uso.
 
 ---

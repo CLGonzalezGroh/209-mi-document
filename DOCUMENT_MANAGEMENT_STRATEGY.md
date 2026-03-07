@@ -145,103 +145,188 @@ Esto permite que el subgraph `document` sea 100% independiente de los demás.
 
 ## 4. FileServer API
 
-### Tecnología sugerida
+### Descripción General
 
-- **Runtime**: Node.js (Fastify o Express)
-- **SDK**: `@aws-sdk/client-s3` + `@aws-sdk/s3-request-presigner` (compatible con DO Spaces)
-- **Auth**: Bearer Token (API Key compartida con Next.js backend)
-- **Deploy**: Docker en el mismo servidor o servicio separado
+El FileServer API es un servicio REST dedicado a la gestión de archivos en Digital Ocean Spaces (S3 compatible). Genera presigned URLs para upload/download directo desde el browser al storage, sin que los archivos pasen por servidores intermedios.
 
-### Endpoints
+#### Autenticación
+
+Todos los endpoints bajo `/api/files/*` requieren el header:
+
+```
+Authorization: Bearer <API_TOKEN>
+```
+
+El token se comparte como secreto entre el FileServer y la app consumidora. El endpoint `/api/health` es público (no requiere token).
+
+#### Endpoints principales
 
 ```
 POST   /api/files/presign-upload     → Genera presigned PUT URL
 POST   /api/files/presign-download   → Genera presigned GET URL
 DELETE /api/files                    → Elimina archivo del storage
-POST   /api/files/copy               → Copia archivo (útil para versionado)
+POST   /api/files/copy               → Copia archivo (versionado)
 GET    /api/files/info               → Info del archivo (existe, tamaño, etc.)
-GET    /api/health                   → Health check
+GET    /api/health                   → Health check (público)
 ```
 
-### POST /api/files/presign-upload
+#### Ejemplo de integración (TypeScript)
 
-**Request:**
+```typescript
+const FILESERVER_URL = process.env.FILESERVER_API_URL
+const FILESERVER_TOKEN = process.env.FILESERVER_API_TOKEN
 
-```json
-{
-  "module": "quality",
-  "path": "findings-evidence",
-  "fileName": "foto-hallazgo.jpg",
-  "contentType": "image/jpeg",
-  "maxSize": 5242880
+const headers = {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${FILESERVER_TOKEN}`,
+}
+
+// ─── Upload ───
+export async function getUploadUrl(params: {
+  module: string
+  path: string
+  fileName: string
+  contentType: string
+}) {
+  const res = await fetch(`${FILESERVER_URL}/api/files/presign-upload`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(params),
+  })
+  if (!res.ok) throw new Error(`FileServer error: ${res.statusText}`)
+  return res.json() as Promise<{
+    uploadUrl: string
+    fileKey: string
+    expiresAt: string
+  }>
+}
+
+// ─── Download ───
+export async function getDownloadUrl(fileKey: string) {
+  const res = await fetch(`${FILESERVER_URL}/api/files/presign-download`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ fileKey }),
+  })
+  if (!res.ok) throw new Error(`FileServer error: ${res.statusText}`)
+  return res.json() as Promise<{
+    downloadUrl: string
+    expiresAt: string
+  }>
+}
+
+// ─── Delete ───
+export async function deleteFile(fileKey: string) {
+  const res = await fetch(`${FILESERVER_URL}/api/files`, {
+    method: "DELETE",
+    headers,
+    body: JSON.stringify({ fileKey }),
+  })
+  if (!res.ok) throw new Error(`FileServer error: ${res.statusText}`)
 }
 ```
 
-**Response:**
+#### Parámetros y ejemplos
 
-```json
-{
-  "uploadUrl": "https://bucket.nyc3.digitaloceanspaces.com/quality/findings-evidence/abc123-foto-hallazgo.jpg?X-Amz-...",
-  "fileKey": "quality/findings-evidence/abc123-foto-hallazgo.jpg",
-  "expiresAt": "2026-02-10T15:30:00Z"
-}
+- **POST /api/files/presign-upload**
+  - Request:
+    ```json
+    {
+      "module": "quality",
+      "path": "findings-evidence",
+      "fileName": "foto-hallazgo.jpg",
+      "contentType": "image/jpeg",
+      "maxSize": 5242880
+    }
+    ```
+  - Response:
+    ```json
+    {
+      "uploadUrl": "https://bucket.nyc3.digitaloceanspaces.com/quality/findings-evidence/abc123-foto-hallazgo.jpg?X-Amz-...",
+      "fileKey": "quality/findings-evidence/abc123-foto-hallazgo.jpg",
+      "expiresAt": "2026-02-10T15:30:00.000Z"
+    }
+    ```
+
+- **POST /api/files/presign-download**
+  - Request:
+    ```json
+    {
+      "fileKey": "quality/findings-evidence/abc123-foto-hallazgo.jpg"
+    }
+    ```
+  - Response:
+    ```json
+    {
+      "downloadUrl": "https://bucket.nyc3.digitaloceanspaces.com/quality/findings-evidence/abc123-foto-hallazgo.jpg?X-Amz-...",
+      "expiresAt": "2026-02-10T15:30:00.000Z"
+    }
+    ```
+
+- **DELETE /api/files**
+  - Request:
+    ```json
+    {
+      "fileKey": "quality/findings-evidence/abc123-foto-hallazgo.jpg"
+    }
+    ```
+
+- **POST /api/files/copy**
+  - Request:
+    ```json
+    {
+      "sourceKey": "quality/procedures/rev-a/proc-001.pdf",
+      "destinationKey": "quality/procedures/rev-b/proc-001.pdf"
+    }
+    ```
+
+- **GET /api/files/info?fileKey=...**
+  - Response (archivo existe):
+    ```json
+    {
+      "exists": true,
+      "fileKey": "quality/findings-evidence/abc123-foto-hallazgo.jpg",
+      "size": 245760,
+      "lastModified": "2026-02-10T14:20:00.000Z",
+      "contentType": "image/jpeg",
+      "etag": "\"d41d8cd98f00b204e9800998ecf8427e\""
+    }
+    ```
+  - Response (archivo no existe):
+    ```json
+    {
+      "exists": false,
+      "fileKey": "quality/findings-evidence/abc123-foto-hallazgo.jpg"
+    }
+    ```
+
+#### Seguridad y buenas prácticas
+
+- El FileServer solo debe ser consumido desde el backend (server actions, API routes). Nunca exponer la URL ni el token al browser.
+- Validación estricta de MIME types y tamaño máximo por tipo.
+- Rate limiting: 100 req/min general, 30 req/min para presign.
+- Logs de acceso y errores.
+
+#### Tipos MIME y tamaños máximos permitidos
+
+Ver sección "Notas Adicionales" al final de este documento para la lista completa de tipos y límites.
+
+#### Convención de fileKey
+
+El FileServer genera automáticamente la `fileKey` con el formato:
+
+```
+{module}/{path}/{uuid}-{fileName-sanitizado}
 ```
 
-**Lógica interna:**
+Ejemplo:
 
-1. Validar `module` y `contentType` contra whitelist.
-2. Generar `fileKey` = `{module}/{path}/{uuid}-{fileName}`.
-3. Crear presigned PUT URL con expiración (ej: 15 min).
-4. Devolver URL y key.
-
-### POST /api/files/presign-download
-
-**Request:**
-
-```json
-{
-  "fileKey": "quality/findings-evidence/abc123-foto-hallazgo.jpg"
-}
+```
+quality/findings-evidence/a1b2c3d4-foto-hallazgo.jpg
+projects/engineering/drawings/e5f6g7h8-PL-100-Planta-General.dwg
 ```
 
-**Response:**
-
-```json
-{
-  "downloadUrl": "https://bucket.nyc3.digitaloceanspaces.com/quality/findings-evidence/abc123-foto-hallazgo.jpg?X-Amz-...",
-  "expiresAt": "2026-02-10T15:30:00Z"
-}
-```
-
-### DELETE /api/files
-
-**Request:**
-
-```json
-{
-  "fileKey": "quality/findings-evidence/abc123-foto-hallazgo.jpg"
-}
-```
-
-### POST /api/files/copy
-
-**Request:**
-
-```json
-{
-  "sourceKey": "quality/procedures/rev-a/proc-001.pdf",
-  "destinationKey": "quality/procedures/rev-b/proc-001.pdf"
-}
-```
-
-### Seguridad del FileServer
-
-- Comunicación solo desde Next.js backend (no expuesto al browser).
-- Auth via `Authorization: Bearer <FILESERVER_API_TOKEN>`.
-- Validación de tipos MIME permitidos.
-- Validación de tamaño máximo por tipo.
-- Rate limiting.
-- Logs de acceso.
+Guardar siempre la `fileKey` en la base de datos — es el identificador único para descargar, eliminar o consultar el archivo.
 
 ---
 
@@ -1335,15 +1420,15 @@ components/scanned-files/
 
 ### Diferencias entre Attachments y ScannedFiles
 
-| Aspecto              | Attachments                           | ScannedFiles                              |
-| -------------------- | ------------------------------------- | ----------------------------------------- |
-| **Propósito**        | Adjuntar evidencias/soporte a entidad | Digitalizar papel y clasificar            |
-| **Ciclo de vida**    | Crear → Eliminar (simple)             | Crear → Clasificar → Cargar/Descartar     |
-| **Código único**     | No tiene                              | `code` único por proyecto (ej: SC-001)    |
-| **Ubicación UI**     | Panel embebido en detalle de entidad  | Páginas propias por proyecto              |
-| **Vinculación**      | module + entityType + entityId        | projectId + opcionalmente tipo/clase/área |
-| **Disposición física** | No aplica                           | DESTROY/ARCHIVE con confirmación          |
-| **Workflow**         | No tiene                              | Flujo de clasificación digital + física   |
+| Aspecto                | Attachments                           | ScannedFiles                              |
+| ---------------------- | ------------------------------------- | ----------------------------------------- |
+| **Propósito**          | Adjuntar evidencias/soporte a entidad | Digitalizar papel y clasificar            |
+| **Ciclo de vida**      | Crear → Eliminar (simple)             | Crear → Clasificar → Cargar/Descartar     |
+| **Código único**       | No tiene                              | `code` único por proyecto (ej: SC-001)    |
+| **Ubicación UI**       | Panel embebido en detalle de entidad  | Páginas propias por proyecto              |
+| **Vinculación**        | module + entityType + entityId        | projectId + opcionalmente tipo/clase/área |
+| **Disposición física** | No aplica                             | DESTROY/ARCHIVE con confirmación          |
+| **Workflow**           | No tiene                              | Flujo de clasificación digital + física   |
 
 ---
 
@@ -1489,8 +1574,8 @@ components/scanned-files/
 
 ```env
 # FileServer API
-FILESERVER_API_URL=http://localhost:4000       # URL del FileServer
-FILESERVER_API_TOKEN=fs_secret_token_here      # Token de autenticación
+FILESERVER_API_URL=http://localhost:4208       # URL real del FileServer
+FILESERVER_API_TOKEN=<el_mismo_token_que_API_TOKEN_del_fileserver>
 ```
 
 ### FileServer API (.env)
@@ -1507,10 +1592,10 @@ DO_SPACES_BUCKET=mi-app-documents
 PRESIGNED_URL_EXPIRATION=900                   # 15 minutos en segundos
 
 # Auth
-API_TOKEN=fs_secret_token_here                 # Debe coincidir con FILESERVER_API_TOKEN
+API_TOKEN=<el_token_secreto>
 
 # Server
-PORT=4000
+PORT=4208
 ```
 
 ### Subgraph Document (.env)
@@ -1520,8 +1605,8 @@ PORT=4000
 DATABASE_URL=postgresql://user:password@host:5432/document_db
 
 # Para comunicación con FileServer (si necesita eliminar archivos al borrar documentos)
-FILESERVER_API_URL=http://localhost:4000
-FILESERVER_API_TOKEN=fs_secret_token_here
+FILESERVER_API_URL=http://localhost:4208
+FILESERVER_API_TOKEN=<el_mismo_token_que_API_TOKEN_del_fileserver>
 ```
 
 ### Apollo Gateway/Router
