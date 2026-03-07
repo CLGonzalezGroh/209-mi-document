@@ -182,7 +182,7 @@ export const scannedFileResolvers = {
       }
     },
 
-    scannedFilesStats: async (
+    scannedFileStats: async (
       _: any,
       { projectId }: { projectId: number },
       context: ResolverContext,

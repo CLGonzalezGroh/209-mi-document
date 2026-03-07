@@ -1522,6 +1522,19 @@ type Query {
     pagination: PaginationInput
     orderBy: DocumentSysLogOrderByInput
   ): DocumentSysLogArchiveConnection!
+
+    # ─── Archivos Escaneados ───
+    "Listar archivos escaneados con filtro, paginación y ordenamiento"
+    scannedFiles(
+      filter: ScannedFileFilterInput
+      pagination: PaginationInput
+      orderBy: ScannedFileOrderByInput
+    ): ScannedFileConnection!
+
+    "Obtener estadísticas de archivos escaneados por estado"
+    scannedFileStats(
+      filter: ScannedFileFilterInput
+    ): ScannedFileStats!
 }
 
 # ═══════════════════════════════════════════════════════
