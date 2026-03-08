@@ -384,5 +384,45 @@ export const documentClassResolvers = {
         })
       }
     },
+
+    deleteDocumentClass: async (
+      _: any,
+      { id }: { id: number },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: ["document:documentClass:delete"],
+        context,
+      })
+
+      try {
+        const documentClass = await context.orm.documentClass.findFirst({
+          where: { id },
+        })
+
+        if (!documentClass) {
+          throw new GraphQLError("Clase de documento no encontrada", {
+            extensions: { code: "NOT_FOUND" },
+          })
+        }
+
+        await context.orm.documentClass.delete({
+          where: { id },
+        })
+
+        return true
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "DELETE_DOCUMENT_CLASS",
+          messages: {
+            notFound: "La clase de documento no existe.",
+            default: "Error al eliminar la clase de documento.",
+          },
+        })
+      }
+    },
   },
 }

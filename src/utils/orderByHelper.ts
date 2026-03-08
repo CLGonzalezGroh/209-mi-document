@@ -71,6 +71,7 @@ export function buildDocumentSysLogOrderBy(
 }
 
 const scannedFileFieldMap: Record<string, string> = {
+  ID: "id",
   CODE: "code",
   TITLE: "title",
   CREATED_AT: "createdAt",

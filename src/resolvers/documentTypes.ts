@@ -416,5 +416,45 @@ export const documentTypeResolvers = {
         })
       }
     },
+
+    deleteDocumentType: async (
+      _: any,
+      { id }: { id: number },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_DELETE],
+        context,
+      })
+
+      try {
+        const documentType = await context.orm.documentType.findFirst({
+          where: { id },
+        })
+
+        if (!documentType) {
+          throw new GraphQLError("Tipo de documento no encontrado", {
+            extensions: { code: "NOT_FOUND" },
+          })
+        }
+
+        await context.orm.documentType.delete({
+          where: { id },
+        })
+
+        return true
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "DELETE_DOCUMENT_TYPE",
+          messages: {
+            notFound: "El tipo de documento no existe.",
+            default: "Error al eliminar el tipo de documento.",
+          },
+        })
+      }
+    },
   },
 }

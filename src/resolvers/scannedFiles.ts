@@ -17,7 +17,7 @@ import {
 } from "../generated/prisma/enums.js"
 
 export interface ScannedFileOrderByInput extends OrderByInput {
-  field: "CODE" | "TITLE" | "CREATED_AT" | "CLASSIFIED_AT" | "DIGITAL_DISPOSITION"
+  field: "ID" | "CODE" | "TITLE" | "CREATED_AT" | "CLASSIFIED_AT" | "DIGITAL_DISPOSITION"
 }
 
 const EXTERNAL_SYSTEM_BASE_URL = process.env.EXTERNAL_SYSTEM_BASE_URL || ""

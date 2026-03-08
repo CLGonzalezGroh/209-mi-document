@@ -343,6 +343,8 @@ enum PhysicalDispositionInput {
 
 "Campos de ordenamiento para archivos escaneados"
 enum ScannedFileOrderFieldInput {
+  "Por ID"
+  ID
   "Por código"
   CODE
   "Por título"
@@ -1524,6 +1526,9 @@ type Query {
   ): DocumentSysLogArchiveConnection!
 
   # ─── Archivos Escaneados ───
+  "Obtener un archivo escaneado por ID"
+  scannedFileById(id: Int!): ScannedFile
+
   "Listar archivos escaneados con filtro, paginación y ordenamiento"
   scannedFiles(
     filter: ScannedFileFilterInput
@@ -1614,6 +1619,9 @@ type Mutation {
   "Reactivar un tipo de documento"
   activateDocumentType(id: Int!): DocumentType!
 
+  "Eliminar permanentemente un tipo de documento"
+  deleteDocumentType(id: Int!): Boolean!
+
   # ─── Clases de documento ───
   "Crear una clase de documento"
   createDocumentClass(input: CreateDocumentClassInput!): DocumentClass!
@@ -1629,6 +1637,9 @@ type Mutation {
 
   "Reactivar una clase de documento"
   activateDocumentClass(id: Int!): DocumentClass!
+
+  "Eliminar permanentemente una clase de documento"
+  deleteDocumentClass(id: Int!): Boolean!
 
   # ─── Áreas ───
   "Crear un área"

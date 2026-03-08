@@ -117,3 +117,13 @@
 - Agrega funcionalidad para eliminar archivos escaneados y actualiza el esquema GraphQL
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.5
+
+2026-03-08
+
+## DocumentType & DocumentClass
+
+- Agrega funcionalidad para eliminar tipos y clases de documentos, y mejora la consulta de archivos escaneados por ID
+
+---
