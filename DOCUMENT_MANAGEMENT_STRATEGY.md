@@ -5,6 +5,7 @@
 >
 > Fecha: 10 de febrero de 2026
 > Actualizado: 6 de marzo de 2026
+> Actualizado: 8 de marzo de 2026
 
 ---
 
@@ -116,15 +117,15 @@ Un sistema centralizado de gestión documental compuesto por:
 
 ### Justificación: Subgraph Centralizado vs. Documentos por Módulo
 
-| Aspecto                  | Subgraph centralizado          | Documentos en cada subgraph      |
-| ------------------------ | ------------------------------ | -------------------------------- |
-| **DRY**                  | ✅ Una sola implementación     | ❌ Repetir lógica en 5 subgraphs |
-| **Consistencia**         | ✅ Mismo modelo revisión/ver.  | ❌ Riesgo de divergencia         |
-| **Workflow ISO 9001**    | ✅ Un solo motor de workflow   | ❌ Replicar en cada módulo       |
-| **Transmittals**         | ✅ Consulta cross-module fácil | ❌ Joins complicados             |
-| **FileServer**           | ✅ Un punto de integración     | ❌ Cada subgraph habla con FS    |
-| **Migración gradual**    | ✅ Migrar módulos uno a uno    | ❌ Todo o nada por módulo        |
-| **Queries cross-module** | ⚠️ Requiere entidades externas | ✅ Datos locales                 |
+| Aspecto                  | Subgraph centralizado           | Documentos en cada subgraph      |
+| ------------------------ | ------------------------------- | -------------------------------- |
+| **DRY**                  | ✅ Una sola implementación      | ❌ Repetir lógica en 5 subgraphs |
+| **Consistencia**         | ✅ Mismo modelo revisión/ver.   | ❌ Riesgo de divergencia         |
+| **Workflow ISO 9001**    | ✅ Un solo motor de workflow    | ❌ Replicar en cada módulo       |
+| **Transmittals**         | ✅ Consulta cross-module fácil  | ❌ Joins complicados             |
+| **FileServer**           | ✅ Un punto de integración      | ❌ Cada subgraph habla con FS    |
+| **Migración gradual**    | ✅ Migrar módulos uno a uno     | ❌ Todo o nada por módulo        |
+| **Queries cross-module** | ✅ Queries directas con filtros | ✅ Datos locales                 |
 
 ### Vínculo con otros Subgraphs: `moduleRef`
 
@@ -720,9 +721,8 @@ type Query {
   attachmentsByModule(module, entityType, entityId, pagination): AttachmentConnection!
 
   # ─── Archivos escaneados ───
-  scannedFileById(id: Int!): ScannedFile
   scannedFiles(filter, pagination, orderBy): ScannedFileConnection!
-  scannedFileStats(projectId: Int!): ScannedFileStats!
+  scannedFileStats(filter): ScannedFileStats!
 
   # ─── Logs ───
   documentSysLogById(id: Int!): DocumentSysLog
@@ -789,6 +789,7 @@ type Mutation {
   confirmPhysicalDisposition(id): ScannedFile!
   terminateScannedFile(id): ScannedFile!
   activateScannedFile(id): ScannedFile!
+  deleteScannedFile(id): Boolean!
 
   # ─── Logs ───
   archiveDocumentSysLogs(olderThanDays): Int!
@@ -822,50 +823,50 @@ updatePhysicalDisposition ──▶ confirmPhysicalDisposition
 
 ## 8. Integración con Federation (Subgraphs existentes)
 
-### En el subgraph `quality`
+### Principio: Sin stubs de entidades externas
 
-```graphql
-# Extiende Document como entidad externa (solo necesita el ID)
-extend type Document @key(fields: "id") {
-  id: Int! @external
-}
+El subgraph `document` **no expone stubs** de tipos que pertenecen a otros subgraphs
+(como `Project`, `Finding`, `Equipment`). En su lugar, las entidades se vinculan
+mediante:
 
-# Los Findings NO tienen campo "documents" directo.
-# Se consultan via documentsByModule(module: QUALITY, entityType: "finding", entityId: X)
-# desde el Gateway.
+- **Documentos y Adjuntos**: `module` + `entityType` + `entityId` (referencia genérica).
+- **Transmittals, ScannedFiles y Áreas**: `projectId` (FK directa como Int, sin tipo `Project`).
+
+Desde el frontend, se consultan directamente usando queries con filtros, lo cual
+provee paginación, filtros avanzados y ordenamiento — ventajas que un stub de
+Federation con arrays planos no daría.
+
+### En los subgraphs consumidores (quality, projects, tags)
+
+Los demás subgraphs **no necesitan extender** tipos del subgraph `document`.
+La comunicación se resuelve enteramente desde el frontend:
+
+```
+┌────────────────┐
+│    Frontend    │
+│   (Next.js)    │
+└───┬────────┬───┘
+    │        │
+    │        │  Queries directas al subgraph document:
+    │        │  - documentsByModule(module, entityType, entityId)
+    │        │  - transmittals(filter: { projectId })
+    │        │  - scannedFiles(filter: { projectId })
+    │        │  - areas(filter: { projectId })
+    │        │
+    ▼        ▼
+┌────────┐ ┌──────────┐
+│quality │ │ document │
+│projects│ │ subgraph │
+│tags    │ └──────────┘
+└────────┘
 ```
 
-### En el subgraph `projects`
+### Queries desde el frontend por módulo
+
+#### Documentos de un Finding (Quality)
 
 ```graphql
-extend type Document @key(fields: "id") {
-  id: Int! @external
-}
-
-extend type Transmittal @key(fields: "id") {
-  id: Int! @external
-}
-
-# El Project puede exponer transmittals via Federation
-extend type Project @key(fields: "id") {
-  id: Int! @external
-  # Resuelto por el subgraph document via transmittalsByProject
-}
-```
-
-### En el subgraph `tags`
-
-```graphql
-extend type Document @key(fields: "id") {
-  id: Int! @external
-}
-```
-
-### Query unificada desde el Gateway
-
-```graphql
-# El Apollo Gateway combina datos de múltiples subgraphs automáticamente
-query GetFindingWithDocuments($findingId: Int!) {
+query GetFindingDocuments($findingId: Int!) {
   # Resuelto por subgraph quality
   findingById(id: $findingId) {
     id
@@ -873,11 +874,12 @@ query GetFindingWithDocuments($findingId: Int!) {
     status
   }
 
-  # Resuelto por subgraph document
+  # Resuelto por subgraph document (query independiente)
   documentsByModule(
     module: QUALITY
     entityType: "finding"
     entityId: $findingId
+    pagination: { skip: 0, take: 20 }
   ) {
     items {
       id
@@ -890,20 +892,104 @@ query GetFindingWithDocuments($findingId: Int!) {
           fileName
           fileKey
         }
-        workflow {
-          status
-          steps {
-            assignedTo {
-              id # Resuelto por subgraph admin (Federation)
-            }
-            status
-          }
-        }
       }
+    }
+    pagination {
+      totalItems
+      hasNext
     }
   }
 }
 ```
+
+#### Transmittals de un Proyecto
+
+```graphql
+query TransmittalsDelProyecto($projectId: Int!) {
+  transmittals(
+    filter: { projectId: $projectId }
+    pagination: { skip: 0, take: 20 }
+    orderBy: { field: CREATED_AT, direction: DESC }
+  ) {
+    items {
+      id
+      code
+      status
+      issuedTo
+      issuedAt
+    }
+    pagination {
+      totalItems
+      hasNext
+    }
+  }
+}
+```
+
+#### Áreas de un Proyecto
+
+```graphql
+query AreasDelProyecto($projectId: Int!) {
+  areas(
+    filter: { projectId: $projectId }
+    pagination: { skip: 0, take: 20 }
+    orderBy: { field: SORT_ORDER, direction: ASC }
+  ) {
+    items {
+      id
+      name
+      code
+      sortOrder
+    }
+    pagination {
+      totalItems
+      hasNext
+    }
+  }
+}
+```
+
+#### ScannedFiles de un Proyecto
+
+```graphql
+query ScannedFilesDelProyecto($projectId: Int!) {
+  scannedFiles(
+    filter: { projectId: $projectId }
+    pagination: { skip: 0, take: 20 }
+    orderBy: { field: CREATED_AT, direction: DESC }
+  ) {
+    items {
+      id
+      code
+      title
+      digitalDisposition
+      physicalDisposition
+    }
+    pagination {
+      totalItems
+      hasNext
+    }
+  }
+  scannedFileStats(filter: { projectId: $projectId }) {
+    pending
+    accepted
+    uploaded
+    discarded
+    total
+  }
+}
+```
+
+### ¿Por qué no usar stubs de Federation?
+
+| Aspecto           | Stub `Project { transmittals }`  | Query directa con `projectId`      |
+| ----------------- | -------------------------------- | ---------------------------------- |
+| **Paginación**    | ❌ Array plano, carga todo       | ✅ PaginationInput integrado       |
+| **Filtros**       | ❌ No disponibles                | ✅ Filtros por status, query, etc. |
+| **Ordenamiento**  | ❌ No disponible                 | ✅ OrderBy configurable            |
+| **Complejidad**   | ⚠️ Requiere `__resolveReference` | ✅ Sin resolvers adicionales       |
+| **Performance**   | ❌ Over-fetching                 | ✅ Solo lo necesario               |
+| **Independencia** | ❌ Acopla subgraphs              | ✅ Subgraph 100% autónomo          |
 
 ---
 
@@ -915,10 +1001,20 @@ query GetFindingWithDocuments($findingId: Int!) {
 lib/actions/documents/
 ├── document-queries.ts          # getDocuments, getDocumentById, getDocumentsByModule
 ├── document-actions.ts          # createDocument, updateDocument, terminateDocument
+├── document-type-queries.ts     # getDocumentTypes, getDocumentTypeById, getDocumentTypesSelectList
+├── document-type-actions.ts     # createDocumentType, updateDocumentType, terminateDocumentType
+├── document-class-queries.ts    # getDocumentClasses, getDocumentClassById, getDocumentClassesSelectList
+├── document-class-actions.ts    # createDocumentClass, updateDocumentClass, terminateDocumentClass
 ├── revision-actions.ts          # createRevision, registerVersion
 ├── workflow-actions.ts          # initiateReview, approveStep, rejectStep
-├── transmittal-queries.ts       # getTransmittals, getTransmittalById
-├── transmittal-actions.ts       # createTransmittal, issueTransmittal, respondTransmittal
+├── transmittal-queries.ts       # getTransmittals, getTransmittalById, getTransmittalsByProject
+├── transmittal-actions.ts       # createTransmittal, issueTransmittal, respondTransmittal, closeTransmittal
+├── attachment-queries.ts        # getAttachmentById, getAttachmentsByModule
+├── attachment-actions.ts        # createAttachment, deleteAttachment
+├── scanned-file-queries.ts      # getScannedFiles, getScannedFileStats
+├── scanned-file-actions.ts      # createScannedFile, classifyScannedFile, markAsUploaded, updatePhysicalDisposition, deleteScannedFile
+├── area-queries.ts              # getAreas, getAreaById, getAreasSelectList
+├── area-actions.ts              # createArea, updateArea, terminateArea, activateArea
 └── fileserver-client.ts         # getPresignedUploadUrl, getPresignedDownloadUrl, deleteFile
 ```
 
@@ -1436,7 +1532,7 @@ components/scanned-files/
 
 ### Fase 1: Fundamentos ✅ COMPLETADA
 
-**Objetivo**: Infraestructura base funcional — subgraph document operativo.
+**Objetivo**: Infraestructura base funcional — subgraph document y FileServer operativos.
 
 - [x] **Crear Subgraph Document**
   - Setup del nuevo subgraph (Apollo Federation v2.7)
@@ -1456,103 +1552,157 @@ components/scanned-files/
   - SelectList queries para selectores del frontend
   - Enums duplicados para inputs (ej: `ModuleTypeInput`, `RevisionSchemeInput`)
 
-- [x] **Attachments (adjuntos simples)**
-  - Modelo `Attachment`: archivos sin workflow ni revisiones
-  - Vinculado por `module` + `entityType` + `entityId`
-  - Queries: `attachmentById`, `attachmentsByModule`
-  - Mutations: `createAttachment`, `deleteAttachment`
-
-- [x] **ScannedFiles (digitalización)**
-  - Modelo `ScannedFile` con campo `code` único por proyecto y flujo de clasificación digital y física
-  - Enums `DigitalDisposition` y `PhysicalDisposition`
-  - Modelo `Area` para ubicación en planta
-  - Queries: `scannedFileById`, `scannedFiles`, `scannedFileStats`
-  - Mutations: `createScannedFile`, `classifyScannedFile`, `markAsUploaded`,
-    `updatePhysicalDisposition`, `confirmPhysicalDisposition`,
-    `terminateScannedFile`, `activateScannedFile`
-  - Queries de áreas: `areas`, `areaById`, `areasSelectList`
-  - Mutations de áreas: `createArea`, `updateArea`, `terminateArea`, `activateArea`
-
 - [x] **Logs del sistema**
   - Modelo `DocumentSysLog` y `DocumentSysLogArchive`
   - Queries paginadas y con filtros
   - Mutations: `archiveDocumentSysLogs`, `deleteArchivedDocumentSysLogs`
 
-- [ ] **Crear proyecto FileServer API**
-  - Setup Node.js + Fastify/Express
-  - Integrar AWS SDK (S3 compatible) con DO Spaces
-  - Implementar endpoints: presign-upload, presign-download, delete
+- [x] **FileServer API**
+  - Setup Node.js + Express
+  - Integración AWS SDK (S3 compatible) con DO Spaces
+  - Endpoints implementados: presign-upload, presign-download, delete, copy, info, health
   - Auth con Bearer Token
-  - Tests
-  - Dockerize + deploy
+  - Rate limiting: 100 req/min general, 30 req/min para presign
+  - Validación de MIME types y tamaños máximos por módulo
+  - Docker + deploy
+  - Documentación completa en `FILESERVER_API_DOCUMENTATION.md`
 
-- [ ] **Configurar DO Spaces**
-  - Crear bucket `mi-app-documents`
-  - Configurar CORS para dominio de la app
-  - Configurar políticas de acceso (private)
-  - Probar presigned URLs manualmente
+- [x] **Configurar DO Spaces**
+  - Bucket `mi-testing` creado y operativo
+  - CORS configurado para dominio de la app
+  - Políticas de acceso: private (todo via presigned URLs)
+  - Presigned URLs testeadas manualmente
 
-- [ ] **Integrar en Next.js**
+### Fase 2: ScannedFiles en Proyectos
+
+**Objetivo**: Flujo completo de digitalización de documentos en papel dentro de proyectos.
+
+- [x] Schema y resolvers del subgraph
+  - Modelo `ScannedFile` con campo `code` único por proyecto
+  - Flujo de clasificación digital y física
+  - Enums `DigitalDisposition` y `PhysicalDisposition`
+  - Modelo `Area` para ubicación en planta
+  - Queries: `scannedFiles`, `scannedFileStats`
+  - Mutations: `createScannedFile`, `classifyScannedFile`, `markAsUploaded`,
+    `updatePhysicalDisposition`, `confirmPhysicalDisposition`,
+    `terminateScannedFile`, `activateScannedFile`, `deleteScannedFile`
+  - Queries de áreas: `areas`, `areaById`, `areasSelectList`
+  - Mutations de áreas: `createArea`, `updateArea`, `terminateArea`, `activateArea`
+- [ ] Integrar en Next.js
   - Crear `lib/actions/documents/fileserver-client.ts`
-  - Crear server actions básicas: create, list, download
-  - Crear hook `useDocumentUpload`
-  - Crear componente `DocumentTable`
-  - Reemplazar `quality/documents/page.tsx` con datos dinámicos
+  - Crear server actions: `scanned-file-queries.ts`, `scanned-file-actions.ts`
+  - Crear server actions: `area-queries.ts`, `area-actions.ts`
+  - Crear hook `useDocumentUpload` (upload directo a DO Spaces con progreso)
   - Regenerar tipos con codegen
+- [ ] Páginas del frontend
+  - `projects/[projectId]/scanned-files/page.tsx` — Lista con filtros y estadísticas
+  - `projects/[projectId]/scanned-files/new/page.tsx` — Subir nuevo archivo escaneado
+  - `projects/[projectId]/scanned-files/[scannedFileId]/page.tsx` — Detalle con clasificación y disposición
+- [ ] Componentes reutilizables
+  - `ScannedFileTable.tsx` — Tabla paginada con filtros
+  - `ScannedFileForm.tsx` — Formulario crear (code, título, archivo)
+  - `ScannedFileDetail.tsx` — Detalle con estado de clasificación y disposición
+  - `ScannedFileClassifyForm.tsx` — Formulario de clasificación (ACCEPTED/DISCARDED)
+  - `ScannedFileDispositionPanel.tsx` — Panel de disposición física (DESTROY/ARCHIVE)
+  - `ScannedFileStatsCard.tsx` — Card con estadísticas por proyecto
+  - `ScannedFileUploadZone.tsx` — Zona de drag & drop para escaneos
+  - `UploadProgressBar.tsx` — Barra de progreso de upload
 
-### Fase 2: Revisiones y Versionado
+### Fase 3: Attachments para Quality
 
-**Objetivo**: Sistema completo de revisiones y versiones.
+**Objetivo**: Adjuntos simples (evidencias, fotos, archivos de soporte) en el módulo de calidad.
+
+- [x] Schema y resolvers del subgraph
+  - Modelo `Attachment`: archivos sin workflow ni revisiones
+  - Vinculado por `module` + `entityType` + `entityId`
+  - Queries: `attachmentById`, `attachmentsByModule`
+  - Mutations: `createAttachment`, `deleteAttachment`
+- [ ] Integrar en Next.js
+  - Crear server actions: `attachment-queries.ts`, `attachment-actions.ts`
+- [ ] Componentes reutilizables (embebibles en detalle de cualquier entidad)
+  - `AttachmentPanel.tsx` — Panel de adjuntos embebible en cualquier detalle
+  - `AttachmentList.tsx` — Lista de adjuntos de una entidad
+  - `AttachmentUploadButton.tsx` — Botón + diálogo para subir adjunto
+  - `AttachmentRow.tsx` — Fila individual con preview, descarga y eliminar
+- [ ] Integrar en páginas de Quality
+  - Embeber `AttachmentPanel` en detalle de findings
+  - Embeber `AttachmentPanel` en detalle de actions
+  - Embeber `AttachmentPanel` en otras entidades de quality que requieran adjuntos
+
+### Fase 4: Documentos — Revisiones, Versionado y Workflows
+
+**Objetivo**: Gestión documental completa con revisiones, versionado y flujo de aprobación ISO 9001 para todos los módulos.
+
+#### Revisiones y Versionado
 
 - [x] Schema y resolvers: createRevision, registerVersion
 - [x] Auto-generación de revisionCode según `revisionScheme` (A → B → C o 0 → 1 → 2)
 - [x] Mutation `switchRevisionScheme` para cambiar esquema de revisión
 - [ ] Lógica de SUPERSEDED automático al aprobar nueva revisión
-- [ ] View: `DocumentVersionHistory` component
-- [ ] View: `RevisionTimeline` component
-- [ ] View: Detalle de documento con tabs (Info, Revisiones, Versiones)
-- [ ] Formulario para subir nueva versión a revisión existente
-- [ ] Formulario para crear nueva revisión
+- [ ] Integrar en Next.js
+  - Crear server actions: `document-queries.ts`, `document-actions.ts`
+  - Crear server actions: `document-type-queries.ts`, `document-type-actions.ts`
+  - Crear server actions: `document-class-queries.ts`, `document-class-actions.ts`
+  - Crear server actions: `revision-actions.ts`
+- [ ] Páginas del frontend
+  - `quality/documents/page.tsx` — Lista de documentos de calidad
+  - `quality/documents/new/page.tsx` — Crear nuevo documento
+  - `quality/documents/[documentId]/page.tsx` — Detalle con tabs (Info, Revisiones, Versiones)
+  - `quality/documents/[documentId]/edit/page.tsx` — Editar metadata
+  - `quality/documents/[documentId]/revisions/[revisionId]/page.tsx` — Detalle de revisión
+  - `tags/documents/page.tsx` — Documentos técnicos
+  - `projects/[projectId]/documents/page.tsx` — Documentos del proyecto
+- [ ] Componentes reutilizables
+  - `DocumentTable.tsx` — Tabla de documentos (reutilizable por módulo)
+  - `DocumentForm.tsx` — Formulario crear/editar documento
+  - `DocumentDetail.tsx` — Vista de detalle del documento
+  - `DocumentUploadZone.tsx` — Zona de drag & drop para archivos
+  - `DocumentVersionHistory.tsx` — Historial de versiones
+  - `RevisionTimeline.tsx` — Timeline de revisiones
+- [ ] Extensión a todos los módulos
+  - Migrar `tags/documents/page.tsx` a datos dinámicos
+  - Migrar `tags/displays/[id]/[eqId]/documents/page.tsx`
+  - Integrar documentos en módulo operations
+  - Integrar documentos en módulo management
+  - Integrar documentos en módulo comercial
 
-### Fase 3: Workflows de Revisión
-
-**Objetivo**: Flujo de aprobación ISO 9001 completo.
+#### Workflows de Revisión ISO 9001
 
 - [x] Schema: ReviewWorkflow, ReviewStep (resolvers implementados)
 - [x] Mutaciones: initiateReview, approveStep, rejectStep, cancelWorkflow
 - [ ] Lógica de ejecución secuencial de steps
 - [ ] Generación de signatureHash para trazabilidad
 - [ ] Reglas de negocio: solo DRAFT puede ir a IN_REVIEW, etc.
-- [ ] View: `ReviewWorkflowPanel` component
-- [ ] View: `ReviewStepCard` component
+- [ ] Integrar en Next.js
+  - Crear server actions: `workflow-actions.ts`
+- [ ] Componentes reutilizables
+  - `ReviewWorkflowPanel.tsx` — Panel de workflow de revisión
+  - `ReviewStepCard.tsx` — Card individual de un step
 - [ ] Dashboard de documentos pendientes de revisión
 - [ ] Notificaciones por email al asignar reviewers
 - [ ] Notificaciones al completar/rechazar revisión
 - [ ] Audit log de todas las acciones del workflow
 
-### Fase 4: Transmittals de Ingeniería
+### Fase 5: Transmittals de Ingeniería
 
-**Objetivo**: Gestión de emisiones de documentos a clientes.
+**Objetivo**: Gestión de emisiones de documentos a clientes en proyectos.
 
 - [x] Schema: Transmittal, TransmittalItem (resolvers implementados)
 - [x] Mutaciones: createTransmittal, issueTransmittal, respondTransmittal, closeTransmittal
 - [ ] Lógica de estados del transmittal
-- [ ] View: Transmittal pages en projects/[id]/transmittals
-- [ ] Formulario de creación con selección de documentos y purpose codes
-- [ ] Vista de detalle con tracking de respuestas por item
+- [ ] Integrar en Next.js
+  - Crear server actions: `transmittal-queries.ts`, `transmittal-actions.ts`
+- [ ] Páginas del frontend
+  - `projects/[projectId]/transmittals/page.tsx` — Lista de transmittals
+  - `projects/[projectId]/transmittals/new/page.tsx` — Crear transmittal
+  - `projects/[projectId]/transmittals/[transmittalId]/page.tsx` — Detalle con items y respuestas
+- [ ] Componentes reutilizables
+  - `TransmittalTable.tsx` — Tabla de transmittals
+  - `TransmittalForm.tsx` — Formulario crear transmittal
+  - `TransmittalDetail.tsx` — Detalle con items y respuestas
+  - `TransmittalItemRow.tsx` — Fila de item con status de cliente
 - [ ] Generación de PDF/reporte del transmittal
 - [ ] Dashboard: transmittals pendientes de respuesta
-
-### Fase 5: Extensión a otros Módulos
-
-**Objetivo**: Migrar documentos de todos los módulos al sistema centralizado.
-
-- [ ] Migrar `tags/documents/page.tsx` a datos dinámicos
-- [ ] Migrar `tags/displays/[id]/[eqId]/documents/page.tsx`
-- [ ] Integrar documentos en módulo operations
-- [ ] Integrar documentos en módulo management
-- [ ] Integrar documentos en módulo comercial
-- [ ] Migrar evidencias de findings/actions a DocumentVersion
 
 ### Fase 6: Mejoras y Optimización (ongoing)
 
@@ -1565,6 +1715,7 @@ components/scanned-files/
 - [ ] Reportes de estado documental por módulo
 - [ ] Políticas de retención y archivado
 - [ ] Backup automático de DO Spaces
+- [ ] Migrar evidencias de findings/actions a Attachments
 
 ---
 
@@ -1586,7 +1737,7 @@ DO_SPACES_KEY=your_spaces_key
 DO_SPACES_SECRET=your_spaces_secret
 DO_SPACES_ENDPOINT=https://nyc3.digitaloceanspaces.com
 DO_SPACES_REGION=nyc3
-DO_SPACES_BUCKET=mi-app-documents
+DO_SPACES_BUCKET=mi-testing
 
 # Presigned URLs
 PRESIGNED_URL_EXPIRATION=900                   # 15 minutos en segundos

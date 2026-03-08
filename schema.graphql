@@ -1523,18 +1523,16 @@ type Query {
     orderBy: DocumentSysLogOrderByInput
   ): DocumentSysLogArchiveConnection!
 
-    # ─── Archivos Escaneados ───
-    "Listar archivos escaneados con filtro, paginación y ordenamiento"
-    scannedFiles(
-      filter: ScannedFileFilterInput
-      pagination: PaginationInput
-      orderBy: ScannedFileOrderByInput
-    ): ScannedFileConnection!
+  # ─── Archivos Escaneados ───
+  "Listar archivos escaneados con filtro, paginación y ordenamiento"
+  scannedFiles(
+    filter: ScannedFileFilterInput
+    pagination: PaginationInput
+    orderBy: ScannedFileOrderByInput
+  ): ScannedFileConnection!
 
-    "Obtener estadísticas de archivos escaneados por estado"
-    scannedFileStats(
-      filter: ScannedFileFilterInput
-    ): ScannedFileStats!
+  "Obtener estadísticas de archivos escaneados por estado"
+  scannedFileStats(filter: ScannedFileFilterInput): ScannedFileStats!
 }
 
 # ═══════════════════════════════════════════════════════
@@ -1621,7 +1619,10 @@ type Mutation {
   createDocumentClass(input: CreateDocumentClassInput!): DocumentClass!
 
   "Actualizar una clase de documento"
-  updateDocumentClass(id: Int!, input: UpdateDocumentClassInput!): DocumentClass!
+  updateDocumentClass(
+    id: Int!
+    input: UpdateDocumentClassInput!
+  ): DocumentClass!
 
   "Deshabilitar una clase de documento"
   terminateDocumentClass(id: Int!): DocumentClass!
@@ -1660,7 +1661,10 @@ type Mutation {
   markAsUploaded(id: Int!, input: MarkAsUploadedInput!): ScannedFile!
 
   "Actualizar disposición física del papel"
-  updatePhysicalDisposition(id: Int!, disposition: PhysicalDispositionInput!): ScannedFile!
+  updatePhysicalDisposition(
+    id: Int!
+    disposition: PhysicalDispositionInput!
+  ): ScannedFile!
 
   "Confirmar ejecución de la disposición física (DESTROY→DESTROYED, ARCHIVE→ARCHIVED)"
   confirmPhysicalDisposition(id: Int!): ScannedFile!
@@ -1670,6 +1674,9 @@ type Mutation {
 
   "Reactivar un archivo escaneado"
   activateScannedFile(id: Int!): ScannedFile!
+
+  "Eliminar permanentemente un archivo escaneado y su archivo del storage"
+  deleteScannedFile(id: Int!): Boolean!
 
   # ─── Logs del Sistema ───
   "Archiva logs del sistema antiguos (mueve de DocumentSysLog a DocumentSysLogArchive)"

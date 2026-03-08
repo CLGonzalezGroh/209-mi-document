@@ -107,3 +107,13 @@
 - Agrega consultas para listar archivos escaneados y obtener estadísticas de archivos escaneados por estado
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.4
+
+2026-03-08
+
+## ScannedFiles
+
+- Agrega funcionalidad para eliminar archivos escaneados y actualiza el esquema GraphQL
+
+---

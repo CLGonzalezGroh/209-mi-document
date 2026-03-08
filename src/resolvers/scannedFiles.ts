@@ -684,5 +684,45 @@ export const scannedFileResolvers = {
         })
       }
     },
+
+    deleteScannedFile: async (
+      _: any,
+      { id }: { id: number },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_DELETE],
+        context,
+      })
+
+      try {
+        const scannedFile = await context.orm.scannedFile.findFirst({
+          where: { id },
+        })
+
+        if (!scannedFile) {
+          throw new GraphQLError("Archivo escaneado no encontrado", {
+            extensions: { code: "NOT_FOUND" },
+          })
+        }
+
+        await context.orm.scannedFile.delete({
+          where: { id },
+        })
+
+        return true
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "DELETE_SCANNED_FILE",
+          messages: {
+            notFound: "El archivo escaneado no existe.",
+            default: "Error al eliminar el archivo escaneado.",
+          },
+        })
+      }
+    },
   },
 }
