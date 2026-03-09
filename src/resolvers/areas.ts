@@ -347,5 +347,45 @@ export const areaResolvers = {
         })
       }
     },
+
+    deleteArea: async (
+      _: any,
+      { id }: { id: number },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: ["document:area:delete"],
+        context,
+      })
+
+      try {
+        const area = await context.orm.area.findFirst({
+          where: { id },
+        })
+
+        if (!area) {
+          throw new GraphQLError("Área no encontrada", {
+            extensions: { code: "NOT_FOUND" },
+          })
+        }
+
+        await context.orm.area.delete({
+          where: { id },
+        })
+
+        return true
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "DELETE_AREA",
+          messages: {
+            notFound: "El área no existe.",
+            default: "Error al eliminar el área.",
+          },
+        })
+      }
+    },
   },
 }

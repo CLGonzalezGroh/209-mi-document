@@ -1654,6 +1654,9 @@ type Mutation {
   "Reactivar un área"
   activateArea(id: Int!): Area!
 
+  "Eliminar permanentemente un área"
+  deleteArea(id: Int!): Boolean!
+
   # ─── Adjuntos ───
   "Crear un nuevo adjunto"
   createAttachment(input: CreateAttachmentInput!): Attachment!

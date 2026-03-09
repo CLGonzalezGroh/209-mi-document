@@ -127,3 +127,13 @@
 - Agrega funcionalidad para eliminar tipos y clases de documentos, y mejora la consulta de archivos escaneados por ID
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.6
+
+2026-03-09
+
+## Areas
+
+- Agrega funcionalidad para eliminar áreas
+
+---
