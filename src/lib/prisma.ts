@@ -2,6 +2,24 @@ import "dotenv/config"
 import { PrismaPg } from "@prisma/adapter-pg"
 import { PrismaClient } from "../generated/prisma/client.js"
 
+// Suprimir DeprecationWarning de pg v8 causado internamente por @prisma/adapter-pg
+// El adapter WASM envía queries concurrentes en un solo PoolClient durante transacciones implícitas.
+// pg v8 los encola correctamente, pero avisa que en v9 se eliminará este comportamiento.
+const originalEmit = process.emit.bind(process)
+process.emit = function (event: string, ...args: unknown[]) {
+  if (
+    event === "warning" &&
+    (args[0] as { name?: string; message?: string })?.name ===
+      "DeprecationWarning" &&
+    (args[0] as { message?: string })?.message?.includes(
+      "Calling client.query()",
+    )
+  ) {
+    return false
+  }
+  return originalEmit(event, ...args)
+}
+
 const connectionString = process.env.DATABASE_URL
 
 if (!connectionString) {

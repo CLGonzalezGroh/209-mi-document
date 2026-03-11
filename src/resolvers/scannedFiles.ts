@@ -17,7 +17,13 @@ import {
 } from "../generated/prisma/enums.js"
 
 export interface ScannedFileOrderByInput extends OrderByInput {
-  field: "ID" | "CODE" | "TITLE" | "CREATED_AT" | "CLASSIFIED_AT" | "DIGITAL_DISPOSITION"
+  field:
+    | "ID"
+    | "CODE"
+    | "TITLE"
+    | "CREATED_AT"
+    | "CLASSIFIED_AT"
+    | "DIGITAL_DISPOSITION"
 }
 
 const EXTERNAL_SYSTEM_BASE_URL = process.env.EXTERNAL_SYSTEM_BASE_URL || ""
@@ -206,7 +212,7 @@ export const scannedFileResolvers = {
           physicalDestroyed,
           physicalArchive,
           physicalArchived,
-        ] = await Promise.all([
+        ] = await context.orm.$transaction([
           context.orm.scannedFile.count({
             where: { ...baseWhere, digitalDisposition: "PENDING" },
           }),
@@ -277,6 +283,8 @@ export const scannedFileResolvers = {
           originalReference?: string
           physicalLocation?: string
           areaId?: number
+          documentClassId?: number
+          documentTypeId?: number
           fileKey: string
           fileName: string
           fileSize: number
@@ -300,6 +308,8 @@ export const scannedFileResolvers = {
             originalReference: input.originalReference,
             physicalLocation: input.physicalLocation,
             areaId: input.areaId,
+            documentClassId: input.documentClassId,
+            documentTypeId: input.documentTypeId,
             fileKey: input.fileKey,
             fileName: input.fileName,
             fileSize: input.fileSize,
@@ -326,7 +336,7 @@ export const scannedFileResolvers = {
       }
     },
 
-    classifyScannedFile: async (
+    updateScannedFile: async (
       _: any,
       {
         id,
@@ -334,12 +344,18 @@ export const scannedFileResolvers = {
       }: {
         id: number
         input: {
-          digitalDisposition: DigitalDisposition
-          documentTypeId?: number
-          documentClassId?: number
+          code: string
+          title: string
+          description?: string
+          originalReference?: string
+          physicalLocation?: string
           areaId?: number
-          classificationNotes?: string
-          discardReason?: string
+          documentClassId?: number
+          documentTypeId?: number
+          fileKey?: string
+          fileName?: string
+          fileSize?: number
+          mimeType?: string
         }
       },
       context: ResolverContext,
@@ -361,23 +377,119 @@ export const scannedFileResolvers = {
         }
 
         if (existing.terminatedAt) {
+          throw new GraphQLError("No se puede editar un archivo dado de baja", {
+            extensions: { code: "BAD_REQUEST" },
+          })
+        }
+
+        const data: any = {
+          code: input.code,
+          title: input.title,
+          description: input.description,
+          originalReference: input.originalReference,
+          physicalLocation: input.physicalLocation,
+          areaId: input.areaId,
+          documentClassId: input.documentClassId,
+          documentTypeId: input.documentTypeId,
+          updatedById: userId,
+        }
+
+        // Solo actualizar campos de archivo si se envían todos
+        if (
+          input.fileKey &&
+          input.fileName &&
+          input.fileSize &&
+          input.mimeType
+        ) {
+          data.fileKey = input.fileKey
+          data.fileName = input.fileName
+          data.fileSize = input.fileSize
+          data.mimeType = input.mimeType
+        }
+
+        const scannedFile = await context.orm.scannedFile.update({
+          where: { id },
+          data,
+          include: scannedFileIncludes,
+        })
+
+        return scannedFile
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "UPDATE_SCANNED_FILE",
+          messages: {
+            notFound: "El archivo escaneado no existe.",
+            default: "Error al actualizar el archivo escaneado.",
+          },
+        })
+      }
+    },
+
+    classifyScannedFile: async (
+      _: any,
+      {
+        id,
+        input,
+      }: {
+        id: number
+        input: {
+          digitalDisposition: DigitalDisposition
+          classificationNotes?: string
+          discardReason?: string
+        }
+      },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_APPROVE],
+        context,
+      })
+
+      try {
+        const existing = await context.orm.scannedFile.findFirst({
+          where: { id },
+        })
+
+        if (!existing) {
+          throw new GraphQLError("Archivo escaneado no encontrado", {
+            extensions: { code: "NOT_FOUND" },
+          })
+        }
+
+        if (existing.terminatedAt) {
           throw new GraphQLError(
             "No se puede clasificar un archivo dado de baja",
             { extensions: { code: "BAD_REQUEST" } },
           )
         }
 
-        if (existing.digitalDisposition !== "PENDING") {
+        // Transiciones permitidas según máquina de estados:
+        // PENDING → ACCEPTED | DISCARDED
+        // DISCARDED → ACCEPTED | PENDING
+        // ACCEPTED → PENDING | DISCARDED
+        // UPLOADED → (no se puede reclasificar)
+        const allowedTransitions: Record<string, string[]> = {
+          PENDING: ["ACCEPTED", "DISCARDED", "PENDING"],
+          DISCARDED: ["ACCEPTED", "PENDING", "DISCARDED"],
+          ACCEPTED: ["PENDING", "DISCARDED", "ACCEPTED"],
+        }
+
+        const allowed = allowedTransitions[existing.digitalDisposition]
+
+        if (!allowed) {
           throw new GraphQLError(
-            `El archivo ya fue clasificado como ${existing.digitalDisposition}`,
+            `No se puede reclasificar un archivo con disposición ${existing.digitalDisposition}`,
             { extensions: { code: "BAD_REQUEST" } },
           )
         }
 
-        if (input.digitalDisposition === "ACCEPTED" && !input.documentTypeId) {
+        if (!allowed.includes(input.digitalDisposition)) {
           throw new GraphQLError(
-            "documentTypeId es requerido cuando se acepta un archivo",
-            { extensions: { code: "BAD_USER_INPUT" } },
+            `Transición no permitida: ${existing.digitalDisposition} → ${input.digitalDisposition}`,
+            { extensions: { code: "BAD_REQUEST" } },
           )
         }
 
@@ -388,26 +500,42 @@ export const scannedFileResolvers = {
           )
         }
 
-        if (!["ACCEPTED", "DISCARDED"].includes(input.digitalDisposition)) {
+        if (
+          !["ACCEPTED", "DISCARDED", "PENDING"].includes(
+            input.digitalDisposition,
+          )
+        ) {
           throw new GraphQLError(
-            "digitalDisposition debe ser ACCEPTED o DISCARDED",
+            "digitalDisposition debe ser ACCEPTED, DISCARDED o PENDING",
             { extensions: { code: "BAD_USER_INPUT" } },
           )
         }
 
+        // Limpiar campos según la transición
+        const data: Record<string, any> = {
+          digitalDisposition: input.digitalDisposition,
+          classificationNotes: input.classificationNotes,
+          updatedById: userId,
+        }
+
+        if (input.digitalDisposition === "PENDING") {
+          // Volver a pendiente: limpiar clasificación
+          data.classifiedById = null
+          data.classifiedAt = null
+          data.discardReason = null
+        } else {
+          // ACCEPTED o DISCARDED: registrar clasificador
+          data.classifiedById = userId
+          data.classifiedAt = new Date()
+          data.discardReason =
+            input.digitalDisposition === "DISCARDED"
+              ? input.discardReason
+              : null
+        }
+
         const scannedFile = await context.orm.scannedFile.update({
           where: { id },
-          data: {
-            digitalDisposition: input.digitalDisposition,
-            documentTypeId: input.documentTypeId,
-            documentClassId: input.documentClassId,
-            areaId: input.areaId,
-            classificationNotes: input.classificationNotes,
-            discardReason: input.discardReason,
-            classifiedById: userId,
-            classifiedAt: new Date(),
-            updatedById: userId,
-          },
+          data,
           include: scannedFileIncludes,
         })
 
@@ -499,7 +627,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_APPROVE],
         context,
       })
 
@@ -521,12 +649,48 @@ export const scannedFileResolvers = {
           )
         }
 
+        // Transiciones permitidas según máquina de estados:
+        // PENDING → DESTROY | ARCHIVE
+        // DESTROY ↔ ARCHIVE (bidireccional)
+        // DESTROY → PENDING
+        // ARCHIVE → PENDING
+        // DESTROYED / ARCHIVED → (estados terminales)
+        const allowedTransitions: Record<string, string[]> = {
+          PENDING: ["DESTROY", "ARCHIVE"],
+          DESTROY: ["PENDING", "ARCHIVE"],
+          ARCHIVE: ["PENDING", "DESTROY"],
+        }
+
+        const allowed = allowedTransitions[existing.physicalDisposition]
+
+        if (!allowed) {
+          throw new GraphQLError(
+            `No se puede cambiar la disposición física desde ${existing.physicalDisposition}`,
+            { extensions: { code: "BAD_REQUEST" } },
+          )
+        }
+
+        if (!allowed.includes(disposition)) {
+          throw new GraphQLError(
+            `Transición no permitida: ${existing.physicalDisposition} → ${disposition}`,
+            { extensions: { code: "BAD_REQUEST" } },
+          )
+        }
+
+        const data: Record<string, any> = {
+          physicalDisposition: disposition,
+          updatedById: userId,
+        }
+
+        // Si vuelve a PENDING, limpiar confirmación previa
+        if (disposition === "PENDING") {
+          data.physicalConfirmedById = null
+          data.physicalConfirmedAt = null
+        }
+
         const scannedFile = await context.orm.scannedFile.update({
           where: { id },
-          data: {
-            physicalDisposition: disposition,
-            updatedById: userId,
-          },
+          data,
           include: scannedFileIncludes,
         })
 
@@ -551,7 +715,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_DELETE],
+        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_UPDATE],
         context,
       })
 
@@ -586,7 +750,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_APPROVE],
         context,
       })
 
@@ -613,8 +777,7 @@ export const scannedFileResolvers = {
           ARCHIVE: "ARCHIVED",
         }
 
-        const newDisposition =
-          transitionMap[existing.physicalDisposition]
+        const newDisposition = transitionMap[existing.physicalDisposition]
 
         if (!newDisposition) {
           throw new GraphQLError(
@@ -643,8 +806,7 @@ export const scannedFileResolvers = {
           logName: "CONFIRM_PHYSICAL_DISPOSITION",
           messages: {
             notFound: "El archivo escaneado no existe.",
-            default:
-              "Error al confirmar la disposición física.",
+            default: "Error al confirmar la disposición física.",
           },
         })
       }
@@ -685,6 +847,66 @@ export const scannedFileResolvers = {
       }
     },
 
+    resetScannedFileToPending: async (
+      _: any,
+      { id }: { id: number },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_ADMIN_UPDATE],
+        context,
+      })
+
+      try {
+        const existing = await context.orm.scannedFile.findFirst({
+          where: { id },
+        })
+
+        if (!existing) {
+          throw new GraphQLError("Archivo escaneado no encontrado", {
+            extensions: { code: "NOT_FOUND" },
+          })
+        }
+
+        if (existing.terminatedAt) {
+          throw new GraphQLError(
+            "No se puede revertir un archivo dado de baja",
+            { extensions: { code: "BAD_REQUEST" } },
+          )
+        }
+
+        const scannedFile = await context.orm.scannedFile.update({
+          where: { id },
+          data: {
+            digitalDisposition: "PENDING",
+            physicalDisposition: "PENDING",
+            classifiedById: null,
+            classifiedAt: null,
+            classificationNotes: null,
+            discardReason: null,
+            externalReference: null,
+            physicalConfirmedById: null,
+            physicalConfirmedAt: null,
+            updatedById: userId,
+          },
+          include: scannedFileIncludes,
+        })
+
+        return scannedFile
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "RESET_SCANNED_FILE_TO_PENDING",
+          messages: {
+            notFound: "El archivo escaneado no existe.",
+            default: "Error al revertir el archivo escaneado a pendiente.",
+          },
+        })
+      }
+    },
+
     deleteScannedFile: async (
       _: any,
       { id }: { id: number },
@@ -704,6 +926,13 @@ export const scannedFileResolvers = {
           throw new GraphQLError("Archivo escaneado no encontrado", {
             extensions: { code: "NOT_FOUND" },
           })
+        }
+
+        if (scannedFile.digitalDisposition !== "PENDING") {
+          throw new GraphQLError(
+            "Solo se puede eliminar un archivo en estado PENDING",
+            { extensions: { code: "BAD_REQUEST" } },
+          )
         }
 
         await context.orm.scannedFile.delete({

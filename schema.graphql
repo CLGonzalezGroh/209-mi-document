@@ -1339,6 +1339,10 @@ input CreateScannedFileInput {
   physicalLocation: String
   "ID del área física o ubicación en planta"
   areaId: Int
+  "ID de la clase de documento"
+  documentClassId: Int
+  "ID del tipo de documento"
+  documentTypeId: Int
   "Key del archivo en DO Spaces"
   fileKey: String!
   "Nombre original del archivo"
@@ -1349,16 +1353,38 @@ input CreateScannedFileInput {
   mimeType: String!
 }
 
+"Datos para editar un archivo escaneado"
+input UpdateScannedFileInput {
+  "Código único dentro del proyecto (ej: SC-001)"
+  code: String!
+  "Título descriptivo"
+  title: String!
+  "Descripción o contexto"
+  description: String
+  "Código o referencia del documento original en papel"
+  originalReference: String
+  "Ubicación física donde se encontró"
+  physicalLocation: String
+  "ID del área física o ubicación en planta"
+  areaId: Int
+  "ID de la clase de documento"
+  documentClassId: Int
+  "ID del tipo de documento"
+  documentTypeId: Int
+  "Key del archivo en DO Spaces (solo si se reemplaza el archivo)"
+  fileKey: String
+  "Nombre original del archivo (solo si se reemplaza)"
+  fileName: String
+  "Tamaño en bytes (solo si se reemplaza)"
+  fileSize: Int
+  "Tipo MIME (solo si se reemplaza)"
+  mimeType: String
+}
+
 "Datos para clasificar un archivo escaneado"
 input ClassifyScannedFileInput {
   "Disposición digital: ACCEPTED o DISCARDED"
   digitalDisposition: DigitalDispositionInput!
-  "ID del tipo de documento (requerido si ACCEPTED)"
-  documentTypeId: Int
-  "ID de la clase de documento"
-  documentClassId: Int
-  "ID del área"
-  areaId: Int
   "Notas de clasificación"
   classificationNotes: String
   "Motivo de descarte (requerido si DISCARDED)"
@@ -1668,6 +1694,9 @@ type Mutation {
   "Subir un archivo escaneado"
   createScannedFile(input: CreateScannedFileInput!): ScannedFile!
 
+  "Editar metadata de un archivo escaneado (opcionalmente reemplazar archivo)"
+  updateScannedFile(id: Int!, input: UpdateScannedFileInput!): ScannedFile!
+
   "Clasificar un archivo escaneado (ACCEPTED o DISCARDED)"
   classifyScannedFile(id: Int!, input: ClassifyScannedFileInput!): ScannedFile!
 
@@ -1688,6 +1717,9 @@ type Mutation {
 
   "Reactivar un archivo escaneado"
   activateScannedFile(id: Int!): ScannedFile!
+
+  "Revertir un archivo escaneado a estado pendiente (limpia clasificación y disposición)"
+  resetScannedFileToPending(id: Int!): ScannedFile!
 
   "Eliminar permanentemente un archivo escaneado y su archivo del storage"
   deleteScannedFile(id: Int!): Boolean!

@@ -783,6 +783,7 @@ type Mutation {
 
   # ─── Archivos escaneados ───
   createScannedFile(input): ScannedFile!
+  updateScannedFile(id, input): ScannedFile!
   classifyScannedFile(id, input): ScannedFile!
   markAsUploaded(id, input): ScannedFile!
   updatePhysicalDisposition(id, disposition): ScannedFile!
@@ -1012,7 +1013,7 @@ lib/actions/documents/
 ├── attachment-queries.ts        # getAttachmentById, getAttachmentsByModule
 ├── attachment-actions.ts        # createAttachment, deleteAttachment
 ├── scanned-file-queries.ts      # getScannedFiles, getScannedFileStats
-├── scanned-file-actions.ts      # createScannedFile, classifyScannedFile, markAsUploaded, updatePhysicalDisposition, deleteScannedFile
+├── scanned-file-actions.ts      # createScannedFile, updateScannedFile, classifyScannedFile, markAsUploaded, updatePhysicalDisposition, deleteScannedFile
 ├── area-queries.ts              # getAreas, getAreaById, getAreasSelectList
 ├── area-actions.ts              # createArea, updateArea, terminateArea, activateArea
 └── fileserver-client.ts         # getPresignedUploadUrl, getPresignedDownloadUrl, deleteFile
@@ -1287,6 +1288,63 @@ Paso 5: Server Action → Browser
 Paso 6: Browser → DO Spaces (DIRECTO)
         GET downloadUrl para descargar el archivo
 ```
+
+### Update con reemplazo de archivo (Ejemplo: updateScannedFile)
+
+Cuando una mutación de edición permite opcionalmente reemplazar el archivo asociado,
+el **subgraph solo actualiza metadata en la base de datos**. La orquestación de
+archivos (presign, upload, delete del viejo) la maneja el **server action**.
+
+#### Caso A — Solo metadata (sin archivo nuevo)
+
+```
+Paso 1: Browser envía formulario al Server Action
+        { id, code, title, description, ... }  (sin archivo)
+        ↓
+Paso 2: Server Action → GraphQL (subgraph document)
+        Mutation updateScannedFile(id, input)
+        input NO incluye fileKey/fileName/fileSize/mimeType
+        ↓
+Paso 3: Server Action → Browser
+        Devuelve { successMsg }
+```
+
+#### Caso B — Con reemplazo de archivo
+
+```
+Paso 1: Browser envía formulario + archivo nuevo al Server Action
+        { id, code, title, ..., file: File }
+        ↓
+Paso 2: Server Action guarda el fileKey actual (del registro existente)
+        oldFileKey = scannedFile.fileKey
+        ↓
+Paso 3: Server Action → FileServer API
+        POST /api/files/presign-upload
+        { module: "projects", path: "scanned-files", fileName, contentType }
+        Recibe { uploadUrl, fileKey (nuevo) }
+        ↓
+Paso 4: Server Action → GraphQL (subgraph document)
+        Mutation updateScannedFile(id, input) con:
+        - campos de metadata editados
+        - fileKey, fileName, fileSize, mimeType del archivo nuevo
+        ↓
+Paso 5: Server Action → Browser
+        Devuelve { successMsg, uploadUrl }
+        ↓
+Paso 6: Browser → DO Spaces (DIRECTO)
+        PUT uploadUrl con el archivo binario nuevo
+        ↓
+Paso 7: Browser → Server Action (confirmación de upload exitoso)
+        ↓
+Paso 8: Server Action → FileServer API
+        DELETE /api/files { fileKey: oldFileKey }
+        Elimina el archivo viejo del storage
+```
+
+> **Importante:** El archivo viejo se elimina DESPUÉS de confirmar que el nuevo
+> se subió correctamente. Si el upload falla, el registro ya apunta al nuevo
+> fileKey pero el viejo sigue en storage — se puede limpiar con un job de
+> reconciliación o reintentar.
 
 ### Ventajas del patrón Presigned URLs
 

@@ -137,3 +137,13 @@
 - Agrega funcionalidad para eliminar áreas
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.7
+
+2026-03-11
+
+## Scanned Files
+
+- Agrega funcionalidad para actualizar archivos escaneados y mejora la gestión de metadatos
+
+---
