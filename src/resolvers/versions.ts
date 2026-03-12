@@ -85,6 +85,16 @@ export const versionResolvers = {
           include: versionIncludes,
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "REGISTER_VERSION",
+            message: `Versión ${nextVersionNumber} registrada para revisión ID ${revisionId}`,
+            meta: JSON.stringify({ versionId: version.id, revisionId, versionNumber: nextVersionNumber }),
+          },
+        })
+
         return version
       } catch (error) {
         return handleError({

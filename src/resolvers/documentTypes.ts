@@ -58,9 +58,9 @@ export const documentTypeResolvers = {
 
         if (filter?.query) {
           where.OR = [
-            { name: { contains: filter.query } },
-            { code: { contains: filter.query } },
-            { description: { contains: filter.query } },
+            { name: { contains: filter.query, mode: "insensitive" as const } },
+            { code: { contains: filter.query, mode: "insensitive" as const } },
+            { description: { contains: filter.query, mode: "insensitive" as const } },
           ]
         }
 
@@ -75,9 +75,9 @@ export const documentTypeResolvers = {
             where.AND = [
               {
                 OR: [
-                  { name: { contains: filter.query } },
-                  { code: { contains: filter.query } },
-                  { description: { contains: filter.query } },
+                  { name: { contains: filter.query, mode: "insensitive" as const } },
+                  { code: { contains: filter.query, mode: "insensitive" as const } },
+                  { description: { contains: filter.query, mode: "insensitive" as const } },
                 ],
               },
               {
@@ -281,6 +281,16 @@ export const documentTypeResolvers = {
           include: { class: true },
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "CREATE_DOCUMENT_TYPE",
+            message: `Tipo de documento creado: ${documentType.name} (${documentType.code})`,
+            meta: JSON.stringify({ documentTypeId: documentType.id, input }),
+          },
+        })
+
         return documentType
       } catch (error) {
         return handleError({
@@ -330,6 +340,16 @@ export const documentTypeResolvers = {
           include: { class: true },
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "UPDATE_DOCUMENT_TYPE",
+            message: `Tipo de documento actualizado: ${documentType.name} (${documentType.code})`,
+            meta: JSON.stringify({ documentTypeId: id, input }),
+          },
+        })
+
         return documentType
       } catch (error) {
         return handleError({
@@ -367,6 +387,16 @@ export const documentTypeResolvers = {
           include: { class: true },
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "TERMINATE_DOCUMENT_TYPE",
+            message: `Tipo de documento deshabilitado: ${documentType.name} (${documentType.code})`,
+            meta: JSON.stringify({ documentTypeId: id }),
+          },
+        })
+
         return documentType
       } catch (error) {
         return handleError({
@@ -400,6 +430,16 @@ export const documentTypeResolvers = {
             updatedById: userId,
           },
           include: { class: true },
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "ACTIVATE_DOCUMENT_TYPE",
+            message: `Tipo de documento reactivado: ${documentType.name} (${documentType.code})`,
+            meta: JSON.stringify({ documentTypeId: id }),
+          },
         })
 
         return documentType
@@ -440,6 +480,16 @@ export const documentTypeResolvers = {
 
         await context.orm.documentType.delete({
           where: { id },
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "WARNING",
+            name: "DELETE_DOCUMENT_TYPE",
+            message: `Tipo de documento eliminado: ${documentType.name} (${documentType.code})`,
+            meta: JSON.stringify({ documentTypeId: id }),
+          },
         })
 
         return true

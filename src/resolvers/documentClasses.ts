@@ -64,9 +64,9 @@ export const documentClassResolvers = {
 
         if (filter?.query) {
           where.OR = [
-            { name: { contains: filter.query } },
-            { code: { contains: filter.query } },
-            { description: { contains: filter.query } },
+            { name: { contains: filter.query, mode: "insensitive" as const } },
+            { code: { contains: filter.query, mode: "insensitive" as const } },
+            { description: { contains: filter.query, mode: "insensitive" as const } },
           ]
         }
 
@@ -78,9 +78,9 @@ export const documentClassResolvers = {
             where.AND = [
               {
                 OR: [
-                  { name: { contains: filter.query } },
-                  { code: { contains: filter.query } },
-                  { description: { contains: filter.query } },
+                  { name: { contains: filter.query, mode: "insensitive" as const } },
+                  { code: { contains: filter.query, mode: "insensitive" as const } },
+                  { description: { contains: filter.query, mode: "insensitive" as const } },
                 ],
               },
               moduleCondition,
@@ -250,6 +250,16 @@ export const documentClassResolvers = {
           include: documentClassIncludes,
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "CREATE_DOCUMENT_CLASS",
+            message: `Clase de documento creada: ${documentClass.name} (${documentClass.code})`,
+            meta: JSON.stringify({ documentClassId: documentClass.id, input }),
+          },
+        })
+
         return documentClass
       } catch (error) {
         return handleError({
@@ -298,6 +308,16 @@ export const documentClassResolvers = {
           include: documentClassIncludes,
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "UPDATE_DOCUMENT_CLASS",
+            message: `Clase de documento actualizada: ${documentClass.name} (${documentClass.code})`,
+            meta: JSON.stringify({ documentClassId: id, input }),
+          },
+        })
+
         return documentClass
       } catch (error) {
         return handleError({
@@ -335,6 +355,16 @@ export const documentClassResolvers = {
           include: documentClassIncludes,
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "TERMINATE_DOCUMENT_CLASS",
+            message: `Clase de documento deshabilitada: ${documentClass.name} (${documentClass.code})`,
+            meta: JSON.stringify({ documentClassId: id }),
+          },
+        })
+
         return documentClass
       } catch (error) {
         return handleError({
@@ -368,6 +398,16 @@ export const documentClassResolvers = {
             updatedById: userId,
           },
           include: documentClassIncludes,
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "ACTIVATE_DOCUMENT_CLASS",
+            message: `Clase de documento reactivada: ${documentClass.name} (${documentClass.code})`,
+            meta: JSON.stringify({ documentClassId: id }),
+          },
         })
 
         return documentClass
@@ -408,6 +448,16 @@ export const documentClassResolvers = {
 
         await context.orm.documentClass.delete({
           where: { id },
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "WARNING",
+            name: "DELETE_DOCUMENT_CLASS",
+            message: `Clase de documento eliminada: ${documentClass.name} (${documentClass.code})`,
+            meta: JSON.stringify({ documentClassId: id }),
+          },
         })
 
         return true

@@ -213,6 +213,16 @@ export const revisionResolvers = {
           include: revisionIncludes,
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "CREATE_REVISION",
+            message: `Revisión creada: ${revisionCode} para documento ${document.code}`,
+            meta: JSON.stringify({ revisionId: revision.id, documentId, revisionCode }),
+          },
+        })
+
         return revision
       } catch (error) {
         return handleError({

@@ -58,9 +58,9 @@ export const areaResolvers = {
 
         if (filter?.query) {
           where.OR = [
-            { name: { contains: filter.query } },
-            { code: { contains: filter.query } },
-            { description: { contains: filter.query } },
+            { name: { contains: filter.query, mode: "insensitive" as const } },
+            { code: { contains: filter.query, mode: "insensitive" as const } },
+            { description: { contains: filter.query, mode: "insensitive" as const } },
           ]
         }
 
@@ -217,6 +217,16 @@ export const areaResolvers = {
           },
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "CREATE_AREA",
+            message: `Área creada: ${area.name} (${area.code})`,
+            meta: JSON.stringify({ areaId: area.id, input }),
+          },
+        })
+
         return area
       } catch (error) {
         return handleError({
@@ -263,6 +273,16 @@ export const areaResolvers = {
           },
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "UPDATE_AREA",
+            message: `Área actualizada: ${area.name} (${area.code})`,
+            meta: JSON.stringify({ areaId: id, input }),
+          },
+        })
+
         return area
       } catch (error) {
         return handleError({
@@ -299,6 +319,16 @@ export const areaResolvers = {
           },
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "TERMINATE_AREA",
+            message: `Área deshabilitada: ${area.name} (${area.code})`,
+            meta: JSON.stringify({ areaId: id }),
+          },
+        })
+
         return area
       } catch (error) {
         return handleError({
@@ -330,6 +360,16 @@ export const areaResolvers = {
           data: {
             terminatedAt: null,
             updatedById: userId,
+          },
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "ACTIVATE_AREA",
+            message: `Área reactivada: ${area.name} (${area.code})`,
+            meta: JSON.stringify({ areaId: id }),
           },
         })
 
@@ -371,6 +411,16 @@ export const areaResolvers = {
 
         await context.orm.area.delete({
           where: { id },
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "WARNING",
+            name: "DELETE_AREA",
+            message: `Área eliminada: ${area.name} (${area.code})`,
+            meta: JSON.stringify({ areaId: id }),
+          },
         })
 
         return true

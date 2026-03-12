@@ -147,3 +147,13 @@
 - Agrega funcionalidad para actualizar archivos escaneados y mejora la gestión de metadatos
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.8
+
+2026-03-12
+
+## Logging de mutaciones
+
+- Se implementaron los loggings de todas las mutaciones
+
+---

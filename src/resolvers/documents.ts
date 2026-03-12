@@ -118,9 +118,9 @@ export const documentResolvers = {
 
         if (filter?.query) {
           where.OR = [
-            { code: { contains: filter.query } },
-            { title: { contains: filter.query } },
-            { description: { contains: filter.query } },
+            { code: { contains: filter.query, mode: "insensitive" as const } },
+            { title: { contains: filter.query, mode: "insensitive" as const } },
+            { description: { contains: filter.query, mode: "insensitive" as const } },
           ]
         }
 
@@ -283,8 +283,8 @@ export const documentResolvers = {
 
         if (filter?.query) {
           where.OR = [
-            { code: { contains: filter.query } },
-            { title: { contains: filter.query } },
+            { code: { contains: filter.query, mode: "insensitive" as const } },
+            { title: { contains: filter.query, mode: "insensitive" as const } },
           ]
         }
 
@@ -390,6 +390,16 @@ export const documentResolvers = {
           include: documentIncludes,
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "CREATE_DOCUMENT",
+            message: `Documento creado: ${document.title} (${document.code})`,
+            meta: JSON.stringify({ documentId: document.id, input }),
+          },
+        })
+
         return document
       } catch (error) {
         return handleError({
@@ -448,6 +458,16 @@ export const documentResolvers = {
           include: documentIncludes,
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "UPDATE_DOCUMENT",
+            message: `Documento actualizado: ${document.title} (${document.code})`,
+            meta: JSON.stringify({ documentId: id, input }),
+          },
+        })
+
         return document
       } catch (error) {
         return handleError({
@@ -485,6 +505,16 @@ export const documentResolvers = {
           include: documentIncludes,
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "TERMINATE_DOCUMENT",
+            message: `Documento deshabilitado: ${document.title} (${document.code})`,
+            meta: JSON.stringify({ documentId: id }),
+          },
+        })
+
         return document
       } catch (error) {
         return handleError({
@@ -518,6 +548,16 @@ export const documentResolvers = {
             updatedById: userId,
           },
           include: documentIncludes,
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "ACTIVATE_DOCUMENT",
+            message: `Documento reactivado: ${document.title} (${document.code})`,
+            meta: JSON.stringify({ documentId: id }),
+          },
         })
 
         return document
@@ -570,6 +610,16 @@ export const documentResolvers = {
             updatedById: userId,
           },
           include: documentIncludes,
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "SWITCH_REVISION_SCHEME",
+            message: `Esquema de revisión cambiado a ${scheme}: ${document.title} (${document.code})`,
+            meta: JSON.stringify({ documentId: id, scheme }),
+          },
         })
 
         return document

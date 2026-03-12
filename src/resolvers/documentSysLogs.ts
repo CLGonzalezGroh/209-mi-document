@@ -93,8 +93,8 @@ export const documentSysLogResolvers = {
         if (filter) {
           if (filter.query) {
             where.OR = [
-              { name: { contains: filter.query } },
-              { message: { contains: filter.query } },
+              { name: { contains: filter.query, mode: "insensitive" as const } },
+              { message: { contains: filter.query, mode: "insensitive" as const } },
             ]
           }
 
@@ -221,8 +221,8 @@ export const documentSysLogResolvers = {
         if (filter) {
           if (filter.query) {
             where.OR = [
-              { name: { contains: filter.query } },
-              { message: { contains: filter.query } },
+              { name: { contains: filter.query, mode: "insensitive" as const } },
+              { message: { contains: filter.query, mode: "insensitive" as const } },
             ]
           }
 

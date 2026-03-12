@@ -125,8 +125,8 @@ export const transmittalResolvers = {
 
         if (filter?.query) {
           where.OR = [
-            { code: { contains: filter.query } },
-            { issuedTo: { contains: filter.query } },
+            { code: { contains: filter.query, mode: "insensitive" as const } },
+            { issuedTo: { contains: filter.query, mode: "insensitive" as const } },
           ]
         }
 
@@ -278,6 +278,16 @@ export const transmittalResolvers = {
           include: transmittalIncludes,
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "CREATE_TRANSMITTAL",
+            message: `Transmittal creado: ${transmittal.code} para ${input.issuedTo}`,
+            meta: JSON.stringify({ transmittalId: transmittal.id, input }),
+          },
+        })
+
         return transmittal
       } catch (error) {
         return handleError({
@@ -332,6 +342,16 @@ export const transmittalResolvers = {
             issuedById: userId,
           },
           include: transmittalIncludes,
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "ISSUE_TRANSMITTAL",
+            message: `Transmittal emitido: ${updated.code}`,
+            meta: JSON.stringify({ transmittalId: id }),
+          },
         })
 
         return updated
@@ -420,6 +440,16 @@ export const transmittalResolvers = {
           return updated
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "RESPOND_TRANSMITTAL",
+            message: `Transmittal respondido: ${transmittal.code}`,
+            meta: JSON.stringify({ transmittalId: id, itemsCount: input.items.length }),
+          },
+        })
+
         return result
       } catch (error) {
         return handleError({
@@ -476,6 +506,16 @@ export const transmittalResolvers = {
             updatedById: userId,
           },
           include: transmittalIncludes,
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "CLOSE_TRANSMITTAL",
+            message: `Transmittal cerrado: ${updated.code}`,
+            meta: JSON.stringify({ transmittalId: id }),
+          },
         })
 
         return updated

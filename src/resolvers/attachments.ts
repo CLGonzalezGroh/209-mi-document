@@ -155,6 +155,16 @@ export const attachmentResolvers = {
           },
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "CREATE_ATTACHMENT",
+            message: `Adjunto creado: ${attachment.fileName} (${input.module}/${input.entityType}/${input.entityId})`,
+            meta: JSON.stringify({ attachmentId: attachment.id, input }),
+          },
+        })
+
         return attachment
       } catch (error) {
         return handleError({
@@ -192,6 +202,16 @@ export const attachmentResolvers = {
 
         await context.orm.attachment.delete({
           where: { id },
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "WARNING",
+            name: "DELETE_ATTACHMENT",
+            message: `Adjunto eliminado: ${attachment.fileName}`,
+            meta: JSON.stringify({ attachmentId: id }),
+          },
         })
 
         return true

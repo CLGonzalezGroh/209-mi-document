@@ -116,11 +116,13 @@ export const scannedFileResolvers = {
         }
 
         if (filter?.query) {
+          const parsedId = parseInt(filter.query, 10)
           where.OR = [
-            { code: { contains: filter.query } },
-            { title: { contains: filter.query } },
-            { originalReference: { contains: filter.query } },
-            { externalReference: { contains: filter.query } },
+            ...(!isNaN(parsedId) ? [{ id: parsedId }] : []),
+            { code: { contains: filter.query, mode: "insensitive" as const } },
+            { title: { contains: filter.query, mode: "insensitive" as const } },
+            { originalReference: { contains: filter.query, mode: "insensitive" as const } },
+            { externalReference: { contains: filter.query, mode: "insensitive" as const } },
           ]
         }
 
@@ -322,6 +324,16 @@ export const scannedFileResolvers = {
           include: scannedFileIncludes,
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "CREATE_SCANNED_FILE",
+            message: `Archivo escaneado creado: ${scannedFile.title} (${scannedFile.code})`,
+            meta: JSON.stringify({ scannedFileId: scannedFile.id, input }),
+          },
+        })
+
         return scannedFile
       } catch (error) {
         return handleError({
@@ -411,6 +423,16 @@ export const scannedFileResolvers = {
           where: { id },
           data,
           include: scannedFileIncludes,
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "UPDATE_SCANNED_FILE",
+            message: `Archivo escaneado actualizado: ${scannedFile.title} (${scannedFile.code})`,
+            meta: JSON.stringify({ scannedFileId: id, input }),
+          },
         })
 
         return scannedFile
@@ -539,6 +561,16 @@ export const scannedFileResolvers = {
           include: scannedFileIncludes,
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "CLASSIFY_SCANNED_FILE",
+            message: `Archivo escaneado clasificado como ${input.digitalDisposition}: ID ${id}`,
+            meta: JSON.stringify({ scannedFileId: id, input }),
+          },
+        })
+
         return scannedFile
       } catch (error) {
         return handleError({
@@ -603,6 +635,16 @@ export const scannedFileResolvers = {
             updatedById: userId,
           },
           include: scannedFileIncludes,
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "MARK_AS_UPLOADED",
+            message: `Archivo escaneado marcado como cargado: ID ${id}, ref: ${input.externalReference}`,
+            meta: JSON.stringify({ scannedFileId: id, externalReference: input.externalReference }),
+          },
         })
 
         return scannedFile
@@ -694,6 +736,16 @@ export const scannedFileResolvers = {
           include: scannedFileIncludes,
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "UPDATE_PHYSICAL_DISPOSITION",
+            message: `Disposición física actualizada a ${disposition}: ID ${id}`,
+            meta: JSON.stringify({ scannedFileId: id, from: existing.physicalDisposition, to: disposition }),
+          },
+        })
+
         return scannedFile
       } catch (error) {
         return handleError({
@@ -727,6 +779,16 @@ export const scannedFileResolvers = {
             updatedById: userId,
           },
           include: scannedFileIncludes,
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "TERMINATE_SCANNED_FILE",
+            message: `Archivo escaneado dado de baja: ${scannedFile.title} (${scannedFile.code})`,
+            meta: JSON.stringify({ scannedFileId: id }),
+          },
         })
 
         return scannedFile
@@ -797,6 +859,16 @@ export const scannedFileResolvers = {
           include: scannedFileIncludes,
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "CONFIRM_PHYSICAL_DISPOSITION",
+            message: `Disposición física confirmada: ${existing.physicalDisposition} → ${newDisposition}, ID ${id}`,
+            meta: JSON.stringify({ scannedFileId: id, from: existing.physicalDisposition, to: newDisposition }),
+          },
+        })
+
         return scannedFile
       } catch (error) {
         return handleError({
@@ -830,6 +902,16 @@ export const scannedFileResolvers = {
             updatedById: userId,
           },
           include: scannedFileIncludes,
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "ACTIVATE_SCANNED_FILE",
+            message: `Archivo escaneado reactivado: ${scannedFile.title} (${scannedFile.code})`,
+            meta: JSON.stringify({ scannedFileId: id }),
+          },
         })
 
         return scannedFile
@@ -892,6 +974,16 @@ export const scannedFileResolvers = {
           include: scannedFileIncludes,
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "WARNING",
+            name: "RESET_SCANNED_FILE_TO_PENDING",
+            message: `Archivo escaneado revertido a pendiente: ID ${id}`,
+            meta: JSON.stringify({ scannedFileId: id, previousDigital: existing.digitalDisposition, previousPhysical: existing.physicalDisposition }),
+          },
+        })
+
         return scannedFile
       } catch (error) {
         return handleError({
@@ -937,6 +1029,16 @@ export const scannedFileResolvers = {
 
         await context.orm.scannedFile.delete({
           where: { id },
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "WARNING",
+            name: "DELETE_SCANNED_FILE",
+            message: `Archivo escaneado eliminado: ${scannedFile.title} (${scannedFile.code})`,
+            meta: JSON.stringify({ scannedFileId: id }),
+          },
         })
 
         return true

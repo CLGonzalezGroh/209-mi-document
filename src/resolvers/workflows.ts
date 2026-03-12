@@ -213,6 +213,16 @@ export const workflowResolvers = {
           return wf
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "INITIATE_REVIEW",
+            message: `Workflow de revisión iniciado para revisión ID ${revisionId} con ${input.steps.length} pasos`,
+            meta: JSON.stringify({ workflowId: workflow.id, revisionId, stepsCount: input.steps.length }),
+          },
+        })
+
         return workflow
       } catch (error) {
         return handleError({
@@ -346,6 +356,16 @@ export const workflowResolvers = {
           return updatedStep
         })
 
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "APPROVE_STEP",
+            message: `Paso de revisión aprobado: step ID ${stepId}, workflow ID ${step.workflow.id}`,
+            meta: JSON.stringify({ stepId, workflowId: step.workflow.id, comments }),
+          },
+        })
+
         return result
       } catch (error) {
         return handleError({
@@ -443,6 +463,16 @@ export const workflowResolvers = {
           })
 
           return updatedStep
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "WARNING",
+            name: "REJECT_STEP",
+            message: `Paso de revisión rechazado: step ID ${stepId}, workflow ID ${step.workflow.id}`,
+            meta: JSON.stringify({ stepId, workflowId: step.workflow.id, comments }),
+          },
         })
 
         return result
