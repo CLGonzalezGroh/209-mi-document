@@ -17,7 +17,6 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build-and-push:
@@ -52,7 +51,7 @@ jobs:
           echo "@CLGonzalezGroh:registry=https://npm.pkg.github.com" >> /tmp/.npmrc
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true

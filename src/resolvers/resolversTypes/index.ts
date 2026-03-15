@@ -266,7 +266,7 @@ export const resolverTypes = {
     externalUrl: (parent: ScannedFile) => {
       const baseUrl = process.env.EXTERNAL_SYSTEM_BASE_URL || ""
       return parent.externalReference && baseUrl
-        ? `${baseUrl}${parent.externalReference}`
+        ? `${baseUrl}${parent.externalReference}/latest`
         : null
     },
   },
