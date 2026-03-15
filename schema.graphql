@@ -1703,6 +1703,9 @@ type Mutation {
   "Marcar archivo como cargado en sistema externo"
   markAsUploaded(id: Int!, input: MarkAsUploadedInput!): ScannedFile!
 
+  "Corregir la referencia externa de un archivo ya marcado como uploaded"
+  updateExternalReference(id: Int!, externalReference: String!): ScannedFile!
+
   "Actualizar disposición física del papel"
   updatePhysicalDisposition(
     id: Int!

@@ -663,6 +663,81 @@ export const scannedFileResolvers = {
       }
     },
 
+    updateExternalReference: async (
+      _: any,
+      {
+        id,
+        externalReference,
+      }: {
+        id: number
+        externalReference: string
+      },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_UPDATE],
+        context,
+      })
+
+      try {
+        const existing = await context.orm.scannedFile.findFirst({
+          where: { id },
+        })
+
+        if (!existing) {
+          throw new GraphQLError("Archivo escaneado no encontrado", {
+            extensions: { code: "NOT_FOUND" },
+          })
+        }
+
+        if (existing.terminatedAt) {
+          throw new GraphQLError(
+            "No se puede actualizar un archivo dado de baja",
+            { extensions: { code: "BAD_REQUEST" } },
+          )
+        }
+
+        if (existing.digitalDisposition !== "UPLOADED") {
+          throw new GraphQLError(
+            `Solo se puede corregir la referencia externa de archivos con disposición UPLOADED (actual: ${existing.digitalDisposition})`,
+            { extensions: { code: "BAD_REQUEST" } },
+          )
+        }
+
+        const scannedFile = await context.orm.scannedFile.update({
+          where: { id },
+          data: {
+            externalReference,
+            updatedById: userId,
+          },
+          include: scannedFileIncludes,
+        })
+
+        await context.orm.documentSysLog.create({
+          data: {
+            userId,
+            level: "INFO",
+            name: "UPDATE_EXTERNAL_REFERENCE",
+            message: `Referencia externa actualizada: ID ${id}, ref anterior: ${existing.externalReference}, nueva ref: ${externalReference}`,
+            meta: JSON.stringify({ scannedFileId: id, previousReference: existing.externalReference, newReference: externalReference }),
+          },
+        })
+
+        return scannedFile
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "UPDATE_EXTERNAL_REFERENCE",
+          messages: {
+            notFound: "El archivo escaneado no existe.",
+            default: "Error al actualizar la referencia externa.",
+          },
+        })
+      }
+    },
+
     updatePhysicalDisposition: async (
       _: any,
       { id, disposition }: { id: number; disposition: PhysicalDisposition },

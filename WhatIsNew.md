@@ -167,3 +167,13 @@
 - Agrega la variable EXTERNAL_SYSTEM_BASE_URL al archivo .env.example, actualiza la acción de Docker a la versión 7 y modifica la URL externa en resolverTypes para incluir '/latest'.
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.10
+
+2026-03-15
+
+## Enlace a M-Files
+
+- Agrega la mutación updateExternalReference para corregir la referencia externa de archivos ya marcados como cargados
+
+---
