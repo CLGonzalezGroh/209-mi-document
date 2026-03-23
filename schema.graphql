@@ -355,6 +355,8 @@ enum ScannedFileOrderFieldInput {
   CLASSIFIED_AT
   "Por disposición digital"
   DIGITAL_DISPOSITION
+  "Por ubicación física"
+  PHYSICAL_LOCATION
 }
 
 "Nivel del log"

@@ -177,3 +177,13 @@
 - Agrega la mutación updateExternalReference para corregir la referencia externa de archivos ya marcados como cargados
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.11
+
+2026-03-23
+
+## ScannedFiles
+
+- Agrega el campo PHYSICAL_LOCATION a los enums y resolvers de archivos escaneados
+
+---

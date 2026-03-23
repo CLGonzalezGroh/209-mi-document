@@ -77,6 +77,7 @@ const scannedFileFieldMap: Record<string, string> = {
   CREATED_AT: "createdAt",
   CLASSIFIED_AT: "classifiedAt",
   DIGITAL_DISPOSITION: "digitalDisposition",
+  PHYSICAL_LOCATION: "physicalLocation",
 }
 
 export function buildScannedFileOrderBy(
