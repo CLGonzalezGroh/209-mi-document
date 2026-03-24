@@ -397,32 +397,49 @@ Document (registro maestro)
 
 ### Revisión de documentos (ISO 9001)
 
-```
-DRAFT → initiateReview() → IN_REVIEW → approveStep() (todos) → APPROVED
-                                 ↓                                  ↓
-                           rejectStep() → DRAFT            SUPERSEDED (al crear nueva revisión)
+```mermaid
+stateDiagram-v2
+    [*] --> DRAFT
+    DRAFT --> IN_REVIEW : initiateReview()
+    IN_REVIEW --> APPROVED : approveStep() (todos los pasos)
+    IN_REVIEW --> DRAFT : rejectStep()
+    APPROVED --> SUPERSEDED : al crear nueva revisión
+    APPROVED --> OBSOLETE : obsolescencia manual
 ```
 
 ### Transmittals
 
-```
-DRAFT → issueTransmittal() → ISSUED → respondTransmittal() → RESPONDED → closeTransmittal() → CLOSED
-                                ↓
-                         ACKNOWLEDGED (cliente acusa recibo)
+```mermaid
+stateDiagram-v2
+    [*] --> DRAFT
+    DRAFT --> ISSUED : issueTransmittal()
+    ISSUED --> ACKNOWLEDGED : cliente acusa recibo
+    ISSUED --> RESPONDED : respondTransmittal()
+    ACKNOWLEDGED --> RESPONDED : respondTransmittal()
+    RESPONDED --> CLOSED : closeTransmittal()
 ```
 
 ### Digitalización — Disposición digital
 
-```
-PENDING → classifyScannedFile() → ACCEPTED → markAsUploaded() → UPLOADED
-                                → DISCARDED
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING
+    PENDING --> ACCEPTED : classifyScannedFile()
+    PENDING --> DISCARDED : classifyScannedFile()
+    ACCEPTED --> UPLOADED : markAsUploaded()
+    ACCEPTED --> PENDING : resetScannedFileToPending()
+    DISCARDED --> PENDING : resetScannedFileToPending()
 ```
 
 ### Digitalización — Disposición física
 
-```
-PENDING → updatePhysicalDisposition(DESTROY) → DESTROY → confirmPhysicalDisposition() → DESTROYED
-        → updatePhysicalDisposition(ARCHIVE) → ARCHIVE → confirmPhysicalDisposition() → ARCHIVED
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING
+    PENDING --> DESTROY : updatePhysicalDisposition()
+    PENDING --> ARCHIVE : updatePhysicalDisposition()
+    DESTROY --> DESTROYED : confirmPhysicalDisposition()
+    ARCHIVE --> ARCHIVED : confirmPhysicalDisposition()
 ```
 
 ---
