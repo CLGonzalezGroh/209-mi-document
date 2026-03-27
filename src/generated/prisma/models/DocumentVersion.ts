@@ -250,7 +250,7 @@ export type DocumentVersionGroupByOutputType = {
   _max: DocumentVersionMaxAggregateOutputType | null
 }
 
-type GetDocumentVersionGroupByPayload<T extends DocumentVersionGroupByArgs> = Prisma.PrismaPromise<
+export type GetDocumentVersionGroupByPayload<T extends DocumentVersionGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<DocumentVersionGroupByOutputType, T['by']> &
       {

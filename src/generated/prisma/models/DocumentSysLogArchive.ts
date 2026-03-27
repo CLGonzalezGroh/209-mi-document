@@ -210,7 +210,7 @@ export type DocumentSysLogArchiveGroupByOutputType = {
   _max: DocumentSysLogArchiveMaxAggregateOutputType | null
 }
 
-type GetDocumentSysLogArchiveGroupByPayload<T extends DocumentSysLogArchiveGroupByArgs> = Prisma.PrismaPromise<
+export type GetDocumentSysLogArchiveGroupByPayload<T extends DocumentSysLogArchiveGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<DocumentSysLogArchiveGroupByOutputType, T['by']> &
       {

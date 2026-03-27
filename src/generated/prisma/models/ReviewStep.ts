@@ -239,7 +239,7 @@ export type ReviewStepGroupByOutputType = {
   _max: ReviewStepMaxAggregateOutputType | null
 }
 
-type GetReviewStepGroupByPayload<T extends ReviewStepGroupByArgs> = Prisma.PrismaPromise<
+export type GetReviewStepGroupByPayload<T extends ReviewStepGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ReviewStepGroupByOutputType, T['by']> &
       {

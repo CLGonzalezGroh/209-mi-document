@@ -207,7 +207,7 @@ export type TransmittalItemGroupByOutputType = {
   _max: TransmittalItemMaxAggregateOutputType | null
 }
 
-type GetTransmittalItemGroupByPayload<T extends TransmittalItemGroupByArgs> = Prisma.PrismaPromise<
+export type GetTransmittalItemGroupByPayload<T extends TransmittalItemGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<TransmittalItemGroupByOutputType, T['by']> &
       {

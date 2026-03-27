@@ -243,7 +243,7 @@ export type DocumentRevisionGroupByOutputType = {
   _max: DocumentRevisionMaxAggregateOutputType | null
 }
 
-type GetDocumentRevisionGroupByPayload<T extends DocumentRevisionGroupByArgs> = Prisma.PrismaPromise<
+export type GetDocumentRevisionGroupByPayload<T extends DocumentRevisionGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<DocumentRevisionGroupByOutputType, T['by']> &
       {

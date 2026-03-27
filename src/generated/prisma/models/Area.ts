@@ -246,7 +246,7 @@ export type AreaGroupByOutputType = {
   _max: AreaMaxAggregateOutputType | null
 }
 
-type GetAreaGroupByPayload<T extends AreaGroupByArgs> = Prisma.PrismaPromise<
+export type GetAreaGroupByPayload<T extends AreaGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<AreaGroupByOutputType, T['by']> &
       {

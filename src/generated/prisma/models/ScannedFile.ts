@@ -389,7 +389,7 @@ export type ScannedFileGroupByOutputType = {
   _max: ScannedFileMaxAggregateOutputType | null
 }
 
-type GetScannedFileGroupByPayload<T extends ScannedFileGroupByArgs> = Prisma.PrismaPromise<
+export type GetScannedFileGroupByPayload<T extends ScannedFileGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ScannedFileGroupByOutputType, T['by']> &
       {

@@ -214,7 +214,7 @@ export type ReviewWorkflowGroupByOutputType = {
   _max: ReviewWorkflowMaxAggregateOutputType | null
 }
 
-type GetReviewWorkflowGroupByPayload<T extends ReviewWorkflowGroupByArgs> = Prisma.PrismaPromise<
+export type GetReviewWorkflowGroupByPayload<T extends ReviewWorkflowGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ReviewWorkflowGroupByOutputType, T['by']> &
       {
