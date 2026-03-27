@@ -1057,6 +1057,11 @@ export type DocumentSysLogArchiveFindManyArgs<ExtArgs extends runtime.Types.Exte
    * Skip the first `n` DocumentSysLogArchives.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of DocumentSysLogArchives.
+   */
   distinct?: Prisma.DocumentSysLogArchiveScalarFieldEnum | Prisma.DocumentSysLogArchiveScalarFieldEnum[]
 }
 

@@ -1613,6 +1613,11 @@ export type DocumentClassFindManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Skip the first `n` DocumentClasses.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of DocumentClasses.
+   */
   distinct?: Prisma.DocumentClassScalarFieldEnum | Prisma.DocumentClassScalarFieldEnum[]
 }
 

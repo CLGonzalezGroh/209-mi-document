@@ -187,3 +187,13 @@
 - Agrega el campo PHYSICAL_LOCATION a los enums y resolvers de archivos escaneados
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.12
+
+2026-03-27
+
+## Cache
+
+- Actualiza resolvers para incluir permisos comunes en las funciones de selección
+
+---

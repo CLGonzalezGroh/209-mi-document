@@ -1310,6 +1310,11 @@ export type ReviewWorkflowFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Skip the first `n` ReviewWorkflows.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of ReviewWorkflows.
+   */
   distinct?: Prisma.ReviewWorkflowScalarFieldEnum | Prisma.ReviewWorkflowScalarFieldEnum[]
 }
 

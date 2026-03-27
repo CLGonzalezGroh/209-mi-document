@@ -1935,6 +1935,11 @@ export type DocumentFindManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Skip the first `n` Documents.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of Documents.
+   */
   distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
 }
 

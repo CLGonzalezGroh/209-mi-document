@@ -5,6 +5,7 @@ import {
   ListResponse,
   OrderByInput,
   SelectOption,
+  PERMISSIONS,
   TerminatedFilter,
 } from "@CLGonzalezGroh/mi-common"
 import { Area } from "../generated/prisma/client.js"
@@ -148,7 +149,10 @@ export const areaResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:area:select"],
+        requiredPermissions: [
+          PERMISSIONS.DOCUMENT_AREA_SELECT,
+          PERMISSIONS.COMMON_SELECT_LIST_ACCESS,
+        ],
         context,
       })
 

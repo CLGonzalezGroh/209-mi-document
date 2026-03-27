@@ -179,7 +179,10 @@ export const documentClassResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:documentClass:select"],
+        requiredPermissions: [
+          PERMISSIONS.DOCUMENT_DOCUMENT_CLASS_SELECT,
+          PERMISSIONS.COMMON_SELECT_LIST_ACCESS,
+        ],
         context,
       })
 
