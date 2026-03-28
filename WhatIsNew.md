@@ -197,3 +197,13 @@
 - Actualiza resolvers para incluir permisos comunes en las funciones de selección
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.13
+
+2026-03-28
+
+## Error Handle
+
+- Agrega mensajes de error para la restricción de unicidad en la creación y actualización de archivos escaneados
+
+---

@@ -343,6 +343,7 @@ export const scannedFileResolvers = {
           context,
           logName: "CREATE_SCANNED_FILE",
           messages: {
+            uniqueConstraint: "Ya existe un archivo escaneado con ese código en este proyecto.",
             default: "Error al crear el archivo escaneado.",
           },
         })
@@ -445,6 +446,7 @@ export const scannedFileResolvers = {
           logName: "UPDATE_SCANNED_FILE",
           messages: {
             notFound: "El archivo escaneado no existe.",
+            uniqueConstraint: "Ya existe un archivo escaneado con ese código en este proyecto.",
             default: "Error al actualizar el archivo escaneado.",
           },
         })
