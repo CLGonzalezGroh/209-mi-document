@@ -207,3 +207,13 @@
 - Agrega mensajes de error para la restricción de unicidad en la creación y actualización de archivos escaneados
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.13
+
+2026-03-29
+
+## npm update
+
+- Actualiza dependencias y corrige importaciones en varios archivos
+
+---

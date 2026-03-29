@@ -1,4 +1,4 @@
-import { GraphQLResolverMap } from "@apollo/subgraph/dist/schema-helper"
+import { GraphQLResolverMap } from "@apollo/subgraph/dist/schema-helper/index.js"
 import { ResolverContext } from "../types.js"
 import * as scalars from "../scalars/index.js"
 import { resolverTypes } from "./resolversTypes/index.js"

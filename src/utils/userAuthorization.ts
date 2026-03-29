@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken"
 import { GraphQLError } from "graphql"
-import { ResolverContext } from "../types"
+import { ResolverContext } from "../types.js"
 import { ApiToken } from "@CLGonzalezGroh/mi-common"
 
 type UserAuthorizationProps = {

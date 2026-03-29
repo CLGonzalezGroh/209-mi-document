@@ -1,7 +1,7 @@
-import { GraphQLResolverMap } from "@apollo/subgraph/dist/schema-helper"
+import { GraphQLResolverMap } from "@apollo/subgraph/dist/schema-helper/index.js"
 import { DocumentNode } from "graphql"
 import { IncomingHttpHeaders } from "http"
-import type { PrismaClient } from "./generated/prisma/client"
+import type { PrismaClient } from "./generated/prisma/client.js"
 
 // Definición del módulo de esquema GraphQL
 export interface GraphQLSchemaModule {
