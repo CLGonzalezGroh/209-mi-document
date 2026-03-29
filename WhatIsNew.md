@@ -217,3 +217,13 @@
 - Actualiza dependencias y corrige importaciones en varios archivos
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.14
+
+2026-03-29
+
+## Ubicación Física
+
+- Agrega filtro por ubicación física en la entrada de ScannedFileFilterInput
+
+---

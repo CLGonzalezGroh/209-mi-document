@@ -1313,6 +1313,8 @@ input ScannedFileFilterInput {
   digitalDisposition: DigitalDispositionInput
   "Filtrar por disposición física"
   physicalDisposition: PhysicalDispositionInput
+  "Filtrar por ubicación física (búsqueda parcial)"
+  physicalLocation: String
   "Filtrar por estado de habilitación"
   terminatedFilter: TerminatedFilterInput
 }

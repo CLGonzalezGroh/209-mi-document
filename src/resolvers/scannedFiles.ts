@@ -37,6 +37,7 @@ interface ScannedFileFilterInput {
   areaId?: number
   digitalDisposition?: DigitalDisposition
   physicalDisposition?: PhysicalDisposition
+  physicalLocation?: string
   terminatedFilter?: TerminatedFilter
 }
 
@@ -149,6 +150,10 @@ export const scannedFileResolvers = {
 
         if (filter?.physicalDisposition) {
           where.physicalDisposition = filter.physicalDisposition
+        }
+
+        if (filter?.physicalLocation) {
+          where.physicalLocation = { contains: filter.physicalLocation, mode: "insensitive" as const }
         }
 
         const prismaOrderBy = buildScannedFileOrderBy(orderBy)
