@@ -25,6 +25,9 @@ export interface ScannedFileOrderByInput extends OrderByInput {
     | "CLASSIFIED_AT"
     | "DIGITAL_DISPOSITION"
     | "PHYSICAL_LOCATION"
+    | "AREA_NAME"
+    | "CLASS_NAME"
+    | "TYPE_NAME"
 }
 
 const EXTERNAL_SYSTEM_BASE_URL = process.env.EXTERNAL_SYSTEM_BASE_URL || ""

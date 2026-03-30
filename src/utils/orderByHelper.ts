@@ -80,13 +80,25 @@ const scannedFileFieldMap: Record<string, string> = {
   PHYSICAL_LOCATION: "physicalLocation",
 }
 
+const scannedFileNestedFieldMap: Record<string, { relation: string; field: string }> = {
+  AREA_NAME: { relation: "area", field: "name" },
+  CLASS_NAME: { relation: "documentClass", field: "name" },
+  TYPE_NAME: { relation: "documentType", field: "name" },
+}
+
 export function buildScannedFileOrderBy(
   orderBy?: ScannedFileOrderByInput,
-): Record<string, string> | undefined {
+): Record<string, any> | undefined {
   if (!orderBy) return undefined
-  const field = scannedFileFieldMap[orderBy.field]
-  if (!field) return undefined
-  return { [field]: orderBy.direction.toLowerCase() }
+  const direction = orderBy.direction.toLowerCase()
+
+  const simpleField = scannedFileFieldMap[orderBy.field]
+  if (simpleField) return { [simpleField]: direction }
+
+  const nestedField = scannedFileNestedFieldMap[orderBy.field]
+  if (nestedField) return { [nestedField.relation]: { [nestedField.field]: direction } }
+
+  return undefined
 }
 
 const documentClassFieldMap: Record<string, string> = {

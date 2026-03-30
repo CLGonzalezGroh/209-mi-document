@@ -357,6 +357,12 @@ enum ScannedFileOrderFieldInput {
   DIGITAL_DISPOSITION
   "Por ubicación física"
   PHYSICAL_LOCATION
+  "Por nombre de área"
+  AREA_NAME
+  "Por nombre de clase de documento"
+  CLASS_NAME
+  "Por nombre de tipo de documento"
+  TYPE_NAME
 }
 
 "Nivel del log"

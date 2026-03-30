@@ -227,3 +227,13 @@
 - Agrega filtro por ubicación física en la entrada de ScannedFileFilterInput
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.15
+
+2026-03-30
+
+## Scanned Files
+
+- Agrega nuevos campos de ordenación para archivos escaneados: AREA_NAME, CLASS_NAME y TYPE_NAME
+
+---
