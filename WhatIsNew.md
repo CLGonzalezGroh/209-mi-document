@@ -247,3 +247,13 @@
 - Refactor la conexión de Prisma para usar un pool de conexiones con pg
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.18
+
+2026-04-02
+
+## Cross References
+
+- Agrega resolvers para verificar dependencias documentales entre entidades externas
+
+---

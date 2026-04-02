@@ -1574,6 +1574,47 @@ type Query {
 
   "Obtener estadísticas de archivos escaneados por estado"
   scannedFileStats(filter: ScannedFileFilterInput): ScannedFileStats!
+
+  # ─── Dependencias Cross-Service ───
+  "Verifica si una entidad externa tiene dependencias documentales"
+  checkDocumentDependencies(
+    entityType: DocumentDependencyEntityInput!
+    entityId: Int!
+  ): DependencyCheck!
+}
+
+# ═══════════════════════════════════════════════════════
+# DEPENDENCIAS CROSS-SERVICE
+# ═══════════════════════════════════════════════════════
+
+"Entidad externa para verificar dependencias documentales"
+enum DocumentDependencyEntityInput {
+  "Proyecto (Transmittals, ScannedFiles, Areas, Documents)"
+  PROJECT
+  "Hallazgo de calidad (Documents)"
+  FINDING
+  "Acción correctiva (Documents)"
+  ACTION
+}
+
+"Conteo de dependencias por modelo"
+type DependencyCount @shareable {
+  "Nombre del modelo dependiente"
+  model: String! @shareable
+  "Cantidad de registros que dependen de la entidad"
+  count: Int! @shareable
+  "Etiqueta para mostrar en UI"
+  label: String! @shareable
+}
+
+"Resultado de verificación de dependencias externas"
+type DependencyCheck @shareable {
+  "ID de la entidad verificada"
+  entityId: Int! @shareable
+  "Lista de dependencias encontradas por modelo"
+  dependencies: [DependencyCount!]! @shareable
+  "True si existe al menos una dependencia"
+  hasDependencies: Boolean! @shareable
 }
 
 # ═══════════════════════════════════════════════════════

@@ -13,6 +13,7 @@ import { attachmentResolvers } from "./attachments.js"
 import { scannedFileResolvers } from "./scannedFiles.js"
 import { documentClassResolvers } from "./documentClasses.js"
 import { areaResolvers } from "./areas.js"
+import { dependencyResolvers } from "./dependencies.js"
 
 export const resolvers: GraphQLResolverMap<ResolverContext> = {
   ...scalars,
@@ -27,6 +28,7 @@ export const resolvers: GraphQLResolverMap<ResolverContext> = {
     ...documentSysLogResolvers.Query,
     ...attachmentResolvers.Query,
     ...scannedFileResolvers.Query,
+    ...dependencyResolvers.Query,
   },
   Mutation: {
     ...documentResolvers.Mutation,
