@@ -31,6 +31,10 @@ const documentClassIncludes = {
   },
 }
 
+import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
+
+const logger = createLogger("documentClasses")
+
 export const documentClassResolvers = {
   Query: {
     documentClasses: async (
@@ -50,6 +54,7 @@ export const documentClassResolvers = {
         requiredPermissions: ["document:documentClass:list"],
         context,
       })
+      logger.info("documentClasses", { userId })
 
       try {
         const where: any = {}
@@ -145,6 +150,7 @@ export const documentClassResolvers = {
         requiredPermissions: ["document:documentClass:read"],
         context,
       })
+      logger.info("documentClassById", { userId })
 
       try {
         const documentClass = await context.orm.documentClass.findFirst({
@@ -185,6 +191,7 @@ export const documentClassResolvers = {
         ],
         context,
       })
+      logger.info("documentClassesSelectList", { userId })
 
       try {
         const where: any = { terminatedAt: null }
@@ -239,6 +246,7 @@ export const documentClassResolvers = {
         requiredPermissions: ["document:documentClass:create"],
         context,
       })
+      logger.info("createDocumentClass", { userId })
 
       try {
         const documentClass = await context.orm.documentClass.create({
@@ -300,6 +308,7 @@ export const documentClassResolvers = {
         requiredPermissions: ["document:documentClass:update"],
         context,
       })
+      logger.info("updateDocumentClass", { userId })
 
       try {
         const documentClass = await context.orm.documentClass.update({
@@ -347,6 +356,7 @@ export const documentClassResolvers = {
         requiredPermissions: ["document:documentClass:delete"],
         context,
       })
+      logger.info("terminateDocumentClass", { userId })
 
       try {
         const documentClass = await context.orm.documentClass.update({
@@ -392,6 +402,7 @@ export const documentClassResolvers = {
         requiredPermissions: ["document:documentClass:update"],
         context,
       })
+      logger.info("activateDocumentClass", { userId })
 
       try {
         const documentClass = await context.orm.documentClass.update({
@@ -437,6 +448,7 @@ export const documentClassResolvers = {
         requiredPermissions: ["document:documentClass:delete"],
         context,
       })
+      logger.info("deleteDocumentClass", { userId })
 
       try {
         const documentClass = await context.orm.documentClass.findFirst({

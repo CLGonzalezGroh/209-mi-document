@@ -27,6 +27,10 @@ interface DocumentSysLogFilterInput {
   createdTo?: Date
 }
 
+import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
+
+const logger = createLogger("documentSysLogs")
+
 export const documentSysLogResolvers = {
   Query: {
     documentSysLogById: async (
@@ -38,6 +42,7 @@ export const documentSysLogResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SYS_LOG_READ],
         context,
       })
+      logger.info("documentSysLogById", { userId })
 
       try {
         const log = await context.orm.documentSysLog.findFirst({
@@ -82,6 +87,7 @@ export const documentSysLogResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SYS_LOG_LIST],
         context,
       })
+      logger.info("documentSysLogs", { userId })
 
       try {
         const skip = pagination?.skip || 0
@@ -166,6 +172,7 @@ export const documentSysLogResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SYS_LOG_READ],
         context,
       })
+      logger.info("documentSysLogArchiveById", { userId })
 
       try {
         const log = await context.orm.documentSysLogArchive.findFirst({
@@ -210,6 +217,7 @@ export const documentSysLogResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SYS_LOG_LIST],
         context,
       })
+      logger.info("documentSysLogsArchive", { userId })
 
       try {
         const skip = pagination?.skip || 0
@@ -298,6 +306,7 @@ export const documentSysLogResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SYS_LOG_ARCHIVE],
         context,
       })
+      logger.info("archiveDocumentSysLogs", { userId })
 
       try {
         // Calcular la fecha límite
@@ -377,6 +386,7 @@ export const documentSysLogResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SYS_LOG_DELETE],
         context,
       })
+      logger.info("deleteArchivedDocumentSysLogs", { userId })
 
       try {
         // Calcular la fecha límite

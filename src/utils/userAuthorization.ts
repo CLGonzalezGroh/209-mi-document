@@ -2,6 +2,9 @@ import jwt from "jsonwebtoken"
 import { GraphQLError } from "graphql"
 import { ResolverContext } from "../types.js"
 import { ApiToken } from "@CLGonzalezGroh/mi-common"
+import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
+
+const logger = createLogger("userAuthorization")
 
 type UserAuthorizationProps = {
   requiredPermissions: string[]
@@ -23,14 +26,14 @@ export const userAuthorization = async ({
 }: UserAuthorizationProps): Promise<number> => {
   // 1. Validar variables de entorno
   if (!process.env.AUTH_JWT_SECRET) {
-    console.error("❌ AUTH_JWT_SECRET no está configurado")
+    logger.error("AUTH_JWT_SECRET no está configurado")
     throw new GraphQLError("Error de configuración del servidor", {
       extensions: { code: "INTERNAL_SERVER_ERROR" },
     })
   }
 
   if (!process.env.ADMIN_API_URL) {
-    console.error("❌ ADMIN_API_URL no está configurado")
+    logger.error("ADMIN_API_URL no está configurado")
     throw new GraphQLError("Error de configuración del servidor", {
       extensions: { code: "INTERNAL_SERVER_ERROR" },
     })
@@ -62,7 +65,7 @@ export const userAuthorization = async ({
     ) as ApiToken
 
     if (!decodeToken.id) {
-      console.warn("⚠️ Token válido pero sin ID de usuario")
+      logger.auth("Token válido pero sin ID de usuario", {})
       throw new GraphQLError("Se debe iniciar sesión", {
         extensions: { code: "UNAUTHENTICATED" },
       })
@@ -91,7 +94,7 @@ export const userAuthorization = async ({
     })
 
     if (!response.ok) {
-      console.error(`❌ Error al consultar admin API: ${response.status}`)
+      logger.error(`Error al consultar admin API: ${response.status}`)
       throw new GraphQLError("Error al verificar permisos", {
         extensions: { code: "INTERNAL_SERVER_ERROR" },
       })
@@ -109,7 +112,7 @@ export const userAuthorization = async ({
       const errorCode = firstError.extensions?.code || "INTERNAL_SERVER_ERROR"
       const errorMessage = firstError.message || "Error al verificar permisos"
 
-      console.error("❌ Error en respuesta de admin API:", errorMessage)
+      logger.error(`Error en respuesta de admin API: ${errorMessage}`)
       throw new GraphQLError(errorMessage, {
         extensions: { code: errorCode },
       })
@@ -119,13 +122,11 @@ export const userAuthorization = async ({
     const hasPermission = data?.hasPermissions
 
     if (!hasPermission) {
-      console.warn(
-        `🚫 Usuario ${
-          decodeToken.id
-        } intentó acceder sin permisos. Permisos requeridos: [${requiredPermissions.join(
-          ", ",
-        )}], Roles del usuario: [${decodeToken.roles.join(", ")}]`,
-      )
+      logger.auth("Acceso denegado", {
+        userId: decodeToken.id,
+        roles: decodeToken.roles,
+        requiredPermissions,
+      })
       throw new GraphQLError("No estás autorizado", {
         extensions: {
           code: "FORBIDDEN",
@@ -137,7 +138,7 @@ export const userAuthorization = async ({
   } catch (error) {
     // Manejar errores específicos de JWT
     if (error instanceof jwt.JsonWebTokenError) {
-      console.warn(`🔒 Token JWT inválido: ${error.message}`)
+      logger.auth("Token JWT inválido", { tokenError: error.message })
       throw new GraphQLError("Token inválido. Reinicie sesión", {
         extensions: {
           code: "UNAUTHENTICATED",
@@ -146,7 +147,7 @@ export const userAuthorization = async ({
     }
 
     if (error instanceof jwt.TokenExpiredError) {
-      console.warn(`⏰ Token JWT expirado: ${error.message}`)
+      logger.auth("Token JWT expirado", { tokenError: error.message })
       throw new GraphQLError("Su sesión ha expirado. Reinicie sesión", {
         extensions: {
           code: "UNAUTHENTICATED",
@@ -160,7 +161,7 @@ export const userAuthorization = async ({
     }
 
     // Error genérico no esperado
-    console.error(`💥 Error inesperado en autorización:`, error)
+    logger.error("Error inesperado en autorización", error)
     throw new GraphQLError("Error interno del servidor", {
       extensions: {
         code: "INTERNAL_SERVER_ERROR",

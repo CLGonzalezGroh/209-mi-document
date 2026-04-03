@@ -17,6 +17,10 @@ interface DependencyCheck {
   hasDependencies: boolean
 }
 
+import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
+
+const logger = createLogger("dependencies")
+
 export const dependencyResolvers = {
   Query: {
     checkDocumentDependencies: async (
@@ -34,6 +38,7 @@ export const dependencyResolvers = {
         requiredPermissions: [PERMISSIONS.ADMIN_USER_READ],
         context,
       })
+      logger.info("checkDocumentDependencies", { userId })
 
       try {
         const dependencies: DependencyCount[] = []

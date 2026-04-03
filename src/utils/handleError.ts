@@ -2,6 +2,9 @@ import { GraphQLError } from "graphql"
 import { LogLevel } from "../generated/prisma/enums.js"
 import { ResolverContext } from "../types.js"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client.js"
+import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
+
+const logger = createLogger("handleError")
 
 type HandleErrorParams = {
   error: unknown
@@ -24,6 +27,7 @@ export const handleError = async ({
   messages,
 }: HandleErrorParams): Promise<never> => {
   // Registrar el error sin modificaciones
+  logger.error(logName, error instanceof Error ? error.message : "Unknown error")
   const data = {
     name: logName,
     message: error instanceof Error ? error.message : "Unknown error",

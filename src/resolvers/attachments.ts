@@ -10,6 +10,10 @@ import { handleError } from "../utils/handleError.js"
 import type { Attachment } from "../generated/prisma/client.js"
 import { ModuleType } from "../generated/prisma/enums.js"
 
+import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
+
+const logger = createLogger("attachments")
+
 export const attachmentResolvers = {
   Query: {
     attachmentById: async (
@@ -21,6 +25,7 @@ export const attachmentResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_ATTACHMENT_READ],
         context,
       })
+      logger.info("attachmentById", { userId })
 
       try {
         const attachment = await context.orm.attachment.findFirst({
@@ -67,6 +72,7 @@ export const attachmentResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_ATTACHMENT_LIST],
         context,
       })
+      logger.info("attachmentsByModule", { userId })
 
       try {
         const skip = pagination?.skip || 0
@@ -139,6 +145,7 @@ export const attachmentResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_ATTACHMENT_CREATE],
         context,
       })
+      logger.info("createAttachment", { userId })
 
       try {
         const attachment = await context.orm.attachment.create({
@@ -188,6 +195,7 @@ export const attachmentResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_ATTACHMENT_DELETE],
         context,
       })
+      logger.info("deleteAttachment", { userId })
 
       try {
         const attachment = await context.orm.attachment.findFirst({

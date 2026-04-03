@@ -43,6 +43,10 @@ const documentIncludes = {
   },
 }
 
+import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
+
+const logger = createLogger("documents")
+
 export const documentResolvers = {
   Query: {
     documentById: async (
@@ -54,6 +58,7 @@ export const documentResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_READ],
         context,
       })
+      logger.info("documentById", { userId })
 
       try {
         const document = await context.orm.document.findFirst({
@@ -99,6 +104,7 @@ export const documentResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_LIST],
         context,
       })
+      logger.info("documents", { userId })
 
       try {
         const skip = pagination?.skip || 0
@@ -209,6 +215,7 @@ export const documentResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_LIST],
         context,
       })
+      logger.info("documentsByModule", { userId })
 
       try {
         const skip = pagination?.skip || 0
@@ -273,6 +280,7 @@ export const documentResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_SELECT],
         context,
       })
+      logger.info("documentsSelectList", { userId })
 
       try {
         const where: any = { terminatedAt: null }
@@ -344,6 +352,7 @@ export const documentResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_CREATE],
         context,
       })
+      logger.info("createDocument", { userId })
 
       try {
         // Determinar esquema de revisión y código inicial
@@ -437,6 +446,7 @@ export const documentResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_UPDATE],
         context,
       })
+      logger.info("updateDocument", { userId })
 
       try {
         const { documentTypeId, documentClassId, ...rest } = input
@@ -494,6 +504,7 @@ export const documentResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_DELETE],
         context,
       })
+      logger.info("terminateDocument", { userId })
 
       try {
         const document = await context.orm.document.update({
@@ -539,6 +550,7 @@ export const documentResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_UPDATE],
         context,
       })
+      logger.info("activateDocument", { userId })
 
       try {
         const document = await context.orm.document.update({
@@ -584,6 +596,7 @@ export const documentResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_UPDATE],
         context,
       })
+      logger.info("switchRevisionScheme", { userId })
 
       try {
         const existing = await context.orm.document.findFirst({

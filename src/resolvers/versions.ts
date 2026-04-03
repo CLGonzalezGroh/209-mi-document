@@ -13,6 +13,10 @@ const versionIncludes = {
   },
 }
 
+import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
+
+const logger = createLogger("versions")
+
 export const versionResolvers = {
   Mutation: {
     registerVersion: async (
@@ -37,6 +41,7 @@ export const versionResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_CREATE],
         context,
       })
+      logger.info("registerVersion", { userId })
 
       try {
         // Verificar que la revisión existe y está en DRAFT

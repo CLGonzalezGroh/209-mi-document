@@ -25,6 +25,10 @@ interface DocumentTypeFilterInput {
   terminatedFilter?: TerminatedFilter
 }
 
+import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
+
+const logger = createLogger("documentTypes")
+
 export const documentTypeResolvers = {
   Query: {
     documentTypes: async (
@@ -44,6 +48,7 @@ export const documentTypeResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_LIST],
         context,
       })
+      logger.info("documentTypes", { userId })
 
       try {
         const where: any = {}
@@ -158,6 +163,7 @@ export const documentTypeResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_READ],
         context,
       })
+      logger.info("documentTypeById", { userId })
 
       try {
         const documentType = await context.orm.documentType.findFirst({
@@ -199,6 +205,7 @@ export const documentTypeResolvers = {
         ],
         context,
       })
+      logger.info("documentTypesSelectList", { userId })
 
       try {
         const where: any = { terminatedAt: null }
@@ -269,6 +276,7 @@ export const documentTypeResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_CREATE],
         context,
       })
+      logger.info("createDocumentType", { userId })
 
       try {
         const documentType = await context.orm.documentType.create({
@@ -332,6 +340,7 @@ export const documentTypeResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_UPDATE],
         context,
       })
+      logger.info("updateDocumentType", { userId })
 
       try {
         const documentType = await context.orm.documentType.update({
@@ -379,6 +388,7 @@ export const documentTypeResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_DELETE],
         context,
       })
+      logger.info("terminateDocumentType", { userId })
 
       try {
         const documentType = await context.orm.documentType.update({
@@ -424,6 +434,7 @@ export const documentTypeResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_UPDATE],
         context,
       })
+      logger.info("activateDocumentType", { userId })
 
       try {
         const documentType = await context.orm.documentType.update({
@@ -469,6 +480,7 @@ export const documentTypeResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_DELETE],
         context,
       })
+      logger.info("deleteDocumentType", { userId })
 
       try {
         const documentType = await context.orm.documentType.findFirst({

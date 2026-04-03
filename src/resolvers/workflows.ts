@@ -51,6 +51,10 @@ function generateSignatureHash(
   return createHash("sha256").update(data).digest("hex")
 }
 
+import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
+
+const logger = createLogger("workflows")
+
 export const workflowResolvers = {
   Query: {
     pendingReviewSteps: async (
@@ -62,6 +66,7 @@ export const workflowResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_WORKFLOW_LIST],
         context,
       })
+      logger.info("pendingReviewSteps", { userId })
 
       try {
         const steps = await context.orm.reviewStep.findMany({
@@ -101,6 +106,7 @@ export const workflowResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_WORKFLOW_LIST],
         context,
       })
+      logger.info("workflowsByStatus", { userId })
 
       try {
         const workflows = await context.orm.reviewWorkflow.findMany({
@@ -146,6 +152,7 @@ export const workflowResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_WORKFLOW_CREATE],
         context,
       })
+      logger.info("initiateReview", { userId })
 
       try {
         // Verificar que la revisión existe y está en DRAFT
@@ -247,6 +254,7 @@ export const workflowResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_WORKFLOW_UPDATE],
         context,
       })
+      logger.info("approveStep", { userId })
 
       try {
         // Obtener el step con su workflow
@@ -390,6 +398,7 @@ export const workflowResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_WORKFLOW_UPDATE],
         context,
       })
+      logger.info("rejectStep", { userId })
 
       try {
         const step = await context.orm.reviewStep.findFirst({
@@ -499,6 +508,7 @@ export const workflowResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_WORKFLOW_CREATE],
         context,
       })
+      logger.info("cancelWorkflow", { userId })
 
       try {
         const workflow = await context.orm.reviewWorkflow.findFirst({

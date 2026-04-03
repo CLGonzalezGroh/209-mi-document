@@ -50,6 +50,10 @@ const scannedFileIncludes = {
   area: true,
 }
 
+import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
+
+const logger = createLogger("scannedFiles")
+
 export const scannedFileResolvers = {
   Query: {
     scannedFileById: async (
@@ -61,6 +65,7 @@ export const scannedFileResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_READ],
         context,
       })
+      logger.info("scannedFileById", { userId })
 
       try {
         const scannedFile = await context.orm.scannedFile.findFirst({
@@ -106,6 +111,7 @@ export const scannedFileResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_LIST],
         context,
       })
+      logger.info("scannedFiles", { userId })
 
       try {
         const skip = pagination?.skip || 0
@@ -208,6 +214,7 @@ export const scannedFileResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_LIST],
         context,
       })
+      logger.info("scannedFileStats", { userId })
 
       try {
         const baseWhere = { projectId, terminatedAt: null }
@@ -308,6 +315,7 @@ export const scannedFileResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_CREATE],
         context,
       })
+      logger.info("createScannedFile", { userId })
 
       try {
         const scannedFile = await context.orm.scannedFile.create({
@@ -386,6 +394,7 @@ export const scannedFileResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_UPDATE],
         context,
       })
+      logger.info("updateScannedFile", { userId })
 
       try {
         const existing = await context.orm.scannedFile.findFirst({
@@ -480,6 +489,7 @@ export const scannedFileResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_APPROVE],
         context,
       })
+      logger.info("classifyScannedFile", { userId })
 
       try {
         const existing = await context.orm.scannedFile.findFirst({
@@ -612,6 +622,7 @@ export const scannedFileResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_UPDATE],
         context,
       })
+      logger.info("markAsUploaded", { userId })
 
       try {
         const existing = await context.orm.scannedFile.findFirst({
@@ -689,6 +700,7 @@ export const scannedFileResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_UPDATE],
         context,
       })
+      logger.info("updateExternalReference", { userId })
 
       try {
         const existing = await context.orm.scannedFile.findFirst({
@@ -758,6 +770,7 @@ export const scannedFileResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_APPROVE],
         context,
       })
+      logger.info("updatePhysicalDisposition", { userId })
 
       try {
         const existing = await context.orm.scannedFile.findFirst({
@@ -856,6 +869,7 @@ export const scannedFileResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_UPDATE],
         context,
       })
+      logger.info("terminateScannedFile", { userId })
 
       try {
         const scannedFile = await context.orm.scannedFile.update({
@@ -901,6 +915,7 @@ export const scannedFileResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_APPROVE],
         context,
       })
+      logger.info("confirmPhysicalDisposition", { userId })
 
       try {
         const existing = await context.orm.scannedFile.findFirst({
@@ -979,6 +994,7 @@ export const scannedFileResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_UPDATE],
         context,
       })
+      logger.info("activateScannedFile", { userId })
 
       try {
         const scannedFile = await context.orm.scannedFile.update({
@@ -1024,6 +1040,7 @@ export const scannedFileResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_ADMIN_UPDATE],
         context,
       })
+      logger.info("resetScannedFileToPending", { userId })
 
       try {
         const existing = await context.orm.scannedFile.findFirst({
@@ -1094,6 +1111,7 @@ export const scannedFileResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_DELETE],
         context,
       })
+      logger.info("deleteScannedFile", { userId })
 
       try {
         const scannedFile = await context.orm.scannedFile.findFirst({

@@ -59,6 +59,10 @@ async function generateTransmittalCode(
   return `TR-${nextNumber.toString().padStart(3, "0")}`
 }
 
+import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
+
+const logger = createLogger("transmittals")
+
 export const transmittalResolvers = {
   Query: {
     transmittalById: async (
@@ -70,6 +74,7 @@ export const transmittalResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_TRANSMITTAL_READ],
         context,
       })
+      logger.info("transmittalById", { userId })
 
       try {
         const transmittal = await context.orm.transmittal.findFirst({
@@ -116,6 +121,7 @@ export const transmittalResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_TRANSMITTAL_LIST],
         context,
       })
+      logger.info("transmittals", { userId })
 
       try {
         const skip = pagination?.skip || 0
@@ -192,6 +198,7 @@ export const transmittalResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_TRANSMITTAL_LIST],
         context,
       })
+      logger.info("transmittalsByProject", { userId })
 
       try {
         const skip = pagination?.skip || 0
@@ -257,6 +264,7 @@ export const transmittalResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_TRANSMITTAL_CREATE],
         context,
       })
+      logger.info("createTransmittal", { userId })
 
       try {
         const code = await generateTransmittalCode(context.orm)
@@ -314,6 +322,7 @@ export const transmittalResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_TRANSMITTAL_UPDATE],
         context,
       })
+      logger.info("issueTransmittal", { userId })
 
       try {
         const transmittal = await context.orm.transmittal.findFirst({
@@ -391,6 +400,7 @@ export const transmittalResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_TRANSMITTAL_UPDATE],
         context,
       })
+      logger.info("respondTransmittal", { userId })
 
       try {
         const transmittal = await context.orm.transmittal.findFirst({
@@ -474,6 +484,7 @@ export const transmittalResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_TRANSMITTAL_UPDATE],
         context,
       })
+      logger.info("closeTransmittal", { userId })
 
       try {
         const transmittal = await context.orm.transmittal.findFirst({

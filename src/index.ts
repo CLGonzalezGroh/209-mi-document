@@ -4,6 +4,9 @@ import { buildSubgraphSchema } from "@apollo/subgraph"
 import { readFileSync } from "fs"
 import { gql } from "graphql-tag"
 import { prisma } from "./lib/prisma.js"
+import { createLogger, debugConfig } from "@CLGonzalezGroh/mi-common/logger"
+
+const logger = createLogger("server")
 
 const typeDefs = gql(readFileSync("./schema.graphql", { encoding: "utf-8" }))
 import { resolvers } from "./resolvers/index.js"
@@ -28,4 +31,8 @@ const { url } = await startStandaloneServer(server, {
   listen: { port },
 })
 
-console.log(`🚀  Server ready at: ${url}`)
+logger.info(`Server ready at: ${url}`, {
+  port,
+  env: process.env.APP_ENV || "development",
+  logLevel: debugConfig.logLevel,
+})

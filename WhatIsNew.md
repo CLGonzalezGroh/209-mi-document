@@ -257,3 +257,13 @@
 - Agrega resolvers para verificar dependencias documentales entre entidades externas
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.19
+
+2026-04-03
+
+## Logger
+
+- Agrega configuración de logger y mejora el manejo de errores en varios resolvers y utilidades
+
+---

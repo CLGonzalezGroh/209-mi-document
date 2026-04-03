@@ -79,6 +79,10 @@ function getDefaultRevisionCode(scheme: RevisionScheme): string {
   return scheme === RevisionScheme.NUMERIC ? "0" : "A"
 }
 
+import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
+
+const logger = createLogger("revisions")
+
 export const revisionResolvers = {
   Query: {
     revisionById: async (
@@ -90,6 +94,7 @@ export const revisionResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_READ],
         context,
       })
+      logger.info("revisionById", { userId })
 
       try {
         const revision = await context.orm.documentRevision.findFirst({
@@ -143,6 +148,7 @@ export const revisionResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_CREATE],
         context,
       })
+      logger.info("createRevision", { userId })
 
       try {
         // Verificar que el documento existe

@@ -23,6 +23,10 @@ interface AreaFilterInput {
   terminatedFilter?: TerminatedFilter
 }
 
+import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
+
+const logger = createLogger("areas")
+
 export const areaResolvers = {
   Query: {
     areas: async (
@@ -42,6 +46,7 @@ export const areaResolvers = {
         requiredPermissions: ["document:area:list"],
         context,
       })
+      logger.info("areas", { userId })
 
       try {
         const skip = pagination?.skip || 0
@@ -116,6 +121,7 @@ export const areaResolvers = {
         requiredPermissions: ["document:area:read"],
         context,
       })
+      logger.info("areaById", { userId })
 
       try {
         const area = await context.orm.area.findFirst({
@@ -155,6 +161,7 @@ export const areaResolvers = {
         ],
         context,
       })
+      logger.info("areasSelectList", { userId })
 
       try {
         const where: any = {
@@ -208,6 +215,7 @@ export const areaResolvers = {
         requiredPermissions: ["document:area:create"],
         context,
       })
+      logger.info("createArea", { userId })
 
       try {
         const area = await context.orm.area.create({
@@ -267,6 +275,7 @@ export const areaResolvers = {
         requiredPermissions: ["document:area:update"],
         context,
       })
+      logger.info("updateArea", { userId })
 
       try {
         const area = await context.orm.area.update({
@@ -313,6 +322,7 @@ export const areaResolvers = {
         requiredPermissions: ["document:area:delete"],
         context,
       })
+      logger.info("terminateArea", { userId })
 
       try {
         const area = await context.orm.area.update({
@@ -357,6 +367,7 @@ export const areaResolvers = {
         requiredPermissions: ["document:area:update"],
         context,
       })
+      logger.info("activateArea", { userId })
 
       try {
         const area = await context.orm.area.update({
@@ -401,6 +412,7 @@ export const areaResolvers = {
         requiredPermissions: ["document:area:delete"],
         context,
       })
+      logger.info("deleteArea", { userId })
 
       try {
         const area = await context.orm.area.findFirst({
