@@ -11,7 +11,7 @@ import {
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentOrderBy } from "../utils/orderByHelper.js"
-import { ModuleType, RevisionStatus, RevisionScheme } from "../generated/prisma/enums.js"
+import { ModuleType, RevisionStatus, RevisionScheme, SysLogModule } from "../generated/prisma/enums.js"
 import { Document } from "../generated/prisma/client.js"
 
 export interface DocumentOrderByInput extends OrderByInput {
@@ -405,6 +405,7 @@ export const documentResolvers = {
             level: "INFO",
             name: "CREATE_DOCUMENT",
             message: `Documento creado: ${document.title} (${document.code})`,
+            module: document.module as SysLogModule,
             meta: JSON.stringify({ documentId: document.id, input }),
           },
         })
@@ -474,6 +475,7 @@ export const documentResolvers = {
             level: "INFO",
             name: "UPDATE_DOCUMENT",
             message: `Documento actualizado: ${document.title} (${document.code})`,
+            module: document.module as SysLogModule,
             meta: JSON.stringify({ documentId: id, input }),
           },
         })
@@ -522,6 +524,7 @@ export const documentResolvers = {
             level: "INFO",
             name: "TERMINATE_DOCUMENT",
             message: `Documento deshabilitado: ${document.title} (${document.code})`,
+            module: document.module as SysLogModule,
             meta: JSON.stringify({ documentId: id }),
           },
         })
@@ -568,6 +571,7 @@ export const documentResolvers = {
             level: "INFO",
             name: "ACTIVATE_DOCUMENT",
             message: `Documento reactivado: ${document.title} (${document.code})`,
+            module: document.module as SysLogModule,
             meta: JSON.stringify({ documentId: id }),
           },
         })
@@ -631,6 +635,7 @@ export const documentResolvers = {
             level: "INFO",
             name: "SWITCH_REVISION_SCHEME",
             message: `Esquema de revisión cambiado a ${scheme}: ${document.title} (${document.code})`,
+            module: document.module as SysLogModule,
             meta: JSON.stringify({ documentId: id, scheme }),
           },
         })

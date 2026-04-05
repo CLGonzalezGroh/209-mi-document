@@ -12,7 +12,7 @@ import { DocumentType } from "../generated/prisma/client.js"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentTypeOrderBy } from "../utils/orderByHelper.js"
-import { ModuleType } from "../generated/prisma/enums.js"
+import { ModuleType, SysLogModule } from "../generated/prisma/enums.js"
 
 export interface DocumentTypeOrderByInput extends OrderByInput {
   field: "NAME" | "CODE" | "CREATED_AT" | "UPDATED_AT"
@@ -147,6 +147,7 @@ export const documentTypeResolvers = {
           userId,
           context,
           logName: "GET_DOCUMENT_TYPES",
+          module: SysLogModule.DOCUMENT,
           messages: {
             default: "Error al obtener los tipos de documento.",
           },
@@ -184,6 +185,7 @@ export const documentTypeResolvers = {
           userId,
           context,
           logName: "GET_DOCUMENT_TYPE_BY_ID",
+          module: SysLogModule.DOCUMENT,
           messages: {
             notFound:
               "El tipo de documento solicitado no existe o no está disponible.",
@@ -247,6 +249,7 @@ export const documentTypeResolvers = {
           userId,
           context,
           logName: "GET_DOCUMENT_TYPES_SELECT_LIST",
+          module: SysLogModule.DOCUMENT,
           messages: {
             default: "Error al obtener la lista de tipos de documento.",
           },
@@ -297,6 +300,7 @@ export const documentTypeResolvers = {
             userId,
             level: "INFO",
             name: "CREATE_DOCUMENT_TYPE",
+            module: SysLogModule.DOCUMENT,
             message: `Tipo de documento creado: ${documentType.name} (${documentType.code})`,
             meta: JSON.stringify({ documentTypeId: documentType.id, input }),
           },
@@ -309,6 +313,7 @@ export const documentTypeResolvers = {
           userId,
           context,
           logName: "CREATE_DOCUMENT_TYPE",
+          module: SysLogModule.DOCUMENT,
           messages: {
             uniqueConstraint:
               "Ya existe un tipo de documento con ese nombre o código.",
@@ -357,6 +362,7 @@ export const documentTypeResolvers = {
             userId,
             level: "INFO",
             name: "UPDATE_DOCUMENT_TYPE",
+            module: SysLogModule.DOCUMENT,
             message: `Tipo de documento actualizado: ${documentType.name} (${documentType.code})`,
             meta: JSON.stringify({ documentTypeId: id, input }),
           },
@@ -369,6 +375,7 @@ export const documentTypeResolvers = {
           userId,
           context,
           logName: "UPDATE_DOCUMENT_TYPE",
+          module: SysLogModule.DOCUMENT,
           messages: {
             notFound: "El tipo de documento no existe.",
             uniqueConstraint:
@@ -405,6 +412,7 @@ export const documentTypeResolvers = {
             userId,
             level: "INFO",
             name: "TERMINATE_DOCUMENT_TYPE",
+            module: SysLogModule.DOCUMENT,
             message: `Tipo de documento deshabilitado: ${documentType.name} (${documentType.code})`,
             meta: JSON.stringify({ documentTypeId: id }),
           },
@@ -417,6 +425,7 @@ export const documentTypeResolvers = {
           userId,
           context,
           logName: "TERMINATE_DOCUMENT_TYPE",
+          module: SysLogModule.DOCUMENT,
           messages: {
             notFound: "El tipo de documento no existe.",
             default: "Error al deshabilitar el tipo de documento.",
@@ -451,6 +460,7 @@ export const documentTypeResolvers = {
             userId,
             level: "INFO",
             name: "ACTIVATE_DOCUMENT_TYPE",
+            module: SysLogModule.DOCUMENT,
             message: `Tipo de documento reactivado: ${documentType.name} (${documentType.code})`,
             meta: JSON.stringify({ documentTypeId: id }),
           },
@@ -463,6 +473,7 @@ export const documentTypeResolvers = {
           userId,
           context,
           logName: "ACTIVATE_DOCUMENT_TYPE",
+          module: SysLogModule.DOCUMENT,
           messages: {
             notFound: "El tipo de documento no existe.",
             default: "Error al reactivar el tipo de documento.",
@@ -502,6 +513,7 @@ export const documentTypeResolvers = {
             userId,
             level: "WARNING",
             name: "DELETE_DOCUMENT_TYPE",
+            module: SysLogModule.DOCUMENT,
             message: `Tipo de documento eliminado: ${documentType.name} (${documentType.code})`,
             meta: JSON.stringify({ documentTypeId: id }),
           },
@@ -514,6 +526,7 @@ export const documentTypeResolvers = {
           userId,
           context,
           logName: "DELETE_DOCUMENT_TYPE",
+          module: SysLogModule.DOCUMENT,
           messages: {
             notFound: "El tipo de documento no existe.",
             default: "Error al eliminar el tipo de documento.",

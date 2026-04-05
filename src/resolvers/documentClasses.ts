@@ -12,7 +12,7 @@ import { DocumentClass } from "../generated/prisma/client.js"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentClassOrderBy } from "../utils/orderByHelper.js"
-import { ModuleType } from "../generated/prisma/enums.js"
+import { ModuleType, SysLogModule } from "../generated/prisma/enums.js"
 
 export interface DocumentClassOrderByInput extends OrderByInput {
   field: "NAME" | "CODE" | "SORT_ORDER" | "CREATED_AT"
@@ -71,7 +71,12 @@ export const documentClassResolvers = {
           where.OR = [
             { name: { contains: filter.query, mode: "insensitive" as const } },
             { code: { contains: filter.query, mode: "insensitive" as const } },
-            { description: { contains: filter.query, mode: "insensitive" as const } },
+            {
+              description: {
+                contains: filter.query,
+                mode: "insensitive" as const,
+              },
+            },
           ]
         }
 
@@ -83,9 +88,24 @@ export const documentClassResolvers = {
             where.AND = [
               {
                 OR: [
-                  { name: { contains: filter.query, mode: "insensitive" as const } },
-                  { code: { contains: filter.query, mode: "insensitive" as const } },
-                  { description: { contains: filter.query, mode: "insensitive" as const } },
+                  {
+                    name: {
+                      contains: filter.query,
+                      mode: "insensitive" as const,
+                    },
+                  },
+                  {
+                    code: {
+                      contains: filter.query,
+                      mode: "insensitive" as const,
+                    },
+                  },
+                  {
+                    description: {
+                      contains: filter.query,
+                      mode: "insensitive" as const,
+                    },
+                  },
                 ],
               },
               moduleCondition,
@@ -134,6 +154,7 @@ export const documentClassResolvers = {
           userId,
           context,
           logName: "GET_DOCUMENT_CLASSES",
+          module: SysLogModule.DOCUMENT,
           messages: {
             default: "Error al obtener las clases de documento.",
           },
@@ -171,6 +192,7 @@ export const documentClassResolvers = {
           userId,
           context,
           logName: "GET_DOCUMENT_CLASS_BY_ID",
+          module: SysLogModule.DOCUMENT,
           messages: {
             notFound: "La clase de documento solicitada no existe.",
             default: "Error al obtener la clase de documento.",
@@ -218,6 +240,7 @@ export const documentClassResolvers = {
           userId,
           context,
           logName: "GET_DOCUMENT_CLASSES_SELECT_LIST",
+          module: SysLogModule.DOCUMENT,
           messages: {
             default: "Error al obtener la lista de clases de documento.",
           },
@@ -267,6 +290,7 @@ export const documentClassResolvers = {
             level: "INFO",
             name: "CREATE_DOCUMENT_CLASS",
             message: `Clase de documento creada: ${documentClass.name} (${documentClass.code})`,
+            module: SysLogModule.DOCUMENT,
             meta: JSON.stringify({ documentClassId: documentClass.id, input }),
           },
         })
@@ -278,6 +302,7 @@ export const documentClassResolvers = {
           userId,
           context,
           logName: "CREATE_DOCUMENT_CLASS",
+          module: SysLogModule.DOCUMENT,
           messages: {
             uniqueConstraint:
               "Ya existe una clase de documento con ese nombre o código.",
@@ -326,6 +351,7 @@ export const documentClassResolvers = {
             level: "INFO",
             name: "UPDATE_DOCUMENT_CLASS",
             message: `Clase de documento actualizada: ${documentClass.name} (${documentClass.code})`,
+            module: SysLogModule.DOCUMENT,
             meta: JSON.stringify({ documentClassId: id, input }),
           },
         })
@@ -337,6 +363,7 @@ export const documentClassResolvers = {
           userId,
           context,
           logName: "UPDATE_DOCUMENT_CLASS",
+          module: SysLogModule.DOCUMENT,
           messages: {
             notFound: "La clase de documento no existe.",
             uniqueConstraint:
@@ -374,6 +401,7 @@ export const documentClassResolvers = {
             level: "INFO",
             name: "TERMINATE_DOCUMENT_CLASS",
             message: `Clase de documento deshabilitada: ${documentClass.name} (${documentClass.code})`,
+            module: SysLogModule.DOCUMENT,
             meta: JSON.stringify({ documentClassId: id }),
           },
         })
@@ -385,6 +413,7 @@ export const documentClassResolvers = {
           userId,
           context,
           logName: "TERMINATE_DOCUMENT_CLASS",
+          module: SysLogModule.DOCUMENT,
           messages: {
             notFound: "La clase de documento no existe.",
             default: "Error al deshabilitar la clase de documento.",
@@ -420,6 +449,7 @@ export const documentClassResolvers = {
             level: "INFO",
             name: "ACTIVATE_DOCUMENT_CLASS",
             message: `Clase de documento reactivada: ${documentClass.name} (${documentClass.code})`,
+            module: SysLogModule.DOCUMENT,
             meta: JSON.stringify({ documentClassId: id }),
           },
         })
@@ -431,6 +461,7 @@ export const documentClassResolvers = {
           userId,
           context,
           logName: "ACTIVATE_DOCUMENT_CLASS",
+          module: SysLogModule.DOCUMENT,
           messages: {
             notFound: "La clase de documento no existe.",
             default: "Error al reactivar la clase de documento.",
@@ -471,6 +502,7 @@ export const documentClassResolvers = {
             level: "WARNING",
             name: "DELETE_DOCUMENT_CLASS",
             message: `Clase de documento eliminada: ${documentClass.name} (${documentClass.code})`,
+            module: SysLogModule.DOCUMENT,
             meta: JSON.stringify({ documentClassId: id }),
           },
         })
@@ -482,6 +514,7 @@ export const documentClassResolvers = {
           userId,
           context,
           logName: "DELETE_DOCUMENT_CLASS",
+          module: SysLogModule.DOCUMENT,
           messages: {
             notFound: "La clase de documento no existe.",
             default: "Error al eliminar la clase de documento.",

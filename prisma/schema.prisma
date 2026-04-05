@@ -23,6 +23,16 @@ enum ModuleType {
     COMERCIAL
 }
 
+enum SysLogModule {
+    DOCUMENT
+    QUALITY
+    PROJECTS
+    TAGS
+    OPERATIONS
+    MANAGEMENT
+    COMERCIAL
+}
+
 enum RevisionScheme {
     ALPHABETICAL // A, B, C, ..., Z, AA, AB, ...
     NUMERIC // 0, 1, 2, 3, ...
@@ -401,28 +411,30 @@ model Area {
 
 // Logs generales del sistema (operacionales)
 model DocumentSysLog {
-    id        Int      @id @default(autoincrement())
-    createdAt DateTime @default(now())
+    id        Int           @id @default(autoincrement())
+    createdAt DateTime      @default(now())
     userId    Int // Referencia al User del sistema admin
     level     LogLevel
-    name      String?  @db.VarChar(200)
-    message   String   @db.VarChar(2048)
-    meta      String?  @db.Text
+    module    SysLogModule?
+    name      String?       @db.VarChar(200)
+    message   String        @db.VarChar(2048)
+    meta      String?       @db.Text
 
-    @@index([userId, level, createdAt])
+    @@index([module, userId, level, createdAt])
     @@map("document_sys_logs")
 }
 
 // Logs del Sistema Archivados
 model DocumentSysLogArchive {
-    id        Int      @id @default(autoincrement())
+    id        Int           @id @default(autoincrement())
     createdAt DateTime
     userId    Int // Referencia al User del sistema admin
     level     LogLevel
-    name      String?  @db.VarChar(200)
-    message   String   @db.VarChar(2048)
-    meta      String?  @db.Text
+    module    SysLogModule?
+    name      String?       @db.VarChar(200)
+    message   String        @db.VarChar(2048)
+    meta      String?       @db.Text
 
-    @@index([userId, level, createdAt])
+    @@index([module, userId, level, createdAt])
     @@map("document_sys_logs_archive")
 }

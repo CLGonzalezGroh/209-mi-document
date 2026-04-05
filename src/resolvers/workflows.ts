@@ -8,6 +8,7 @@ import {
   WorkflowStatus,
   StepStatus,
   StepType,
+  SysLogModule,
 } from "../generated/prisma/enums.js"
 import { createHash } from "crypto"
 
@@ -226,6 +227,7 @@ export const workflowResolvers = {
             level: "INFO",
             name: "INITIATE_REVIEW",
             message: `Workflow de revisión iniciado para revisión ID ${revisionId} con ${input.steps.length} pasos`,
+            module: (workflow as any).revision?.document?.module as SysLogModule,
             meta: JSON.stringify({ workflowId: workflow.id, revisionId, stepsCount: input.steps.length }),
           },
         })
@@ -370,6 +372,7 @@ export const workflowResolvers = {
             level: "INFO",
             name: "APPROVE_STEP",
             message: `Paso de revisión aprobado: step ID ${stepId}, workflow ID ${step.workflow.id}`,
+            module: (result as any).workflow?.revision?.document?.module as SysLogModule,
             meta: JSON.stringify({ stepId, workflowId: step.workflow.id, comments }),
           },
         })
@@ -480,6 +483,7 @@ export const workflowResolvers = {
             level: "WARNING",
             name: "REJECT_STEP",
             message: `Paso de revisión rechazado: step ID ${stepId}, workflow ID ${step.workflow.id}`,
+            module: (result as any).workflow?.revision?.document?.module as SysLogModule,
             meta: JSON.stringify({ stepId, workflowId: step.workflow.id, comments }),
           },
         })
@@ -572,6 +576,7 @@ export const workflowResolvers = {
               level: "INFO",
               name: "CANCEL_WORKFLOW",
               message: `Workflow ${workflowId} cancelado. Razón: ${reason}`,
+              module: (updatedWorkflow as any).revision?.document?.module as SysLogModule,
             },
           })
 

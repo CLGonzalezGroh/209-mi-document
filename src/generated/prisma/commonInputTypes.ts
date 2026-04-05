@@ -413,6 +413,13 @@ export type EnumLogLevelFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumLogLevelFilter<$PrismaModel> | $Enums.LogLevel
 }
 
+export type EnumSysLogModuleNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.SysLogModule | Prisma.EnumSysLogModuleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.SysLogModule[] | Prisma.ListEnumSysLogModuleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.SysLogModule[] | Prisma.ListEnumSysLogModuleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumSysLogModuleNullableFilter<$PrismaModel> | $Enums.SysLogModule | null
+}
+
 export type EnumLogLevelWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.LogLevel | Prisma.EnumLogLevelFieldRefInput<$PrismaModel>
   in?: $Enums.LogLevel[] | Prisma.ListEnumLogLevelFieldRefInput<$PrismaModel>
@@ -421,6 +428,16 @@ export type EnumLogLevelWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumLogLevelFilter<$PrismaModel>
   _max?: Prisma.NestedEnumLogLevelFilter<$PrismaModel>
+}
+
+export type EnumSysLogModuleNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.SysLogModule | Prisma.EnumSysLogModuleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.SysLogModule[] | Prisma.ListEnumSysLogModuleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.SysLogModule[] | Prisma.ListEnumSysLogModuleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumSysLogModuleNullableWithAggregatesFilter<$PrismaModel> | $Enums.SysLogModule | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumSysLogModuleNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumSysLogModuleNullableFilter<$PrismaModel>
 }
 
 export type NestedIntFilter<$PrismaModel = never> = {
@@ -835,6 +852,13 @@ export type NestedEnumLogLevelFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumLogLevelFilter<$PrismaModel> | $Enums.LogLevel
 }
 
+export type NestedEnumSysLogModuleNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.SysLogModule | Prisma.EnumSysLogModuleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.SysLogModule[] | Prisma.ListEnumSysLogModuleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.SysLogModule[] | Prisma.ListEnumSysLogModuleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumSysLogModuleNullableFilter<$PrismaModel> | $Enums.SysLogModule | null
+}
+
 export type NestedEnumLogLevelWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.LogLevel | Prisma.EnumLogLevelFieldRefInput<$PrismaModel>
   in?: $Enums.LogLevel[] | Prisma.ListEnumLogLevelFieldRefInput<$PrismaModel>
@@ -843,6 +867,16 @@ export type NestedEnumLogLevelWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumLogLevelFilter<$PrismaModel>
   _max?: Prisma.NestedEnumLogLevelFilter<$PrismaModel>
+}
+
+export type NestedEnumSysLogModuleNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.SysLogModule | Prisma.EnumSysLogModuleFieldRefInput<$PrismaModel> | null
+  in?: $Enums.SysLogModule[] | Prisma.ListEnumSysLogModuleFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.SysLogModule[] | Prisma.ListEnumSysLogModuleFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumSysLogModuleNullableWithAggregatesFilter<$PrismaModel> | $Enums.SysLogModule | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumSysLogModuleNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumSysLogModuleNullableFilter<$PrismaModel>
 }
 
 

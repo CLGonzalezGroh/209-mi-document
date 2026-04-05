@@ -14,6 +14,7 @@ import type { ScannedFile } from "../generated/prisma/client.js"
 import {
   DigitalDisposition,
   PhysicalDisposition,
+  SysLogModule,
 } from "../generated/prisma/enums.js"
 
 export interface ScannedFileOrderByInput extends OrderByInput {
@@ -86,6 +87,7 @@ export const scannedFileResolvers = {
           userId,
           context,
           logName: "GET_SCANNED_FILE_BY_ID",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El archivo escaneado solicitado no existe.",
             default: "Error al obtener el archivo escaneado.",
@@ -198,6 +200,7 @@ export const scannedFileResolvers = {
           userId,
           context,
           logName: "GET_SCANNED_FILES",
+          module: SysLogModule.PROJECTS,
           messages: {
             default: "Error al obtener los archivos escaneados.",
           },
@@ -279,6 +282,7 @@ export const scannedFileResolvers = {
           userId,
           context,
           logName: "GET_SCANNED_FILES_STATS",
+          module: SysLogModule.PROJECTS,
           messages: {
             default: "Error al obtener las estadísticas.",
           },
@@ -346,6 +350,7 @@ export const scannedFileResolvers = {
             userId,
             level: "INFO",
             name: "CREATE_SCANNED_FILE",
+            module: SysLogModule.PROJECTS,
             message: `Archivo escaneado creado: ${scannedFile.title} (${scannedFile.code})`,
             meta: JSON.stringify({ scannedFileId: scannedFile.id, input }),
           },
@@ -358,6 +363,7 @@ export const scannedFileResolvers = {
           userId,
           context,
           logName: "CREATE_SCANNED_FILE",
+          module: SysLogModule.PROJECTS,
           messages: {
             uniqueConstraint: "Ya existe un archivo escaneado con ese código en este proyecto.",
             default: "Error al crear el archivo escaneado.",
@@ -449,6 +455,7 @@ export const scannedFileResolvers = {
             userId,
             level: "INFO",
             name: "UPDATE_SCANNED_FILE",
+            module: SysLogModule.PROJECTS,
             message: `Archivo escaneado actualizado: ${scannedFile.title} (${scannedFile.code})`,
             meta: JSON.stringify({ scannedFileId: id, input }),
           },
@@ -461,6 +468,7 @@ export const scannedFileResolvers = {
           userId,
           context,
           logName: "UPDATE_SCANNED_FILE",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El archivo escaneado no existe.",
             uniqueConstraint: "Ya existe un archivo escaneado con ese código en este proyecto.",
@@ -587,6 +595,7 @@ export const scannedFileResolvers = {
             userId,
             level: "INFO",
             name: "CLASSIFY_SCANNED_FILE",
+            module: SysLogModule.PROJECTS,
             message: `Archivo escaneado clasificado como ${input.digitalDisposition}: ID ${id}`,
             meta: JSON.stringify({ scannedFileId: id, input }),
           },
@@ -599,6 +608,7 @@ export const scannedFileResolvers = {
           userId,
           context,
           logName: "CLASSIFY_SCANNED_FILE",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El archivo escaneado no existe.",
             default: "Error al clasificar el archivo escaneado.",
@@ -664,6 +674,7 @@ export const scannedFileResolvers = {
             userId,
             level: "INFO",
             name: "MARK_AS_UPLOADED",
+            module: SysLogModule.PROJECTS,
             message: `Archivo escaneado marcado como cargado: ID ${id}, ref: ${input.externalReference}`,
             meta: JSON.stringify({ scannedFileId: id, externalReference: input.externalReference }),
           },
@@ -676,6 +687,7 @@ export const scannedFileResolvers = {
           userId,
           context,
           logName: "MARK_AS_UPLOADED",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El archivo escaneado no existe.",
             default:
@@ -741,6 +753,7 @@ export const scannedFileResolvers = {
             userId,
             level: "INFO",
             name: "UPDATE_EXTERNAL_REFERENCE",
+            module: SysLogModule.PROJECTS,
             message: `Referencia externa actualizada: ID ${id}, ref anterior: ${existing.externalReference}, nueva ref: ${externalReference}`,
             meta: JSON.stringify({ scannedFileId: id, previousReference: existing.externalReference, newReference: externalReference }),
           },
@@ -753,6 +766,7 @@ export const scannedFileResolvers = {
           userId,
           context,
           logName: "UPDATE_EXTERNAL_REFERENCE",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El archivo escaneado no existe.",
             default: "Error al actualizar la referencia externa.",
@@ -840,6 +854,7 @@ export const scannedFileResolvers = {
             userId,
             level: "INFO",
             name: "UPDATE_PHYSICAL_DISPOSITION",
+            module: SysLogModule.PROJECTS,
             message: `Disposición física actualizada a ${disposition}: ID ${id}`,
             meta: JSON.stringify({ scannedFileId: id, from: existing.physicalDisposition, to: disposition }),
           },
@@ -852,6 +867,7 @@ export const scannedFileResolvers = {
           userId,
           context,
           logName: "UPDATE_PHYSICAL_DISPOSITION",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El archivo escaneado no existe.",
             default: "Error al actualizar la disposición física.",
@@ -886,6 +902,7 @@ export const scannedFileResolvers = {
             userId,
             level: "INFO",
             name: "TERMINATE_SCANNED_FILE",
+            module: SysLogModule.PROJECTS,
             message: `Archivo escaneado dado de baja: ${scannedFile.title} (${scannedFile.code})`,
             meta: JSON.stringify({ scannedFileId: id }),
           },
@@ -898,6 +915,7 @@ export const scannedFileResolvers = {
           userId,
           context,
           logName: "TERMINATE_SCANNED_FILE",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El archivo escaneado no existe.",
             default: "Error al dar de baja el archivo escaneado.",
@@ -965,6 +983,7 @@ export const scannedFileResolvers = {
             userId,
             level: "INFO",
             name: "CONFIRM_PHYSICAL_DISPOSITION",
+            module: SysLogModule.PROJECTS,
             message: `Disposición física confirmada: ${existing.physicalDisposition} → ${newDisposition}, ID ${id}`,
             meta: JSON.stringify({ scannedFileId: id, from: existing.physicalDisposition, to: newDisposition }),
           },
@@ -977,6 +996,7 @@ export const scannedFileResolvers = {
           userId,
           context,
           logName: "CONFIRM_PHYSICAL_DISPOSITION",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El archivo escaneado no existe.",
             default: "Error al confirmar la disposición física.",
@@ -1011,6 +1031,7 @@ export const scannedFileResolvers = {
             userId,
             level: "INFO",
             name: "ACTIVATE_SCANNED_FILE",
+            module: SysLogModule.PROJECTS,
             message: `Archivo escaneado reactivado: ${scannedFile.title} (${scannedFile.code})`,
             meta: JSON.stringify({ scannedFileId: id }),
           },
@@ -1023,6 +1044,7 @@ export const scannedFileResolvers = {
           userId,
           context,
           logName: "ACTIVATE_SCANNED_FILE",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El archivo escaneado no existe.",
             default: "Error al reactivar el archivo escaneado.",
@@ -1082,6 +1104,7 @@ export const scannedFileResolvers = {
             userId,
             level: "WARNING",
             name: "RESET_SCANNED_FILE_TO_PENDING",
+            module: SysLogModule.PROJECTS,
             message: `Archivo escaneado revertido a pendiente: ID ${id}`,
             meta: JSON.stringify({ scannedFileId: id, previousDigital: existing.digitalDisposition, previousPhysical: existing.physicalDisposition }),
           },
@@ -1094,6 +1117,7 @@ export const scannedFileResolvers = {
           userId,
           context,
           logName: "RESET_SCANNED_FILE_TO_PENDING",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El archivo escaneado no existe.",
             default: "Error al revertir el archivo escaneado a pendiente.",
@@ -1140,6 +1164,7 @@ export const scannedFileResolvers = {
             userId,
             level: "WARNING",
             name: "DELETE_SCANNED_FILE",
+            module: SysLogModule.PROJECTS,
             message: `Archivo escaneado eliminado: ${scannedFile.title} (${scannedFile.code})`,
             meta: JSON.stringify({ scannedFileId: id }),
           },
@@ -1152,6 +1177,7 @@ export const scannedFileResolvers = {
           userId,
           context,
           logName: "DELETE_SCANNED_FILE",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El archivo escaneado no existe.",
             default: "Error al eliminar el archivo escaneado.",

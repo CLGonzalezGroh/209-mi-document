@@ -2,6 +2,7 @@ import { ResolverContext } from "../types.js"
 import { PERMISSIONS } from "@CLGonzalezGroh/mi-common"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
+import { SysLogModule } from "../generated/prisma/enums.js"
 
 type DocumentDependencyEntityInput = "PROJECT" | "FINDING" | "ACTION"
 
@@ -136,6 +137,7 @@ export const dependencyResolvers = {
           userId,
           context,
           logName: "CHECK_DOCUMENT_DEPENDENCIES",
+          module: SysLogModule.DOCUMENT,
           messages: {
             default: "Error al verificar dependencias documentales.",
           },

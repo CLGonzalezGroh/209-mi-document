@@ -3,7 +3,7 @@ import { ResolverContext } from "../types.js"
 import { PERMISSIONS } from "@CLGonzalezGroh/mi-common"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
-import { RevisionStatus } from "../generated/prisma/enums.js"
+import { RevisionStatus, SysLogModule } from "../generated/prisma/enums.js"
 
 const versionIncludes = {
   revision: {
@@ -96,6 +96,7 @@ export const versionResolvers = {
             level: "INFO",
             name: "REGISTER_VERSION",
             message: `Versión ${nextVersionNumber} registrada para revisión ID ${revisionId}`,
+            module: (version as any).revision?.document?.module as SysLogModule,
             meta: JSON.stringify({ versionId: version.id, revisionId, versionNumber: nextVersionNumber }),
           },
         })

@@ -13,16 +13,17 @@ import type {
   DocumentSysLog,
   DocumentSysLogArchive,
 } from "../generated/prisma/client.js"
-import { LogLevel } from "../generated/prisma/enums.js"
+import { LogLevel, SysLogModule } from "../generated/prisma/enums.js"
 
 export interface DocumentSysLogOrderByInput extends OrderByInput {
-  field: "CREATED_AT" | "LEVEL" | "NAME"
+  field: "CREATED_AT" | "LEVEL" | "NAME" | "MODULE"
 }
 
 interface DocumentSysLogFilterInput {
   query?: string
   userId?: number
   level?: LogLevel
+  module?: SysLogModule
   createdFrom?: Date
   createdTo?: Date
 }
@@ -62,6 +63,7 @@ export const documentSysLogResolvers = {
           userId,
           context,
           logName: "FETCH_DOCUMENT_SYS_LOG_ERROR",
+          module: SysLogModule.DOCUMENT,
           messages: {
             notFound: "Log del sistema no encontrado",
             default: "Error al obtener el log del sistema",
@@ -112,6 +114,10 @@ export const documentSysLogResolvers = {
             where.level = filter.level
           }
 
+          if (filter.module) {
+            where.module = filter.module
+          }
+
           if (filter.createdFrom || filter.createdTo) {
             where.createdAt = {}
             if (filter.createdFrom) {
@@ -156,6 +162,7 @@ export const documentSysLogResolvers = {
           userId,
           context,
           logName: "FETCH_DOCUMENT_SYS_LOGS_ERROR",
+          module: SysLogModule.DOCUMENT,
           messages: {
             default: "Error al obtener logs del sistema",
           },
@@ -192,6 +199,7 @@ export const documentSysLogResolvers = {
           userId,
           context,
           logName: "FETCH_DOCUMENT_SYS_LOG_ARCHIVE_ERROR",
+          module: SysLogModule.DOCUMENT,
           messages: {
             notFound: "Log archivado del sistema no encontrado",
             default: "Error al obtener el log archivado del sistema",
@@ -242,6 +250,10 @@ export const documentSysLogResolvers = {
             where.level = filter.level
           }
 
+          if (filter.module) {
+            where.module = filter.module
+          }
+
           if (filter.createdFrom || filter.createdTo) {
             where.createdAt = {}
             if (filter.createdFrom) {
@@ -288,6 +300,7 @@ export const documentSysLogResolvers = {
           userId,
           context,
           logName: "FETCH_DOCUMENT_SYS_LOGS_ARCHIVE_ERROR",
+          module: SysLogModule.DOCUMENT,
           messages: {
             default: "Error al obtener logs archivados del sistema",
           },
@@ -333,6 +346,7 @@ export const documentSysLogResolvers = {
             createdAt: log.createdAt,
             userId: log.userId,
             level: log.level,
+            module: log.module,
             name: log.name,
             message: log.message,
             meta: log.meta,
@@ -355,6 +369,7 @@ export const documentSysLogResolvers = {
             level: "INFO",
             name: "ARCHIVE_DOCUMENT_SYS_LOGS",
             message: `${oldLogs.length} logs archivados exitosamente (mayores a ${olderThanDays} días)`,
+            module: SysLogModule.DOCUMENT,
             meta: JSON.stringify({
               archivedCount: oldLogs.length,
               olderThanDays,
@@ -370,6 +385,7 @@ export const documentSysLogResolvers = {
           userId,
           context,
           logName: "ARCHIVE_DOCUMENT_SYS_LOGS_ERROR",
+          module: SysLogModule.DOCUMENT,
           messages: {
             default: "Error al archivar logs del sistema",
           },
@@ -409,6 +425,7 @@ export const documentSysLogResolvers = {
             level: "WARNING",
             name: "DELETE_ARCHIVED_DOCUMENT_SYS_LOGS",
             message: `${result.count} logs archivados eliminados permanentemente (mayores a ${olderThanDays} días)`,
+            module: SysLogModule.DOCUMENT,
             meta: JSON.stringify({
               deletedCount: result.count,
               olderThanDays,
@@ -424,6 +441,7 @@ export const documentSysLogResolvers = {
           userId,
           context,
           logName: "DELETE_ARCHIVED_DOCUMENT_SYS_LOGS_ERROR",
+          module: SysLogModule.DOCUMENT,
           messages: {
             default: "Error al eliminar logs archivados del sistema",
           },

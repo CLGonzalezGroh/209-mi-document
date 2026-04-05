@@ -32,6 +32,7 @@ const documentSysLogFieldMap: Record<string, string> = {
   CREATED_AT: "createdAt",
   LEVEL: "level",
   NAME: "name",
+  MODULE: "module",
 }
 
 export function buildDocumentOrderBy(

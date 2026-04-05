@@ -1714,6 +1714,7 @@ export const DocumentSysLogScalarFieldEnum = {
   createdAt: 'createdAt',
   userId: 'userId',
   level: 'level',
+  module: 'module',
   name: 'name',
   message: 'message',
   meta: 'meta'
@@ -1727,6 +1728,7 @@ export const DocumentSysLogArchiveScalarFieldEnum = {
   createdAt: 'createdAt',
   userId: 'userId',
   level: 'level',
+  module: 'module',
   name: 'name',
   message: 'message',
   meta: 'meta'
@@ -1979,6 +1981,20 @@ export type EnumLogLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
  * Reference to a field of type 'LogLevel[]'
  */
 export type ListEnumLogLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LogLevel[]'>
+    
+
+
+/**
+ * Reference to a field of type 'SysLogModule'
+ */
+export type EnumSysLogModuleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SysLogModule'>
+    
+
+
+/**
+ * Reference to a field of type 'SysLogModule[]'
+ */
+export type ListEnumSysLogModuleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SysLogModule[]'>
     
 
 

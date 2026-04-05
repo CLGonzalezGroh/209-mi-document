@@ -8,7 +8,7 @@ import {
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
 import { buildTransmittalOrderBy } from "../utils/orderByHelper.js"
-import { TransmittalStatus, ClientStatus } from "../generated/prisma/enums.js"
+import { TransmittalStatus, ClientStatus, SysLogModule } from "../generated/prisma/enums.js"
 import { Transmittal } from "../generated/prisma/client.js"
 import { OrderByInput } from "@CLGonzalezGroh/mi-common"
 
@@ -95,6 +95,7 @@ export const transmittalResolvers = {
           userId,
           context,
           logName: "GET_TRANSMITTAL_BY_ID",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound:
               "El transmittal solicitado no existe o no está disponible.",
@@ -176,6 +177,7 @@ export const transmittalResolvers = {
           userId,
           context,
           logName: "GET_TRANSMITTALS",
+          module: SysLogModule.PROJECTS,
           messages: {
             default: "Error al obtener la lista de transmittals.",
           },
@@ -235,6 +237,7 @@ export const transmittalResolvers = {
           userId,
           context,
           logName: "GET_TRANSMITTALS_BY_PROJECT",
+          module: SysLogModule.PROJECTS,
           messages: {
             default: "Error al obtener transmittals del proyecto.",
           },
@@ -292,6 +295,7 @@ export const transmittalResolvers = {
             level: "INFO",
             name: "CREATE_TRANSMITTAL",
             message: `Transmittal creado: ${transmittal.code} para ${input.issuedTo}`,
+            module: SysLogModule.PROJECTS,
             meta: JSON.stringify({ transmittalId: transmittal.id, input }),
           },
         })
@@ -303,6 +307,7 @@ export const transmittalResolvers = {
           userId,
           context,
           logName: "CREATE_TRANSMITTAL",
+          module: SysLogModule.PROJECTS,
           messages: {
             uniqueConstraint: "Ya existe un transmittal con ese código.",
             foreignKeyConstraint:
@@ -359,6 +364,7 @@ export const transmittalResolvers = {
             level: "INFO",
             name: "ISSUE_TRANSMITTAL",
             message: `Transmittal emitido: ${updated.code}`,
+            module: SysLogModule.PROJECTS,
             meta: JSON.stringify({ transmittalId: id }),
           },
         })
@@ -370,6 +376,7 @@ export const transmittalResolvers = {
           userId,
           context,
           logName: "ISSUE_TRANSMITTAL",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El transmittal no existe.",
             default: "Error al emitir el transmittal.",
@@ -456,6 +463,7 @@ export const transmittalResolvers = {
             level: "INFO",
             name: "RESPOND_TRANSMITTAL",
             message: `Transmittal respondido: ${transmittal.code}`,
+            module: SysLogModule.PROJECTS,
             meta: JSON.stringify({ transmittalId: id, itemsCount: input.items.length }),
           },
         })
@@ -467,6 +475,7 @@ export const transmittalResolvers = {
           userId,
           context,
           logName: "RESPOND_TRANSMITTAL",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El transmittal o uno de sus items no existe.",
             default: "Error al registrar la respuesta del transmittal.",
@@ -525,6 +534,7 @@ export const transmittalResolvers = {
             level: "INFO",
             name: "CLOSE_TRANSMITTAL",
             message: `Transmittal cerrado: ${updated.code}`,
+            module: SysLogModule.PROJECTS,
             meta: JSON.stringify({ transmittalId: id }),
           },
         })
@@ -536,6 +546,7 @@ export const transmittalResolvers = {
           userId,
           context,
           logName: "CLOSE_TRANSMITTAL",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El transmittal no existe.",
             default: "Error al cerrar el transmittal.",

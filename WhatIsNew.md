@@ -267,3 +267,13 @@
 - Agrega configuración de logger y mejora el manejo de errores en varios resolvers y utilidades
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.20
+
+2026-04-05
+
+## SysLogs
+
+- Agregando el campo modulo para diferenciar de que módulo viene el log
+
+---

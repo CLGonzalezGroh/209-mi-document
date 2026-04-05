@@ -1,5 +1,5 @@
 import { GraphQLError } from "graphql"
-import { LogLevel } from "../generated/prisma/enums.js"
+import { LogLevel, SysLogModule } from "../generated/prisma/enums.js"
 import { ResolverContext } from "../types.js"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client.js"
 import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
@@ -11,6 +11,7 @@ type HandleErrorParams = {
   userId: number
   context: ResolverContext
   logName: string
+  module?: SysLogModule
   messages: {
     notFound?: string
     uniqueConstraint?: string
@@ -24,6 +25,7 @@ export const handleError = async ({
   userId,
   context,
   logName,
+  module,
   messages,
 }: HandleErrorParams): Promise<never> => {
   // Registrar el error sin modificaciones
@@ -34,6 +36,7 @@ export const handleError = async ({
     meta: JSON.stringify(error, null, 2),
     userId,
     level: LogLevel.ERROR,
+    ...(module && { module }),
   }
   await context.orm.documentSysLog.create({ data })
 

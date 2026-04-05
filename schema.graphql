@@ -375,6 +375,42 @@ enum LogLevel {
   ERROR
 }
 
+"Módulo origen del log del sistema"
+enum SysLogModule {
+  "Operaciones transversales del módulo document"
+  DOCUMENT
+  "Módulo calidad"
+  QUALITY
+  "Módulo proyectos"
+  PROJECTS
+  "Módulo equipos/activos"
+  TAGS
+  "Módulo operaciones"
+  OPERATIONS
+  "Módulo administración contable"
+  MANAGEMENT
+  "Módulo comercial"
+  COMERCIAL
+}
+
+"Módulo origen del log del sistema para inputs"
+enum SysLogModuleInput {
+  "Operaciones transversales del módulo document"
+  DOCUMENT
+  "Módulo calidad"
+  QUALITY
+  "Módulo proyectos"
+  PROJECTS
+  "Módulo equipos/activos"
+  TAGS
+  "Módulo operaciones"
+  OPERATIONS
+  "Módulo administración contable"
+  MANAGEMENT
+  "Módulo comercial"
+  COMERCIAL
+}
+
 "Nivel del log para inputs"
 enum LogLevelInput {
   "Información"
@@ -393,6 +429,8 @@ enum DocumentSysLogSortFieldInput {
   LEVEL
   "Por nombre"
   NAME
+  "Por módulo"
+  MODULE
 }
 
 # ═══════════════════════════════════════════════════════
@@ -807,6 +845,8 @@ type DocumentSysLog {
   user: UserName
   "Nivel de severidad del log"
   level: LogLevel!
+  "Módulo origen del log"
+  module: SysLogModule
   "Nombre del log"
   name: String
   "Mensaje del log"
@@ -825,6 +865,8 @@ type DocumentSysLogArchive {
   user: UserName
   "Nivel de severidad del log archivado"
   level: LogLevel!
+  "Módulo origen del log archivado"
+  module: SysLogModule
   "Nombre del log archivado"
   name: String
   "Mensaje del log archivado"
@@ -1415,6 +1457,8 @@ input DocumentSysLogFilterInput {
   userId: Int
   "Filtrar por nivel"
   level: LogLevelInput
+  "Filtrar por módulo"
+  module: SysLogModuleInput
   "Fecha desde"
   createdFrom: DateTime
   "Fecha hasta"

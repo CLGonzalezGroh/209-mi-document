@@ -12,6 +12,7 @@ import { Area } from "../generated/prisma/client.js"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
 import { buildAreaOrderBy } from "../utils/orderByHelper.js"
+import { SysLogModule } from "../generated/prisma/enums.js"
 
 export interface AreaOrderByInput extends OrderByInput {
   field: "NAME" | "CODE" | "SORT_ORDER" | "CREATED_AT"
@@ -105,6 +106,7 @@ export const areaResolvers = {
           userId,
           context,
           logName: "GET_AREAS",
+          module: SysLogModule.PROJECTS,
           messages: {
             default: "Error al obtener la lista de áreas.",
           },
@@ -141,6 +143,7 @@ export const areaResolvers = {
           userId,
           context,
           logName: "GET_AREA_BY_ID",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El área solicitada no existe.",
             default: "Error al obtener el área.",
@@ -187,6 +190,7 @@ export const areaResolvers = {
           userId,
           context,
           logName: "GET_AREAS_SELECT_LIST",
+          module: SysLogModule.PROJECTS,
           messages: {
             default: "Error al obtener la lista de áreas.",
           },
@@ -234,6 +238,7 @@ export const areaResolvers = {
             userId,
             level: "INFO",
             name: "CREATE_AREA",
+            module: SysLogModule.PROJECTS,
             message: `Área creada: ${area.name} (${area.code})`,
             meta: JSON.stringify({ areaId: area.id, input }),
           },
@@ -246,6 +251,7 @@ export const areaResolvers = {
           userId,
           context,
           logName: "CREATE_AREA",
+          module: SysLogModule.PROJECTS,
           messages: {
             uniqueConstraint:
               "Ya existe un área con ese código en este proyecto.",
@@ -291,6 +297,7 @@ export const areaResolvers = {
             userId,
             level: "INFO",
             name: "UPDATE_AREA",
+            module: SysLogModule.PROJECTS,
             message: `Área actualizada: ${area.name} (${area.code})`,
             meta: JSON.stringify({ areaId: id, input }),
           },
@@ -303,6 +310,7 @@ export const areaResolvers = {
           userId,
           context,
           logName: "UPDATE_AREA",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El área no existe.",
             uniqueConstraint:
@@ -338,6 +346,7 @@ export const areaResolvers = {
             userId,
             level: "INFO",
             name: "TERMINATE_AREA",
+            module: SysLogModule.PROJECTS,
             message: `Área deshabilitada: ${area.name} (${area.code})`,
             meta: JSON.stringify({ areaId: id }),
           },
@@ -350,6 +359,7 @@ export const areaResolvers = {
           userId,
           context,
           logName: "TERMINATE_AREA",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El área no existe.",
             default: "Error al deshabilitar el área.",
@@ -383,6 +393,7 @@ export const areaResolvers = {
             userId,
             level: "INFO",
             name: "ACTIVATE_AREA",
+            module: SysLogModule.PROJECTS,
             message: `Área reactivada: ${area.name} (${area.code})`,
             meta: JSON.stringify({ areaId: id }),
           },
@@ -395,6 +406,7 @@ export const areaResolvers = {
           userId,
           context,
           logName: "ACTIVATE_AREA",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El área no existe.",
             default: "Error al reactivar el área.",
@@ -434,6 +446,7 @@ export const areaResolvers = {
             userId,
             level: "WARNING",
             name: "DELETE_AREA",
+            module: SysLogModule.PROJECTS,
             message: `Área eliminada: ${area.name} (${area.code})`,
             meta: JSON.stringify({ areaId: id }),
           },
@@ -446,6 +459,7 @@ export const areaResolvers = {
           userId,
           context,
           logName: "DELETE_AREA",
+          module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El área no existe.",
             default: "Error al eliminar el área.",

@@ -3,7 +3,7 @@ import { ResolverContext } from "../types.js"
 import { PERMISSIONS } from "@CLGonzalezGroh/mi-common"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
-import { RevisionStatus, RevisionScheme } from "../generated/prisma/enums.js"
+import { RevisionStatus, RevisionScheme, SysLogModule } from "../generated/prisma/enums.js"
 
 const revisionIncludes = {
   document: {
@@ -225,6 +225,7 @@ export const revisionResolvers = {
             level: "INFO",
             name: "CREATE_REVISION",
             message: `Revisión creada: ${revisionCode} para documento ${document.code}`,
+            module: document.module as SysLogModule,
             meta: JSON.stringify({ revisionId: revision.id, documentId, revisionCode }),
           },
         })

@@ -41,6 +41,7 @@ export type DocumentSysLogMinAggregateOutputType = {
   createdAt: Date | null
   userId: number | null
   level: $Enums.LogLevel | null
+  module: $Enums.SysLogModule | null
   name: string | null
   message: string | null
   meta: string | null
@@ -51,6 +52,7 @@ export type DocumentSysLogMaxAggregateOutputType = {
   createdAt: Date | null
   userId: number | null
   level: $Enums.LogLevel | null
+  module: $Enums.SysLogModule | null
   name: string | null
   message: string | null
   meta: string | null
@@ -61,6 +63,7 @@ export type DocumentSysLogCountAggregateOutputType = {
   createdAt: number
   userId: number
   level: number
+  module: number
   name: number
   message: number
   meta: number
@@ -83,6 +86,7 @@ export type DocumentSysLogMinAggregateInputType = {
   createdAt?: true
   userId?: true
   level?: true
+  module?: true
   name?: true
   message?: true
   meta?: true
@@ -93,6 +97,7 @@ export type DocumentSysLogMaxAggregateInputType = {
   createdAt?: true
   userId?: true
   level?: true
+  module?: true
   name?: true
   message?: true
   meta?: true
@@ -103,6 +108,7 @@ export type DocumentSysLogCountAggregateInputType = {
   createdAt?: true
   userId?: true
   level?: true
+  module?: true
   name?: true
   message?: true
   meta?: true
@@ -200,6 +206,7 @@ export type DocumentSysLogGroupByOutputType = {
   createdAt: Date
   userId: number
   level: $Enums.LogLevel
+  module: $Enums.SysLogModule | null
   name: string | null
   message: string
   meta: string | null
@@ -233,6 +240,7 @@ export type DocumentSysLogWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"DocumentSysLog"> | Date | string
   userId?: Prisma.IntFilter<"DocumentSysLog"> | number
   level?: Prisma.EnumLogLevelFilter<"DocumentSysLog"> | $Enums.LogLevel
+  module?: Prisma.EnumSysLogModuleNullableFilter<"DocumentSysLog"> | $Enums.SysLogModule | null
   name?: Prisma.StringNullableFilter<"DocumentSysLog"> | string | null
   message?: Prisma.StringFilter<"DocumentSysLog"> | string
   meta?: Prisma.StringNullableFilter<"DocumentSysLog"> | string | null
@@ -243,6 +251,7 @@ export type DocumentSysLogOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   level?: Prisma.SortOrder
+  module?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   message?: Prisma.SortOrder
   meta?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -256,6 +265,7 @@ export type DocumentSysLogWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"DocumentSysLog"> | Date | string
   userId?: Prisma.IntFilter<"DocumentSysLog"> | number
   level?: Prisma.EnumLogLevelFilter<"DocumentSysLog"> | $Enums.LogLevel
+  module?: Prisma.EnumSysLogModuleNullableFilter<"DocumentSysLog"> | $Enums.SysLogModule | null
   name?: Prisma.StringNullableFilter<"DocumentSysLog"> | string | null
   message?: Prisma.StringFilter<"DocumentSysLog"> | string
   meta?: Prisma.StringNullableFilter<"DocumentSysLog"> | string | null
@@ -266,6 +276,7 @@ export type DocumentSysLogOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   level?: Prisma.SortOrder
+  module?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   message?: Prisma.SortOrder
   meta?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -284,6 +295,7 @@ export type DocumentSysLogScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"DocumentSysLog"> | Date | string
   userId?: Prisma.IntWithAggregatesFilter<"DocumentSysLog"> | number
   level?: Prisma.EnumLogLevelWithAggregatesFilter<"DocumentSysLog"> | $Enums.LogLevel
+  module?: Prisma.EnumSysLogModuleNullableWithAggregatesFilter<"DocumentSysLog"> | $Enums.SysLogModule | null
   name?: Prisma.StringNullableWithAggregatesFilter<"DocumentSysLog"> | string | null
   message?: Prisma.StringWithAggregatesFilter<"DocumentSysLog"> | string
   meta?: Prisma.StringNullableWithAggregatesFilter<"DocumentSysLog"> | string | null
@@ -293,6 +305,7 @@ export type DocumentSysLogCreateInput = {
   createdAt?: Date | string
   userId: number
   level: $Enums.LogLevel
+  module?: $Enums.SysLogModule | null
   name?: string | null
   message: string
   meta?: string | null
@@ -303,6 +316,7 @@ export type DocumentSysLogUncheckedCreateInput = {
   createdAt?: Date | string
   userId: number
   level: $Enums.LogLevel
+  module?: $Enums.SysLogModule | null
   name?: string | null
   message: string
   meta?: string | null
@@ -312,6 +326,7 @@ export type DocumentSysLogUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.EnumLogLevelFieldUpdateOperationsInput | $Enums.LogLevel
+  module?: Prisma.NullableEnumSysLogModuleFieldUpdateOperationsInput | $Enums.SysLogModule | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   message?: Prisma.StringFieldUpdateOperationsInput | string
   meta?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -322,6 +337,7 @@ export type DocumentSysLogUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.EnumLogLevelFieldUpdateOperationsInput | $Enums.LogLevel
+  module?: Prisma.NullableEnumSysLogModuleFieldUpdateOperationsInput | $Enums.SysLogModule | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   message?: Prisma.StringFieldUpdateOperationsInput | string
   meta?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -332,6 +348,7 @@ export type DocumentSysLogCreateManyInput = {
   createdAt?: Date | string
   userId: number
   level: $Enums.LogLevel
+  module?: $Enums.SysLogModule | null
   name?: string | null
   message: string
   meta?: string | null
@@ -341,6 +358,7 @@ export type DocumentSysLogUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.EnumLogLevelFieldUpdateOperationsInput | $Enums.LogLevel
+  module?: Prisma.NullableEnumSysLogModuleFieldUpdateOperationsInput | $Enums.SysLogModule | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   message?: Prisma.StringFieldUpdateOperationsInput | string
   meta?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -351,6 +369,7 @@ export type DocumentSysLogUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.EnumLogLevelFieldUpdateOperationsInput | $Enums.LogLevel
+  module?: Prisma.NullableEnumSysLogModuleFieldUpdateOperationsInput | $Enums.SysLogModule | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   message?: Prisma.StringFieldUpdateOperationsInput | string
   meta?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -361,6 +380,7 @@ export type DocumentSysLogCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   level?: Prisma.SortOrder
+  module?: Prisma.SortOrder
   name?: Prisma.SortOrder
   message?: Prisma.SortOrder
   meta?: Prisma.SortOrder
@@ -376,6 +396,7 @@ export type DocumentSysLogMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   level?: Prisma.SortOrder
+  module?: Prisma.SortOrder
   name?: Prisma.SortOrder
   message?: Prisma.SortOrder
   meta?: Prisma.SortOrder
@@ -386,6 +407,7 @@ export type DocumentSysLogMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   level?: Prisma.SortOrder
+  module?: Prisma.SortOrder
   name?: Prisma.SortOrder
   message?: Prisma.SortOrder
   meta?: Prisma.SortOrder
@@ -400,6 +422,10 @@ export type EnumLogLevelFieldUpdateOperationsInput = {
   set?: $Enums.LogLevel
 }
 
+export type NullableEnumSysLogModuleFieldUpdateOperationsInput = {
+  set?: $Enums.SysLogModule | null
+}
+
 
 
 export type DocumentSysLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -407,6 +433,7 @@ export type DocumentSysLogSelect<ExtArgs extends runtime.Types.Extensions.Intern
   createdAt?: boolean
   userId?: boolean
   level?: boolean
+  module?: boolean
   name?: boolean
   message?: boolean
   meta?: boolean
@@ -417,6 +444,7 @@ export type DocumentSysLogSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   createdAt?: boolean
   userId?: boolean
   level?: boolean
+  module?: boolean
   name?: boolean
   message?: boolean
   meta?: boolean
@@ -427,6 +455,7 @@ export type DocumentSysLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   createdAt?: boolean
   userId?: boolean
   level?: boolean
+  module?: boolean
   name?: boolean
   message?: boolean
   meta?: boolean
@@ -437,12 +466,13 @@ export type DocumentSysLogSelectScalar = {
   createdAt?: boolean
   userId?: boolean
   level?: boolean
+  module?: boolean
   name?: boolean
   message?: boolean
   meta?: boolean
 }
 
-export type DocumentSysLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "userId" | "level" | "name" | "message" | "meta", ExtArgs["result"]["documentSysLog"]>
+export type DocumentSysLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "userId" | "level" | "module" | "name" | "message" | "meta", ExtArgs["result"]["documentSysLog"]>
 
 export type $DocumentSysLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DocumentSysLog"
@@ -452,6 +482,7 @@ export type $DocumentSysLogPayload<ExtArgs extends runtime.Types.Extensions.Inte
     createdAt: Date
     userId: number
     level: $Enums.LogLevel
+    module: $Enums.SysLogModule | null
     name: string | null
     message: string
     meta: string | null
@@ -882,6 +913,7 @@ export interface DocumentSysLogFieldRefs {
   readonly createdAt: Prisma.FieldRef<"DocumentSysLog", 'DateTime'>
   readonly userId: Prisma.FieldRef<"DocumentSysLog", 'Int'>
   readonly level: Prisma.FieldRef<"DocumentSysLog", 'LogLevel'>
+  readonly module: Prisma.FieldRef<"DocumentSysLog", 'SysLogModule'>
   readonly name: Prisma.FieldRef<"DocumentSysLog", 'String'>
   readonly message: Prisma.FieldRef<"DocumentSysLog", 'String'>
   readonly meta: Prisma.FieldRef<"DocumentSysLog", 'String'>

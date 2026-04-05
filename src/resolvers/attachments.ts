@@ -8,7 +8,7 @@ import {
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
 import type { Attachment } from "../generated/prisma/client.js"
-import { ModuleType } from "../generated/prisma/enums.js"
+import { ModuleType, SysLogModule } from "../generated/prisma/enums.js"
 
 import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
 
@@ -168,6 +168,7 @@ export const attachmentResolvers = {
             level: "INFO",
             name: "CREATE_ATTACHMENT",
             message: `Adjunto creado: ${attachment.fileName} (${input.module}/${input.entityType}/${input.entityId})`,
+            module: input.module as unknown as SysLogModule,
             meta: JSON.stringify({ attachmentId: attachment.id, input }),
           },
         })
@@ -179,6 +180,7 @@ export const attachmentResolvers = {
           userId,
           context,
           logName: "CREATE_ATTACHMENT",
+          module: input.module as unknown as SysLogModule,
           messages: {
             default: "Error al crear el adjunto.",
           },
@@ -197,8 +199,9 @@ export const attachmentResolvers = {
       })
       logger.info("deleteAttachment", { userId })
 
+      let attachment: Awaited<ReturnType<typeof context.orm.attachment.findFirst>> = null
       try {
-        const attachment = await context.orm.attachment.findFirst({
+        attachment = await context.orm.attachment.findFirst({
           where: { id },
         })
 
@@ -217,7 +220,8 @@ export const attachmentResolvers = {
             userId,
             level: "WARNING",
             name: "DELETE_ATTACHMENT",
-            message: `Adjunto eliminado: ${attachment.fileName}`,
+            message: `Adjunto eliminado: ${attachment!.fileName}`,
+            module: attachment!.module as unknown as SysLogModule,
             meta: JSON.stringify({ attachmentId: id }),
           },
         })
@@ -229,6 +233,7 @@ export const attachmentResolvers = {
           userId,
           context,
           logName: "DELETE_ATTACHMENT",
+          module: attachment?.module as unknown as SysLogModule,
           messages: {
             notFound: "El adjunto no existe.",
             default: "Error al eliminar el adjunto.",

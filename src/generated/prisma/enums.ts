@@ -21,6 +21,19 @@ export const ModuleType = {
 export type ModuleType = (typeof ModuleType)[keyof typeof ModuleType]
 
 
+export const SysLogModule = {
+  DOCUMENT: 'DOCUMENT',
+  QUALITY: 'QUALITY',
+  PROJECTS: 'PROJECTS',
+  TAGS: 'TAGS',
+  OPERATIONS: 'OPERATIONS',
+  MANAGEMENT: 'MANAGEMENT',
+  COMERCIAL: 'COMERCIAL'
+} as const
+
+export type SysLogModule = (typeof SysLogModule)[keyof typeof SysLogModule]
+
+
 export const RevisionScheme = {
   ALPHABETICAL: 'ALPHABETICAL',
   NUMERIC: 'NUMERIC'

@@ -305,6 +305,7 @@ export const DocumentSysLogScalarFieldEnum = {
   createdAt: 'createdAt',
   userId: 'userId',
   level: 'level',
+  module: 'module',
   name: 'name',
   message: 'message',
   meta: 'meta'
@@ -318,6 +319,7 @@ export const DocumentSysLogArchiveScalarFieldEnum = {
   createdAt: 'createdAt',
   userId: 'userId',
   level: 'level',
+  module: 'module',
   name: 'name',
   message: 'message',
   meta: 'meta'
