@@ -65,7 +65,7 @@ export const userAuthorization = async ({
     ) as ApiToken
 
     if (!decodeToken.id) {
-      logger.auth("Token válido pero sin ID de usuario", {})
+      logger.auth("Token válido pero sin ID de usuario", { tokenError: "missing id" })
       throw new GraphQLError("Se debe iniciar sesión", {
         extensions: { code: "UNAUTHENTICATED" },
       })
@@ -133,6 +133,8 @@ export const userAuthorization = async ({
         },
       })
     }
+
+    logger.debug("Auth OK", { userId: decodeToken.id, permissions: requiredPermissions })
 
     return decodeToken.id
   } catch (error) {

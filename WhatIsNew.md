@@ -277,3 +277,13 @@
 - Agregando el campo modulo para diferenciar de que módulo viene el log
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.21
+
+2026-04-05
+
+## SysLogs
+
+- Mejora la gestión de logs y errores: se actualizan tipos de datos en DocumentSysLog, se renombra la función de eliminación de logs y se maneja el registro de errores en la creación de logs.
+
+---

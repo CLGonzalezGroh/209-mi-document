@@ -848,7 +848,7 @@ type DocumentSysLog {
   "Módulo origen del log"
   module: SysLogModule
   "Nombre del log"
-  name: String
+  name: String!
   "Mensaje del log"
   message: String!
   "Metadatos adicionales del log"
@@ -868,7 +868,7 @@ type DocumentSysLogArchive {
   "Módulo origen del log archivado"
   module: SysLogModule
   "Nombre del log archivado"
-  name: String
+  name: String!
   "Mensaje del log archivado"
   message: String!
   "Metadatos adicionales del log archivado"
@@ -1827,5 +1827,5 @@ type Mutation {
   archiveDocumentSysLogs(olderThanDays: Int!): Int!
 
   "Elimina logs archivados antiguos permanentemente"
-  deleteArchivedDocumentSysLogs(olderThanDays: Int!): Int!
+  deleteDocumentSysLogsArchive(olderThanDays: Int!): Int!
 }

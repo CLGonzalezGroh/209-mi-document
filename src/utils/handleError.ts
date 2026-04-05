@@ -38,7 +38,11 @@ export const handleError = async ({
     level: LogLevel.ERROR,
     ...(module && { module }),
   }
-  await context.orm.documentSysLog.create({ data })
+  try {
+    await context.orm.documentSysLog.create({ data })
+  } catch (logError) {
+    logger.error("Error al registrar en document_sys_logs", logError)
+  }
 
   // Lanzar un nuevo error con un mensaje personalizado
   if (error instanceof PrismaClientKnownRequestError) {

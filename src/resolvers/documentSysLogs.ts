@@ -393,7 +393,7 @@ export const documentSysLogResolvers = {
       }
     },
 
-    deleteArchivedDocumentSysLogs: async (
+    deleteDocumentSysLogsArchive: async (
       _: any,
       { olderThanDays }: { olderThanDays: number },
       context: ResolverContext,
@@ -402,7 +402,7 @@ export const documentSysLogResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENT_SYS_LOG_DELETE],
         context,
       })
-      logger.info("deleteArchivedDocumentSysLogs", { userId })
+      logger.info("deleteDocumentSysLogsArchive", { userId })
 
       try {
         // Calcular la fecha límite
