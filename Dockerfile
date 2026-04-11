@@ -5,13 +5,13 @@
 # ============================================
 
 # -- Stage 1: Build --
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
 # Instalar dependencias (el token se monta como secret, no queda en la imagen)
 COPY package*.json ./
-RUN --mount=type=secret,id=npmrc,target=/app/.npmrc npm ci
+RUN --mount=type=secret,id=npmrc,target=/app/.npmrc npm ci --ignore-scripts
 
 # Copiar código fuente, schema de Prisma y config
 COPY prisma/ ./prisma/
@@ -28,7 +28,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # -- Stage 2: Production --
-FROM node:22-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 
@@ -38,7 +38,7 @@ RUN addgroup -g 1001 -S nodejs && \
 
 # Instalar solo dependencias de producción
 COPY package*.json ./
-RUN --mount=type=secret,id=npmrc,target=/app/.npmrc npm ci --omit=dev && npm cache clean --force
+RUN --mount=type=secret,id=npmrc,target=/app/.npmrc npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
 # Copiar build y archivos necesarios
 COPY --from=builder /app/dist ./dist
@@ -46,6 +46,9 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./
 COPY --from=builder /app/schema.graphql ./
 COPY --from=builder /app/src/generated ./src/generated
+
+# Copiar Prisma engines generados en builder (evita --ignore-scripts + permisos)
+COPY --from=builder /app/node_modules/@prisma/engines ./node_modules/@prisma/engines
 
 USER api
 
