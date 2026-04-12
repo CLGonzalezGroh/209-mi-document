@@ -42,6 +42,7 @@ interface ScannedFileFilterInput {
   digitalDisposition?: DigitalDisposition
   physicalDisposition?: PhysicalDisposition
   physicalLocation?: string
+  updatedById?: number
   terminatedFilter?: TerminatedFilter
 }
 
@@ -134,8 +135,18 @@ export const scannedFileResolvers = {
             ...(!isNaN(parsedId) ? [{ id: parsedId }] : []),
             { code: { contains: filter.query, mode: "insensitive" as const } },
             { title: { contains: filter.query, mode: "insensitive" as const } },
-            { originalReference: { contains: filter.query, mode: "insensitive" as const } },
-            { externalReference: { contains: filter.query, mode: "insensitive" as const } },
+            {
+              originalReference: {
+                contains: filter.query,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              externalReference: {
+                contains: filter.query,
+                mode: "insensitive" as const,
+              },
+            },
           ]
         }
 
@@ -164,7 +175,14 @@ export const scannedFileResolvers = {
         }
 
         if (filter?.physicalLocation) {
-          where.physicalLocation = { contains: filter.physicalLocation, mode: "insensitive" as const }
+          where.physicalLocation = {
+            contains: filter.physicalLocation,
+            mode: "insensitive" as const,
+          }
+        }
+
+        if (filter?.updatedById) {
+          where.updatedById = filter.updatedById
         }
 
         const prismaOrderBy = buildScannedFileOrderBy(orderBy)
@@ -365,7 +383,8 @@ export const scannedFileResolvers = {
           logName: "CREATE_SCANNED_FILE",
           module: SysLogModule.PROJECTS,
           messages: {
-            uniqueConstraint: "Ya existe un archivo escaneado con ese código en este proyecto.",
+            uniqueConstraint:
+              "Ya existe un archivo escaneado con ese código en este proyecto.",
             default: "Error al crear el archivo escaneado.",
           },
         })
@@ -471,7 +490,8 @@ export const scannedFileResolvers = {
           module: SysLogModule.PROJECTS,
           messages: {
             notFound: "El archivo escaneado no existe.",
-            uniqueConstraint: "Ya existe un archivo escaneado con ese código en este proyecto.",
+            uniqueConstraint:
+              "Ya existe un archivo escaneado con ese código en este proyecto.",
             default: "Error al actualizar el archivo escaneado.",
           },
         })
@@ -676,7 +696,10 @@ export const scannedFileResolvers = {
             name: "MARK_AS_UPLOADED",
             module: SysLogModule.PROJECTS,
             message: `Archivo escaneado marcado como cargado: ID ${id}, ref: ${input.externalReference}`,
-            meta: JSON.stringify({ scannedFileId: id, externalReference: input.externalReference }),
+            meta: JSON.stringify({
+              scannedFileId: id,
+              externalReference: input.externalReference,
+            }),
           },
         })
 
@@ -755,7 +778,11 @@ export const scannedFileResolvers = {
             name: "UPDATE_EXTERNAL_REFERENCE",
             module: SysLogModule.PROJECTS,
             message: `Referencia externa actualizada: ID ${id}, ref anterior: ${existing.externalReference}, nueva ref: ${externalReference}`,
-            meta: JSON.stringify({ scannedFileId: id, previousReference: existing.externalReference, newReference: externalReference }),
+            meta: JSON.stringify({
+              scannedFileId: id,
+              previousReference: existing.externalReference,
+              newReference: externalReference,
+            }),
           },
         })
 
@@ -856,7 +883,11 @@ export const scannedFileResolvers = {
             name: "UPDATE_PHYSICAL_DISPOSITION",
             module: SysLogModule.PROJECTS,
             message: `Disposición física actualizada a ${disposition}: ID ${id}`,
-            meta: JSON.stringify({ scannedFileId: id, from: existing.physicalDisposition, to: disposition }),
+            meta: JSON.stringify({
+              scannedFileId: id,
+              from: existing.physicalDisposition,
+              to: disposition,
+            }),
           },
         })
 
@@ -985,7 +1016,11 @@ export const scannedFileResolvers = {
             name: "CONFIRM_PHYSICAL_DISPOSITION",
             module: SysLogModule.PROJECTS,
             message: `Disposición física confirmada: ${existing.physicalDisposition} → ${newDisposition}, ID ${id}`,
-            meta: JSON.stringify({ scannedFileId: id, from: existing.physicalDisposition, to: newDisposition }),
+            meta: JSON.stringify({
+              scannedFileId: id,
+              from: existing.physicalDisposition,
+              to: newDisposition,
+            }),
           },
         })
 
@@ -1106,7 +1141,11 @@ export const scannedFileResolvers = {
             name: "RESET_SCANNED_FILE_TO_PENDING",
             module: SysLogModule.PROJECTS,
             message: `Archivo escaneado revertido a pendiente: ID ${id}`,
-            meta: JSON.stringify({ scannedFileId: id, previousDigital: existing.digitalDisposition, previousPhysical: existing.physicalDisposition }),
+            meta: JSON.stringify({
+              scannedFileId: id,
+              previousDigital: existing.digitalDisposition,
+              previousPhysical: existing.physicalDisposition,
+            }),
           },
         })
 

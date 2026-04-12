@@ -363,6 +363,8 @@ enum ScannedFileOrderFieldInput {
   CLASS_NAME
   "Por nombre de tipo de documento"
   TYPE_NAME
+  "Por fecha de última actualización"
+  UPDATED_AT
 }
 
 "Nivel del log"
@@ -1363,6 +1365,8 @@ input ScannedFileFilterInput {
   physicalDisposition: PhysicalDispositionInput
   "Filtrar por ubicación física (búsqueda parcial)"
   physicalLocation: String
+  "Filtrar por usuario que actualizó"
+  updatedById: Int
   "Filtrar por estado de habilitación"
   terminatedFilter: TerminatedFilterInput
 }

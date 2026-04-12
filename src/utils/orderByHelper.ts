@@ -79,6 +79,7 @@ const scannedFileFieldMap: Record<string, string> = {
   CLASSIFIED_AT: "classifiedAt",
   DIGITAL_DISPOSITION: "digitalDisposition",
   PHYSICAL_LOCATION: "physicalLocation",
+  UPDATED_AT: "updatedAt",
 }
 
 const scannedFileNestedFieldMap: Record<string, { relation: string; field: string }> = {
