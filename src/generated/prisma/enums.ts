@@ -125,6 +125,7 @@ export type LogLevel = (typeof LogLevel)[keyof typeof LogLevel]
 
 export const DigitalDisposition = {
   PENDING: 'PENDING',
+  BAD_QUALITY: 'BAD_QUALITY',
   ACCEPTED: 'ACCEPTED',
   UPLOADED: 'UPLOADED',
   DISCARDED: 'DISCARDED'

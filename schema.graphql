@@ -293,6 +293,8 @@ enum TransmittalOrderFieldInput {
 enum DigitalDisposition {
   "Pendiente de clasificación"
   PENDING
+  "Imagen de mala calidad, requiere re-escaneo"
+  BAD_QUALITY
   "Aceptado, pendiente de carga en sistema externo"
   ACCEPTED
   "Cargado en sistema externo, ciclo cerrado"
@@ -305,6 +307,8 @@ enum DigitalDisposition {
 enum DigitalDispositionInput {
   "Pendiente de clasificación"
   PENDING
+  "Imagen de mala calidad, requiere re-escaneo"
+  BAD_QUALITY
   "Aceptado, pendiente de carga en sistema externo"
   ACCEPTED
   "Cargado en sistema externo, ciclo cerrado"
@@ -813,6 +817,8 @@ type Area @key(fields: "id") {
 type ScannedFileStats {
   "Total de archivos pendientes de clasificación"
   pending: Int!
+  "Total de archivos con mala calidad de imagen"
+  badQuality: Int!
   "Total de archivos aceptados pendientes de carga"
   accepted: Int!
   "Total de archivos cargados en sistema externo"

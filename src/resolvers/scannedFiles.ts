@@ -242,6 +242,7 @@ export const scannedFileResolvers = {
 
         const [
           pending,
+          badQuality,
           accepted,
           uploaded,
           discarded,
@@ -254,6 +255,9 @@ export const scannedFileResolvers = {
         ] = await context.orm.$transaction([
           context.orm.scannedFile.count({
             where: { ...baseWhere, digitalDisposition: "PENDING" },
+          }),
+          context.orm.scannedFile.count({
+            where: { ...baseWhere, digitalDisposition: "BAD_QUALITY" },
           }),
           context.orm.scannedFile.count({
             where: { ...baseWhere, digitalDisposition: "ACCEPTED" },
@@ -284,6 +288,7 @@ export const scannedFileResolvers = {
 
         return {
           pending,
+          badQuality,
           accepted,
           uploaded,
           discarded,
@@ -538,12 +543,14 @@ export const scannedFileResolvers = {
         }
 
         // Transiciones permitidas según máquina de estados:
-        // PENDING → ACCEPTED | DISCARDED
+        // PENDING → ACCEPTED | DISCARDED | BAD_QUALITY
+        // BAD_QUALITY → PENDING
         // DISCARDED → ACCEPTED | PENDING
         // ACCEPTED → PENDING | DISCARDED
         // UPLOADED → (no se puede reclasificar)
         const allowedTransitions: Record<string, string[]> = {
-          PENDING: ["ACCEPTED", "DISCARDED", "PENDING"],
+          PENDING: ["ACCEPTED", "DISCARDED", "BAD_QUALITY", "PENDING"],
+          BAD_QUALITY: ["PENDING", "BAD_QUALITY"],
           DISCARDED: ["ACCEPTED", "PENDING", "DISCARDED"],
           ACCEPTED: ["PENDING", "DISCARDED", "ACCEPTED"],
         }
@@ -572,12 +579,12 @@ export const scannedFileResolvers = {
         }
 
         if (
-          !["ACCEPTED", "DISCARDED", "PENDING"].includes(
+          !["ACCEPTED", "DISCARDED", "PENDING", "BAD_QUALITY"].includes(
             input.digitalDisposition,
           )
         ) {
           throw new GraphQLError(
-            "digitalDisposition debe ser ACCEPTED, DISCARDED o PENDING",
+            "digitalDisposition debe ser ACCEPTED, DISCARDED, PENDING o BAD_QUALITY",
             { extensions: { code: "BAD_USER_INPUT" } },
           )
         }
@@ -589,8 +596,11 @@ export const scannedFileResolvers = {
           updatedById: userId,
         }
 
-        if (input.digitalDisposition === "PENDING") {
-          // Volver a pendiente: limpiar clasificación
+        if (
+          input.digitalDisposition === "PENDING" ||
+          input.digitalDisposition === "BAD_QUALITY"
+        ) {
+          // Volver a pendiente o mala calidad: limpiar clasificación
           data.classifiedById = null
           data.classifiedAt = null
           data.discardReason = null

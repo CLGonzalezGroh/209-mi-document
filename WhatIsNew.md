@@ -297,3 +297,13 @@
 - Agrega filtros por fecha de última actualización y usuario que actualizó en los archivos escaneados
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.23
+
+2026-04-13
+
+## ScannedFiles
+
+- Agrega el estado 'BAD_QUALITY' a la enumeración DigitalDisposition y actualiza los resolvers para manejar este nuevo estado
+
+---

@@ -328,6 +328,7 @@ model Attachment {
 
 enum DigitalDisposition {
     PENDING // Sin clasificar
+    BAD_QUALITY // Imagen de mala calidad, requiere re-escaneo
     ACCEPTED // Aceptado, pendiente de carga en sistema externo
     UPLOADED // Cargado en sistema externo, ciclo cerrado
     DISCARDED // Descartado, sin valor documental
