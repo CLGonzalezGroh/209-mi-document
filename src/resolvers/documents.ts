@@ -55,7 +55,7 @@ export const documentResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_READ],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_READ],
         context,
       })
       logger.info("documentById", { userId })
@@ -101,7 +101,7 @@ export const documentResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_LIST],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_LIST],
         context,
       })
       logger.info("documents", { userId })
@@ -212,7 +212,7 @@ export const documentResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_LIST],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_LIST],
         context,
       })
       logger.info("documentsByModule", { userId })
@@ -277,7 +277,7 @@ export const documentResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_SELECT],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_SELECT],
         context,
       })
       logger.info("documentsSelectList", { userId })
@@ -349,7 +349,7 @@ export const documentResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_CREATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CREATE],
         context,
       })
       logger.info("createDocument", { userId })
@@ -444,7 +444,7 @@ export const documentResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_UPDATE],
         context,
       })
       logger.info("updateDocument", { userId })
@@ -503,7 +503,7 @@ export const documentResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_DELETE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_DELETE],
         context,
       })
       logger.info("terminateDocument", { userId })
@@ -550,7 +550,7 @@ export const documentResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_UPDATE],
         context,
       })
       logger.info("activateDocument", { userId })
@@ -597,7 +597,7 @@ export const documentResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_UPDATE],
         context,
       })
       logger.info("switchRevisionScheme", { userId })

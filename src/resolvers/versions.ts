@@ -38,7 +38,7 @@ export const versionResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_CREATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CREATE],
         context,
       })
       logger.info("registerVersion", { userId })

@@ -45,7 +45,7 @@ export const documentTypeResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_LIST],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_LIST],
         context,
       })
       logger.info("documentTypes", { userId })
@@ -161,7 +161,7 @@ export const documentTypeResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_READ],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_READ],
         context,
       })
       logger.info("documentTypeById", { userId })
@@ -202,7 +202,7 @@ export const documentTypeResolvers = {
     ) => {
       const userId = await userAuthorization({
         requiredPermissions: [
-          PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_SELECT,
+          PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_SELECT,
           PERMISSIONS.COMMON_SELECT_LIST_ACCESS,
         ],
         context,
@@ -276,7 +276,7 @@ export const documentTypeResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_CREATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_CREATE],
         context,
       })
       logger.info("createDocumentType", { userId })
@@ -342,7 +342,7 @@ export const documentTypeResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_UPDATE],
         context,
       })
       logger.info("updateDocumentType", { userId })
@@ -392,7 +392,7 @@ export const documentTypeResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_DELETE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_DELETE],
         context,
       })
       logger.info("terminateDocumentType", { userId })
@@ -440,7 +440,7 @@ export const documentTypeResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_UPDATE],
         context,
       })
       logger.info("activateDocumentType", { userId })
@@ -488,7 +488,7 @@ export const documentTypeResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_TYPE_DELETE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_DELETE],
         context,
       })
       logger.info("deleteDocumentType", { userId })

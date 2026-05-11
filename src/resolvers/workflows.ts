@@ -64,7 +64,7 @@ export const workflowResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_WORKFLOW_LIST],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_WORKFLOW_LIST],
         context,
       })
       logger.info("pendingReviewSteps", { userId })
@@ -104,7 +104,7 @@ export const workflowResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_WORKFLOW_LIST],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_WORKFLOW_LIST],
         context,
       })
       logger.info("workflowsByStatus", { userId })
@@ -150,7 +150,7 @@ export const workflowResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_WORKFLOW_CREATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_WORKFLOW_CREATE],
         context,
       })
       logger.info("initiateReview", { userId })
@@ -253,7 +253,7 @@ export const workflowResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_WORKFLOW_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_WORKFLOW_UPDATE],
         context,
       })
       logger.info("approveStep", { userId })
@@ -398,7 +398,7 @@ export const workflowResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_WORKFLOW_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_WORKFLOW_UPDATE],
         context,
       })
       logger.info("rejectStep", { userId })
@@ -509,7 +509,7 @@ export const workflowResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_WORKFLOW_CREATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_WORKFLOW_CREATE],
         context,
       })
       logger.info("cancelWorkflow", { userId })

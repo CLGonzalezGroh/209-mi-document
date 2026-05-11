@@ -64,7 +64,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_READ],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SCANNED_FILE_READ],
         context,
       })
       logger.info("scannedFileById", { userId })
@@ -111,7 +111,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_LIST],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SCANNED_FILE_LIST],
         context,
       })
       logger.info("scannedFiles", { userId })
@@ -232,7 +232,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_LIST],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SCANNED_FILE_LIST],
         context,
       })
       logger.info("scannedFileStats", { userId })
@@ -339,7 +339,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_CREATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SCANNED_FILE_CREATE],
         context,
       })
       logger.info("createScannedFile", { userId })
@@ -421,7 +421,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SCANNED_FILE_UPDATE],
         context,
       })
       logger.info("updateScannedFile", { userId })
@@ -519,7 +519,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_APPROVE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SCANNED_FILE_APPROVE],
         context,
       })
       logger.info("classifyScannedFile", { userId })
@@ -659,7 +659,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SCANNED_FILE_UPDATE],
         context,
       })
       logger.info("markAsUploaded", { userId })
@@ -742,7 +742,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SCANNED_FILE_UPDATE],
         context,
       })
       logger.info("updateExternalReference", { userId })
@@ -818,7 +818,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_APPROVE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SCANNED_FILE_APPROVE],
         context,
       })
       logger.info("updatePhysicalDisposition", { userId })
@@ -923,7 +923,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SCANNED_FILE_UPDATE],
         context,
       })
       logger.info("terminateScannedFile", { userId })
@@ -971,7 +971,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_APPROVE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SCANNED_FILE_APPROVE],
         context,
       })
       logger.info("confirmPhysicalDisposition", { userId })
@@ -1056,7 +1056,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SCANNED_FILE_UPDATE],
         context,
       })
       logger.info("activateScannedFile", { userId })
@@ -1104,7 +1104,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_ADMIN_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SCANNED_FILE_ADMIN_UPDATE],
         context,
       })
       logger.info("resetScannedFileToPending", { userId })
@@ -1181,7 +1181,7 @@ export const scannedFileResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SCANNED_FILE_DELETE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SCANNED_FILE_DELETE],
         context,
       })
       logger.info("deleteScannedFile", { userId })

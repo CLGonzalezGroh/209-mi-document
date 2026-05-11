@@ -91,7 +91,7 @@ export const revisionResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_READ],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_READ],
         context,
       })
       logger.info("revisionById", { userId })
@@ -145,7 +145,7 @@ export const revisionResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_DOCUMENT_CREATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CREATE],
         context,
       })
       logger.info("createRevision", { userId })

@@ -307,3 +307,13 @@
 - Agrega el estado 'BAD_QUALITY' a la enumeración DigitalDisposition y actualiza los resolvers para manejar este nuevo estado
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.24
+
+2026-05-11
+
+## Modules
+
+- Resolver discrepancias de nombre de módulos
+
+---

@@ -40,7 +40,7 @@ export const documentSysLogResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SYS_LOG_READ],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SYS_LOG_READ],
         context,
       })
       logger.info("documentSysLogById", { userId })
@@ -86,7 +86,7 @@ export const documentSysLogResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SYS_LOG_LIST],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SYS_LOG_LIST],
         context,
       })
       logger.info("documentSysLogs", { userId })
@@ -176,7 +176,7 @@ export const documentSysLogResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SYS_LOG_READ],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SYS_LOG_READ],
         context,
       })
       logger.info("documentSysLogArchiveById", { userId })
@@ -222,7 +222,7 @@ export const documentSysLogResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SYS_LOG_LIST],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SYS_LOG_LIST],
         context,
       })
       logger.info("documentSysLogsArchive", { userId })
@@ -316,7 +316,7 @@ export const documentSysLogResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SYS_LOG_ARCHIVE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SYS_LOG_ARCHIVE],
         context,
       })
       logger.info("archiveDocumentSysLogs", { userId })
@@ -399,7 +399,7 @@ export const documentSysLogResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_SYS_LOG_DELETE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_SYS_LOG_DELETE],
         context,
       })
       logger.info("deleteDocumentSysLogsArchive", { userId })

@@ -5,8 +5,12 @@ import { readFileSync } from "fs"
 import { gql } from "graphql-tag"
 import { prisma } from "./lib/prisma.js"
 import { createLogger, debugConfig } from "@CLGonzalezGroh/mi-common/logger"
+import { assertPrismaModuleSync } from "./utils/prismaModuleMap.js"
 
 const logger = createLogger("server")
+
+// Falla rápido si el enum Prisma `ModuleType` y `MODULE_ID_TO_PRISMA` divergen.
+assertPrismaModuleSync()
 
 const typeDefs = gql(readFileSync("./schema.graphql", { encoding: "utf-8" }))
 import { resolvers } from "./resolvers/index.js"

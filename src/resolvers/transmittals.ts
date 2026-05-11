@@ -71,7 +71,7 @@ export const transmittalResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_TRANSMITTAL_READ],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_READ],
         context,
       })
       logger.info("transmittalById", { userId })
@@ -119,7 +119,7 @@ export const transmittalResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_TRANSMITTAL_LIST],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_LIST],
         context,
       })
       logger.info("transmittals", { userId })
@@ -197,7 +197,7 @@ export const transmittalResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_TRANSMITTAL_LIST],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_LIST],
         context,
       })
       logger.info("transmittalsByProject", { userId })
@@ -264,7 +264,7 @@ export const transmittalResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_TRANSMITTAL_CREATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_CREATE],
         context,
       })
       logger.info("createTransmittal", { userId })
@@ -324,7 +324,7 @@ export const transmittalResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_TRANSMITTAL_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_UPDATE],
         context,
       })
       logger.info("issueTransmittal", { userId })
@@ -404,7 +404,7 @@ export const transmittalResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_TRANSMITTAL_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_UPDATE],
         context,
       })
       logger.info("respondTransmittal", { userId })
@@ -490,7 +490,7 @@ export const transmittalResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_TRANSMITTAL_UPDATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_UPDATE],
         context,
       })
       logger.info("closeTransmittal", { userId })

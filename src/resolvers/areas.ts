@@ -159,7 +159,7 @@ export const areaResolvers = {
     ) => {
       const userId = await userAuthorization({
         requiredPermissions: [
-          PERMISSIONS.DOCUMENT_AREA_SELECT,
+          PERMISSIONS.DOCUMENTS_AREA_SELECT,
           PERMISSIONS.COMMON_SELECT_LIST_ACCESS,
         ],
         context,

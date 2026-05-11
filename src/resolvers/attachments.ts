@@ -22,7 +22,7 @@ export const attachmentResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_ATTACHMENT_READ],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_ATTACHMENT_READ],
         context,
       })
       logger.info("attachmentById", { userId })
@@ -69,7 +69,7 @@ export const attachmentResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_ATTACHMENT_LIST],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_ATTACHMENT_LIST],
         context,
       })
       logger.info("attachmentsByModule", { userId })
@@ -142,7 +142,7 @@ export const attachmentResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_ATTACHMENT_CREATE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_ATTACHMENT_CREATE],
         context,
       })
       logger.info("createAttachment", { userId })
@@ -194,7 +194,7 @@ export const attachmentResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENT_ATTACHMENT_DELETE],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_ATTACHMENT_DELETE],
         context,
       })
       logger.info("deleteAttachment", { userId })
