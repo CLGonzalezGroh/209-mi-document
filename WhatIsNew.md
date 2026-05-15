@@ -317,3 +317,13 @@
 - Resolver discrepancias de nombre de módulos
 
 ---
+
+# What's new in María Ingeniería API Documents 2.0.256
+
+2026-05-15
+
+## Areas
+
+- Actualiza permisos en resolvers de áreas y clases de documentos para usar constantes de permisos
+
+---

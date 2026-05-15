@@ -44,7 +44,7 @@ export const areaResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:area:list"],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_AREA_LIST],
         context,
       })
       logger.info("areas", { userId })
@@ -120,7 +120,7 @@ export const areaResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:area:read"],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_AREA_READ],
         context,
       })
       logger.info("areaById", { userId })
@@ -216,7 +216,7 @@ export const areaResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:area:create"],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_AREA_CREATE],
         context,
       })
       logger.info("createArea", { userId })
@@ -278,7 +278,7 @@ export const areaResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:area:update"],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_AREA_UPDATE],
         context,
       })
       logger.info("updateArea", { userId })
@@ -327,7 +327,7 @@ export const areaResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:area:delete"],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_AREA_DELETE],
         context,
       })
       logger.info("terminateArea", { userId })
@@ -374,7 +374,7 @@ export const areaResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:area:update"],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_AREA_UPDATE],
         context,
       })
       logger.info("activateArea", { userId })
@@ -421,7 +421,7 @@ export const areaResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:area:delete"],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_AREA_DELETE],
         context,
       })
       logger.info("deleteArea", { userId })

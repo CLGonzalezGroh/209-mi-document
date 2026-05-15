@@ -51,7 +51,7 @@ export const documentClassResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:documentClass:list"],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_LIST],
         context,
       })
       logger.info("documentClasses", { userId })
@@ -168,7 +168,7 @@ export const documentClassResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:documentClass:read"],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_READ],
         context,
       })
       logger.info("documentClassById", { userId })
@@ -266,7 +266,7 @@ export const documentClassResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:documentClass:create"],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_CREATE],
         context,
       })
       logger.info("createDocumentClass", { userId })
@@ -330,7 +330,7 @@ export const documentClassResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:documentClass:update"],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_UPDATE],
         context,
       })
       logger.info("updateDocumentClass", { userId })
@@ -380,7 +380,7 @@ export const documentClassResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:documentClass:delete"],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_DELETE],
         context,
       })
       logger.info("terminateDocumentClass", { userId })
@@ -428,7 +428,7 @@ export const documentClassResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:documentClass:update"],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_UPDATE],
         context,
       })
       logger.info("activateDocumentClass", { userId })
@@ -476,7 +476,7 @@ export const documentClassResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
-        requiredPermissions: ["document:documentClass:delete"],
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_DELETE],
         context,
       })
       logger.info("deleteDocumentClass", { userId })
