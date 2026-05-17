@@ -57,6 +57,11 @@ export type DocumentType = Prisma.DocumentTypeModel
  */
 export type Document = Prisma.DocumentModel
 /**
+ * Model TaskDocumentReference
+ * 
+ */
+export type TaskDocumentReference = Prisma.TaskDocumentReferenceModel
+/**
  * Model DocumentRevision
  * 
  */

@@ -14,6 +14,7 @@ import {
   Area,
   DocumentSysLog,
   DocumentSysLogArchive,
+  TaskDocumentReference,
 } from "../../generated/prisma/client.js"
 
 export const resolverTypes = {
@@ -43,6 +44,18 @@ export const resolverTypes = {
     },
     createdBy: (parent: Document) => {
       return { __typename: "UserName", id: parent.createdById }
+    },
+    // Fase A.5 — federación con mi-project
+    projectTask: (parent: Document) => {
+      return parent.projectTaskId
+        ? { __typename: "ProjectTask", id: parent.projectTaskId }
+        : null
+    },
+    taskDocumentReferences: async (parent: Document) => {
+      return prisma.taskDocumentReference.findMany({
+        where: { documentId: parent.id },
+        orderBy: { createdAt: "asc" },
+      })
     },
     currentRevision: async (parent: any) => {
       // Si ya viene con revisions incluidas
@@ -279,6 +292,41 @@ export const resolverTypes = {
     },
     updatedBy: (parent: Area) => {
       return { __typename: "UserName", id: parent.updatedById }
+    },
+  },
+
+  // ─── Fase A.5: Federación ProjectTask ↔ Document ───
+
+  // Tipo federado: ProjectTask vive en 204-mi-project. Acá sólo extendemos
+  // con los campos documentales que aporta este subgraph.
+  ProjectTask: {
+    __resolveReference: (ref: { id: number }) => ref,
+    documents: async (parent: { id: number }) => {
+      return prisma.document.findMany({
+        where: { projectTaskId: parent.id, terminatedAt: null },
+        orderBy: { code: "asc" },
+      })
+    },
+    documentReferences: async (parent: { id: number }) => {
+      return prisma.taskDocumentReference.findMany({
+        where: { projectTaskId: parent.id },
+        orderBy: { createdAt: "asc" },
+      })
+    },
+  },
+
+  TaskDocumentReference: {
+    __resolveReference: async (ref: { id: number }) => {
+      return prisma.taskDocumentReference.findUnique({ where: { id: ref.id } })
+    },
+    createdBy: (parent: TaskDocumentReference) => {
+      return { __typename: "UserName", id: parent.createdById }
+    },
+    projectTask: (parent: TaskDocumentReference) => {
+      return { __typename: "ProjectTask", id: parent.projectTaskId }
+    },
+    document: async (parent: TaskDocumentReference) => {
+      return prisma.document.findUnique({ where: { id: parent.documentId } })
     },
   },
 }

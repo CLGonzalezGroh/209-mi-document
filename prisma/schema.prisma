@@ -95,6 +95,13 @@ enum LogLevel {
     ERROR
 }
 
+// Rol de un documento respecto a una tarea de proyecto (federación A.5)
+enum TaskDocumentRole {
+    INPUT // Insumo que la tarea consume (norma, BoD, especificación)
+    OUTPUT // Documento producido por la tarea (no entregable principal)
+    REFERENCE // Referencia cruzada (documento relacionado, no consumido ni producido)
+}
+
 // ================================
 // MODELOS
 // ================================
@@ -171,15 +178,42 @@ model Document {
     documentClassId Int? // Clase de documento (null = sin clasificar)
     revisionScheme  RevisionScheme @default(ALPHABETICAL) // Esquema de revisión actual
 
+    // Federación A.5: documento como entregable de una tarea de proyecto (capa 1)
+    // null cuando module ≠ PROJECTS o cuando todavía no fue vinculado.
+    // Sin FK porque ProjectTask vive en mi-project.
+    projectTaskId Int?
+
     // Relaciones
-    documentType  DocumentType       @relation(fields: [documentTypeId], references: [id])
-    documentClass DocumentClass?     @relation(fields: [documentClassId], references: [id])
-    revisions     DocumentRevision[]
+    documentType       DocumentType            @relation(fields: [documentTypeId], references: [id])
+    documentClass      DocumentClass?          @relation(fields: [documentClassId], references: [id])
+    revisions          DocumentRevision[]
+    taskDocumentRefs   TaskDocumentReference[]
 
     @@unique([code, module, entityType, entityId]) // Único dentro del mismo contexto (módulo + entidad)
     @@index([module, entityType, entityId])
     @@index([documentClassId])
+    @@index([projectTaskId])
     @@map("documents")
+}
+
+// Tabla puente N-a-N entre ProjectTask (mi-project) y Document (mi-document).
+// Capa 2 de la federación A.5: documentos consumidos como insumo o referenciados.
+// El entregable principal (capa 1) se modela con Document.projectTaskId.
+model TaskDocumentReference {
+    id            Int              @id @default(autoincrement())
+    createdAt     DateTime         @default(now())
+    createdById   Int // Referencia al User del sistema admin
+
+    projectTaskId Int // Referencia a ProjectTask.id (sin FK, está en otro subgraph)
+    documentId    Int
+    role          TaskDocumentRole
+
+    document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+    @@unique([projectTaskId, documentId, role])
+    @@index([projectTaskId])
+    @@index([documentId])
+    @@map("task_document_references")
 }
 
 // Revisiones de un documento (A, B, C... o 0, 1, 2...)

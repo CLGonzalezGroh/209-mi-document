@@ -54,6 +54,7 @@ export const ModelName = {
   DocumentClass: 'DocumentClass',
   DocumentType: 'DocumentType',
   Document: 'Document',
+  TaskDocumentReference: 'TaskDocumentReference',
   DocumentRevision: 'DocumentRevision',
   DocumentVersion: 'DocumentVersion',
   ReviewWorkflow: 'ReviewWorkflow',
@@ -134,10 +135,23 @@ export const DocumentScalarFieldEnum = {
   entityId: 'entityId',
   documentTypeId: 'documentTypeId',
   documentClassId: 'documentClassId',
-  revisionScheme: 'revisionScheme'
+  revisionScheme: 'revisionScheme',
+  projectTaskId: 'projectTaskId'
 } as const
 
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
+
+
+export const TaskDocumentReferenceScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  projectTaskId: 'projectTaskId',
+  documentId: 'documentId',
+  role: 'role'
+} as const
+
+export type TaskDocumentReferenceScalarFieldEnum = (typeof TaskDocumentReferenceScalarFieldEnum)[keyof typeof TaskDocumentReferenceScalarFieldEnum]
 
 
 export const DocumentRevisionScalarFieldEnum = {

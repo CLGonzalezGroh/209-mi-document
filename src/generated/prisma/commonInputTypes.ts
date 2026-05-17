@@ -253,6 +253,23 @@ export type EnumRevisionSchemeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel>
 }
 
+export type EnumTaskDocumentRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.TaskDocumentRole | Prisma.EnumTaskDocumentRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.TaskDocumentRole[] | Prisma.ListEnumTaskDocumentRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TaskDocumentRole[] | Prisma.ListEnumTaskDocumentRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTaskDocumentRoleFilter<$PrismaModel> | $Enums.TaskDocumentRole
+}
+
+export type EnumTaskDocumentRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TaskDocumentRole | Prisma.EnumTaskDocumentRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.TaskDocumentRole[] | Prisma.ListEnumTaskDocumentRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TaskDocumentRole[] | Prisma.ListEnumTaskDocumentRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTaskDocumentRoleWithAggregatesFilter<$PrismaModel> | $Enums.TaskDocumentRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTaskDocumentRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTaskDocumentRoleFilter<$PrismaModel>
+}
+
 export type EnumRevisionStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.RevisionStatus | Prisma.EnumRevisionStatusFieldRefInput<$PrismaModel>
   in?: $Enums.RevisionStatus[] | Prisma.ListEnumRevisionStatusFieldRefInput<$PrismaModel>
@@ -690,6 +707,23 @@ export type NestedEnumRevisionSchemeWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel>
+}
+
+export type NestedEnumTaskDocumentRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.TaskDocumentRole | Prisma.EnumTaskDocumentRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.TaskDocumentRole[] | Prisma.ListEnumTaskDocumentRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TaskDocumentRole[] | Prisma.ListEnumTaskDocumentRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTaskDocumentRoleFilter<$PrismaModel> | $Enums.TaskDocumentRole
+}
+
+export type NestedEnumTaskDocumentRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TaskDocumentRole | Prisma.EnumTaskDocumentRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.TaskDocumentRole[] | Prisma.ListEnumTaskDocumentRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TaskDocumentRole[] | Prisma.ListEnumTaskDocumentRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTaskDocumentRoleWithAggregatesFilter<$PrismaModel> | $Enums.TaskDocumentRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTaskDocumentRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTaskDocumentRoleFilter<$PrismaModel>
 }
 
 export type NestedEnumRevisionStatusFilter<$PrismaModel = never> = {

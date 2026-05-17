@@ -14,6 +14,7 @@ import { scannedFileResolvers } from "./scannedFiles.js"
 import { documentClassResolvers } from "./documentClasses.js"
 import { areaResolvers } from "./areas.js"
 import { dependencyResolvers } from "./dependencies.js"
+import { taskDocumentReferenceResolvers } from "./taskDocumentReferences.js"
 
 export const resolvers: GraphQLResolverMap<ResolverContext> = {
   ...scalars,
@@ -42,6 +43,7 @@ export const resolvers: GraphQLResolverMap<ResolverContext> = {
     ...documentSysLogResolvers.Mutation,
     ...attachmentResolvers.Mutation,
     ...scannedFileResolvers.Mutation,
+    ...taskDocumentReferenceResolvers.Mutation,
   },
   ...resolverTypes,
 }

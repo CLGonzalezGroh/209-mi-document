@@ -123,6 +123,15 @@ export const LogLevel = {
 export type LogLevel = (typeof LogLevel)[keyof typeof LogLevel]
 
 
+export const TaskDocumentRole = {
+  INPUT: 'INPUT',
+  OUTPUT: 'OUTPUT',
+  REFERENCE: 'REFERENCE'
+} as const
+
+export type TaskDocumentRole = (typeof TaskDocumentRole)[keyof typeof TaskDocumentRole]
+
+
 export const DigitalDisposition = {
   PENDING: 'PENDING',
   BAD_QUALITY: 'BAD_QUALITY',

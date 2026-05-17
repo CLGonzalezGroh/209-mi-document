@@ -318,12 +318,22 @@
 
 ---
 
-# What's new in María Ingeniería API Documents 2.0.256
+# What's new in María Ingeniería API Documents 2.0.25
 
 2026-05-15
 
 ## Areas
 
 - Actualiza permisos en resolvers de áreas y clases de documentos para usar constantes de permisos
+
+---
+
+# What's new in María Ingeniería API Documents 2.0.26
+
+2026-05-17
+
+## ProjectTask Documents
+
+- Agregar resolvers para Documentos de referencia para Tareas de Proyectos
 
 ---

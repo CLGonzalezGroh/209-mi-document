@@ -11,6 +11,7 @@
 export type * from './models/DocumentClass.js'
 export type * from './models/DocumentType.js'
 export type * from './models/Document.js'
+export type * from './models/TaskDocumentReference.js'
 export type * from './models/DocumentRevision.js'
 export type * from './models/DocumentVersion.js'
 export type * from './models/ReviewWorkflow.js'

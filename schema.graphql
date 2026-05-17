@@ -537,6 +537,58 @@ type Document @key(fields: "id") {
   currentRevision: DocumentRevision
   "Historial de revisiones del documento"
   revisions: [DocumentRevision!]!
+  "Tarea de proyecto a la que pertenece este documento como entregable principal (capa 1 de la federación A.5)"
+  projectTask: ProjectTask
+  "Referencias documentales (inputs/outputs/refs) que apuntan a este documento desde tareas (capa 2)"
+  taskDocumentReferences: [TaskDocumentReference!]!
+}
+
+# ═══════════════════════════════════════════════════════
+# FEDERACIÓN A.5 — Vínculo ProjectTask ↔ Document
+# ═══════════════════════════════════════════════════════
+
+"Rol de un documento respecto a una tarea de proyecto"
+enum TaskDocumentRole {
+  "Insumo que la tarea consume (norma, BoD, especificación)"
+  INPUT
+  "Documento producido por la tarea (no es el entregable principal)"
+  OUTPUT
+  "Referencia cruzada (documento relacionado)"
+  REFERENCE
+}
+
+"Variante de input de TaskDocumentRole (los enums no deben usarse como input y output simultáneamente)"
+enum TaskDocumentRoleInput {
+  "Insumo que la tarea consume (norma, BoD, especificación)"
+  INPUT
+  "Documento producido por la tarea (no es el entregable principal)"
+  OUTPUT
+  "Referencia cruzada (documento relacionado)"
+  REFERENCE
+}
+
+type ProjectTask @key(fields: "id") {
+  id: Int!
+  "Documentos entregables de la tarea (capa 1: relación 1:N vía Document.projectTaskId)"
+  documents: [Document!]!
+  "Referencias documentales de la tarea: inputs, outputs adicionales y referencias (capa 2: N:N)"
+  documentReferences: [TaskDocumentReference!]!
+}
+
+"Vínculo N:N entre una tarea de proyecto y un documento, con rol asociado (input/output/referencia)"
+type TaskDocumentReference @key(fields: "id") {
+  "Identificador único"
+  id: Int!
+  "Fecha de creación del vínculo"
+  createdAt: DateTime!
+  "Usuario que creó el vínculo"
+  createdBy: UserName!
+  "Tarea de proyecto vinculada"
+  projectTask: ProjectTask!
+  "Documento vinculado"
+  document: Document!
+  "Rol del documento respecto a la tarea"
+  role: TaskDocumentRole!
 }
 
 "Revisión de un documento"
@@ -1159,6 +1211,16 @@ input UpdateDocumentInput {
   documentTypeId: Int
   "Nueva clase de documento"
   documentClassId: Int
+}
+
+"Input para crear una referencia documental tarea ↔ documento (Fase A.5, capa 2)"
+input TaskDocumentReferenceCreateInput {
+  "Tarea de proyecto que referencia el documento"
+  projectTaskId: Int!
+  "Documento referenciado"
+  documentId: Int!
+  "Rol del documento respecto a la tarea"
+  role: TaskDocumentRoleInput!
 }
 
 "Input para crear una revisión"
@@ -1838,4 +1900,20 @@ type Mutation {
 
   "Elimina logs archivados antiguos permanentemente"
   deleteDocumentSysLogsArchive(olderThanDays: Int!): Int!
+
+  # ─── Federación A.5 — ProjectTask ↔ Document ───
+
+  "Vincula un documento existente a una tarea de proyecto como entregable principal (capa 1). Requiere que Document.module = PROJECTS."
+  linkDocumentToTask(documentId: Int!, projectTaskId: Int!): Document!
+
+  "Quita el vínculo de entregable principal de un documento (no elimina el documento)"
+  unlinkDocumentFromTask(documentId: Int!): Document!
+
+  "Agrega una referencia documental a una tarea (input, output adicional o referencia, capa 2)"
+  addTaskDocumentReference(
+    input: TaskDocumentReferenceCreateInput!
+  ): TaskDocumentReference!
+
+  "Elimina una referencia documental de una tarea"
+  removeTaskDocumentReference(id: Int!): Boolean!
 }

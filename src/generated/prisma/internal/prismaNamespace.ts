@@ -387,6 +387,7 @@ export const ModelName = {
   DocumentClass: 'DocumentClass',
   DocumentType: 'DocumentType',
   Document: 'Document',
+  TaskDocumentReference: 'TaskDocumentReference',
   DocumentRevision: 'DocumentRevision',
   DocumentVersion: 'DocumentVersion',
   ReviewWorkflow: 'ReviewWorkflow',
@@ -413,7 +414,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "documentClass" | "documentType" | "document" | "documentRevision" | "documentVersion" | "reviewWorkflow" | "reviewStep" | "transmittal" | "transmittalItem" | "attachment" | "scannedFile" | "area" | "documentSysLog" | "documentSysLogArchive"
+    modelProps: "documentClass" | "documentType" | "document" | "taskDocumentReference" | "documentRevision" | "documentVersion" | "reviewWorkflow" | "reviewStep" | "transmittal" | "transmittalItem" | "attachment" | "scannedFile" | "area" | "documentSysLog" | "documentSysLogArchive"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -636,6 +637,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.DocumentCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.DocumentCountAggregateOutputType> | number
+        }
+      }
+    }
+    TaskDocumentReference: {
+      payload: Prisma.$TaskDocumentReferencePayload<ExtArgs>
+      fields: Prisma.TaskDocumentReferenceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TaskDocumentReferenceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskDocumentReferencePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TaskDocumentReferenceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskDocumentReferencePayload>
+        }
+        findFirst: {
+          args: Prisma.TaskDocumentReferenceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskDocumentReferencePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TaskDocumentReferenceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskDocumentReferencePayload>
+        }
+        findMany: {
+          args: Prisma.TaskDocumentReferenceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskDocumentReferencePayload>[]
+        }
+        create: {
+          args: Prisma.TaskDocumentReferenceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskDocumentReferencePayload>
+        }
+        createMany: {
+          args: Prisma.TaskDocumentReferenceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TaskDocumentReferenceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskDocumentReferencePayload>[]
+        }
+        delete: {
+          args: Prisma.TaskDocumentReferenceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskDocumentReferencePayload>
+        }
+        update: {
+          args: Prisma.TaskDocumentReferenceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskDocumentReferencePayload>
+        }
+        deleteMany: {
+          args: Prisma.TaskDocumentReferenceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TaskDocumentReferenceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TaskDocumentReferenceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskDocumentReferencePayload>[]
+        }
+        upsert: {
+          args: Prisma.TaskDocumentReferenceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskDocumentReferencePayload>
+        }
+        aggregate: {
+          args: Prisma.TaskDocumentReferenceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTaskDocumentReference>
+        }
+        groupBy: {
+          args: Prisma.TaskDocumentReferenceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskDocumentReferenceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TaskDocumentReferenceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskDocumentReferenceCountAggregateOutputType> | number
         }
       }
     }
@@ -1543,10 +1618,23 @@ export const DocumentScalarFieldEnum = {
   entityId: 'entityId',
   documentTypeId: 'documentTypeId',
   documentClassId: 'documentClassId',
-  revisionScheme: 'revisionScheme'
+  revisionScheme: 'revisionScheme',
+  projectTaskId: 'projectTaskId'
 } as const
 
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
+
+
+export const TaskDocumentReferenceScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  projectTaskId: 'projectTaskId',
+  documentId: 'documentId',
+  role: 'role'
+} as const
+
+export type TaskDocumentReferenceScalarFieldEnum = (typeof TaskDocumentReferenceScalarFieldEnum)[keyof typeof TaskDocumentReferenceScalarFieldEnum]
 
 
 export const DocumentRevisionScalarFieldEnum = {
@@ -1845,6 +1933,20 @@ export type ListEnumRevisionSchemeFieldRefInput<$PrismaModel> = FieldRefInputTyp
 
 
 /**
+ * Reference to a field of type 'TaskDocumentRole'
+ */
+export type EnumTaskDocumentRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TaskDocumentRole'>
+    
+
+
+/**
+ * Reference to a field of type 'TaskDocumentRole[]'
+ */
+export type ListEnumTaskDocumentRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TaskDocumentRole[]'>
+    
+
+
+/**
  * Reference to a field of type 'RevisionStatus'
  */
 export type EnumRevisionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RevisionStatus'>
@@ -2109,6 +2211,7 @@ export type GlobalOmitConfig = {
   documentClass?: Prisma.DocumentClassOmit
   documentType?: Prisma.DocumentTypeOmit
   document?: Prisma.DocumentOmit
+  taskDocumentReference?: Prisma.TaskDocumentReferenceOmit
   documentRevision?: Prisma.DocumentRevisionOmit
   documentVersion?: Prisma.DocumentVersionOmit
   reviewWorkflow?: Prisma.ReviewWorkflowOmit
