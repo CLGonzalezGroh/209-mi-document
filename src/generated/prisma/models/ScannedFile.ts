@@ -368,10 +368,10 @@ export type ScannedFileGroupByOutputType = {
   description: string | null
   originalReference: string | null
   physicalLocation: string | null
-  fileKey: string
-  fileName: string
-  fileSize: number
-  mimeType: string
+  fileKey: string | null
+  fileName: string | null
+  fileSize: number | null
+  mimeType: string | null
   digitalDisposition: $Enums.DigitalDisposition
   physicalDisposition: $Enums.PhysicalDisposition
   externalReference: string | null
@@ -422,10 +422,10 @@ export type ScannedFileWhereInput = {
   description?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
   originalReference?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
   physicalLocation?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
-  fileKey?: Prisma.StringFilter<"ScannedFile"> | string
-  fileName?: Prisma.StringFilter<"ScannedFile"> | string
-  fileSize?: Prisma.IntFilter<"ScannedFile"> | number
-  mimeType?: Prisma.StringFilter<"ScannedFile"> | string
+  fileKey?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
+  fileName?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
+  fileSize?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
+  mimeType?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFilter<"ScannedFile"> | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFilter<"ScannedFile"> | $Enums.PhysicalDisposition
   externalReference?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
@@ -456,10 +456,10 @@ export type ScannedFileOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   originalReference?: Prisma.SortOrderInput | Prisma.SortOrder
   physicalLocation?: Prisma.SortOrderInput | Prisma.SortOrder
-  fileKey?: Prisma.SortOrder
-  fileName?: Prisma.SortOrder
-  fileSize?: Prisma.SortOrder
-  mimeType?: Prisma.SortOrder
+  fileKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  fileName?: Prisma.SortOrderInput | Prisma.SortOrder
+  fileSize?: Prisma.SortOrderInput | Prisma.SortOrder
+  mimeType?: Prisma.SortOrderInput | Prisma.SortOrder
   digitalDisposition?: Prisma.SortOrder
   physicalDisposition?: Prisma.SortOrder
   externalReference?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -494,10 +494,10 @@ export type ScannedFileWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
   originalReference?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
   physicalLocation?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
-  fileKey?: Prisma.StringFilter<"ScannedFile"> | string
-  fileName?: Prisma.StringFilter<"ScannedFile"> | string
-  fileSize?: Prisma.IntFilter<"ScannedFile"> | number
-  mimeType?: Prisma.StringFilter<"ScannedFile"> | string
+  fileKey?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
+  fileName?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
+  fileSize?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
+  mimeType?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFilter<"ScannedFile"> | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFilter<"ScannedFile"> | $Enums.PhysicalDisposition
   externalReference?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
@@ -528,10 +528,10 @@ export type ScannedFileOrderByWithAggregationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   originalReference?: Prisma.SortOrderInput | Prisma.SortOrder
   physicalLocation?: Prisma.SortOrderInput | Prisma.SortOrder
-  fileKey?: Prisma.SortOrder
-  fileName?: Prisma.SortOrder
-  fileSize?: Prisma.SortOrder
-  mimeType?: Prisma.SortOrder
+  fileKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  fileName?: Prisma.SortOrderInput | Prisma.SortOrder
+  fileSize?: Prisma.SortOrderInput | Prisma.SortOrder
+  mimeType?: Prisma.SortOrderInput | Prisma.SortOrder
   digitalDisposition?: Prisma.SortOrder
   physicalDisposition?: Prisma.SortOrder
   externalReference?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -567,10 +567,10 @@ export type ScannedFileScalarWhereWithAggregatesInput = {
   description?: Prisma.StringNullableWithAggregatesFilter<"ScannedFile"> | string | null
   originalReference?: Prisma.StringNullableWithAggregatesFilter<"ScannedFile"> | string | null
   physicalLocation?: Prisma.StringNullableWithAggregatesFilter<"ScannedFile"> | string | null
-  fileKey?: Prisma.StringWithAggregatesFilter<"ScannedFile"> | string
-  fileName?: Prisma.StringWithAggregatesFilter<"ScannedFile"> | string
-  fileSize?: Prisma.IntWithAggregatesFilter<"ScannedFile"> | number
-  mimeType?: Prisma.StringWithAggregatesFilter<"ScannedFile"> | string
+  fileKey?: Prisma.StringNullableWithAggregatesFilter<"ScannedFile"> | string | null
+  fileName?: Prisma.StringNullableWithAggregatesFilter<"ScannedFile"> | string | null
+  fileSize?: Prisma.IntNullableWithAggregatesFilter<"ScannedFile"> | number | null
+  mimeType?: Prisma.StringNullableWithAggregatesFilter<"ScannedFile"> | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionWithAggregatesFilter<"ScannedFile"> | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionWithAggregatesFilter<"ScannedFile"> | $Enums.PhysicalDisposition
   externalReference?: Prisma.StringNullableWithAggregatesFilter<"ScannedFile"> | string | null
@@ -594,10 +594,10 @@ export type ScannedFileCreateInput = {
   description?: string | null
   originalReference?: string | null
   physicalLocation?: string | null
-  fileKey: string
-  fileName: string
-  fileSize: number
-  mimeType: string
+  fileKey?: string | null
+  fileName?: string | null
+  fileSize?: number | null
+  mimeType?: string | null
   digitalDisposition?: $Enums.DigitalDisposition
   physicalDisposition?: $Enums.PhysicalDisposition
   externalReference?: string | null
@@ -628,10 +628,10 @@ export type ScannedFileUncheckedCreateInput = {
   description?: string | null
   originalReference?: string | null
   physicalLocation?: string | null
-  fileKey: string
-  fileName: string
-  fileSize: number
-  mimeType: string
+  fileKey?: string | null
+  fileName?: string | null
+  fileSize?: number | null
+  mimeType?: string | null
   digitalDisposition?: $Enums.DigitalDisposition
   physicalDisposition?: $Enums.PhysicalDisposition
   externalReference?: string | null
@@ -655,10 +655,10 @@ export type ScannedFileUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
-  fileName?: Prisma.StringFieldUpdateOperationsInput | string
-  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
   externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -689,10 +689,10 @@ export type ScannedFileUncheckedUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
-  fileName?: Prisma.StringFieldUpdateOperationsInput | string
-  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
   externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -720,10 +720,10 @@ export type ScannedFileCreateManyInput = {
   description?: string | null
   originalReference?: string | null
   physicalLocation?: string | null
-  fileKey: string
-  fileName: string
-  fileSize: number
-  mimeType: string
+  fileKey?: string | null
+  fileName?: string | null
+  fileSize?: number | null
+  mimeType?: string | null
   digitalDisposition?: $Enums.DigitalDisposition
   physicalDisposition?: $Enums.PhysicalDisposition
   externalReference?: string | null
@@ -747,10 +747,10 @@ export type ScannedFileUpdateManyMutationInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
-  fileName?: Prisma.StringFieldUpdateOperationsInput | string
-  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
   externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -778,10 +778,10 @@ export type ScannedFileUncheckedUpdateManyInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
-  fileName?: Prisma.StringFieldUpdateOperationsInput | string
-  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
   externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1073,10 +1073,10 @@ export type ScannedFileCreateWithoutDocumentClassInput = {
   description?: string | null
   originalReference?: string | null
   physicalLocation?: string | null
-  fileKey: string
-  fileName: string
-  fileSize: number
-  mimeType: string
+  fileKey?: string | null
+  fileName?: string | null
+  fileSize?: number | null
+  mimeType?: string | null
   digitalDisposition?: $Enums.DigitalDisposition
   physicalDisposition?: $Enums.PhysicalDisposition
   externalReference?: string | null
@@ -1105,10 +1105,10 @@ export type ScannedFileUncheckedCreateWithoutDocumentClassInput = {
   description?: string | null
   originalReference?: string | null
   physicalLocation?: string | null
-  fileKey: string
-  fileName: string
-  fileSize: number
-  mimeType: string
+  fileKey?: string | null
+  fileName?: string | null
+  fileSize?: number | null
+  mimeType?: string | null
   digitalDisposition?: $Enums.DigitalDisposition
   physicalDisposition?: $Enums.PhysicalDisposition
   externalReference?: string | null
@@ -1165,10 +1165,10 @@ export type ScannedFileScalarWhereInput = {
   description?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
   originalReference?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
   physicalLocation?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
-  fileKey?: Prisma.StringFilter<"ScannedFile"> | string
-  fileName?: Prisma.StringFilter<"ScannedFile"> | string
-  fileSize?: Prisma.IntFilter<"ScannedFile"> | number
-  mimeType?: Prisma.StringFilter<"ScannedFile"> | string
+  fileKey?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
+  fileName?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
+  fileSize?: Prisma.IntNullableFilter<"ScannedFile"> | number | null
+  mimeType?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFilter<"ScannedFile"> | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFilter<"ScannedFile"> | $Enums.PhysicalDisposition
   externalReference?: Prisma.StringNullableFilter<"ScannedFile"> | string | null
@@ -1192,10 +1192,10 @@ export type ScannedFileCreateWithoutDocumentTypeInput = {
   description?: string | null
   originalReference?: string | null
   physicalLocation?: string | null
-  fileKey: string
-  fileName: string
-  fileSize: number
-  mimeType: string
+  fileKey?: string | null
+  fileName?: string | null
+  fileSize?: number | null
+  mimeType?: string | null
   digitalDisposition?: $Enums.DigitalDisposition
   physicalDisposition?: $Enums.PhysicalDisposition
   externalReference?: string | null
@@ -1224,10 +1224,10 @@ export type ScannedFileUncheckedCreateWithoutDocumentTypeInput = {
   description?: string | null
   originalReference?: string | null
   physicalLocation?: string | null
-  fileKey: string
-  fileName: string
-  fileSize: number
-  mimeType: string
+  fileKey?: string | null
+  fileName?: string | null
+  fileSize?: number | null
+  mimeType?: string | null
   digitalDisposition?: $Enums.DigitalDisposition
   physicalDisposition?: $Enums.PhysicalDisposition
   externalReference?: string | null
@@ -1277,10 +1277,10 @@ export type ScannedFileCreateWithoutAreaInput = {
   description?: string | null
   originalReference?: string | null
   physicalLocation?: string | null
-  fileKey: string
-  fileName: string
-  fileSize: number
-  mimeType: string
+  fileKey?: string | null
+  fileName?: string | null
+  fileSize?: number | null
+  mimeType?: string | null
   digitalDisposition?: $Enums.DigitalDisposition
   physicalDisposition?: $Enums.PhysicalDisposition
   externalReference?: string | null
@@ -1309,10 +1309,10 @@ export type ScannedFileUncheckedCreateWithoutAreaInput = {
   description?: string | null
   originalReference?: string | null
   physicalLocation?: string | null
-  fileKey: string
-  fileName: string
-  fileSize: number
-  mimeType: string
+  fileKey?: string | null
+  fileName?: string | null
+  fileSize?: number | null
+  mimeType?: string | null
   digitalDisposition?: $Enums.DigitalDisposition
   physicalDisposition?: $Enums.PhysicalDisposition
   externalReference?: string | null
@@ -1365,10 +1365,10 @@ export type ScannedFileCreateManyDocumentClassInput = {
   description?: string | null
   originalReference?: string | null
   physicalLocation?: string | null
-  fileKey: string
-  fileName: string
-  fileSize: number
-  mimeType: string
+  fileKey?: string | null
+  fileName?: string | null
+  fileSize?: number | null
+  mimeType?: string | null
   digitalDisposition?: $Enums.DigitalDisposition
   physicalDisposition?: $Enums.PhysicalDisposition
   externalReference?: string | null
@@ -1392,10 +1392,10 @@ export type ScannedFileUpdateWithoutDocumentClassInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
-  fileName?: Prisma.StringFieldUpdateOperationsInput | string
-  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
   externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1424,10 +1424,10 @@ export type ScannedFileUncheckedUpdateWithoutDocumentClassInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
-  fileName?: Prisma.StringFieldUpdateOperationsInput | string
-  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
   externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1454,10 +1454,10 @@ export type ScannedFileUncheckedUpdateManyWithoutDocumentClassInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
-  fileName?: Prisma.StringFieldUpdateOperationsInput | string
-  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
   externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1484,10 +1484,10 @@ export type ScannedFileCreateManyDocumentTypeInput = {
   description?: string | null
   originalReference?: string | null
   physicalLocation?: string | null
-  fileKey: string
-  fileName: string
-  fileSize: number
-  mimeType: string
+  fileKey?: string | null
+  fileName?: string | null
+  fileSize?: number | null
+  mimeType?: string | null
   digitalDisposition?: $Enums.DigitalDisposition
   physicalDisposition?: $Enums.PhysicalDisposition
   externalReference?: string | null
@@ -1511,10 +1511,10 @@ export type ScannedFileUpdateWithoutDocumentTypeInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
-  fileName?: Prisma.StringFieldUpdateOperationsInput | string
-  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
   externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1543,10 +1543,10 @@ export type ScannedFileUncheckedUpdateWithoutDocumentTypeInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
-  fileName?: Prisma.StringFieldUpdateOperationsInput | string
-  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
   externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1573,10 +1573,10 @@ export type ScannedFileUncheckedUpdateManyWithoutDocumentTypeInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
-  fileName?: Prisma.StringFieldUpdateOperationsInput | string
-  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
   externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1603,10 +1603,10 @@ export type ScannedFileCreateManyAreaInput = {
   description?: string | null
   originalReference?: string | null
   physicalLocation?: string | null
-  fileKey: string
-  fileName: string
-  fileSize: number
-  mimeType: string
+  fileKey?: string | null
+  fileName?: string | null
+  fileSize?: number | null
+  mimeType?: string | null
   digitalDisposition?: $Enums.DigitalDisposition
   physicalDisposition?: $Enums.PhysicalDisposition
   externalReference?: string | null
@@ -1630,10 +1630,10 @@ export type ScannedFileUpdateWithoutAreaInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
-  fileName?: Prisma.StringFieldUpdateOperationsInput | string
-  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
   externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1662,10 +1662,10 @@ export type ScannedFileUncheckedUpdateWithoutAreaInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
-  fileName?: Prisma.StringFieldUpdateOperationsInput | string
-  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
   externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1692,10 +1692,10 @@ export type ScannedFileUncheckedUpdateManyWithoutAreaInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fileKey?: Prisma.StringFieldUpdateOperationsInput | string
-  fileName?: Prisma.StringFieldUpdateOperationsInput | string
-  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   digitalDisposition?: Prisma.EnumDigitalDispositionFieldUpdateOperationsInput | $Enums.DigitalDisposition
   physicalDisposition?: Prisma.EnumPhysicalDispositionFieldUpdateOperationsInput | $Enums.PhysicalDisposition
   externalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1882,10 +1882,10 @@ export type $ScannedFilePayload<ExtArgs extends runtime.Types.Extensions.Interna
     description: string | null
     originalReference: string | null
     physicalLocation: string | null
-    fileKey: string
-    fileName: string
-    fileSize: number
-    mimeType: string
+    fileKey: string | null
+    fileName: string | null
+    fileSize: number | null
+    mimeType: string | null
     digitalDisposition: $Enums.DigitalDisposition
     physicalDisposition: $Enums.PhysicalDisposition
     externalReference: string | null

@@ -301,6 +301,8 @@ enum DigitalDisposition {
   UPLOADED
   "Descartado, sin valor documental"
   DISCARDED
+  "Documento sin copia física hallada, no se escaneará"
+  LOST
 }
 
 "Estado de clasificación digital para inputs"
@@ -315,6 +317,8 @@ enum DigitalDispositionInput {
   UPLOADED
   "Descartado, sin valor documental"
   DISCARDED
+  "Documento sin copia física hallada, no se escaneará"
+  LOST
 }
 
 "Disposición física del papel original"
@@ -807,14 +811,14 @@ type ScannedFile @key(fields: "id") {
   originalReference: String
   "Ubicación física donde se encontró el papel"
   physicalLocation: String
-  "Key del archivo en DO Spaces"
-  fileKey: String!
-  "Nombre original del archivo digitalizado"
-  fileName: String!
-  "Tamaño del archivo en bytes"
-  fileSize: Int!
-  "Tipo MIME del archivo"
-  mimeType: String!
+  "Key del archivo en DO Spaces (null si el documento está marcado como Perdido)"
+  fileKey: String
+  "Nombre original del archivo digitalizado (null si está marcado como Perdido)"
+  fileName: String
+  "Tamaño del archivo en bytes (null si está marcado como Perdido)"
+  fileSize: Int
+  "Tipo MIME del archivo (null si está marcado como Perdido)"
+  mimeType: String
   "Estado de clasificación digital"
   digitalDisposition: DigitalDisposition!
   "Disposición del papel físico original"
@@ -877,6 +881,8 @@ type ScannedFileStats {
   uploaded: Int!
   "Total de archivos descartados"
   discarded: Int!
+  "Total de archivos marcados como perdidos (sin copia física hallada)"
+  lost: Int!
   "Total general"
   total: Int!
   "Papel pendiente de decisión"
@@ -1467,14 +1473,16 @@ input CreateScannedFileInput {
   documentClassId: Int
   "ID del tipo de documento"
   documentTypeId: Int
-  "Key del archivo en DO Spaces"
-  fileKey: String!
-  "Nombre original del archivo"
-  fileName: String!
-  "Tamaño en bytes"
-  fileSize: Int!
-  "Tipo MIME"
-  mimeType: String!
+  "Key del archivo en DO Spaces (omitir si markAsLost es true)"
+  fileKey: String
+  "Nombre original del archivo (omitir si markAsLost es true)"
+  fileName: String
+  "Tamaño en bytes (omitir si markAsLost es true)"
+  fileSize: Int
+  "Tipo MIME (omitir si markAsLost es true)"
+  mimeType: String
+  "Marcar como Perdido: crea el registro sin archivo (no se exige imagen)"
+  markAsLost: Boolean
 }
 
 "Datos para editar un archivo escaneado"

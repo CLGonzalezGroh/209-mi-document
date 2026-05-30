@@ -337,3 +337,18 @@
 - Agregar resolvers para Documentos de referencia para Tareas de Proyectos
 
 ---
+
+# What's new in María Ingeniería API Documents 2.1.0
+
+2026-05-30
+
+## Disposición digital "Perdido" (LOST) para archivos escaneados
+
+- Nuevo valor `LOST` en el enum `DigitalDisposition`: permite registrar un documento que se sabe debería existir pero cuya copia física no se encuentra, sin exigir subir una imagen escaneada.
+- Los campos de archivo de `ScannedFile` (`fileKey`, `fileName`, `fileSize`, `mimeType`) pasan a ser **nullable** en la base de datos y en el schema GraphQL para soportar registros sin archivo.
+- `CreateScannedFileInput` incorpora el flag `markAsLost`: cuando es `true`, el registro se crea con disposición `LOST` y sin archivo; cuando es `false`/omitido, se siguen exigiendo los 4 campos de archivo (`BAD_USER_INPUT` si faltan).
+- `ScannedFileStats` agrega el conteo `lost`.
+- La recuperación `LOST → PENDING` se realiza con el resolver existente `resetScannedFileToPending` (permiso `DOCUMENTS_SCANNED_FILE_ADMIN_UPDATE`); luego puede subirse la imagen vía `updateScannedFile`.
+- Requiere aplicar la migración Prisma `add_lost_disposition_nullable_files` en la BD `mi_document` de cada cliente.
+
+---

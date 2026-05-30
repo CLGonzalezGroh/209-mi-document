@@ -137,7 +137,8 @@ export const DigitalDisposition = {
   BAD_QUALITY: 'BAD_QUALITY',
   ACCEPTED: 'ACCEPTED',
   UPLOADED: 'UPLOADED',
-  DISCARDED: 'DISCARDED'
+  DISCARDED: 'DISCARDED',
+  LOST: 'LOST'
 } as const
 
 export type DigitalDisposition = (typeof DigitalDisposition)[keyof typeof DigitalDisposition]

@@ -366,6 +366,7 @@ enum DigitalDisposition {
     ACCEPTED // Aceptado, pendiente de carga en sistema externo
     UPLOADED // Cargado en sistema externo, ciclo cerrado
     DISCARDED // Descartado, sin valor documental
+    LOST // Documento sin copia física hallada, no se escaneará
 }
 
 enum PhysicalDisposition {
@@ -392,10 +393,10 @@ model ScannedFile {
     description           String?             @db.Text
     originalReference     String?             @db.VarChar(255)
     physicalLocation      String?             @db.VarChar(500)
-    fileKey               String              @db.VarChar(500)
-    fileName              String              @db.VarChar(255)
-    fileSize              Int
-    mimeType              String              @db.VarChar(100)
+    fileKey               String?             @db.VarChar(500)
+    fileName              String?             @db.VarChar(255)
+    fileSize              Int?
+    mimeType              String?             @db.VarChar(100)
     digitalDisposition    DigitalDisposition  @default(PENDING)
     physicalDisposition   PhysicalDisposition @default(PENDING)
     externalReference     String?             @db.VarChar(500)

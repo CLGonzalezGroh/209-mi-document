@@ -246,6 +246,7 @@ export const scannedFileResolvers = {
           accepted,
           uploaded,
           discarded,
+          lost,
           total,
           physicalPending,
           physicalDestroy,
@@ -267,6 +268,9 @@ export const scannedFileResolvers = {
           }),
           context.orm.scannedFile.count({
             where: { ...baseWhere, digitalDisposition: "DISCARDED" },
+          }),
+          context.orm.scannedFile.count({
+            where: { ...baseWhere, digitalDisposition: "LOST" },
           }),
           context.orm.scannedFile.count({ where: baseWhere }),
           context.orm.scannedFile.count({
@@ -292,6 +296,7 @@ export const scannedFileResolvers = {
           accepted,
           uploaded,
           discarded,
+          lost,
           total,
           physicalPending,
           physicalDestroy,
@@ -330,10 +335,11 @@ export const scannedFileResolvers = {
           areaId?: number
           documentClassId?: number
           documentTypeId?: number
-          fileKey: string
-          fileName: string
-          fileSize: number
-          mimeType: string
+          fileKey?: string
+          fileName?: string
+          fileSize?: number
+          mimeType?: string
+          markAsLost?: boolean
         }
       },
       context: ResolverContext,
@@ -345,6 +351,22 @@ export const scannedFileResolvers = {
       logger.info("createScannedFile", { userId })
 
       try {
+        const isLost = input.markAsLost === true
+
+        if (!isLost) {
+          if (
+            !input.fileKey ||
+            !input.fileName ||
+            !input.fileSize ||
+            !input.mimeType
+          ) {
+            throw new GraphQLError(
+              "fileKey, fileName, fileSize y mimeType son requeridos cuando el archivo no se marca como perdido",
+              { extensions: { code: "BAD_USER_INPUT" } },
+            )
+          }
+        }
+
         const scannedFile = await context.orm.scannedFile.create({
           data: {
             projectId: input.projectId,
@@ -356,11 +378,11 @@ export const scannedFileResolvers = {
             areaId: input.areaId,
             documentClassId: input.documentClassId,
             documentTypeId: input.documentTypeId,
-            fileKey: input.fileKey,
-            fileName: input.fileName,
-            fileSize: input.fileSize,
-            mimeType: input.mimeType,
-            digitalDisposition: "PENDING",
+            fileKey: isLost ? null : input.fileKey,
+            fileName: isLost ? null : input.fileName,
+            fileSize: isLost ? null : input.fileSize,
+            mimeType: isLost ? null : input.mimeType,
+            digitalDisposition: isLost ? "LOST" : "PENDING",
             physicalDisposition: "PENDING",
             createdById: userId,
             updatedById: userId,
