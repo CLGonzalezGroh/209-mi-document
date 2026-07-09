@@ -352,3 +352,15 @@
 - Requiere aplicar la migración Prisma `add_lost_disposition_nullable_files` en la BD `mi_document` de cada cliente.
 
 ---
+
+# What's new in María Ingeniería API Documents 2.1.1
+
+2026-07-09
+
+## Actualización de dependencias
+
+- Migración a **TypeScript 7** (compilador nativo).
+- Actualización de `@apollo/server` 5.5.1, `@apollo/subgraph` 2.14.2, `prisma`/`@prisma/*` 7.8, `pg` 8.22, `@types/node` 26, `tsx`, `graphql-tag` y `@CLGonzalezGroh/mi-common` 2.1.
+- `graphql` se mantiene en `^16` (Apollo aún no soporta `graphql` 17).
+
+---
