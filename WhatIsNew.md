@@ -364,3 +364,15 @@
 - `graphql` se mantiene en `^16` (Apollo aún no soporta `graphql` 17).
 
 ---
+
+# What's new in María Ingeniería API Documents 2.1.2
+
+2026-07-17
+
+## Módulo digitalization en el catálogo compartido
+
+- Se agrega `digitalization` a `MODULE_IDS` de `@CLGonzalezGroh/mi-common` (2.3.0).
+- `MODULE_ID_TO_PRISMA` mapea `digitalization → null`: el módulo de digitalización gestiona su propia metadata de archivos y **no** etiqueta documentos en `mi-document` (ADR-018). No requiere un valor nuevo en el enum Prisma `ModuleType` ni migración.
+- Actualización de dependencia `@CLGonzalezGroh/mi-common` a `2.3`.
+
+---

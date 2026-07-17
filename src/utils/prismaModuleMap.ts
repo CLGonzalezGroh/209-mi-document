@@ -16,6 +16,7 @@ export const MODULE_ID_TO_PRISMA: Record<ModuleId, ModuleType | null> = {
   [MODULE_IDS.QUALITY]: ModuleType.QUALITY,
   [MODULE_IDS.PROJECTS]: ModuleType.PROJECTS,
   [MODULE_IDS.DOCUMENTS]: null, // documents no se etiqueta a sí mismo
+  [MODULE_IDS.DIGITALIZATION]: null, // digitalization gestiona su propia metadata; no etiqueta documentos en mi-document
   [MODULE_IDS.MANAGEMENT]: ModuleType.MANAGEMENT,
   [MODULE_IDS.COMERCIAL]: ModuleType.COMERCIAL,
   [MODULE_IDS.TAGS]: ModuleType.TAGS,
