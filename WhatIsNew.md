@@ -376,3 +376,24 @@
 - Actualización de dependencia `@CLGonzalezGroh/mi-common` a `2.3`.
 
 ---
+
+# What's new in María Ingeniería API Documents 2.2.0
+
+2026-08-08
+
+## Trazabilidad funcional del subsistema de Gestión Documental
+
+Primer bloque de la evolución documentada en `docs/EVOLUTION/BLOCK_01_TRAZABILIDAD_FUNCIONAL.md`. **No modifica el comportamiento funcional**: sustituye el registro de la traza y agrega su consulta.
+
+- Dos objetos de dominio nuevos, inmutables: **`DocWorkflowEvent`** registra transiciones de estado (qué objeto cambió, desde qué estado y hacia cuál) y **`DocAuditEvent`** registra acciones ejecutadas (quién hizo qué, con sus datos de contexto). Enum `DocObjectType` para el objeto afectado.
+- Las **25 escrituras funcionales** del subsistema documental —documentos, revisiones, versiones, workflows, transmittals y catálogos— dejan de escribirse en `DocumentSysLog` y pasan a emitir eventos.
+- **`DocumentSysLog` no se modifica.** Conserva los errores técnicos de todos los subsistemas vía `handleError`, la traza de `ScannedFile` y `Area`, y sus operaciones de archivado. Sus pantallas siguen operando sin cambios.
+- La emisión ocurre **dentro de la misma transacción** que aplica el cambio de estado: deja de ser posible un cambio sin su registro. Las operaciones que antes ejecutaban una sola sentencia quedaron envueltas en `$transaction`.
+- Una acción puede producir **varias transiciones**: aprobar el último paso de un circuito emite la aprobación del paso, la del circuito, la de la revisión y una por cada revisión que queda `SUPERSEDED`.
+- Nuevas consultas de solo lectura: `docWorkflowEvents(objectType, objectId)` y `docAuditEvents(objectType, objectId)`, en orden cronológico. Exigen el permiso de lectura del objeto consultado; **no se introdujo un permiso nuevo**.
+- Nuevo escalar **`JSON`**, portado de `mi-digitalization`, usado por `DocAuditEvent.meta`.
+- Primeras **pruebas automatizadas del módulo** con `node:test`, sin dependencias nuevas: `npm run test:block01` (28 pruebas, sin base) y `npm run test:block01-db` (agrega la verificación de persistencia y de la garantía transaccional).
+- La lógica de completitud del circuito de revisión se extrajo a `src/utils/reviewWorkflow.ts` para poder probarla. Reproduce el comportamiento vigente sin modificarlo.
+- Requiere aplicar la migración Prisma `add_domain_events` en la BD `mi_document` de cada cliente. Es **puramente aditiva**: un enum, dos tablas y tres índices, sin `ALTER` ni `DROP`.
+
+---

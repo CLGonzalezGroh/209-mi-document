@@ -8,8 +8,18 @@ import {
   WorkflowStatus,
   StepStatus,
   StepType,
-  SysLogModule,
 } from "../generated/prisma/enums.js"
+import { AuditAction, WorkflowEvent } from "../events/catalog.js"
+import {
+  emitAuditEvent,
+  emitWorkflowEvents,
+  type WorkflowEventInput,
+} from "../events/emit.js"
+import {
+  completesWorkflow,
+  stepsSkippedByCancellation,
+  stepsSkippedByRejection,
+} from "../utils/reviewWorkflow.js"
 import { createHash } from "crypto"
 
 const workflowIncludes = {
@@ -218,18 +228,29 @@ export const workflowResolvers = {
             },
           })
 
-          return wf
-        })
+          await emitAuditEvent(tx, {
+            action: AuditAction.InitiateReview,
+            objectId: wf.id,
+            actorId: userId,
+            meta: { revisionId, stepsCount: input.steps.length },
+          })
+          await emitWorkflowEvents(tx, [
+            {
+              name: WorkflowEvent.WorkflowStarted,
+              objectId: wf.id,
+              toState: WorkflowStatus.IN_PROGRESS,
+              actorId: userId,
+            },
+            {
+              name: WorkflowEvent.RevisionSubmitted,
+              objectId: revisionId,
+              fromState: RevisionStatus.DRAFT,
+              toState: RevisionStatus.IN_REVIEW,
+              actorId: userId,
+            },
+          ])
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "INITIATE_REVIEW",
-            message: `Workflow de revisión iniciado para revisión ID ${revisionId} con ${input.steps.length} pasos`,
-            module: (workflow as any).revision?.document?.module as SysLogModule,
-            meta: JSON.stringify({ workflowId: workflow.id, revisionId, stepsCount: input.steps.length }),
-          },
+          return wf
         })
 
         return workflow
@@ -318,18 +339,18 @@ export const workflowResolvers = {
             include: stepIncludes,
           })
 
-          // Verificar si todos los steps están completados
-          const allSteps = step.workflow.steps
+          const transitions: WorkflowEventInput[] = [
+            {
+              name: WorkflowEvent.StepApproved,
+              objectId: stepId,
+              fromState: StepStatus.PENDING,
+              toState: StepStatus.APPROVED,
+              actorId: userId,
+            },
+          ]
 
           // Si no quedan pasos pendientes (excepto ACKNOWLEDGE), el workflow está completo
-          const nonAckSteps = allSteps.filter(
-            (s) => s.stepType !== "ACKNOWLEDGE",
-          )
-          const approvedNonAck = nonAckSteps.filter(
-            (s) => s.id === stepId || s.status === StepStatus.APPROVED,
-          )
-
-          if (approvedNonAck.length === nonAckSteps.length) {
+          if (completesWorkflow(step.workflow.steps, stepId)) {
             // Completar workflow
             await tx.reviewWorkflow.update({
               where: { id: step.workflow.id },
@@ -350,31 +371,60 @@ export const workflowResolvers = {
               },
             })
 
+            // Revisiones anteriores que quedarán SUPERSEDED: se identifican antes
+            // de actualizarlas para poder emitir una transición por cada una.
+            const supersededWhere = {
+              documentId: step.workflow.revision.documentId,
+              id: { not: step.workflow.revisionId },
+              status: RevisionStatus.APPROVED,
+            }
+            const superseded = await tx.documentRevision.findMany({
+              where: supersededWhere,
+              select: { id: true },
+            })
+
             // Marcar revisiones anteriores como SUPERSEDED
             await tx.documentRevision.updateMany({
-              where: {
-                documentId: step.workflow.revision.documentId,
-                id: { not: step.workflow.revisionId },
-                status: RevisionStatus.APPROVED,
-              },
+              where: supersededWhere,
               data: {
                 status: RevisionStatus.SUPERSEDED,
               },
             })
+
+            transitions.push(
+              {
+                name: WorkflowEvent.WorkflowCompleted,
+                objectId: step.workflow.id,
+                fromState: step.workflow.status,
+                toState: WorkflowStatus.COMPLETED,
+                actorId: userId,
+              },
+              {
+                name: WorkflowEvent.RevisionApproved,
+                objectId: step.workflow.revisionId,
+                fromState: RevisionStatus.IN_REVIEW,
+                toState: RevisionStatus.APPROVED,
+                actorId: userId,
+              },
+              ...superseded.map((r) => ({
+                name: WorkflowEvent.RevisionSuperseded,
+                objectId: r.id,
+                fromState: RevisionStatus.APPROVED,
+                toState: RevisionStatus.SUPERSEDED,
+                actorId: userId,
+              })),
+            )
           }
 
-          return updatedStep
-        })
+          await emitAuditEvent(tx, {
+            action: AuditAction.ApproveStep,
+            objectId: stepId,
+            actorId: userId,
+            meta: { workflowId: step.workflow.id, comments: comments ?? null },
+          })
+          await emitWorkflowEvents(tx, transitions)
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "APPROVE_STEP",
-            message: `Paso de revisión aprobado: step ID ${stepId}, workflow ID ${step.workflow.id}`,
-            module: (result as any).workflow?.revision?.document?.module as SysLogModule,
-            meta: JSON.stringify({ stepId, workflowId: step.workflow.id, comments }),
-          },
+          return updatedStep
         })
 
         return result
@@ -431,6 +481,8 @@ export const workflowResolvers = {
 
         const signatureHash = generateSignatureHash(stepId, userId, "REJECTED")
 
+        const skipped = stepsSkippedByRejection(step.workflow.steps, step.stepOrder)
+
         const result = await context.orm.$transaction(async (tx) => {
           // Rechazar el step
           const updatedStep = await tx.reviewStep.update({
@@ -474,18 +526,44 @@ export const workflowResolvers = {
             },
           })
 
-          return updatedStep
-        })
+          await emitAuditEvent(tx, {
+            action: AuditAction.RejectStep,
+            objectId: stepId,
+            actorId: userId,
+            meta: { workflowId: step.workflow.id, comments },
+          })
+          await emitWorkflowEvents(tx, [
+            {
+              name: WorkflowEvent.StepRejected,
+              objectId: stepId,
+              fromState: StepStatus.PENDING,
+              toState: StepStatus.REJECTED,
+              actorId: userId,
+            },
+            ...skipped.map((s) => ({
+              name: WorkflowEvent.StepSkipped,
+              objectId: s.id,
+              fromState: StepStatus.PENDING,
+              toState: StepStatus.SKIPPED,
+              actorId: userId,
+            })),
+            {
+              name: WorkflowEvent.WorkflowRejected,
+              objectId: step.workflow.id,
+              fromState: step.workflow.status,
+              toState: WorkflowStatus.REJECTED,
+              actorId: userId,
+            },
+            {
+              name: WorkflowEvent.RevisionReturned,
+              objectId: step.workflow.revisionId,
+              fromState: RevisionStatus.IN_REVIEW,
+              toState: RevisionStatus.DRAFT,
+              actorId: userId,
+            },
+          ])
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "WARNING",
-            name: "REJECT_STEP",
-            message: `Paso de revisión rechazado: step ID ${stepId}, workflow ID ${step.workflow.id}`,
-            module: (result as any).workflow?.revision?.document?.module as SysLogModule,
-            meta: JSON.stringify({ stepId, workflowId: step.workflow.id, comments }),
-          },
+          return updatedStep
         })
 
         return result
@@ -538,6 +616,8 @@ export const workflowResolvers = {
           )
         }
 
+        const skipped = stepsSkippedByCancellation(workflow.steps)
+
         const result = await context.orm.$transaction(async (tx) => {
           // Marcar steps pendientes como SKIPPED
           await tx.reviewStep.updateMany({
@@ -569,16 +649,37 @@ export const workflowResolvers = {
             },
           })
 
-          // Log de cancelación
-          await tx.documentSysLog.create({
-            data: {
-              userId,
-              level: "INFO",
-              name: "CANCEL_WORKFLOW",
-              message: `Workflow ${workflowId} cancelado. Razón: ${reason}`,
-              module: (updatedWorkflow as any).revision?.document?.module as SysLogModule,
-            },
+          // La cancelación no tiene estado propio: se registra como rechazo del
+          // workflow, y el motivo queda en la acción de auditoría (H-05, D-17).
+          await emitAuditEvent(tx, {
+            action: AuditAction.CancelWorkflow,
+            objectId: workflowId,
+            actorId: userId,
+            meta: { revisionId: workflow.revisionId, reason },
           })
+          await emitWorkflowEvents(tx, [
+            ...skipped.map((s) => ({
+              name: WorkflowEvent.StepSkipped,
+              objectId: s.id,
+              fromState: StepStatus.PENDING,
+              toState: StepStatus.SKIPPED,
+              actorId: userId,
+            })),
+            {
+              name: WorkflowEvent.WorkflowRejected,
+              objectId: workflowId,
+              fromState: workflow.status,
+              toState: WorkflowStatus.REJECTED,
+              actorId: userId,
+            },
+            {
+              name: WorkflowEvent.RevisionReturned,
+              objectId: workflow.revisionId,
+              fromState: RevisionStatus.IN_REVIEW,
+              toState: RevisionStatus.DRAFT,
+              actorId: userId,
+            },
+          ])
 
           return updatedWorkflow
         })

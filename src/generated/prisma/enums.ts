@@ -132,6 +132,20 @@ export const TaskDocumentRole = {
 export type TaskDocumentRole = (typeof TaskDocumentRole)[keyof typeof TaskDocumentRole]
 
 
+export const DocObjectType = {
+  DOCUMENT: 'DOCUMENT',
+  DOCUMENT_REVISION: 'DOCUMENT_REVISION',
+  DOCUMENT_VERSION: 'DOCUMENT_VERSION',
+  REVIEW_WORKFLOW: 'REVIEW_WORKFLOW',
+  REVIEW_STEP: 'REVIEW_STEP',
+  TRANSMITTAL: 'TRANSMITTAL',
+  DOCUMENT_CLASS: 'DOCUMENT_CLASS',
+  DOCUMENT_TYPE: 'DOCUMENT_TYPE'
+} as const
+
+export type DocObjectType = (typeof DocObjectType)[keyof typeof DocObjectType]
+
+
 export const DigitalDisposition = {
   PENDING: 'PENDING',
   BAD_QUALITY: 'BAD_QUALITY',

@@ -1,0 +1,89 @@
+# SFS — Especificación Funcional de Software
+
+Documentación funcional de **OperMask Documents**.
+
+**Estado:** Draft de cobertura.
+
+## Objetivo
+
+Esta SFS describe exclusivamente el comportamiento implementado y validado de OperMask Documents.
+
+Las propuestas, decisiones aprobadas pendientes, brechas y estrategias de migración se mantienen en `docs/EVOLUTION/`. Una definición se incorpora a esta SFS únicamente después de completar su implementación y verificar el comportamiento resultante.
+
+El estado Draft indica que la cobertura documental todavía es incompleta. No significa que la SFS pueda contener comportamiento futuro.
+
+## Alcance de la especificación
+
+Esta SFS cubre el subsistema de **Gestión Documental**:
+
+- catálogos documentales: `DocumentClass` y `DocumentType`;
+- documentos y su identificación: `Document`;
+- control de revisiones y versiones: `DocumentRevision` y `DocumentVersion`;
+- circuito de revisión y aprobación: `ReviewWorkflow` y `ReviewStep`;
+- emisión y seguimiento de transmittals: `Transmittal` y `TransmittalItem`;
+- archivos adjuntos sin versionado: `Attachment`;
+- vinculación de documentos con tareas de proyecto: `TaskDocumentReference`;
+- eventos funcionales transversales de workflow y auditoría, con el mismo tratamiento de dominio que reciben en OperMask Digitalization.
+
+No forman parte del alcance de esta especificación:
+
+- la digitalización de documentación física implementada en este subgraph mediante `ScannedFile` y `Area`. Ese comportamiento se considera legado: su dominio está siendo especificado en `212-mi-digitalization` y su continuidad, migración o retiro se tratan en `docs/EVOLUTION/`;
+- el registro técnico `DocumentSysLog`, que queda asociado a la operación del servicio y al subsistema legado de `ScannedFile`. La trazabilidad funcional del subsistema de Gestión Documental se expresa mediante eventos de dominio.
+
+## Método de trabajo
+
+Cada bloque funcional se incorpora de forma incremental:
+
+1. relevar el comportamiento implementado;
+2. contrastarlo con el bloque aprobado en `docs/EVOLUTION/`;
+3. completar las migraciones y validaciones aplicables;
+4. confirmar el comportamiento funcional resultante;
+5. documentarlo sin conservar alternativas ni estados transitorios;
+6. registrar la promoción en el plan de evolución.
+
+El relevamiento no habilita por sí mismo la documentación. Un comportamiento existente en el código puede ser revisado, ajustado o reemplazado antes de incorporarse a esta especificación.
+
+## Estados documentales
+
+| Estado | Significado |
+| ------ | ----------- |
+| `Draft de cobertura` | Contiene solo comportamiento vigente, pero todavía no cubre todo el alcance declarado. |
+| `Approved` | El alcance declarado fue implementado, validado y documentado completamente. |
+| `Superseded` | El documento fue reemplazado por una versión posterior. |
+
+Los estados `PROPUESTO`, `APROBADO_PENDIENTE` e `IMPLEMENTADO_CON_BRECHA` pertenecen al plan de evolución y no se utilizan como reglas normativas dentro de la SFS.
+
+## Índice inicial
+
+| Documento            | Contenido                                                   | Estado |
+| -------------------- | ----------------------------------------------------------- | ------ |
+| `00_Convenciones.md` | Convenciones de idioma, nomenclatura y promoción documental | Draft de cobertura |
+| `domain/00_transversal/10_DOM-001_DocWorkflowEvent.md` | Transición de estado de un objeto del dominio | Approved |
+| `domain/00_transversal/20_DOM-002_DocAuditEvent.md` | Acción ejecutada sobre un objeto del dominio | Approved |
+
+Los dos Objetos del Dominio incorporados provienen del bloque de trazabilidad funcional. La organización conceptual del dominio —modelos, arquitectura y su índice— se incorporará cuando los bloques correspondientes se promuevan; hasta entonces, este índice cumple esa función.
+
+## Estructura prevista
+
+La estructura se incorporará por partes a medida que se apruebe cada bloque:
+
+```text
+00_Convenciones.md
+01_Glosario.md
+10_Introduccion.md
+20_Arquitectura_Conceptual.md
+30_Modelo_Conceptual.md
+40_Actores.md
+50_casos_de_uso/
+60_workflows/
+70_pantallas/
+80_indicadores/
+90_Architecture_Decisions.md
+domain/
+```
+
+No se crearán documentos vacíos ni se copiarán definiciones pendientes para anticipar una implementación.
+
+## Plan de evolución
+
+Las decisiones y cambios aprobados que aún no forman parte de esta especificación se encuentran en `../EVOLUTION/README.md`.

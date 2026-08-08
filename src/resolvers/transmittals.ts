@@ -9,6 +9,8 @@ import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
 import { buildTransmittalOrderBy } from "../utils/orderByHelper.js"
 import { TransmittalStatus, ClientStatus, SysLogModule } from "../generated/prisma/enums.js"
+import { AuditAction, WorkflowEvent } from "../events/catalog.js"
+import { emitAuditEvent, emitWorkflowEvent } from "../events/emit.js"
 import { Transmittal } from "../generated/prisma/client.js"
 import { OrderByInput } from "@CLGonzalezGroh/mi-common"
 
@@ -272,32 +274,43 @@ export const transmittalResolvers = {
       try {
         const code = await generateTransmittalCode(context.orm)
 
-        const transmittal = await context.orm.transmittal.create({
-          data: {
-            code,
-            projectId: input.projectId,
-            issuedTo: input.issuedTo,
-            issuedById: userId,
-            updatedById: userId,
-            items: {
-              create: input.items.map((item) => ({
-                documentRevisionId: item.documentRevisionId,
-                purposeCode: item.purposeCode as any,
-              })),
+        const transmittal = await context.orm.$transaction(async (tx) => {
+          const created = await tx.transmittal.create({
+            data: {
+              code,
+              projectId: input.projectId,
+              issuedTo: input.issuedTo,
+              issuedById: userId,
+              updatedById: userId,
+              items: {
+                create: input.items.map((item) => ({
+                  documentRevisionId: item.documentRevisionId,
+                  purposeCode: item.purposeCode as any,
+                })),
+              },
             },
-          },
-          include: transmittalIncludes,
-        })
+            include: transmittalIncludes,
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "CREATE_TRANSMITTAL",
-            message: `Transmittal creado: ${transmittal.code} para ${input.issuedTo}`,
-            module: SysLogModule.PROJECTS,
-            meta: JSON.stringify({ transmittalId: transmittal.id, input }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.CreateTransmittal,
+            objectId: created.id,
+            actorId: userId,
+            meta: {
+              code: created.code,
+              projectId: input.projectId,
+              issuedTo: input.issuedTo,
+              itemsCount: input.items.length,
+            },
+          })
+          await emitWorkflowEvent(tx, {
+            name: WorkflowEvent.TransmittalCreated,
+            objectId: created.id,
+            toState: TransmittalStatus.DRAFT,
+            actorId: userId,
+          })
+
+          return created
         })
 
         return transmittal
@@ -347,26 +360,33 @@ export const transmittalResolvers = {
           )
         }
 
-        const updated = await context.orm.transmittal.update({
-          where: { id },
-          data: {
-            status: TransmittalStatus.ISSUED,
-            issuedAt: new Date(),
-            updatedById: userId,
-            issuedById: userId,
-          },
-          include: transmittalIncludes,
-        })
+        const updated = await context.orm.$transaction(async (tx) => {
+          const issued = await tx.transmittal.update({
+            where: { id },
+            data: {
+              status: TransmittalStatus.ISSUED,
+              issuedAt: new Date(),
+              updatedById: userId,
+              issuedById: userId,
+            },
+            include: transmittalIncludes,
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "ISSUE_TRANSMITTAL",
-            message: `Transmittal emitido: ${updated.code}`,
-            module: SysLogModule.PROJECTS,
-            meta: JSON.stringify({ transmittalId: id }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.IssueTransmittal,
+            objectId: id,
+            actorId: userId,
+            meta: { code: issued.code },
+          })
+          await emitWorkflowEvent(tx, {
+            name: WorkflowEvent.TransmittalIssued,
+            objectId: id,
+            fromState: transmittal.status,
+            toState: TransmittalStatus.ISSUED,
+            actorId: userId,
+          })
+
+          return issued
         })
 
         return updated
@@ -454,18 +474,21 @@ export const transmittalResolvers = {
             include: transmittalIncludes,
           })
 
-          return updated
-        })
+          await emitAuditEvent(tx, {
+            action: AuditAction.RespondTransmittal,
+            objectId: id,
+            actorId: userId,
+            meta: { code: transmittal.code, itemsCount: input.items.length },
+          })
+          await emitWorkflowEvent(tx, {
+            name: WorkflowEvent.TransmittalResponded,
+            objectId: id,
+            fromState: transmittal.status,
+            toState: TransmittalStatus.RESPONDED,
+            actorId: userId,
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "RESPOND_TRANSMITTAL",
-            message: `Transmittal respondido: ${transmittal.code}`,
-            module: SysLogModule.PROJECTS,
-            meta: JSON.stringify({ transmittalId: id, itemsCount: input.items.length }),
-          },
+          return updated
         })
 
         return result
@@ -519,24 +542,31 @@ export const transmittalResolvers = {
           )
         }
 
-        const updated = await context.orm.transmittal.update({
-          where: { id },
-          data: {
-            status: TransmittalStatus.CLOSED,
-            updatedById: userId,
-          },
-          include: transmittalIncludes,
-        })
+        const updated = await context.orm.$transaction(async (tx) => {
+          const closed = await tx.transmittal.update({
+            where: { id },
+            data: {
+              status: TransmittalStatus.CLOSED,
+              updatedById: userId,
+            },
+            include: transmittalIncludes,
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "CLOSE_TRANSMITTAL",
-            message: `Transmittal cerrado: ${updated.code}`,
-            module: SysLogModule.PROJECTS,
-            meta: JSON.stringify({ transmittalId: id }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.CloseTransmittal,
+            objectId: id,
+            actorId: userId,
+            meta: { code: closed.code },
+          })
+          await emitWorkflowEvent(tx, {
+            name: WorkflowEvent.TransmittalClosed,
+            objectId: id,
+            fromState: transmittal.status,
+            toState: TransmittalStatus.CLOSED,
+            actorId: userId,
+          })
+
+          return closed
         })
 
         return updated

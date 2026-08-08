@@ -11,7 +11,9 @@ import {
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentOrderBy } from "../utils/orderByHelper.js"
-import { ModuleType, RevisionStatus, RevisionScheme, SysLogModule } from "../generated/prisma/enums.js"
+import { ModuleType, RevisionStatus, RevisionScheme } from "../generated/prisma/enums.js"
+import { AuditAction, WorkflowEvent } from "../events/catalog.js"
+import { emitAuditEvent, emitWorkflowEvent } from "../events/emit.js"
 import { Document } from "../generated/prisma/client.js"
 
 export interface DocumentOrderByInput extends OrderByInput {
@@ -363,51 +365,57 @@ export const documentResolvers = {
           (revisionScheme === RevisionScheme.NUMERIC ? "0" : "A")
 
         // Crear documento con primera revisión y primera versión en una transacción
-        const document = await context.orm.document.create({
-          data: {
-            code: input.code,
-            title: input.title,
-            description: input.description,
-            module: input.module,
-            entityType: input.entityType,
-            entityId: input.entityId,
-            documentTypeId: input.documentTypeId,
-            documentClassId: input.documentClassId,
-            revisionScheme,
-            createdById: userId,
-            updatedById: userId,
-            revisions: {
-              create: {
-                revisionCode: initialRevisionCode,
-                status: "DRAFT",
-                createdById: userId,
-                updatedById: userId,
-                versions: {
-                  create: {
-                    versionNumber: 1,
-                    fileKey: input.fileKey,
-                    fileName: input.fileName,
-                    fileSize: input.fileSize,
-                    mimeType: input.mimeType,
-                    checksum: input.checksum,
-                    createdById: userId,
+        const document = await context.orm.$transaction(async (tx) => {
+          const created = await tx.document.create({
+            data: {
+              code: input.code,
+              title: input.title,
+              description: input.description,
+              module: input.module,
+              entityType: input.entityType,
+              entityId: input.entityId,
+              documentTypeId: input.documentTypeId,
+              documentClassId: input.documentClassId,
+              revisionScheme,
+              createdById: userId,
+              updatedById: userId,
+              revisions: {
+                create: {
+                  revisionCode: initialRevisionCode,
+                  status: "DRAFT",
+                  createdById: userId,
+                  updatedById: userId,
+                  versions: {
+                    create: {
+                      versionNumber: 1,
+                      fileKey: input.fileKey,
+                      fileName: input.fileName,
+                      fileSize: input.fileSize,
+                      mimeType: input.mimeType,
+                      checksum: input.checksum,
+                      createdById: userId,
+                    },
                   },
                 },
               },
             },
-          },
-          include: documentIncludes,
-        })
+            include: documentIncludes,
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "CREATE_DOCUMENT",
-            message: `Documento creado: ${document.title} (${document.code})`,
-            module: document.module as SysLogModule,
-            meta: JSON.stringify({ documentId: document.id, input }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.CreateDocument,
+            objectId: created.id,
+            actorId: userId,
+            meta: { code: created.code, title: created.title, module: created.module },
+          })
+          await emitWorkflowEvent(tx, {
+            name: WorkflowEvent.RevisionCreated,
+            objectId: created.revisions[0].id,
+            toState: RevisionStatus.DRAFT,
+            actorId: userId,
+          })
+
+          return created
         })
 
         return document
@@ -452,32 +460,32 @@ export const documentResolvers = {
       try {
         const { documentTypeId, documentClassId, ...rest } = input
 
-        const document = await context.orm.document.update({
-          where: { id },
-          data: {
-            ...rest,
-            updatedById: userId,
-            ...(documentTypeId !== undefined && {
-              documentType: { connect: { id: documentTypeId } },
-            }),
-            ...(documentClassId !== undefined && {
-              documentClass: documentClassId
-                ? { connect: { id: documentClassId } }
-                : { disconnect: true },
-            }),
-          },
-          include: documentIncludes,
-        })
+        const document = await context.orm.$transaction(async (tx) => {
+          const updated = await tx.document.update({
+            where: { id },
+            data: {
+              ...rest,
+              updatedById: userId,
+              ...(documentTypeId !== undefined && {
+                documentType: { connect: { id: documentTypeId } },
+              }),
+              ...(documentClassId !== undefined && {
+                documentClass: documentClassId
+                  ? { connect: { id: documentClassId } }
+                  : { disconnect: true },
+              }),
+            },
+            include: documentIncludes,
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "UPDATE_DOCUMENT",
-            message: `Documento actualizado: ${document.title} (${document.code})`,
-            module: document.module as SysLogModule,
-            meta: JSON.stringify({ documentId: id, input }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.UpdateDocument,
+            objectId: id,
+            actorId: userId,
+            meta: { input },
+          })
+
+          return updated
         })
 
         return document
@@ -509,24 +517,30 @@ export const documentResolvers = {
       logger.info("terminateDocument", { userId })
 
       try {
-        const document = await context.orm.document.update({
-          where: { id },
-          data: {
-            terminatedAt: new Date(),
-            updatedById: userId,
-          },
-          include: documentIncludes,
-        })
+        const document = await context.orm.$transaction(async (tx) => {
+          const updated = await tx.document.update({
+            where: { id },
+            data: {
+              terminatedAt: new Date(),
+              updatedById: userId,
+            },
+            include: documentIncludes,
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "TERMINATE_DOCUMENT",
-            message: `Documento deshabilitado: ${document.title} (${document.code})`,
-            module: document.module as SysLogModule,
-            meta: JSON.stringify({ documentId: id }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.TerminateDocument,
+            objectId: id,
+            actorId: userId,
+          })
+          await emitWorkflowEvent(tx, {
+            name: WorkflowEvent.DocumentTerminated,
+            objectId: id,
+            fromState: "ACTIVE",
+            toState: "TERMINATED",
+            actorId: userId,
+          })
+
+          return updated
         })
 
         return document
@@ -556,24 +570,30 @@ export const documentResolvers = {
       logger.info("activateDocument", { userId })
 
       try {
-        const document = await context.orm.document.update({
-          where: { id },
-          data: {
-            terminatedAt: null,
-            updatedById: userId,
-          },
-          include: documentIncludes,
-        })
+        const document = await context.orm.$transaction(async (tx) => {
+          const updated = await tx.document.update({
+            where: { id },
+            data: {
+              terminatedAt: null,
+              updatedById: userId,
+            },
+            include: documentIncludes,
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "ACTIVATE_DOCUMENT",
-            message: `Documento reactivado: ${document.title} (${document.code})`,
-            module: document.module as SysLogModule,
-            meta: JSON.stringify({ documentId: id }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.ActivateDocument,
+            objectId: id,
+            actorId: userId,
+          })
+          await emitWorkflowEvent(tx, {
+            name: WorkflowEvent.DocumentActivated,
+            objectId: id,
+            fromState: "TERMINATED",
+            toState: "ACTIVE",
+            actorId: userId,
+          })
+
+          return updated
         })
 
         return document
@@ -620,24 +640,24 @@ export const documentResolvers = {
           )
         }
 
-        const document = await context.orm.document.update({
-          where: { id },
-          data: {
-            revisionScheme: scheme,
-            updatedById: userId,
-          },
-          include: documentIncludes,
-        })
+        const document = await context.orm.$transaction(async (tx) => {
+          const updated = await tx.document.update({
+            where: { id },
+            data: {
+              revisionScheme: scheme,
+              updatedById: userId,
+            },
+            include: documentIncludes,
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "SWITCH_REVISION_SCHEME",
-            message: `Esquema de revisión cambiado a ${scheme}: ${document.title} (${document.code})`,
-            module: document.module as SysLogModule,
-            meta: JSON.stringify({ documentId: id, scheme }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.SwitchRevisionScheme,
+            objectId: id,
+            actorId: userId,
+            meta: { from: existing.revisionScheme, to: scheme },
+          })
+
+          return updated
         })
 
         return document

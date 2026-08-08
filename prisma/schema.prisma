@@ -360,6 +360,56 @@ model Attachment {
     @@map("attachments")
 }
 
+// ================================
+// EVENTOS DE DOMINIO — BLOQUE 01
+// ================================
+
+// Objetos del subsistema de Gestión Documental sobre los que se emiten eventos
+enum DocObjectType {
+    DOCUMENT
+    DOCUMENT_REVISION
+    DOCUMENT_VERSION
+    REVIEW_WORKFLOW
+    REVIEW_STEP
+    TRANSMITTAL
+    DOCUMENT_CLASS
+    DOCUMENT_TYPE
+}
+
+// Transición de estado de un objeto del dominio documental.
+// Responde qué objeto cambió, desde qué estado y hacia cuál. Inmutable.
+model DocWorkflowEvent {
+    id          Int      @id @default(autoincrement())
+    createdAt   DateTime @default(now())
+    createdById Int? // nulo si lo emite el sistema
+
+    objectType DocObjectType
+    objectId   Int
+    name       String // p. ej. RevisionApproved, TransmittalIssued
+    fromState  String?
+    toState    String?
+
+    @@index([objectType, objectId, createdAt])
+    @@map("doc_workflow_events")
+}
+
+// Acción ejecutada por un usuario o por el sistema sobre un objeto del dominio documental.
+// Responde quién hizo qué y cuándo. Inmutable.
+model DocAuditEvent {
+    id          Int      @id @default(autoincrement())
+    createdAt   DateTime @default(now())
+    createdById Int? // nulo si lo emite el sistema
+
+    objectType DocObjectType
+    objectId   Int?
+    action     String // p. ej. CreateDocument, ApproveStep
+    meta       Json?
+
+    @@index([objectType, objectId, createdAt])
+    @@index([createdById, createdAt])
+    @@map("doc_audit_events")
+}
+
 enum DigitalDisposition {
     PENDING // Sin clasificar
     BAD_QUALITY // Imagen de mala calidad, requiere re-escaneo

@@ -1,0 +1,156 @@
+import { PERMISSIONS } from "@CLGonzalezGroh/mi-common"
+import { DocObjectType } from "../generated/prisma/enums.js"
+
+/**
+ * Catálogo de eventos de dominio del subsistema de Gestión Documental (Bloque 01).
+ *
+ * Convención de nombres (B5):
+ * - acciones de auditoría: verbo en inglés imperativo, PascalCase;
+ * - nombres de transición: participio, PascalCase.
+ *
+ * Se usan como constantes con nombre —`AuditAction.CreateDocument`—, nunca como
+ * texto libre en el resolver. Cada constante corresponde a un único tipo de objeto,
+ * de modo que el tipo se deriva del catálogo y no lo informa quien emite.
+ */
+
+// ================================
+// ACCIONES — DocAuditEvent
+// ================================
+
+export const AuditAction = {
+  CreateDocument: "CreateDocument",
+  UpdateDocument: "UpdateDocument",
+  TerminateDocument: "TerminateDocument",
+  ActivateDocument: "ActivateDocument",
+  SwitchRevisionScheme: "SwitchRevisionScheme",
+  CreateRevision: "CreateRevision",
+  RegisterVersion: "RegisterVersion",
+  InitiateReview: "InitiateReview",
+  ApproveStep: "ApproveStep",
+  RejectStep: "RejectStep",
+  CancelWorkflow: "CancelWorkflow",
+  CreateTransmittal: "CreateTransmittal",
+  IssueTransmittal: "IssueTransmittal",
+  RespondTransmittal: "RespondTransmittal",
+  CloseTransmittal: "CloseTransmittal",
+  CreateDocumentClass: "CreateDocumentClass",
+  UpdateDocumentClass: "UpdateDocumentClass",
+  TerminateDocumentClass: "TerminateDocumentClass",
+  ActivateDocumentClass: "ActivateDocumentClass",
+  DeleteDocumentClass: "DeleteDocumentClass",
+  CreateDocumentType: "CreateDocumentType",
+  UpdateDocumentType: "UpdateDocumentType",
+  TerminateDocumentType: "TerminateDocumentType",
+  ActivateDocumentType: "ActivateDocumentType",
+  DeleteDocumentType: "DeleteDocumentType",
+} as const
+
+export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
+
+export const AUDIT_ACTIONS = Object.values(AuditAction)
+
+export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
+  [AuditAction.CreateDocument]: DocObjectType.DOCUMENT,
+  [AuditAction.UpdateDocument]: DocObjectType.DOCUMENT,
+  [AuditAction.TerminateDocument]: DocObjectType.DOCUMENT,
+  [AuditAction.ActivateDocument]: DocObjectType.DOCUMENT,
+  [AuditAction.SwitchRevisionScheme]: DocObjectType.DOCUMENT,
+  [AuditAction.CreateRevision]: DocObjectType.DOCUMENT_REVISION,
+  [AuditAction.RegisterVersion]: DocObjectType.DOCUMENT_VERSION,
+  [AuditAction.InitiateReview]: DocObjectType.REVIEW_WORKFLOW,
+  [AuditAction.ApproveStep]: DocObjectType.REVIEW_STEP,
+  [AuditAction.RejectStep]: DocObjectType.REVIEW_STEP,
+  [AuditAction.CancelWorkflow]: DocObjectType.REVIEW_WORKFLOW,
+  [AuditAction.CreateTransmittal]: DocObjectType.TRANSMITTAL,
+  [AuditAction.IssueTransmittal]: DocObjectType.TRANSMITTAL,
+  [AuditAction.RespondTransmittal]: DocObjectType.TRANSMITTAL,
+  [AuditAction.CloseTransmittal]: DocObjectType.TRANSMITTAL,
+  [AuditAction.CreateDocumentClass]: DocObjectType.DOCUMENT_CLASS,
+  [AuditAction.UpdateDocumentClass]: DocObjectType.DOCUMENT_CLASS,
+  [AuditAction.TerminateDocumentClass]: DocObjectType.DOCUMENT_CLASS,
+  [AuditAction.ActivateDocumentClass]: DocObjectType.DOCUMENT_CLASS,
+  [AuditAction.DeleteDocumentClass]: DocObjectType.DOCUMENT_CLASS,
+  [AuditAction.CreateDocumentType]: DocObjectType.DOCUMENT_TYPE,
+  [AuditAction.UpdateDocumentType]: DocObjectType.DOCUMENT_TYPE,
+  [AuditAction.TerminateDocumentType]: DocObjectType.DOCUMENT_TYPE,
+  [AuditAction.ActivateDocumentType]: DocObjectType.DOCUMENT_TYPE,
+  [AuditAction.DeleteDocumentType]: DocObjectType.DOCUMENT_TYPE,
+}
+
+// ================================
+// TRANSICIONES — DocWorkflowEvent
+// ================================
+
+export const WorkflowEvent = {
+  DocumentTerminated: "DocumentTerminated",
+  DocumentActivated: "DocumentActivated",
+  RevisionCreated: "RevisionCreated",
+  RevisionSubmitted: "RevisionSubmitted",
+  RevisionApproved: "RevisionApproved",
+  RevisionSuperseded: "RevisionSuperseded",
+  RevisionReturned: "RevisionReturned",
+  WorkflowStarted: "WorkflowStarted",
+  WorkflowCompleted: "WorkflowCompleted",
+  WorkflowRejected: "WorkflowRejected",
+  StepApproved: "StepApproved",
+  StepRejected: "StepRejected",
+  StepSkipped: "StepSkipped",
+  TransmittalCreated: "TransmittalCreated",
+  TransmittalIssued: "TransmittalIssued",
+  TransmittalResponded: "TransmittalResponded",
+  TransmittalClosed: "TransmittalClosed",
+  DocumentClassTerminated: "DocumentClassTerminated",
+  DocumentClassActivated: "DocumentClassActivated",
+  DocumentTypeTerminated: "DocumentTypeTerminated",
+  DocumentTypeActivated: "DocumentTypeActivated",
+} as const
+
+export type WorkflowEvent = (typeof WorkflowEvent)[keyof typeof WorkflowEvent]
+
+export const WORKFLOW_EVENTS = Object.values(WorkflowEvent)
+
+export const WORKFLOW_EVENT_OBJECT: Record<WorkflowEvent, DocObjectType> = {
+  [WorkflowEvent.DocumentTerminated]: DocObjectType.DOCUMENT,
+  [WorkflowEvent.DocumentActivated]: DocObjectType.DOCUMENT,
+  [WorkflowEvent.RevisionCreated]: DocObjectType.DOCUMENT_REVISION,
+  [WorkflowEvent.RevisionSubmitted]: DocObjectType.DOCUMENT_REVISION,
+  [WorkflowEvent.RevisionApproved]: DocObjectType.DOCUMENT_REVISION,
+  [WorkflowEvent.RevisionSuperseded]: DocObjectType.DOCUMENT_REVISION,
+  [WorkflowEvent.RevisionReturned]: DocObjectType.DOCUMENT_REVISION,
+  [WorkflowEvent.WorkflowStarted]: DocObjectType.REVIEW_WORKFLOW,
+  [WorkflowEvent.WorkflowCompleted]: DocObjectType.REVIEW_WORKFLOW,
+  [WorkflowEvent.WorkflowRejected]: DocObjectType.REVIEW_WORKFLOW,
+  [WorkflowEvent.StepApproved]: DocObjectType.REVIEW_STEP,
+  [WorkflowEvent.StepRejected]: DocObjectType.REVIEW_STEP,
+  [WorkflowEvent.StepSkipped]: DocObjectType.REVIEW_STEP,
+  [WorkflowEvent.TransmittalCreated]: DocObjectType.TRANSMITTAL,
+  [WorkflowEvent.TransmittalIssued]: DocObjectType.TRANSMITTAL,
+  [WorkflowEvent.TransmittalResponded]: DocObjectType.TRANSMITTAL,
+  [WorkflowEvent.TransmittalClosed]: DocObjectType.TRANSMITTAL,
+  [WorkflowEvent.DocumentClassTerminated]: DocObjectType.DOCUMENT_CLASS,
+  [WorkflowEvent.DocumentClassActivated]: DocObjectType.DOCUMENT_CLASS,
+  [WorkflowEvent.DocumentTypeTerminated]: DocObjectType.DOCUMENT_TYPE,
+  [WorkflowEvent.DocumentTypeActivated]: DocObjectType.DOCUMENT_TYPE,
+}
+
+// ================================
+// ACCESO A LA TRAZA
+// ================================
+
+/**
+ * Permiso exigido para consultar la traza de cada tipo de objeto.
+ *
+ * La traza forma parte del objeto: quien puede leer el objeto puede leer su
+ * historia. No se introduce un permiso propio de eventos, que obligaría a
+ * modificar el catálogo compartido de permisos y a otorgarlo por separado.
+ */
+export const DOC_OBJECT_READ_PERMISSION: Record<DocObjectType, string> = {
+  [DocObjectType.DOCUMENT]: PERMISSIONS.DOCUMENTS_DOCUMENT_READ,
+  [DocObjectType.DOCUMENT_REVISION]: PERMISSIONS.DOCUMENTS_DOCUMENT_READ,
+  [DocObjectType.DOCUMENT_VERSION]: PERMISSIONS.DOCUMENTS_DOCUMENT_READ,
+  [DocObjectType.REVIEW_WORKFLOW]: PERMISSIONS.DOCUMENTS_WORKFLOW_LIST,
+  [DocObjectType.REVIEW_STEP]: PERMISSIONS.DOCUMENTS_WORKFLOW_LIST,
+  [DocObjectType.TRANSMITTAL]: PERMISSIONS.DOCUMENTS_TRANSMITTAL_READ,
+  [DocObjectType.DOCUMENT_CLASS]: PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_READ,
+  [DocObjectType.DOCUMENT_TYPE]: PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_READ,
+}

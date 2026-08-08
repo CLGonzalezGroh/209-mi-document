@@ -3,7 +3,9 @@ import { ResolverContext } from "../types.js"
 import { PERMISSIONS } from "@CLGonzalezGroh/mi-common"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
-import { RevisionStatus, SysLogModule } from "../generated/prisma/enums.js"
+import { RevisionStatus } from "../generated/prisma/enums.js"
+import { AuditAction } from "../events/catalog.js"
+import { emitAuditEvent } from "../events/emit.js"
 
 const versionIncludes = {
   revision: {
@@ -75,30 +77,30 @@ export const versionResolvers = {
           : 1
 
         // Crear la versión
-        const version = await context.orm.documentVersion.create({
-          data: {
-            revisionId,
-            versionNumber: nextVersionNumber,
-            fileKey: input.fileKey,
-            fileName: input.fileName,
-            fileSize: input.fileSize,
-            mimeType: input.mimeType,
-            checksum: input.checksum,
-            comment: input.comment,
-            createdById: userId,
-          },
-          include: versionIncludes,
-        })
+        const version = await context.orm.$transaction(async (tx) => {
+          const created = await tx.documentVersion.create({
+            data: {
+              revisionId,
+              versionNumber: nextVersionNumber,
+              fileKey: input.fileKey,
+              fileName: input.fileName,
+              fileSize: input.fileSize,
+              mimeType: input.mimeType,
+              checksum: input.checksum,
+              comment: input.comment,
+              createdById: userId,
+            },
+            include: versionIncludes,
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "REGISTER_VERSION",
-            message: `Versión ${nextVersionNumber} registrada para revisión ID ${revisionId}`,
-            module: (version as any).revision?.document?.module as SysLogModule,
-            meta: JSON.stringify({ versionId: version.id, revisionId, versionNumber: nextVersionNumber }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.RegisterVersion,
+            objectId: created.id,
+            actorId: userId,
+            meta: { revisionId, versionNumber: nextVersionNumber },
+          })
+
+          return created
         })
 
         return version

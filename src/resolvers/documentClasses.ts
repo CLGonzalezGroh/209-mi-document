@@ -9,6 +9,8 @@ import {
   TerminatedFilter,
 } from "@CLGonzalezGroh/mi-common"
 import { DocumentClass } from "../generated/prisma/client.js"
+import { AuditAction, WorkflowEvent } from "../events/catalog.js"
+import { emitAuditEvent, emitWorkflowEvent } from "../events/emit.js"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentClassOrderBy } from "../utils/orderByHelper.js"
@@ -272,27 +274,27 @@ export const documentClassResolvers = {
       logger.info("createDocumentClass", { userId })
 
       try {
-        const documentClass = await context.orm.documentClass.create({
-          data: {
-            name: input.name,
-            code: input.code,
-            module: input.module,
-            description: input.description,
-            sortOrder: input.sortOrder ?? 0,
-            updatedById: userId,
-          },
-          include: documentClassIncludes,
-        })
+        const documentClass = await context.orm.$transaction(async (tx) => {
+          const created = await tx.documentClass.create({
+            data: {
+              name: input.name,
+              code: input.code,
+              module: input.module,
+              description: input.description,
+              sortOrder: input.sortOrder ?? 0,
+              updatedById: userId,
+            },
+            include: documentClassIncludes,
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "CREATE_DOCUMENT_CLASS",
-            message: `Clase de documento creada: ${documentClass.name} (${documentClass.code})`,
-            module: SysLogModule.DOCUMENT,
-            meta: JSON.stringify({ documentClassId: documentClass.id, input }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.CreateDocumentClass,
+            objectId: created.id,
+            actorId: userId,
+            meta: { name: created.name, code: created.code },
+          })
+
+          return created
         })
 
         return documentClass
@@ -336,24 +338,24 @@ export const documentClassResolvers = {
       logger.info("updateDocumentClass", { userId })
 
       try {
-        const documentClass = await context.orm.documentClass.update({
-          where: { id },
-          data: {
-            ...input,
-            updatedById: userId,
-          },
-          include: documentClassIncludes,
-        })
+        const documentClass = await context.orm.$transaction(async (tx) => {
+          const updated = await tx.documentClass.update({
+            where: { id },
+            data: {
+              ...input,
+              updatedById: userId,
+            },
+            include: documentClassIncludes,
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "UPDATE_DOCUMENT_CLASS",
-            message: `Clase de documento actualizada: ${documentClass.name} (${documentClass.code})`,
-            module: SysLogModule.DOCUMENT,
-            meta: JSON.stringify({ documentClassId: id, input }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.UpdateDocumentClass,
+            objectId: id,
+            actorId: userId,
+            meta: { input },
+          })
+
+          return updated
         })
 
         return documentClass
@@ -386,24 +388,30 @@ export const documentClassResolvers = {
       logger.info("terminateDocumentClass", { userId })
 
       try {
-        const documentClass = await context.orm.documentClass.update({
-          where: { id },
-          data: {
-            terminatedAt: new Date(),
-            updatedById: userId,
-          },
-          include: documentClassIncludes,
-        })
+        const documentClass = await context.orm.$transaction(async (tx) => {
+          const updated = await tx.documentClass.update({
+            where: { id },
+            data: {
+              terminatedAt: new Date(),
+              updatedById: userId,
+            },
+            include: documentClassIncludes,
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "TERMINATE_DOCUMENT_CLASS",
-            message: `Clase de documento deshabilitada: ${documentClass.name} (${documentClass.code})`,
-            module: SysLogModule.DOCUMENT,
-            meta: JSON.stringify({ documentClassId: id }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.TerminateDocumentClass,
+            objectId: id,
+            actorId: userId,
+          })
+          await emitWorkflowEvent(tx, {
+            name: WorkflowEvent.DocumentClassTerminated,
+            objectId: id,
+            fromState: "ACTIVE",
+            toState: "TERMINATED",
+            actorId: userId,
+          })
+
+          return updated
         })
 
         return documentClass
@@ -434,24 +442,30 @@ export const documentClassResolvers = {
       logger.info("activateDocumentClass", { userId })
 
       try {
-        const documentClass = await context.orm.documentClass.update({
-          where: { id },
-          data: {
-            terminatedAt: null,
-            updatedById: userId,
-          },
-          include: documentClassIncludes,
-        })
+        const documentClass = await context.orm.$transaction(async (tx) => {
+          const updated = await tx.documentClass.update({
+            where: { id },
+            data: {
+              terminatedAt: null,
+              updatedById: userId,
+            },
+            include: documentClassIncludes,
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "ACTIVATE_DOCUMENT_CLASS",
-            message: `Clase de documento reactivada: ${documentClass.name} (${documentClass.code})`,
-            module: SysLogModule.DOCUMENT,
-            meta: JSON.stringify({ documentClassId: id }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.ActivateDocumentClass,
+            objectId: id,
+            actorId: userId,
+          })
+          await emitWorkflowEvent(tx, {
+            name: WorkflowEvent.DocumentClassActivated,
+            objectId: id,
+            fromState: "TERMINATED",
+            toState: "ACTIVE",
+            actorId: userId,
+          })
+
+          return updated
         })
 
         return documentClass
@@ -492,19 +506,17 @@ export const documentClassResolvers = {
           })
         }
 
-        await context.orm.documentClass.delete({
-          where: { id },
-        })
+        await context.orm.$transaction(async (tx) => {
+          await tx.documentClass.delete({
+            where: { id },
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "WARNING",
-            name: "DELETE_DOCUMENT_CLASS",
-            message: `Clase de documento eliminada: ${documentClass.name} (${documentClass.code})`,
-            module: SysLogModule.DOCUMENT,
-            meta: JSON.stringify({ documentClassId: id }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.DeleteDocumentClass,
+            objectId: id,
+            actorId: userId,
+            meta: { name: documentClass.name, code: documentClass.code },
+          })
         })
 
         return true

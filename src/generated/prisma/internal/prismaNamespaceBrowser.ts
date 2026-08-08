@@ -62,6 +62,8 @@ export const ModelName = {
   Transmittal: 'Transmittal',
   TransmittalItem: 'TransmittalItem',
   Attachment: 'Attachment',
+  DocWorkflowEvent: 'DocWorkflowEvent',
+  DocAuditEvent: 'DocAuditEvent',
   ScannedFile: 'ScannedFile',
   Area: 'Area',
   DocumentSysLog: 'DocumentSysLog',
@@ -263,6 +265,33 @@ export const AttachmentScalarFieldEnum = {
 export type AttachmentScalarFieldEnum = (typeof AttachmentScalarFieldEnum)[keyof typeof AttachmentScalarFieldEnum]
 
 
+export const DocWorkflowEventScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  objectType: 'objectType',
+  objectId: 'objectId',
+  name: 'name',
+  fromState: 'fromState',
+  toState: 'toState'
+} as const
+
+export type DocWorkflowEventScalarFieldEnum = (typeof DocWorkflowEventScalarFieldEnum)[keyof typeof DocWorkflowEventScalarFieldEnum]
+
+
+export const DocAuditEventScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  objectType: 'objectType',
+  objectId: 'objectId',
+  action: 'action',
+  meta: 'meta'
+} as const
+
+export type DocAuditEventScalarFieldEnum = (typeof DocAuditEventScalarFieldEnum)[keyof typeof DocAuditEventScalarFieldEnum]
+
+
 export const ScannedFileScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -350,6 +379,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -364,4 +401,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

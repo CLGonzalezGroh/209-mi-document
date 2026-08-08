@@ -73,6 +73,16 @@ export type TransmittalItem = Prisma.TransmittalItemModel
  */
 export type Attachment = Prisma.AttachmentModel
 /**
+ * Model DocWorkflowEvent
+ * 
+ */
+export type DocWorkflowEvent = Prisma.DocWorkflowEventModel
+/**
+ * Model DocAuditEvent
+ * 
+ */
+export type DocAuditEvent = Prisma.DocAuditEventModel
+/**
  * Model ScannedFile
  * 
  */

@@ -7,6 +7,9 @@ extend schema
 "Tipo de dato para representar una fecha y hora"
 scalar DateTime
 
+"Valor JSON arbitrario (metadata, configuración)"
+scalar JSON
+
 "Recupera el nombre de usuario"
 type UserName @key(fields: "id") {
   id: Int
@@ -419,6 +422,46 @@ enum SysLogModuleInput {
   MANAGEMENT
   "Módulo comercial"
   COMERCIAL
+}
+
+"Objeto del dominio documental sobre el que se emite un evento"
+enum DocObjectType {
+  "Documento maestro"
+  DOCUMENT
+  "Revisión de un documento"
+  DOCUMENT_REVISION
+  "Versión de archivo dentro de una revisión"
+  DOCUMENT_VERSION
+  "Circuito de revisión"
+  REVIEW_WORKFLOW
+  "Paso de un circuito de revisión"
+  REVIEW_STEP
+  "Transmittal"
+  TRANSMITTAL
+  "Clase de documento"
+  DOCUMENT_CLASS
+  "Tipo de documento"
+  DOCUMENT_TYPE
+}
+
+"Objeto del dominio documental para inputs"
+enum DocObjectTypeInput {
+  "Documento maestro"
+  DOCUMENT
+  "Revisión de un documento"
+  DOCUMENT_REVISION
+  "Versión de archivo dentro de una revisión"
+  DOCUMENT_VERSION
+  "Circuito de revisión"
+  REVIEW_WORKFLOW
+  "Paso de un circuito de revisión"
+  REVIEW_STEP
+  "Transmittal"
+  TRANSMITTAL
+  "Clase de documento"
+  DOCUMENT_CLASS
+  "Tipo de documento"
+  DOCUMENT_TYPE
 }
 
 "Nivel del log para inputs"
@@ -895,6 +938,54 @@ type ScannedFileStats {
   physicalArchive: Int!
   "Papel con almacenamiento confirmado"
   physicalArchived: Int!
+}
+
+# ═══════════════════════════════════════════════════════
+# TRAZABILIDAD FUNCIONAL
+# ═══════════════════════════════════════════════════════
+
+"""
+Transición de estado de un objeto del dominio documental.
+Registro inmutable: no admite modificación ni eliminación.
+"""
+type DocWorkflowEvent {
+  "Identificador único del evento"
+  id: Int!
+  "Momento en que ocurrió la transición"
+  createdAt: DateTime!
+  "Usuario que originó la transición. Nulo si la emitió el sistema"
+  createdBy: UserName
+  "Tipo de objeto afectado"
+  objectType: DocObjectType!
+  "Identificador del objeto afectado"
+  objectId: Int!
+  "Nombre de la transición, en participio (p. ej. RevisionApproved)"
+  name: String!
+  "Estado previo. Nulo cuando el objeto no tenía estado anterior"
+  fromState: String
+  "Estado resultante"
+  toState: String
+}
+
+"""
+Acción ejecutada por un usuario o por el sistema sobre un objeto del dominio
+documental. Registro inmutable: no admite modificación ni eliminación.
+"""
+type DocAuditEvent {
+  "Identificador único del evento"
+  id: Int!
+  "Momento en que se ejecutó la acción"
+  createdAt: DateTime!
+  "Usuario que ejecutó la acción. Nulo si la emitió el sistema"
+  createdBy: UserName
+  "Tipo de objeto afectado"
+  objectType: DocObjectType!
+  "Identificador del objeto afectado. Nulo si la acción no recae sobre uno persistido"
+  objectId: Int
+  "Acción ejecutada, en imperativo (p. ej. ApproveStep)"
+  action: String!
+  "Datos contextuales de la acción"
+  meta: JSON
 }
 
 # ═══════════════════════════════════════════════════════
@@ -1705,6 +1796,19 @@ type Query {
     entityType: DocumentDependencyEntityInput!
     entityId: Int!
   ): DependencyCheck!
+
+  # ─── Trazabilidad Funcional ───
+  "Transiciones de estado de un objeto, en orden cronológico"
+  docWorkflowEvents(
+    objectType: DocObjectTypeInput!
+    objectId: Int!
+  ): [DocWorkflowEvent!]!
+
+  "Acciones ejecutadas sobre un objeto, en orden cronológico"
+  docAuditEvents(
+    objectType: DocObjectTypeInput!
+    objectId: Int!
+  ): [DocAuditEvent!]!
 }
 
 # ═══════════════════════════════════════════════════════

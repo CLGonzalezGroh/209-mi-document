@@ -15,6 +15,7 @@ import { documentClassResolvers } from "./documentClasses.js"
 import { areaResolvers } from "./areas.js"
 import { dependencyResolvers } from "./dependencies.js"
 import { taskDocumentReferenceResolvers } from "./taskDocumentReferences.js"
+import { eventResolvers } from "./events.js"
 
 export const resolvers: GraphQLResolverMap<ResolverContext> = {
   ...scalars,
@@ -30,6 +31,7 @@ export const resolvers: GraphQLResolverMap<ResolverContext> = {
     ...attachmentResolvers.Query,
     ...scannedFileResolvers.Query,
     ...dependencyResolvers.Query,
+    ...eventResolvers.Query,
   },
   Mutation: {
     ...documentResolvers.Mutation,

@@ -395,6 +395,8 @@ export const ModelName = {
   Transmittal: 'Transmittal',
   TransmittalItem: 'TransmittalItem',
   Attachment: 'Attachment',
+  DocWorkflowEvent: 'DocWorkflowEvent',
+  DocAuditEvent: 'DocAuditEvent',
   ScannedFile: 'ScannedFile',
   Area: 'Area',
   DocumentSysLog: 'DocumentSysLog',
@@ -414,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "documentClass" | "documentType" | "document" | "taskDocumentReference" | "documentRevision" | "documentVersion" | "reviewWorkflow" | "reviewStep" | "transmittal" | "transmittalItem" | "attachment" | "scannedFile" | "area" | "documentSysLog" | "documentSysLogArchive"
+    modelProps: "documentClass" | "documentType" | "document" | "taskDocumentReference" | "documentRevision" | "documentVersion" | "reviewWorkflow" | "reviewStep" | "transmittal" | "transmittalItem" | "attachment" | "docWorkflowEvent" | "docAuditEvent" | "scannedFile" | "area" | "documentSysLog" | "documentSysLogArchive"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1232,6 +1234,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DocWorkflowEvent: {
+      payload: Prisma.$DocWorkflowEventPayload<ExtArgs>
+      fields: Prisma.DocWorkflowEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocWorkflowEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocWorkflowEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowEventPayload>
+        }
+        findFirst: {
+          args: Prisma.DocWorkflowEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocWorkflowEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowEventPayload>
+        }
+        findMany: {
+          args: Prisma.DocWorkflowEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowEventPayload>[]
+        }
+        create: {
+          args: Prisma.DocWorkflowEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowEventPayload>
+        }
+        createMany: {
+          args: Prisma.DocWorkflowEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocWorkflowEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowEventPayload>[]
+        }
+        delete: {
+          args: Prisma.DocWorkflowEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowEventPayload>
+        }
+        update: {
+          args: Prisma.DocWorkflowEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocWorkflowEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocWorkflowEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocWorkflowEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocWorkflowEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowEventPayload>
+        }
+        aggregate: {
+          args: Prisma.DocWorkflowEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocWorkflowEvent>
+        }
+        groupBy: {
+          args: Prisma.DocWorkflowEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocWorkflowEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocWorkflowEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocWorkflowEventCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocAuditEvent: {
+      payload: Prisma.$DocAuditEventPayload<ExtArgs>
+      fields: Prisma.DocAuditEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocAuditEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocAuditEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocAuditEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocAuditEventPayload>
+        }
+        findFirst: {
+          args: Prisma.DocAuditEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocAuditEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocAuditEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocAuditEventPayload>
+        }
+        findMany: {
+          args: Prisma.DocAuditEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocAuditEventPayload>[]
+        }
+        create: {
+          args: Prisma.DocAuditEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocAuditEventPayload>
+        }
+        createMany: {
+          args: Prisma.DocAuditEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocAuditEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocAuditEventPayload>[]
+        }
+        delete: {
+          args: Prisma.DocAuditEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocAuditEventPayload>
+        }
+        update: {
+          args: Prisma.DocAuditEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocAuditEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocAuditEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocAuditEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocAuditEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocAuditEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocAuditEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocAuditEventPayload>
+        }
+        aggregate: {
+          args: Prisma.DocAuditEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocAuditEvent>
+        }
+        groupBy: {
+          args: Prisma.DocAuditEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocAuditEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocAuditEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocAuditEventCountAggregateOutputType> | number
+        }
+      }
+    }
     ScannedFile: {
       payload: Prisma.$ScannedFilePayload<ExtArgs>
       fields: Prisma.ScannedFileFieldRefs
@@ -1746,6 +1896,33 @@ export const AttachmentScalarFieldEnum = {
 export type AttachmentScalarFieldEnum = (typeof AttachmentScalarFieldEnum)[keyof typeof AttachmentScalarFieldEnum]
 
 
+export const DocWorkflowEventScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  objectType: 'objectType',
+  objectId: 'objectId',
+  name: 'name',
+  fromState: 'fromState',
+  toState: 'toState'
+} as const
+
+export type DocWorkflowEventScalarFieldEnum = (typeof DocWorkflowEventScalarFieldEnum)[keyof typeof DocWorkflowEventScalarFieldEnum]
+
+
+export const DocAuditEventScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  objectType: 'objectType',
+  objectId: 'objectId',
+  action: 'action',
+  meta: 'meta'
+} as const
+
+export type DocAuditEventScalarFieldEnum = (typeof DocAuditEventScalarFieldEnum)[keyof typeof DocAuditEventScalarFieldEnum]
+
+
 export const ScannedFileScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -1833,6 +2010,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -1847,6 +2032,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -2045,6 +2239,34 @@ export type ListEnumClientStatusFieldRefInput<$PrismaModel> = FieldRefInputType<
 
 
 /**
+ * Reference to a field of type 'DocObjectType'
+ */
+export type EnumDocObjectTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocObjectType'>
+    
+
+
+/**
+ * Reference to a field of type 'DocObjectType[]'
+ */
+export type ListEnumDocObjectTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocObjectType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
  * Reference to a field of type 'DigitalDisposition'
  */
 export type EnumDigitalDispositionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DigitalDisposition'>
@@ -2234,6 +2456,8 @@ export type GlobalOmitConfig = {
   transmittal?: Prisma.TransmittalOmit
   transmittalItem?: Prisma.TransmittalItemOmit
   attachment?: Prisma.AttachmentOmit
+  docWorkflowEvent?: Prisma.DocWorkflowEventOmit
+  docAuditEvent?: Prisma.DocAuditEventOmit
   scannedFile?: Prisma.ScannedFileOmit
   area?: Prisma.AreaOmit
   documentSysLog?: Prisma.DocumentSysLogOmit

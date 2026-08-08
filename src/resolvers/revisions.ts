@@ -3,7 +3,9 @@ import { ResolverContext } from "../types.js"
 import { PERMISSIONS } from "@CLGonzalezGroh/mi-common"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
-import { RevisionStatus, RevisionScheme, SysLogModule } from "../generated/prisma/enums.js"
+import { RevisionStatus, RevisionScheme } from "../generated/prisma/enums.js"
+import { AuditAction, WorkflowEvent } from "../events/catalog.js"
+import { emitAuditEvent, emitWorkflowEvent } from "../events/emit.js"
 
 const revisionIncludes = {
   document: {
@@ -196,38 +198,44 @@ export const revisionResolvers = {
         }
 
         // Crear la revisión con su primera versión
-        const revision = await context.orm.documentRevision.create({
-          data: {
-            documentId,
-            revisionCode,
-            status: RevisionStatus.DRAFT,
-            createdById: userId,
-            updatedById: userId,
-            versions: {
-              create: {
-                versionNumber: 1,
-                fileKey: input.fileKey,
-                fileName: input.fileName,
-                fileSize: input.fileSize,
-                mimeType: input.mimeType,
-                checksum: input.checksum,
-                comment: input.comment,
-                createdById: userId,
+        const revision = await context.orm.$transaction(async (tx) => {
+          const created = await tx.documentRevision.create({
+            data: {
+              documentId,
+              revisionCode,
+              status: RevisionStatus.DRAFT,
+              createdById: userId,
+              updatedById: userId,
+              versions: {
+                create: {
+                  versionNumber: 1,
+                  fileKey: input.fileKey,
+                  fileName: input.fileName,
+                  fileSize: input.fileSize,
+                  mimeType: input.mimeType,
+                  checksum: input.checksum,
+                  comment: input.comment,
+                  createdById: userId,
+                },
               },
             },
-          },
-          include: revisionIncludes,
-        })
+            include: revisionIncludes,
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "CREATE_REVISION",
-            message: `Revisión creada: ${revisionCode} para documento ${document.code}`,
-            module: document.module as SysLogModule,
-            meta: JSON.stringify({ revisionId: revision.id, documentId, revisionCode }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.CreateRevision,
+            objectId: created.id,
+            actorId: userId,
+            meta: { documentId, documentCode: document.code, revisionCode },
+          })
+          await emitWorkflowEvent(tx, {
+            name: WorkflowEvent.RevisionCreated,
+            objectId: created.id,
+            toState: RevisionStatus.DRAFT,
+            actorId: userId,
+          })
+
+          return created
         })
 
         return revision

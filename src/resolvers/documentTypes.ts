@@ -13,6 +13,8 @@ import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentTypeOrderBy } from "../utils/orderByHelper.js"
 import { ModuleType, SysLogModule } from "../generated/prisma/enums.js"
+import { AuditAction, WorkflowEvent } from "../events/catalog.js"
+import { emitAuditEvent, emitWorkflowEvent } from "../events/emit.js"
 
 export interface DocumentTypeOrderByInput extends OrderByInput {
   field: "NAME" | "CODE" | "CREATED_AT" | "UPDATED_AT"
@@ -282,28 +284,28 @@ export const documentTypeResolvers = {
       logger.info("createDocumentType", { userId })
 
       try {
-        const documentType = await context.orm.documentType.create({
-          data: {
-            name: input.name,
-            code: input.code,
-            module: input.module,
-            classId: input.classId,
-            description: input.description,
-            requiresWorkflow: input.requiresWorkflow ?? false,
-            updatedById: userId,
-          },
-          include: { class: true },
-        })
+        const documentType = await context.orm.$transaction(async (tx) => {
+          const created = await tx.documentType.create({
+            data: {
+              name: input.name,
+              code: input.code,
+              module: input.module,
+              classId: input.classId,
+              description: input.description,
+              requiresWorkflow: input.requiresWorkflow ?? false,
+              updatedById: userId,
+            },
+            include: { class: true },
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "CREATE_DOCUMENT_TYPE",
-            module: SysLogModule.DOCUMENT,
-            message: `Tipo de documento creado: ${documentType.name} (${documentType.code})`,
-            meta: JSON.stringify({ documentTypeId: documentType.id, input }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.CreateDocumentType,
+            objectId: created.id,
+            actorId: userId,
+            meta: { name: created.name, code: created.code },
+          })
+
+          return created
         })
 
         return documentType
@@ -348,24 +350,24 @@ export const documentTypeResolvers = {
       logger.info("updateDocumentType", { userId })
 
       try {
-        const documentType = await context.orm.documentType.update({
-          where: { id },
-          data: {
-            ...input,
-            updatedById: userId,
-          },
-          include: { class: true },
-        })
+        const documentType = await context.orm.$transaction(async (tx) => {
+          const updated = await tx.documentType.update({
+            where: { id },
+            data: {
+              ...input,
+              updatedById: userId,
+            },
+            include: { class: true },
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "UPDATE_DOCUMENT_TYPE",
-            module: SysLogModule.DOCUMENT,
-            message: `Tipo de documento actualizado: ${documentType.name} (${documentType.code})`,
-            meta: JSON.stringify({ documentTypeId: id, input }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.UpdateDocumentType,
+            objectId: id,
+            actorId: userId,
+            meta: { input },
+          })
+
+          return updated
         })
 
         return documentType
@@ -398,24 +400,30 @@ export const documentTypeResolvers = {
       logger.info("terminateDocumentType", { userId })
 
       try {
-        const documentType = await context.orm.documentType.update({
-          where: { id },
-          data: {
-            terminatedAt: new Date(),
-            updatedById: userId,
-          },
-          include: { class: true },
-        })
+        const documentType = await context.orm.$transaction(async (tx) => {
+          const updated = await tx.documentType.update({
+            where: { id },
+            data: {
+              terminatedAt: new Date(),
+              updatedById: userId,
+            },
+            include: { class: true },
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "TERMINATE_DOCUMENT_TYPE",
-            module: SysLogModule.DOCUMENT,
-            message: `Tipo de documento deshabilitado: ${documentType.name} (${documentType.code})`,
-            meta: JSON.stringify({ documentTypeId: id }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.TerminateDocumentType,
+            objectId: id,
+            actorId: userId,
+          })
+          await emitWorkflowEvent(tx, {
+            name: WorkflowEvent.DocumentTypeTerminated,
+            objectId: id,
+            fromState: "ACTIVE",
+            toState: "TERMINATED",
+            actorId: userId,
+          })
+
+          return updated
         })
 
         return documentType
@@ -446,24 +454,30 @@ export const documentTypeResolvers = {
       logger.info("activateDocumentType", { userId })
 
       try {
-        const documentType = await context.orm.documentType.update({
-          where: { id },
-          data: {
-            terminatedAt: null,
-            updatedById: userId,
-          },
-          include: { class: true },
-        })
+        const documentType = await context.orm.$transaction(async (tx) => {
+          const updated = await tx.documentType.update({
+            where: { id },
+            data: {
+              terminatedAt: null,
+              updatedById: userId,
+            },
+            include: { class: true },
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "INFO",
-            name: "ACTIVATE_DOCUMENT_TYPE",
-            module: SysLogModule.DOCUMENT,
-            message: `Tipo de documento reactivado: ${documentType.name} (${documentType.code})`,
-            meta: JSON.stringify({ documentTypeId: id }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.ActivateDocumentType,
+            objectId: id,
+            actorId: userId,
+          })
+          await emitWorkflowEvent(tx, {
+            name: WorkflowEvent.DocumentTypeActivated,
+            objectId: id,
+            fromState: "TERMINATED",
+            toState: "ACTIVE",
+            actorId: userId,
+          })
+
+          return updated
         })
 
         return documentType
@@ -504,19 +518,17 @@ export const documentTypeResolvers = {
           })
         }
 
-        await context.orm.documentType.delete({
-          where: { id },
-        })
+        await context.orm.$transaction(async (tx) => {
+          await tx.documentType.delete({
+            where: { id },
+          })
 
-        await context.orm.documentSysLog.create({
-          data: {
-            userId,
-            level: "WARNING",
-            name: "DELETE_DOCUMENT_TYPE",
-            module: SysLogModule.DOCUMENT,
-            message: `Tipo de documento eliminado: ${documentType.name} (${documentType.code})`,
-            meta: JSON.stringify({ documentTypeId: id }),
-          },
+          await emitAuditEvent(tx, {
+            action: AuditAction.DeleteDocumentType,
+            objectId: id,
+            actorId: userId,
+            meta: { name: documentType.name, code: documentType.code },
+          })
         })
 
         return true

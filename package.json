@@ -1,12 +1,17 @@
 {
   "name": "209-mi-document",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "description": "María Ingeniería API de Gestión Documental",
   "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "tsc --noEmit && tsx watch ./src/index.ts",
     "build": "prisma generate && npm run clean && tsc --build && npm run copy-schema",
+    "test:events": "node --import tsx --test src/events/catalog.test.ts src/events/emit.test.ts",
+    "test:review-workflow": "node --import tsx --test src/utils/reviewWorkflow.test.ts",
+    "test:events-db": "node --import tsx --test src/events/emitPersistence.test.ts",
+    "test:block01": "npm run test:events && npm run test:review-workflow",
+    "test:block01-db": "npm run test:block01 && npm run test:events-db",
     "clean": "rm -rf ./dist",
     "copy-schema": "cp schema.graphql dist/schema.graphql",
     "start": "node ./dist/src/index.js",

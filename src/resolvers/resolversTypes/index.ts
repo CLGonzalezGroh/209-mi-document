@@ -236,6 +236,20 @@ export const resolverTypes = {
     },
   },
 
+  DocWorkflowEvent: {
+    createdBy: (parent: { createdById: number | null }) => {
+      if (parent.createdById === null) return null
+      return { __typename: "UserName", id: parent.createdById }
+    },
+  },
+
+  DocAuditEvent: {
+    createdBy: (parent: { createdById: number | null }) => {
+      if (parent.createdById === null) return null
+      return { __typename: "UserName", id: parent.createdById }
+    },
+  },
+
   Attachment: {
     __resolveReference: async (ref: { id: number }) => {
       return prisma.attachment.findFirst({
