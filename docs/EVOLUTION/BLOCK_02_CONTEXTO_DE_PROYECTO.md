@@ -556,7 +556,47 @@ Confirma la línea base del plan —el subsistema de Gestión Documental no arra
 
 `optimal` es el cliente con uso real del subsistema legado en testing, y es por lo tanto el que hace concreta la exclusión declarada en B8: aplicarle la doble capa lo habría dejado sin acceso a su propia operación, porque ningún usuario tiene membresía documental todavía.
 
-Tras aplicar las migraciones, estos tres valores deben repetirse sin cambios.
+**Verificado tras aplicar las migraciones y el seed en los tres clientes de testing.** Los valores se repiten sin una sola diferencia:
+
+| Cliente | Antes | Después |
+| ------- | ----- | ------- |
+| `rbb` | `0 / 0 / 0` | `0 / 0 / 0` |
+| `proion` | `1 / 0 / 1` | `1 / 0 / 1` |
+| `optimal` | `9 / 3 / 32` | `9 / 3 / 32` |
+
+La exclusión declarada en B8 queda **demostrada, no supuesta**: una migración con `DROP COLUMN` sobre el subsistema documental dejó el subsistema legado exactamente como estaba. Es el valor de haber tomado la línea base antes de tocar nada.
+
+La estructura también quedó confirmada en los tres: `projectId` presente, `entityType` y `entityId` ausentes.
+
+#### Verificación contra producción
+
+**Es la primera vez que el supuesto central del plan se contrasta con una base productiva.** El plan afirma, desde su línea base, que ningún cliente utiliza hoy el subsistema de Gestión Documental, y sobre esa afirmación descansa toda la estrategia del bloque: cambiar el modelo de forma directa, sin compatibilidad hacia atrás, sin backfill y sin etapas.
+
+Resultado en los dos clientes productivos, `optimal` y `proion`: **cero filas en las nueve tablas del subsistema**. El supuesto se confirma.
+
+| Cliente | Subsistema documental | `scanned_files` | `areas` | `document_sys_logs` |
+| ------- | --------------------- | --------------- | ------- | ------------------- |
+| `proion` | 0 | 0 | 0 | 0 |
+| `optimal` | 0 | **3.227** | **52** | **5.060** |
+
+Ambos con `entityType` y `entityId` presentes y `projectId` ausente: estado previo a la migración, como corresponde.
+
+**El volumen de `optimal` redimensiona B8.** La exclusión de `ScannedFile` y `Area` de la doble capa se había argumentado sobre un principio —son el único subsistema con datos y ningún usuario tiene membresía documental—. Contra producción deja de ser un principio: **son 3.227 archivos y 52 áreas de un cliente real**. Aplicarles el alcance por membresía lo habría dejado sin acceso a su propio archivo digitalizado, con la única alternativa de dar de alta membresías de emergencia para restituirlo.
+
+Es también la razón por la que la salida de `ScannedFile` y `Area` hacia `212-mi-digitalization` exige preservar la continuidad operativa, tal como el plan anticipa: ese bloque no mueve tablas vacías.
+
+**Aplicado y verificado en los dos clientes productivos.** `projectId` presente, `entityType` y `entityId` ausentes en ambos.
+
+| Cliente | Legado antes | Legado después |
+| ------- | ------------ | -------------- |
+| `proion` | `0 / 0 / 0` | `0 / 0 / 0` |
+| `optimal` | `3.227 / 52 / 5.060` | `3.248 / 52 / 5.081` |
+
+**El criterio de comparación no es la igualdad, sino que no disminuya.** `optimal` es un sistema en uso: entre ambas mediciones sumó 21 archivos escaneados y 21 registros de log —incremento idéntico, con `areas` sin cambios—, que es la firma de altas normales, no de una alteración del subsistema.
+
+Que el aumento no proviene de la migración está verificado en el origen: **ninguna de las dos migraciones menciona `scanned_files`, `areas` ni `document_sys_logs`**. Todas sus sentencias destructivas recaen sobre `documents` —dos índices y dos columnas—, y el resto son altas de tablas, columnas y valores de enumeración.
+
+Una pérdida de datos se habría manifestado como una disminución. No la hubo.
 
 #### Promovido a la SFS
 
@@ -584,7 +624,24 @@ Queda pendiente la **aplicación operativa** en el servidor de testing —pushea
 
 Relevado sobre `210-mi-deploy`. **Las migraciones no son automáticas**: el despliegue actualiza la imagen, y `prisma migrate deploy` se ejecuta de forma explícita por cliente y por servicio. El `DROP COLUMN` no puede dispararse solo al actualizar la imagen.
 
-Clientes desplegados en el servidor de testing: **`rbb`, `optimal` y `proion`**. `maria` y `austin` tienen configuración en el repositorio de despliegue pero no están en ese servidor, de modo que el bloque no los alcanza todavía.
+**Alcance real del despliegue**, relevado sobre `210-mi-deploy`:
+
+| Ambiente | Clientes |
+| -------- | -------- |
+| Testing | `rbb`, `optimal`, `proion` |
+| Producción | `optimal`, `proion` |
+
+`maria` y `austin` tienen configuración en el repositorio de despliegue pero **no están desplegados en ningún ambiente**, de modo que el bloque no los alcanza.
+
+**Los dos ambientes se conectan distinto, y el procedimiento debe distinguirlos.** En testing la base es el servicio `db` de docker-compose; en producción es una base **gestionada**, alcanzada por `MI_DOCUMENT_DATABASE_URL`, donde ese servicio no existe. Además, la URL de Prisma incluye `uselibpqcompat`, que `psql` no interpreta y debe removerse.
+
+`210-mi-deploy/check-document-db.sh` resuelve ambos casos con el mismo criterio de conexión que `run-migration.sh`, y es de solo lectura:
+
+```
+./check-document-db.sh <cliente> <ambiente>
+```
+
+**Producción es donde el riesgo del `DROP COLUMN` es real.** Que el subsistema documental esté vacío en testing no dice nada de producción: la afirmación del plan —ningún cliente usa hoy la Gestión Documental— debe verificarse contra las bases productivas de `optimal` y `proion` antes de migrarlas. Si alguna devuelve un valor distinto de 0, la migración **no se fuerza**: se detiene y se rediseña para preservar los datos.
 
 Orden, por cliente:
 
