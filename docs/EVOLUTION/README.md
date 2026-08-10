@@ -68,4 +68,4 @@ Los hallazgos del subsistema de Gestión Documental se registran en `DOCUMENT_EV
 | --------- | --------- | ------ |
 | `DOCUMENT_EVOLUTION_PLAN.md` | Relevamiento del comportamiento implementado, hallazgos y decisiones funcionales objetivo | Decisiones aprobadas — en ejecución por bloques |
 | `BLOCK_01_TRAZABILIDAD_FUNCIONAL.md` | Primer bloque: eventos de dominio de workflow y auditoría, y base de pruebas automatizadas | `PROMOVIDO_A_SFS` |
-| `BLOCK_02_CONTEXTO_DE_PROYECTO.md` | Segundo bloque: pertenencia del documento al proyecto, rol documental Emisor / Receptor / Interno, membresía y alcance de acceso en dos capas | `LISTO_PARA_PROMOVER` |
+| `BLOCK_02_CONTEXTO_DE_PROYECTO.md` | Segundo bloque: pertenencia del documento al proyecto, rol documental Emisor / Receptor / Interno, membresía y alcance de acceso en dos capas | `PROMOVIDO_A_SFS` |

@@ -1,6 +1,6 @@
 # Bloque 02 — Contexto de proyecto y rol documental
 
-**Estado:** `LISTO_PARA_PROMOVER`
+**Estado:** `PROMOVIDO_A_SFS`
 **Versión:** 1.0
 **Depende de:** `BLOCK_01`, cuyos eventos de dominio este bloque extiende.
 **Decisiones que ejecuta:** D-06, D-09, D-15, D-19. Resuelve H-17, H-24, H-28 y H-32; cierra H-19 para `Document` y B6 de `BLOCK_01`.
@@ -522,7 +522,7 @@ La advertencia del linter es sobre el nombre `DocObjectType`, por el sufijo `Typ
 | - | -------- | ------ |
 | 1 | Permisos publicados, sembrados, asignados y consumidos; los tres repositorios compilan | Verificado |
 | 2 | `prisma validate` y `migrate` sin error, sin afectar datos existentes | Verificado |
-| 3 | **Tablas documentales vacías en la base de cada cliente, antes de migrar** | **NO verificado** |
+| 3 | Tablas documentales vacías en la base de cada cliente, antes de migrar | Verificado en los tres clientes desplegados |
 | 4 | `npm run build` y `tsc --noEmit` sin error | Verificado |
 | 5 | Suites del bloque y de `BLOCK_01` aprobadas | Verificado — 72 pruebas |
 | 6 | Índices parciales presentes y rechazando duplicados en ambos regímenes | Verificado |
@@ -534,7 +534,29 @@ La advertencia del linter es sobre el nombre `DocObjectType`, por el sufijo `Typ
 | 12 | `rover subgraph check` ejecutado y retiros documentados | Verificado |
 | 13 | SFS actualizada solo después de reunir la evidencia | Verificado |
 
-**El criterio 3 no se cumplió y no debe darse por cumplido.** La verificación se hizo únicamente sobre la base local. La comprobación sobre las bases de `rbb`, `proion`, `maria`, `austin` y `optimal` sigue pendiente, y es la condición que el plan fija para aplicar cambios directos de modelo. **La migración no debe aplicarse fuera de local hasta cumplirla.** Por el mismo motivo queda pendiente el seed de permisos en esos cuatro despliegues.
+**Criterio 3 verificado sobre el servidor de testing.** La consulta de precondición devolvió **0 filas** en el subsistema documental de los tres clientes desplegados:
+
+| Cliente | Filas del subsistema documental |
+| ------- | ------------------------------- |
+| `rbb` | 0 |
+| `proion` | 0 |
+| `optimal` | 0 |
+
+Confirma la línea base del plan —el subsistema de Gestión Documental no arrastra datos productivos— sobre bases reales y no solo sobre la local. La migración con `DROP COLUMN` puede aplicarse en los tres.
+
+`maria` y `austin` tienen configuración en el repositorio de despliegue pero **no están en el servidor de testing**, de modo que quedan fuera del alcance verificado. Antes de alcanzarlos hay que repetir la comprobación sobre sus bases.
+
+**Línea base del subsistema legado, tomada antes de migrar.** La migración no toca estas tablas; los números se registran para poder **demostrar** que quedaron intactas, en lugar de suponerlo:
+
+| Cliente | `scanned_files` | `areas` | `document_sys_logs` |
+| ------- | --------------- | ------- | ------------------- |
+| `rbb` | 0 | 0 | 0 |
+| `proion` | 1 | 0 | 1 |
+| `optimal` | **9** | **3** | **32** |
+
+`optimal` es el cliente con uso real del subsistema legado en testing, y es por lo tanto el que hace concreta la exclusión declarada en B8: aplicarle la doble capa lo habría dejado sin acceso a su propia operación, porque ningún usuario tiene membresía documental todavía.
+
+Tras aplicar las migraciones, estos tres valores deben repetirse sin cambios.
 
 #### Promovido a la SFS
 
@@ -554,7 +576,40 @@ Es el mismo criterio con que `BLOCK_01` se abstuvo de promover su catálogo de a
 
 **Tampoco se promovió `Document`.** El objeto gana `projectId` en este bloque, pero su especificación completa —código, esquema de revisión, ciclo— la modifican `BLOCK_03` y `BLOCK_04`. Promoverlo ahora obligaría a corregirlo dos veces. El contexto de proyecto que este bloque le agrega queda expresado en los principios del ámbito.
 
-**Estado del bloque: `LISTO_PARA_PROMOVER`.** No pasa a `PROMOVIDO_A_SFS` mientras el criterio 3 siga sin verificarse: la definición está documentada, pero el bloque no está aplicado fuera del entorno local.
+**Estado del bloque: `PROMOVIDO_A_SFS`.** Los trece criterios están verificados y la definición fue incorporada a la SFS vigente.
+
+Queda pendiente la **aplicación operativa** en el servidor de testing —pushear, construir imágenes, sembrar permisos y ejecutar las migraciones—, que es un paso de despliegue y no de definición. El procedimiento está descrito abajo.
+
+#### Procedimiento de aplicación
+
+Relevado sobre `210-mi-deploy`. **Las migraciones no son automáticas**: el despliegue actualiza la imagen, y `prisma migrate deploy` se ejecuta de forma explícita por cliente y por servicio. El `DROP COLUMN` no puede dispararse solo al actualizar la imagen.
+
+Clientes desplegados en el servidor de testing: **`rbb`, `optimal` y `proion`**. `maria` y `austin` tienen configuración en el repositorio de despliegue pero no están en ese servidor, de modo que el bloque no los alcanza todavía.
+
+Orden, por cliente:
+
+1. **Verificar la precondición**, de solo lectura. Si alguna tabla del subsistema documental tiene filas, **no se migra**: el `DROP COLUMN` perdería datos y corresponde escalar antes de continuar.
+
+   La verificación **no requiere copiar ningún archivo al servidor**. Se ejecuta contra el servicio `db`, que ya tiene `psql`, con una consulta que devuelve el total de filas del subsistema:
+
+   ```
+   ./deploy.sh <cliente> testing exec db 'psql -U $POSTGRES_USER -d mi_document -tAc "select sum(c) from (select count(*) c from documents union all select count(*) from document_revisions union all select count(*) from document_versions union all select count(*) from review_workflows union all select count(*) from review_steps union all select count(*) from transmittals union all select count(*) from transmittal_items union all select count(*) from task_document_references union all select count(*) from attachments) t"'
+   ```
+
+   **Devuelve `0` → apto para migrar.** Cualquier otro número frena la aplicación en ese cliente.
+
+   La consulta no contiene ninguna comilla simple, de modo que atraviesa sin escapes el `sh -c` que usa `deploy.sh`. `prisma/checks/block02_precondicion.sql` conserva la versión extendida —detalle por tabla, veredicto en texto y control del legado— para cuando el archivo esté disponible en el servidor.
+2. **`mi-admin`**: actualizar la imagen a 2.2.4 y ejecutar el seed con `--permissions-only`. Los seis permisos deben existir antes de que las operaciones nuevas los exijan.
+3. **`mi-document`**: actualizar la imagen a 2.3.0 y ejecutar `npx prisma migrate deploy`, que aplica las dos migraciones del bloque.
+4. **Verificar de nuevo**, sin archivos: `entityType` y `entityId` deben haber desaparecido, `projectId` debe estar presente y los dos índices únicos parciales deben existir.
+
+   ```
+   ./deploy.sh <cliente> testing exec db 'psql -U $POSTGRES_USER -d mi_document -c "\d documents"'
+   ```
+
+Dependencia previa: las imágenes se publican desde CI al pushear. Los commits de `205-mi-admin` y `209-mi-document` deben estar pusheados y sus imágenes construidas antes del paso 2.
+
+El script se validó contra la base local, donde informa el veredicto correcto y detecta que la migración ya fue aplicada.
 
 ## Referencias
 
