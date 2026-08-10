@@ -91,8 +91,13 @@ test("cada tipo de objeto declara el permiso que exige leer su traza", () => {
   )
 })
 
-test("el catálogo cubre las 25 escrituras funcionales relevadas", () => {
+test("el catálogo cubre las escrituras relevadas más lo que agregó el Bloque 02", () => {
   // Línea base del Bloque 01: 25 escrituras a DocumentSysLog en el subsistema
-  // de Gestión Documental, que este bloque sustituye por eventos.
-  assert.equal(AUDIT_ACTIONS.length, 25)
+  // de Gestión Documental, que aquel bloque sustituyó por eventos.
+  //
+  // El Bloque 02 suma 3 acciones sobre objetos que antes no existían:
+  // DeclareProjectSettings, AssignProjectMember y RevokeProjectMember. No son
+  // escrituras que se hayan dejado de registrar en otro lado, sino trazabilidad
+  // nueva del contexto de proyecto.
+  assert.equal(AUDIT_ACTIONS.length, 28)
 })

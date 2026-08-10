@@ -16,6 +16,8 @@ import { areaResolvers } from "./areas.js"
 import { dependencyResolvers } from "./dependencies.js"
 import { taskDocumentReferenceResolvers } from "./taskDocumentReferences.js"
 import { eventResolvers } from "./events.js"
+import { projectSettingsResolvers } from "./projectSettings.js"
+import { projectMemberResolvers } from "./projectMembers.js"
 
 export const resolvers: GraphQLResolverMap<ResolverContext> = {
   ...scalars,
@@ -32,8 +34,12 @@ export const resolvers: GraphQLResolverMap<ResolverContext> = {
     ...scannedFileResolvers.Query,
     ...dependencyResolvers.Query,
     ...eventResolvers.Query,
+    ...projectSettingsResolvers.Query,
+    ...projectMemberResolvers.Query,
   },
   Mutation: {
+    ...projectSettingsResolvers.Mutation,
+    ...projectMemberResolvers.Mutation,
     ...documentResolvers.Mutation,
     ...documentTypeResolvers.Mutation,
     ...documentClassResolvers.Mutation,

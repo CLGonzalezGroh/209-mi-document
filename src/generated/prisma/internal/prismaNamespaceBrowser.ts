@@ -62,6 +62,8 @@ export const ModelName = {
   Transmittal: 'Transmittal',
   TransmittalItem: 'TransmittalItem',
   Attachment: 'Attachment',
+  DocProjectSettings: 'DocProjectSettings',
+  DocProjectMember: 'DocProjectMember',
   DocWorkflowEvent: 'DocWorkflowEvent',
   DocAuditEvent: 'DocAuditEvent',
   ScannedFile: 'ScannedFile',
@@ -133,8 +135,7 @@ export const DocumentScalarFieldEnum = {
   title: 'title',
   description: 'description',
   module: 'module',
-  entityType: 'entityType',
-  entityId: 'entityId',
+  projectId: 'projectId',
   documentTypeId: 'documentTypeId',
   documentClassId: 'documentClassId',
   revisionScheme: 'revisionScheme',
@@ -265,6 +266,39 @@ export const AttachmentScalarFieldEnum = {
 export type AttachmentScalarFieldEnum = (typeof AttachmentScalarFieldEnum)[keyof typeof AttachmentScalarFieldEnum]
 
 
+export const DocProjectSettingsScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  projectId: 'projectId',
+  documentRole: 'documentRole',
+  counterpartyName: 'counterpartyName'
+} as const
+
+export type DocProjectSettingsScalarFieldEnum = (typeof DocProjectSettingsScalarFieldEnum)[keyof typeof DocProjectSettingsScalarFieldEnum]
+
+
+export const DocProjectMemberScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  isSys: 'isSys',
+  projectId: 'projectId',
+  userId: 'userId',
+  side: 'side',
+  assignedAt: 'assignedAt',
+  assignedById: 'assignedById',
+  isActive: 'isActive',
+  revokedAt: 'revokedAt',
+  revokedById: 'revokedById'
+} as const
+
+export type DocProjectMemberScalarFieldEnum = (typeof DocProjectMemberScalarFieldEnum)[keyof typeof DocProjectMemberScalarFieldEnum]
+
+
 export const DocWorkflowEventScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -273,7 +307,9 @@ export const DocWorkflowEventScalarFieldEnum = {
   objectId: 'objectId',
   name: 'name',
   fromState: 'fromState',
-  toState: 'toState'
+  toState: 'toState',
+  projectId: 'projectId',
+  module: 'module'
 } as const
 
 export type DocWorkflowEventScalarFieldEnum = (typeof DocWorkflowEventScalarFieldEnum)[keyof typeof DocWorkflowEventScalarFieldEnum]
@@ -286,7 +322,9 @@ export const DocAuditEventScalarFieldEnum = {
   objectType: 'objectType',
   objectId: 'objectId',
   action: 'action',
-  meta: 'meta'
+  meta: 'meta',
+  projectId: 'projectId',
+  module: 'module'
 } as const
 
 export type DocAuditEventScalarFieldEnum = (typeof DocAuditEventScalarFieldEnum)[keyof typeof DocAuditEventScalarFieldEnum]

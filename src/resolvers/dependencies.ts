@@ -56,11 +56,10 @@ export const dependencyResolvers = {
               context.orm.area.count({
                 where: { projectId: entityId },
               }),
+              // Con projectId explícito, el conteo expresa directamente lo que
+              // siempre quiso decir (BLOQUE 02, B3)
               context.orm.document.count({
-                where: {
-                  module: "PROJECTS",
-                  entityId: entityId,
-                },
+                where: { projectId: entityId },
               }),
             ])
 
@@ -92,39 +91,23 @@ export const dependencyResolvers = {
               label: "Documentos",
             })
           }
-        } else if (entityType === "FINDING") {
-          const documentCount = await context.orm.document.count({
-            where: {
-              module: "QUALITY",
-              entityType: "finding",
-              entityId: entityId,
-            },
-          })
-
-          if (documentCount > 0) {
-            dependencies.push({
-              model: "Document",
-              count: documentCount,
-              label: "Documentos",
-            })
-          }
-        } else if (entityType === "ACTION") {
-          const documentCount = await context.orm.document.count({
-            where: {
-              module: "QUALITY",
-              entityType: "action",
-              entityId: entityId,
-            },
-          })
-
-          if (documentCount > 0) {
-            dependencies.push({
-              model: "Document",
-              count: documentCount,
-              label: "Documentos",
-            })
-          }
         }
+
+        // Las ramas FINDING y ACTION dejan de contar documentos (BLOQUE 02, B3).
+        //
+        // Contaban con `entityType`/`entityId`, columnas que este bloque retira
+        // por expresar la pertenencia sin integridad referencial. Sin ellas solo
+        // quedaría filtrar por `module: QUALITY`, que no distingue el hallazgo
+        // concreto y sobre-reportaría dependencias inexistentes.
+        //
+        // Hoy no existe ningún documento de calidad y D-07 y D-08 difieren esa
+        // integración. Cuando el módulo atienda a calidad, el vínculo se modelará
+        // con una referencia propia, como se hizo con el proyecto, y estas ramas
+        // volverán a contar.
+        //
+        // El contrato GraphQL no cambia: los argumentos identifican la entidad
+        // que el otro servicio va a borrar, no columnas de Document. mi-quality
+        // sigue compilando sin cambios y recibe una respuesta bien formada.
 
         return {
           entityId,

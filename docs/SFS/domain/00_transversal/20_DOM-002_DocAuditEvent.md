@@ -3,7 +3,7 @@
 **Ámbito:** Transversal
 **Categoría:** Entity
 **Estado:** Approved
-**Versión:** 1.0
+**Versión:** 1.1
 
 ---
 
@@ -50,7 +50,8 @@ Entre los atributos propios del `DocAuditEvent` podrán encontrarse:
 - tipo y referencia del objeto afectado;
 - fecha y hora;
 - actor, que puede ser nulo cuando la emite el sistema;
-- datos contextuales de la acción.
+- datos contextuales de la acción;
+- proyecto y ámbito del objeto afectado, derivados de él y no informados por quien emite. Pueden ser nulos: los catálogos no pertenecen a ningún proyecto, y la documentación publicada tampoco.
 
 La definición detallada de estos atributos corresponde al Modelo de Datos.
 
@@ -79,4 +80,5 @@ El `DocAuditEvent` responde a **quién hizo qué y cuándo**, mientras que el `D
 # Referencias
 
 - `10_DOM-001_DocWorkflowEvent.md`
+- `../05_project/80_Principios_del_Modelo.md`
 - `../../00_Convenciones.md`

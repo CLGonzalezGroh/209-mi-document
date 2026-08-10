@@ -2,6 +2,8 @@ import { GraphQLError } from "graphql"
 import { ResolverContext } from "../types.js"
 import { PERMISSIONS } from "@CLGonzalezGroh/mi-common"
 import { userAuthorization } from "../utils/userAuthorization.js"
+import { assertObjectAccess } from "../utils/projectAuthorization.js"
+import { DocObjectType } from "../generated/prisma/enums.js"
 import { handleError } from "../utils/handleError.js"
 import { RevisionStatus } from "../generated/prisma/enums.js"
 import { AuditAction } from "../events/catalog.js"
@@ -44,6 +46,15 @@ export const versionResolvers = {
         context,
       })
       logger.info("registerVersion", { userId })
+
+      // La versión se registra dentro de una revisión: el proyecto es el suyo
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT_REVISION,
+        objectId: revisionId,
+        context,
+        notFoundMessage: "Revisión no encontrada",
+      })
 
       try {
         // Verificar que la revisión existe y está en DRAFT

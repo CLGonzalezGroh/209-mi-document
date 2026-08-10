@@ -1,6 +1,6 @@
 {
   "name": "209-mi-document",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "María Ingeniería API de Gestión Documental",
   "type": "module",
   "main": "index.js",
@@ -18,7 +18,14 @@
     "rover-check-staging": "rover subgraph check Maria-Ingenieria@staging --name mi-document --schema ./schema.graphql",
     "rover-publish-staging": "rover subgraph publish Maria-Ingenieria@staging --name mi-document --schema ./schema.graphql --routing-url http://localhost:4209",
     "rover-check-current": "rover subgraph check Maria-Ingenieria@current --name mi-document --schema ./schema.graphql",
-    "rover-publish-current": "rover subgraph publish Maria-Ingenieria@current --name mi-document --schema ./schema.graphql --routing-url http://localhost:4209"
+    "rover-publish-current": "rover subgraph publish Maria-Ingenieria@current --name mi-document --schema ./schema.graphql --routing-url http://localhost:4209",
+    "test:project-scope": "node --import tsx --test src/utils/projectAuthorization.test.ts",
+    "test:project-scope-db": "node --import tsx --test src/utils/projectAuthorizationPersistence.test.ts",
+    "test:block02": "npm run test:block01 && npm run test:project-scope && npm run test:project-settings",
+    "test:block02-db": "npm run test:block02 && npm run test:events-db && npm run test:project-scope-db",
+    "test:block02-integration": "node --import tsx --test src/resolvers/authorization.integration.test.ts",
+    "test:block02-all": "npm run test:block02-db && npm run test:block02-integration",
+    "test:project-settings": "node --import tsx --test src/utils/projectSettings.test.ts src/utils/documentContext.test.ts"
   },
   "keywords": [],
   "author": "César González Groh",
@@ -33,7 +40,7 @@
   "dependencies": {
     "@apollo/server": "^5.5.1",
     "@apollo/subgraph": "^2.14.2",
-    "@CLGonzalezGroh/mi-common": "^2.3.0",
+    "@CLGonzalezGroh/mi-common": "^2.5.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "graphql": "^16.13.2",

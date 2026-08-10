@@ -3,7 +3,7 @@
 **Ámbito:** Transversal
 **Categoría:** Entity
 **Estado:** Approved
-**Versión:** 1.0
+**Versión:** 1.1
 
 ---
 
@@ -51,7 +51,8 @@ Entre los atributos propios del `DocWorkflowEvent` podrán encontrarse:
 - estado previo, que puede no existir cuando el objeto se da de alta;
 - estado resultante;
 - fecha y hora;
-- actor que originó la transición, que puede ser nulo cuando la emite el sistema.
+- actor que originó la transición, que puede ser nulo cuando la emite el sistema;
+- proyecto y ámbito del objeto afectado, derivados de él y no informados por quien emite. Pueden ser nulos: los catálogos no pertenecen a ningún proyecto, y la documentación publicada tampoco.
 
 La definición detallada de estos atributos corresponde al Modelo de Datos.
 
@@ -73,9 +74,12 @@ La transición se registra **dentro de la misma transacción** que aplica el cam
 
 El `DocWorkflowEvent` se distingue del `DocAuditEvent`: el primero describe **qué** cambió; el segundo, **quién hizo qué**.
 
+El contexto del evento —proyecto y ámbito— se **deriva del objeto afectado** y no lo informa quien emite. La derivación está declarada en un único lugar, de modo que no puede haber discrepancia entre lo que el evento afirma y lo que el objeto es. Conservarlo permite consultar la traza por proyecto o por ámbito sin recorrer la cadena de objetos.
+
 ---
 
 # Referencias
 
 - `20_DOM-002_DocAuditEvent.md`
+- `../05_project/80_Principios_del_Modelo.md`
 - `../../00_Convenciones.md`

@@ -1,7 +1,7 @@
 # Plan de evolución funcional — OperMask Documents
 
-**Estado:** Relevamiento para revisión
-**Versión:** 0.1
+**Estado:** Decisiones aprobadas — en ejecución por bloques
+**Versión:** 1.1
 **Alcance:** subsistema de Gestión Documental (`Document`, `DocumentRevision`, `DocumentVersion`, `ReviewWorkflow`, `ReviewStep`, `Transmittal`, `TransmittalItem`, catálogos, adjuntos y vínculo con tareas de proyecto).
 
 ## Objetivo
@@ -79,7 +79,7 @@ Los siguientes puntos requieren revisión antes de convertirse en reglas aprobad
 | H-01 | Revisión bloqueada tras un rechazo | `rejectStep` devuelve la revisión a `DRAFT` y marca el workflow como `REJECTED`. Como `ReviewWorkflow.revisionId` es único, esa revisión ya no admite un segundo workflow; y como `createRevision` rechaza abrir una nueva mientras exista una en `DRAFT` o `IN_REVIEW`, el documento queda sin salida funcional. Resuelto por D-10: el rechazo interno produce una nueva versión dentro de la misma revisión, y la restricción de unicidad del workflow debe caer. | `APROBADO_PENDIENTE` |
 | H-02 | Sin circuito para documentos que no requieren aprobación | `DocumentType.requiresWorkflow` se persiste pero no se consulta en ninguna validación. No existe operación que apruebe una revisión sin workflow, de modo que un documento de tipo informativo permanece en `DRAFT` indefinidamente. Resuelto por D-03. | `APROBADO_PENDIENTE` |
 | H-03 | Ausencia de control sobre el firmante | `approveStep` y `rejectStep` no verifican que el usuario autenticado sea el `assignedToId` del paso. Cualquier usuario con `DOCUMENTS_WORKFLOW_UPDATE` puede resolver el paso asignado a otro, y no queda registro de quién lo resolvió realmente. Resuelto por D-04. | `APROBADO_PENDIENTE` |
-| H-04 | Pasos de toma de conocimiento sin cierre | `approveStep` excluye los pasos `ACKNOWLEDGE` del cálculo de completitud. Al completarse el workflow, esos pasos quedan `PENDING` de forma permanente. | `IMPLEMENTADO_CON_BRECHA` |
+| H-04 | Pasos de toma de conocimiento sin cierre | `approveStep` excluye los pasos `ACKNOWLEDGE` del cálculo de completitud. Al completarse el workflow, esos pasos quedan `PENDING` de forma permanente. Deja de ser un defecto menor: según D-19, el paso de toma de conocimiento **es** el mecanismo con que se comunica un documento interno aprobado, dado que no existe emisión que lo haga. `BLOCK_03` debe cerrarlos. | `IMPLEMENTADO_CON_BRECHA` |
 | H-05 | Cancelación sin identidad propia | `cancelWorkflow` deja el workflow en `REJECTED`; el motivo de la cancelación solo se escribe en el registro técnico y no queda en el modelo. Una cancelación es indistinguible de un rechazo. Resuelto por D-17. | `APROBADO_PENDIENTE` |
 | H-06 | Alcance de la firma | `signatureHash` se calcula como SHA-256 de `stepId`, `userId`, marca temporal y acción. No incorpora la versión ni el `checksum` del archivo, por lo que no acredita **qué** se aprobó. Tampoco se persisten los datos firmados, de modo que el hash no es verificable a posteriori. Resuelto por D-05. | `APROBADO_PENDIENTE` |
 | H-07 | Consulta de pendientes ajenos | `pendingReviewSteps` recibe el `userId` como argumento y no lo contrasta con el usuario autenticado. Debe alinearse con el criterio de D-04. | `PROPUESTO` |
@@ -102,7 +102,7 @@ Los siguientes puntos requieren revisión antes de convertirse en reglas aprobad
 | H-29 | Transmittal sin sentido de circulación | El modelo asume una única dirección: se emite y el cliente responde sobre el mismo registro. No existe el concepto de transmittal **entrante** ni el vínculo entre uno de respuesta y el que responde. Según D-18: en modo Emisor el transmittal es saliente y la respuesta llega como transmittal de retorno o documento a documento; en modo Receptor es entrante y **no hay transmittal de salida**. | `APROBADO_PENDIENTE` |
 | H-30 | Sin archivos de respuesta del cliente | La respuesta solo admite `clientStatus` y comentarios de texto. No hay forma de incorporar los archivos marcados que devuelve la contraparte, que son la evidencia de la observación. | `APROBADO_PENDIENTE` |
 | H-31 | Sin listado de documentos esperados | En modo Receptor la planta debe definir los documentos obligatorios por contrato, sobre los que el proveedor emite, pudiendo agregar adicionales. No existe ningún concepto equivalente en el modelo. | `APROBADO_PENDIENTE` |
-| H-32 | Sin alcance para usuarios externos | Ambos modos pueden incorporar usuarios ajenos a la organización que hospeda el sistema: el contratista en modo Receptor, y el cliente que responde directamente en modo Emisor (D-12). Cada uno debe ver únicamente lo que le corresponde. No existe hoy ningún mecanismo de alcance: la autorización es puramente global por permiso. Resuelto por D-15. | `APROBADO_PENDIENTE` |
+| H-32 | Sin alcance para usuarios externos | Ambos modos pueden incorporar usuarios ajenos a la organización que hospeda el sistema: el contratista en modo Receptor, y el cliente que responde directamente en modo Emisor (D-12). Cada uno debe ver únicamente lo que le corresponde. No existe hoy ningún mecanismo de alcance: la autorización es puramente global por permiso. Resuelto por D-15. | `LISTO_PARA_PROMOVER` |
 | H-36 | Sin matriz de responsabilidad | En modo Receptor los documentos recibidos se distribuyen entre revisores según disciplina, tipo o área. No existe ningún concepto que proponga esa asignación: hoy cada paso del workflow se asigna a mano, documento por documento (D-18). | `APROBADO_PENDIENTE` |
 | H-33 | Respuesta sin autoría diferenciada | El modelo no distingue quién respondió de quién registró la respuesta. En el caso habitual del modo Emisor la ingresa el control documental de la ingeniería, y esa diferencia debe quedar explícita (D-12). Tampoco se conserva la fecha real de la respuesta frente a la de registro. | `APROBADO_PENDIENTE` |
 
@@ -110,10 +110,10 @@ Los siguientes puntos requieren revisión antes de convertirse en reglas aprobad
 
 | # | Tema | Situación actual observada | Estado |
 | - | ---- | -------------------------- | ------ |
-| H-17 | Documento sin proyecto | `Document` no tiene `projectId`. Su contexto se expresa con `module` más `entityType`/`entityId` genéricos, mientras que `Transmittal`, `Area` y `ScannedFile` sí tienen `projectId`. No hay forma directa de listar los documentos de un proyecto. Resuelto por D-06. | `APROBADO_PENDIENTE` |
+| H-17 | Documento sin proyecto | `Document` no tiene `projectId`. Su contexto se expresa con `module` más `entityType`/`entityId` genéricos, mientras que `Transmittal`, `Area` y `ScannedFile` sí tienen `projectId`. No hay forma directa de listar los documentos de un proyecto. Resuelto por D-06. | `LISTO_PARA_PROMOVER` |
 | H-18 | Doble vínculo documento–tarea | Coexisten `Document.projectTaskId` (entregable principal) y `TaskDocumentReference` con rol `OUTPUT`. Ambos expresan producción documental de una tarea y pueden contradecirse. Diferido por D-07. | `PROPUESTO` |
-| H-28 | Módulos sin uso real | `Document.module` admite seis módulos, pero no existe ningún consumidor fuera de proyectos: `mi-quality` solo invoca `checkDocumentDependencies` para proteger borrados y nunca crea documentos; la webapp solo consume los catálogos. `entityType`/`entityId` no tienen usos productivos. | `APROBADO_PENDIENTE` |
-| H-19 | Unicidad de catálogos con módulo nulo | `DocumentClass` y `DocumentType` declaran unicidad sobre tuplas que incluyen columnas anulables. Cuando `module` o `classId` son nulos, la restricción no impide duplicados. | `IMPLEMENTADO_CON_BRECHA` |
+| H-28 | Módulos sin uso real | `Document.module` admite seis módulos, pero no existe ningún consumidor fuera de proyectos: `mi-quality` solo invoca `checkDocumentDependencies` para proteger borrados y nunca crea documentos; la webapp solo consume los catálogos. `entityType`/`entityId` no tienen usos productivos. | `LISTO_PARA_PROMOVER` |
+| H-19 | Unicidad con columnas anulables | `Document`, `DocumentClass` y `DocumentType` declaran unicidad sobre tuplas que incluyen columnas anulables. Cuando `module`, `entityType`, `entityId` o `classId` son nulos, la restricción no impide duplicados. `BLOCK_02` lo cierra para `Document` con dos índices únicos parciales (B2); subsiste en los dos catálogos. | `IMPLEMENTADO_CON_BRECHA` |
 | H-20 | Documento sin archivo imposible | `createDocument` exige `fileKey`, `fileName`, `fileSize` y `mimeType`. No es posible registrar un documento previsto antes de contar con su archivo. | `PROPUESTO` |
 | H-21 | Adjuntos sin ciclo de vida ni consumidores | `Attachment` carece de `terminatedAt` y `updatedAt`, y no se relaciona con `Document`. Sus operaciones están expuestas en GraphQL, pero no las consume ni la webapp ni `mi-quality`. Diferido por D-08. | `PROPUESTO` |
 | H-22 | Permisos poco específicos | `createRevision` y `registerVersion` exigen `DOCUMENTS_DOCUMENT_CREATE` en lugar de un permiso propio de revisión; `cancelWorkflow` exige `DOCUMENTS_WORKFLOW_CREATE`. | `PROPUESTO` |
@@ -124,7 +124,7 @@ Los siguientes puntos requieren revisión antes de convertirse en reglas aprobad
 | # | Tema | Situación actual observada | Estado |
 | - | ---- | -------------------------- | ------ |
 | H-23 | Auditoría funcional mezclada con log técnico | Toda la traza se escribía en `DocumentSysLog`, junto con los errores del servicio, en registros de texto sin tipo de objeto ni estado. Resuelto por D-01 e implementado en `BLOCK_01`: las 25 escrituras funcionales del subsistema documental se sustituyeron por `DocWorkflowEvent` y `DocAuditEvent`. `DocumentSysLog` conserva la operación del servicio y el subsistema legado. | `PROMOVIDO_A_SFS` |
-| H-24 | Módulo del registro inconsistente | Los transmittals registran siempre `SysLogModule.PROJECTS`, mientras que el resto deriva el módulo del documento afectado. | `PROPUESTO` |
+| H-24 | Módulo del registro inconsistente | Los transmittals registraban siempre `SysLogModule.PROJECTS`, mientras que el resto derivaba el módulo del documento afectado. La inconsistencia vivía en `DocumentSysLog.module` y desapareció con `BLOCK_01`, al sustituirse las 25 escrituras que la producían. El hallazgo no reclamaba suprimir el módulo sino derivarlo: `BLOCK_02` lo incorpora a ambos eventos junto con `projectId`, derivado del objeto afectado y nunca informado por quien emite (B9). | `LISTO_PARA_PROMOVER` |
 
 ### Cobertura y validación
 
@@ -149,7 +149,9 @@ La trazabilidad del subsistema de Gestión Documental se modela con eventos func
 
 Alternativa descartada: enriquecer `DocumentSysLog` con tipo de objeto y estados. Se descarta porque mantiene la auditoría funcional mezclada con los errores técnicos y no permite consultarla como parte del dominio.
 
-Pendiente de definición al abrir el bloque correspondiente: nomenclatura de los objetos y de las acciones, y si el evento de workflow reemplaza o complementa a los campos de fecha ya presentes en las entidades (`approvedAt`, `issuedAt`, `completedAt`).
+Resuelto en `BLOCK_01`: nomenclatura de los objetos y de las acciones (B1 y B5), emisión dentro de la transacción del cambio (B3) y relación de una acción con varias transiciones (B4). `BLOCK_02` incorpora a ambos eventos el contexto del objeto afectado —`projectId`, que aquel bloque había diferido, y `module`, que resuelve H-24— derivado y no informado por quien emite (B9).
+
+Pendiente de definición: si el evento de workflow reemplaza o complementa a los campos de fecha ya presentes en las entidades (`approvedAt`, `issuedAt`, `completedAt`). `BLOCK_01` los conservó sin decidirlo, y la definición corresponde al bloque que altere esas transiciones.
 
 ### D-02 — El rechazo es terminal para la revisión
 
@@ -220,11 +222,11 @@ El relevamiento respalda esa concentración: no existe hoy ningún consumidor de
 
 Alternativa descartada: derivar el proyecto de `entityType = "project"` más `entityId`. Se descarta porque deja el vínculo sin integridad referencial ni índice propio, y obliga a cada consumidor a conocer una convención implícita.
 
-Pendientes de definición al abrir el bloque:
+Definido al abrir `BLOCK_02`:
 
-- si `projectId` es obligatorio siempre o solo cuando `module = PROJECTS`. La recomendación es admitir nulo en el modelo y exigirlo por invariante para documentos de proyecto, de modo que un futuro documento de calidad asociado a un hallazgo no quede forzado a un proyecto artificial;
-- qué ocurre con `entityType` y `entityId` una vez que existe `projectId`: si se retiran, se conservan para los módulos no basados en proyecto, o se reinterpretan;
-- cómo cambia la unicidad del código. Hoy es `[code, module, entityType, entityId]`, lo que en la práctica hace el código único por módulo. Con proyecto explícito, lo natural es que sea único por proyecto.
+- **`projectId` admite nulo y el invariante lo exige** cuando `module = PROJECTS`. Un `projectId` nulo no es una ausencia: identifica el régimen de publicación descrito más abajo. Se descartó crear un proyecto reservado del sistema que permitiera declararlo obligatorio, porque el módulo no es dueño de `Project` y el invariante quedaría sostenido por convención entre servicios (`BLOCK_02`, B1);
+- **`entityType` y `entityId` se retiran.** `module` se conserva como discriminador. La consecuencia sobre `checkDocumentDependencies` se declara por rama en `BLOCK_02`, B3;
+- **la unicidad se resuelve con dos índices únicos parciales**: por proyecto para los documentos en circulación, por módulo para los publicados. Cierra H-19 para `Document` (`BLOCK_02`, B2).
 
 Al no existir documentos productivos, estos cambios se aplican de forma directa sobre el modelo, sin etapas de compatibilidad.
 
@@ -240,9 +242,9 @@ En consecuencia, `Document.projectTaskId` y `TaskDocumentReference` se mantienen
 
 ### D-09 — El proyecto declara el rol documental del sistema
 
-**Estado:** Aprobada.
+**Estado:** Aprobada. Ampliada por D-19, que incorpora un tercer rol sin contraparte.
 
-El módulo opera en dos modos según quién hospeda el sistema. El modo es un atributo **del proyecto**, no del despliegue: un mismo cliente puede tener proyectos en uno u otro rol.
+El módulo opera en dos modos según quién hospeda el sistema y hay contraparte. El modo es un atributo **del proyecto**, no del despliegue: un mismo cliente puede tener proyectos en uno u otro rol.
 
 **Modo Emisor** — el sistema lo usa la empresa de ingeniería; el cliente es la planta.
 
@@ -264,12 +266,15 @@ Lo que **no** cambia entre modos: la revisión sigue siendo la unidad externa y 
 
 Esto reconcilia D-03: la regla "toda revisión se aprueba por workflow" se mantiene en ambos modos. Lo que cambia es quién ejecuta ese workflow y en qué momento — la ingeniería antes de emitir, o la planta después de recibir.
 
-Pendientes de definición al abrir el bloque:
+Definido al abrir `BLOCK_02`:
 
-- nomenclatura del rol y dónde se declara;
-- en modo Receptor, el alcance de acceso del proveedor: un contratista debe ver únicamente sus propios documentos y transmittals. Es la primera vez que el módulo admite usuarios externos a la organización que lo hospeda, y requiere un modelo de alcance que hoy no existe;
-- en modo Receptor, el listado de documentos esperados: la planta define los obligatorios por contrato y el proveedor puede agregar adicionales. Es un concepto nuevo, sin correlato en el modelo actual;
-- si un mismo proyecto puede cambiar de rol una vez iniciado.
+- **el rol se declara en `DocProjectSettings`**, un registro por proyecto, con la enumeración `DocumentRole { ISSUER, RECEIVER }`. Esa misma entidad alojará después el esquema de revisión de D-13 y la configuración de ubicación de D-14 (`BLOCK_02`, B4);
+- **el rol es inmutable desde el primer documento o transmittal.** Antes de eso se modifica libremente (`BLOCK_02`, B5);
+- **el alcance de acceso del usuario externo lo resuelve la membresía de D-15**, aplicada como autorización en dos capas y como filtrado en los listados (`BLOCK_02`, B7).
+
+Pendiente de definición al abrir el bloque correspondiente:
+
+- en modo Receptor, el listado de documentos esperados: la planta define los obligatorios por contrato y el proveedor puede agregar adicionales. Es un concepto nuevo, sin correlato en el modelo actual (H-31, `BLOCK_04`).
 
 ### D-10 — La revisión es externa; la versión es interna
 
@@ -344,11 +349,11 @@ Se adopta el patrón de `ProjectMember` (DOM-020) de OperMask Digitalization:
 
 El precedente cubre exactamente este caso: en digitalización el `Cliente` que realiza revisiones por muestreo también se modela como miembro del proyecto, de modo que su acceso queda acotado.
 
-Pendientes de definición al abrir el bloque:
+Definido al abrir `BLOCK_02`:
 
 **La membresía documental reside en `mi-document`.** La membresía de `mi-project` es interna: registra qué personal propio está asignado al proyecto, tanto para la empresa de ingeniería como para la planta, y no contempla personal externo. La membresía documental es otra población —incorpora cliente o proveedor según el modo— y otra finalidad. Son dos listas distintas, no dos versiones de la misma.
 
-Pendiente de definición al abrir el bloque: si la membresía admite distinguir participación de solo lectura, o si eso queda enteramente en los permisos globales.
+**La membresía no distingue participación de solo lectura.** Queda enteramente en los permisos globales. Incorporar un indicador de solo lectura crearía una segunda fuente de verdad sobre lo permitido y obligaría a resolver cuál prevalece ante una contradicción con el permiso global (`BLOCK_02`, B6).
 
 **La membresía determina qué puede alcanzar el usuario, no qué puede hacer.** Habilita los proyectos y las páginas a las que llega. Lo que puede ejecutar sobre lo que alcanza se resuelve en otras dos capas, que conviene mantener separadas:
 
@@ -364,18 +369,19 @@ Incorporar además un rol funcional a la membresía duplicaría las otras dos de
 | ---------------- | ------------------------ | ----------- |
 | Emisor — el sistema es de la empresa de ingeniería | Ingeniería | **Cliente** |
 | Receptor — el sistema es de la planta | Planta | **Contratista** |
+| Interno — no hay contraparte (D-19) | La propia organización | **Ninguna** |
 
-La estructura sigue siendo binaria; el rótulo se deriva del rol declarado por el proyecto.
+La estructura sigue siendo binaria donde hay dos partes; el rótulo se deriva del rol declarado por el proyecto. En el rol Interno todos los miembros están del lado anfitrión, incluidas las personas ajenas a la organización que participen del desarrollo.
 
-#### Análisis — pendiente de confirmación
+#### Cuántas contrapartes admite un proyecto — confirmado
 
-Recomendación sobre cuántas contrapartes admite un proyecto: **una sola**.
+**Una sola.** Confirmado al abrir `BLOCK_02`, donde el proyecto la declara por nombre en `DocProjectSettings` (B4).
 
 La práctica relevada es que cada proyecto **es** un contrato con un proveedor. La ingeniería civil constituye un proyecto; la mecánica y de piping, otro; la construcción, otro más. Cuando cambia el proveedor, se da de alta un proyecto nuevo. Eso no es un rodeo para sortear una limitación: es la unidad contractual del negocio. Admitir varias contrapartes por proyecto permitiría representar situaciones que la propia operación considera inválidas.
 
-Forma recomendada:
+Forma adoptada:
 
-- **el proyecto declara su contraparte**: el proveedor en modo Receptor, el cliente en modo Emisor;
+- **el proyecto declara su contraparte**, por nombre: el proveedor en modo Receptor, el cliente en modo Emisor;
 - **la membresía declara de qué lado está el usuario**: anfitrión o contraparte.
 
 Aun con una sola contraparte, todo proyecto tiene **dos partes**, y no ven lo mismo: las observaciones internas del anfitrión, antes de devolverse formalmente, no deben ser visibles para la contraparte. Esa distinción es necesaria siempre y es binaria, por lo que resulta mucho más barata que una lógica multi-parte, que se filtra a cada regla de visibilidad y a cada pantalla.
@@ -406,30 +412,27 @@ Hoy la emisión sigue siendo un transmittal —una carátula que viaja por corre
 - El contratista ingresa transmittals entrantes con sus documentos, ya aprobados internamente por su organización. **La planta no modela el ciclo interno del contratista**: solo espera documentación aprobada por quien la emite.
 - La calificación del personal de la planta se responde **documento a documento**, a medida que cada uno se revisa.
 - **No existe transmittal de respuesta.** La planta no consolida su calificación en un remito: la única vía de respuesta es por documento.
-- Sí existe, en cambio, un transmittal **saliente de información de partida**: la planta entrega al contratista la documentación de referencia que constituye el insumo para desarrollar el proyecto.
+- La planta sí entrega al contratista la documentación de referencia que constituye el insumo para desarrollar el proyecto, pero **no como transmittal**: circula como paquete de información de entrada (D-20).
 - La calificación habilita al contratista a emitir la revisión siguiente en un nuevo transmittal.
 
 **Naturaleza del transmittal.** La clasificación relevante no es la dirección sino el propósito, que determina qué reglas lo gobiernan:
 
 | Naturaleza | Modo Emisor | Modo Receptor | Responde a otro transmittal |
 | ---------- | ----------- | ------------- | --------------------------- |
-| **Información de partida** — entrega de documentación de referencia que es insumo del proyecto | Entrante, del cliente. Puede ser uno o varios | Saliente, de la planta al contratista | No |
 | **Emisión** — entrega de documentación producida | Saliente, con puerta dura de aprobación interna | Entrante, del contratista | No |
 | **Respuesta** — calificación consolidada de una emisión | Entrante, práctica histórica | No existe | Sí, al de emisión que contesta |
 
-La distinción entre información de partida y respuesta es la que evita confundirlos: ambos ingresan al sistema del anfitrión en modo Emisor, pero el de referencia no contesta nada, mientras que el de respuesta necesariamente referencia la emisión que califica.
+**La información de partida dejó de ser una naturaleza del transmittal.** D-20 la traslada a un objeto propio, el paquete de información de entrada, porque su contenido son archivos sin catalogar y no revisiones: alojarla acá obligaría a que el ítem del transmittal fuera polimórfico. Las dos naturalezas que quedan operan ambas sobre revisiones, con una sola clase de ítem.
 
-Los transmittals de información de partida son la recepción descrita en D-16, y su contenido es material recibido, no documentación controlada.
+En el rol Interno (D-19) no existe ninguna de las dos: el ciclo termina en la aprobación.
 
-**Contenido del transmittal de información de partida: archivos sin catalogar.** En ambos modos el punto de partida se arma como hoy se arma sin sistema: alguien reúne archivos de los directorios que tiene, los empaqueta y los envía. No hay catalogación previa ni documentación controlada involucrada. Su contenido es material recibido (D-16), y nada más.
-
-A futuro, cuando un cliente planta incorpore el módulo de activos, podría armarse la información de partida a partir de documentos ya catalogados allí, conservando el linaje hacia ellos. **No se diseña para eso ahora**: sería incorporar una segunda clase de ítem al transmittal, lo que resulta aditivo y no exige anticiparlo.
+Con la información de partida fuera, la única distinción que el transmittal debe sostener es entre emisión y respuesta, y la marca es inequívoca: la respuesta referencia necesariamente la emisión que califica.
 
 **Asignación de revisores en modo Receptor.** La matriz de responsabilidad —por disciplina, tipo de documento o área— **propone** los revisores de cada documento recibido, y quien recibe el transmittal puede ajustarlos antes de confirmar. Es una sugerencia, no una asignación automática: evita asignar a mano cada emisión sin quitar el control sobre el resultado.
 
 **Consecuencia sobre el transmittal.** Agrupa la emisión, pero no gobierna el ciclo. Su estado se desprende de sus ítems y su cierre es un acto documental, no una precondición para que un documento avance.
 
-Pendiente de definición al abrir el bloque: el traslado de la emisión al sistema del cliente en modo Emisor —hoy manual, eventualmente automático— queda fuera del alcance actual, pero el modelo no debe impedirlo.
+Pendiente de definición al abrir el bloque: el traslado de la emisión al sistema del cliente en modo Emisor —hoy manual, eventualmente automático— queda fuera del alcance actual, pero el modelo no debe impedirlo. La forma prevista, con sus condiciones y sus límites, está en la orientación sobre intercambio entre despliegues.
 
 ### D-17 — Cancelar un circuito lo aborta, pero no borra historia
 
@@ -459,7 +462,7 @@ Esto resuelve H-05: la cancelación deja de expresarse como `REJECTED`, adopta i
 
 ### D-16 — Material recibido y documento controlado son cosas distintas
 
-**Estado:** Propuesta — pendiente de confirmación.
+**Estado:** Aprobada. Su punto 1 lo reemplaza D-20: la recepción deja de ser un transmittal y pasa a ser un objeto propio. El resto se mantiene sin cambio.
 
 Al iniciar un proyecto la contraparte entrega documentación de partida. Parte de ella integra el alcance y será modificada para producir nuevas revisiones; el resto es solo referencia y llega en volumen, habitualmente comprimida, sin que se sepa de antemano qué resultará útil.
 
@@ -471,7 +474,7 @@ Existe precedente estructural en OperMask Digitalization: una masa de archivos s
 
 Forma propuesta:
 
-1. **La recepción es un transmittal de información de partida.** Una vez que el transmittal tenga naturaleza y sentido de circulación (D-18, H-29), la documentación de referencia circula como una de las tres naturalezas previstas. Aporta lo que hoy se pierde: quién la envió, cuándo, con qué referencia y qué contenía. Es entrante en modo Emisor —del cliente a la ingeniería— y **saliente** en modo Receptor —de la planta al contratista—, de modo que el mecanismo no es exclusivo de la recepción.
+1. **La recepción es un paquete de información de entrada**, objeto propio y distinto del transmittal, según D-20. Aporta lo que hoy se pierde: quién la envió, cuándo, con qué referencia y qué contenía. Existe en los tres roles de D-09 y D-19: del cliente a la ingeniería en modo Emisor, de la planta al contratista en modo Receptor, y cargada por el propio equipo en modo Interno.
 2. **Los archivos recibidos no son documentos.** Cuelgan de la recepción con lo mínimo —nombre, tamaño, tipo, ubicación en el repositorio— sin código, sin revisión, sin workflow y sin catalogación obligatoria. Un paquete comprimido con doscientos archivos ingresa como doscientos archivos recibidos, sin clasificarlos.
 3. **Deben ser navegables desde el sistema.** Listado por proyecto y por recepción, búsqueda y previsualización con el visor existente. Es lo que distingue esta solución del directorio compartido.
 4. **La promoción es el puente.** Cuando un archivo recibido resulta estar en alcance, se promueve a documento controlado: se crea el documento con su primera revisión y su primera versión a partir de ese archivo, registrando el linaje. La decisión se toma cuando el equipo lo descubre, no por adelantado.
@@ -507,7 +510,9 @@ Se adopta el patrón de `CatalogReference` (DOM-024) de OperMask Digitalization:
 
 **El sitio no es una entidad aparte: es el nivel superior del mismo árbol.** Sitio ▸ Planta ▸ Área ▸ Unidad es una jerarquía única, no dos conceptos. Modelar el sitio por separado duplicaría la estructura sin agregar capacidad.
 
-La obligatoriedad se resuelve por configuración, junto con la del esquema de revisión (D-13): habilitado, obligatorio y etiqueta. Un proyecto de ingeniería puede deshabilitar el atributo; una planta lo exigirá.
+La obligatoriedad se resuelve por configuración, en `DocProjectSettings` y junto con el esquema de revisión de D-13: habilitado, obligatorio y etiqueta. Un proyecto de ingeniería puede deshabilitar el atributo; una planta lo exigirá.
+
+**Se ejecuta en `BLOCK_02B`, no en `BLOCK_02`.** La entidad de configuración por proyecto la crea `BLOCK_02`; el catálogo jerárquico y su vínculo con el documento son un cuerpo de trabajo separable que no bloquea al ciclo interno.
 
 **No se reutiliza `Area`.** La entidad existente es plana, está atada al proyecto y pertenece al subsistema de `ScannedFile`, que sale del módulo. La ubicación documental es una jerarquía propia.
 
@@ -579,6 +584,8 @@ Pendientes de definición al abrir el bloque:
 - qué se conserva de la respuesta transcripta como evidencia de origen: los archivos devueltos, la fecha real de la respuesta frente a la fecha de registro, y la referencia al medio por el que llegó;
 - si la respuesta directa del cliente exige que sea usuario con alcance restringido al proyecto, lo que extiende H-32 al modo Emisor.
 
+**Restricción de diseño: el autor de la respuesta no debe declararse como referencia a un usuario propio.** Lo exige el caso transcripto, que es el habitual: el cliente que responde por correo o por un repositorio compartido no es usuario del sistema y no tiene `User` que lo represente. Quien registra sí lo es. Es la condición que `BLOCK_04` no debe comprometer, y no depende de ningún escenario futuro.
+
 ### D-08 — Los adjuntos quedan fuera del alcance
 
 **Estado:** Aprobada — diferida.
@@ -591,6 +598,61 @@ Su destino depende de una cuestión todavía sin resolver: si este módulo prest
 
 El relevamiento no fuerza la decisión en ninguna dirección: hoy `Attachment` no tiene ningún consumidor. Sus operaciones están expuestas en GraphQL, pero no las utiliza la webapp ni `mi-quality`.
 
+### D-19 — Un proyecto puede no tener contraparte
+
+**Estado:** Aprobada. Amplía D-09.
+
+Una planta industrial desarrolla proyectos con su propia ingeniería, sin contraparte externa. La empresa de ingeniería tiene el caso equivalente en su desarrollo propio. El rol documental incorpora por eso un tercer valor, **Interno**, que no es un modo de planta sino la ausencia de contraparte.
+
+**El circuito interno es idéntico al de los otros dos modos.** D-03, D-05, D-10, D-11 y D-13 no distinguen quién hospeda el sistema: se elabora, se revisa, se marca, se rechaza, se corrige y se aprueba de la misma forma. Nada de eso se agrega ni se ramifica.
+
+**Lo que cambia es el significado del estado terminal.** En modo Emisor `APPROVED` es intermedio: significa aprobado internamente y listo para emitir, y el ciclo continúa con la emisión y la respuesta. En modo Receptor la calificación de la planta habilita la revisión siguiente. En modo Interno **`APPROVED` es terminal**: el documento queda vigente y no hay nada después.
+
+Es el mismo nombre de estado con dos semánticas, y no puede inferirse de que todavía no exista un transmittal. Por eso el rol se declara y no se deduce.
+
+En consecuencia, un proyecto Interno:
+
+- **no declara contraparte.** El nombre de la contraparte se exige solo en los roles que la tienen;
+- **no admite transmittals**, de ninguna de sus naturalezas;
+- **sí admite paquetes de información de entrada**, según D-20;
+- **conserva la membresía** de D-15, con miembros de un solo lado. Mantenerla uniforme evita un caso especial en la capa de autorización.
+
+**Las personas ajenas a la organización participan del lado anfitrión.** Un proyectista externo o un consultor contratado trabaja dentro del proyecto como uno más: no recibe emisiones ni califica. Que exista un tercero involucrado no lo convierte en contraparte; lo que define la contraparte es recibir la emisión y responderla.
+
+**La comunicación de lo aprobado se resuelve dentro del circuito.** Cuando hay que dejar constancia de que alguien tomó conocimiento del documento vigente, eso es un paso del workflow —`StepType.ACKNOWLEDGE`— y no una emisión. En el caso de la planta, la comunicación efectiva ocurre más adelante, al promoverse el documento al módulo de activos, que notifica la versión nueva a quienes corresponde. No se incorpora ninguna capacidad de distribución a este módulo.
+
+Esto eleva la importancia de H-04: los pasos de toma de conocimiento que hoy quedan `PENDING` de forma permanente dejan de ser un defecto cosmético y pasan a ser **el mecanismo con que se comunica un documento interno aprobado**. `BLOCK_03` debe cerrarlos.
+
+Alternativa descartada: tratar el proyecto interno como modo Emisor sin emisión. Se descarta porque obligaría a declarar una contraparte que no existe, dejaría `APPROVED` con semántica ambigua y mostraría en la interfaz acciones de emisión que nunca se usan.
+
+Alternativa descartada: un transmittal interno. D-18 fija que la clasificación relevante del transmittal es el propósito, y sus propósitos se definen por cruzar una frontera organizacional. Un transmittal interno sería una carátula dirigida a nadie, que nadie responde, arrastrando la puerta dura, el vínculo respuesta-ítem y el ciclo de cierre sin gobernar nada.
+
+B5 de `BLOCK_02` no cambia: el rol es inmutable desde el primer documento. Una planta que desarrolla internamente y luego contrata afuera abre un proyecto nuevo, coherente con D-15, donde cada proyecto es un contrato.
+
+### D-20 — La información de entrada no es un transmittal
+
+**Estado:** Aprobada. Reemplaza el tratamiento previsto en D-16 y retira una de las tres naturalezas de D-18.
+
+La documentación que constituye el insumo de un proyecto se modela como un **paquete de información de entrada**, objeto propio y distinto del transmittal. El transmittal queda exclusivamente para documentación controlada: emisión y respuesta.
+
+Motivo principal: **evita que el ítem del transmittal sea polimórfico.** D-16 ya establece que los archivos recibidos no son documentos —sin código, sin revisión, sin workflow— mientras que la emisión y la respuesta operan sobre revisiones. Alojar ambos en `TransmittalItem` exigiría dos claves anulables con invariante de exclusión mutua, que es la misma familia de defecto que D-06 retira al eliminar `entityType`/`entityId`.
+
+Motivo concurrente: **las reglas son disjuntas.** La emisión tiene puerta dura de aprobación interna, vínculo entre respuesta e ítem, estado del cliente por ítem y cierre documental. La información de entrada no tiene ninguna: se recibe y queda disponible. Compartir el objeto obligaría a excepcionar la naturaleza en cada regla, en cada estado del ciclo y en cada pantalla.
+
+Motivo adicional: **el paquete existe en los tres roles**, incluido el Interno, que no admite transmittals (D-19). Separarlos elimina la excepción.
+
+Qué conserva el paquete, que es lo que D-16 buscaba y hoy se pierde en el directorio de red: quién lo aportó, cuándo, qué contenía y con qué referencia externa. **El número de transmittal de la contraparte se conserva como referencia**, que es lo que realmente es: un dato del remito ajeno, no un remito propio.
+
+Todo lo demás de D-16 se mantiene sin cambio: los archivos no son documentos, deben ser navegables desde el sistema, y la promoción a documento controlado es el puente que conserva el linaje.
+
+En consecuencia, la tabla de naturalezas de D-18 se reduce a dos —emisión y respuesta— y ambas operan sobre revisiones, con una sola clase de ítem.
+
+Pendientes de definición al abrir el bloque:
+
+- cómo se expresa el sentido del paquete en modo Receptor, donde la planta entrega material al contratista, y qué parte del paquete alcanza la contraparte;
+- si el paquete admite ser cargado por la propia contraparte o solo por el anfitrión;
+- cómo ingresa un paquete comprimido, que D-16 ya dejaba abierto.
+
 ## Cuestión de fondo pendiente
 
 Una definición atraviesa varias decisiones de este plan y conviene enunciarla por separado, porque no se resuelve dentro de ningún bloque:
@@ -599,12 +661,13 @@ Una definición atraviesa varias decisiones de este plan y conviene enunciarla p
 
 De esa respuesta dependen:
 
-- el sentido de `Document.module` y de `entityType`/`entityId` (D-06, H-28);
-- si `projectId` es obligatorio siempre o solo para documentos de proyecto (D-06);
+- el sentido de `Document.module` (D-06, H-28);
 - la permanencia de `Attachment` en este módulo o su traslado a `mi-quality` (D-08);
 - el destino de las páginas `/quality/documents` y `/tags/documents`.
 
 La orientación actual es **concentrarse en proyectos sin cerrar la puerta transversal**: se conserva `module` como discriminador y no se retira nada que la habilite. La definición se toma cuando exista una necesidad concreta de otro módulo, con el circuito de proyectos ya consolidado.
+
+`BLOCK_02` sostuvo esa orientación de forma deliberada. `projectId` admite nulo justamente para no obligar a un documento no perteneciente a un proyecto a colgar de uno artificial, y el nulo quedó nombrado como el régimen de publicación descrito más abajo. Lo que sí se retiró fue `entityType`/`entityId`: no expresaban pertenencia con integridad referencial, y el criterio de D-06 es que cualquier módulo que se incorpore la exprese con una referencia propia, como se hizo con el proyecto.
 
 ### Análisis — pendiente de confirmación
 
@@ -647,6 +710,36 @@ Consecuencia de diseño a resolver cuando se aborde: la referencia documental de
 
 Ninguna de estas condiciones deberá decidirse de forma implícita durante la implementación.
 
+### Orientación — el sistema del proveedor puede operar como usuario del sistema del cliente
+
+Planteada, sin decidir. No se implementa en ningún bloque previsto. Se registra para que las decisiones que se tomen ahora no la impidan.
+
+**El escenario.** La planta hospeda el sistema y exige a su contratista de ingeniería que emita dentro de él: es el modo Receptor de D-09, y la relación de fuerzas es esa. Si además el contratista es cliente del sistema, hoy carga dos veces — su circuito interno en su propio despliegue, y la emisión a mano en el de la planta— y después transcribe de vuelta la calificación que la planta registró.
+
+**El beneficio es enteramente del contratista.** La planta ya tiene su sistema y su información completa; no gana nada. Esa asimetría gobierna el diseño: **todo el trabajo debe recaer sobre el lado que se beneficia.**
+
+**Forma prevista: el sistema del contratista actúa como un usuario del sistema de la planta.** No hay canal nuevo, ni bandeja de entrada, ni contrato de intercambio, ni mensajería. El contratista ya es miembro del proyecto del lado contraparte (D-15), y hoy una persona suya entra y crea el transmittal entrante. Mañana entra su sistema, con credenciales propias, y ejecuta **la misma operación**, con la misma autorización en dos capas, la misma puerta, los mismos invariantes y los mismos eventos de dominio.
+
+**Consecuencia central: la federación es una capacidad del emisor, no del receptor.** El despliegue de la planta no requiere ningún cambio — ni configuración, ni endpoint, ni concepto nuevo. Se construye íntegramente de un lado, y por eso no condiciona lo que se está desarrollando ahora.
+
+**Las dos direcciones las inicia el contratista: empuja la emisión y lee la calificación.** La alternativa —que el sistema de la planta escriba la respuesta en el del contratista— se descarta porque exigiría que la planta configure destino y credenciales para un beneficio ajeno, y no se configuraría nunca. Siendo el sistema del contratista un usuario con acceso al proyecto, puede consultar la calificación de sus propios documentos y registrarla de su lado. La planta permanece pasiva en ambas direcciones.
+
+**Transparencia de comportamiento, no de identidad.** Para el sistema receptor no debe existir ninguna diferencia en el **comportamiento**: misma operación, mismas validaciones, mismos estados, mismos eventos. No se admite ninguna vía de ingreso paralela ni ningún atajo. La **identidad** del actor, en cambio, sí queda registrada: el evento de auditoría de `BLOCK_01` ya conserva quién ejecutó cada acción, y un actor de sistema es distinguible de una persona. Es el criterio de D-04 sobre la firma delegada — la regla no cambia y la diferencia se registra.
+
+`mi-admin` ya admite representar ese actor: `User` tiene `isSys` y credenciales propias, de modo que un usuario que representa un sistema es un usuario con permisos y membresía como cualquier otro. No hace falta un concepto nuevo de identidad.
+
+**Qué condiciona del trabajo actual.** Menos de lo que parecía, justamente porque el receptor no cambia:
+
+1. **Ninguna operación de ingreso paralela.** Toda escritura atraviesa la operación ordinaria con su autorización ordinaria. Es lo que B7 de `BLOCK_02` ya establece, y esta orientación lo confirma como criterio y no solo como implementación.
+2. **La calificación debe ser legible por la contraparte.** `BLOCK_04` debe exponer la calificación de un documento a quien lo emitió, que es lo que permite leerla en lugar de esperar que se la escriban. No es un requisito nuevo: es lo que cualquier contratista necesita ver en pantalla.
+3. **La correspondencia entre objetos de ambos despliegues vive del lado del contratista.** Su documento con el documento de la planta, su proyecto con el proyecto de la planta. Al no requerir nada del receptor, es un dato privado del emisor y no impone estructura al modelo compartido.
+
+Queda para el análisis correspondiente evitar que un reintento del emisor duplique la emisión.
+
+**Alineación a favor.** El `checksum` que D-05 vuelve obligatorio adquiere un segundo uso: verificar la integridad de lo que se transfirió entre despliegues.
+
+**Límites.** Solo opera cuando ambas partes son clientes del sistema, que será el caso minoritario por mucho tiempo, de modo que es una comodidad y no un camino principal. Debe ser **opcional por proyecto**, y las dos vías que D-12 contempla —la contraparte operando como usuario, y la transcripción por el control documental— siguen siendo de primera clase de forma permanente.
+
 ## Nota prospectiva — promoción de documentos al cierre del proyecto
 
 **No forma parte del alcance y no se desarrolla ahora.** Se deja asentada la forma que se anticipa, para no perderla y para no tomar decisiones que la obstruyan.
@@ -672,12 +765,15 @@ Orden propuesto. Cada bloque se abre con su propio documento, con línea base co
 | Bloque | Contenido | Depende de |
 | ------ | --------- | ---------- |
 | `BLOCK_01` | Trazabilidad funcional: eventos de workflow y auditoría (D-01) | — |
-| `BLOCK_02` | Contexto de proyecto y rol documental: `projectId`, modo Emisor / Receptor, membresía y alcance de acceso, ubicación física jerárquica, unicidad del código, tratamiento de `entityType`/`entityId` (D-06, D-09, D-14, D-15; H-17, H-28, H-32) | `BLOCK_01` |
+| `BLOCK_02` | Contexto de proyecto y rol documental: `projectId`, modo Emisor / Receptor, membresía y alcance de acceso, unicidad del código, retiro de `entityType`/`entityId`, contexto de los eventos (D-06, D-09, D-15; H-17, H-24, H-28, H-32; cierra H-19 para `Document`) | `BLOCK_01` |
 | `BLOCK_03` | Ciclo interno: revisión externa y versión interna, versiones durante el circuito, circuitos sucesivos por revisión, esquema de revisión configurable, workflow mínimo, delegación registrada, cancelación con identidad propia y firma verificable (D-03, D-04, D-05, D-10, D-11, D-13, D-17; H-01 a H-10, H-27, H-34) | `BLOCK_02` |
-| `BLOCK_04` | Emisión y respuesta: circulación asimétrica por modo, puerta de emisión, respuesta parcial con archivos y autoría diferenciada, matriz de responsabilidad, documentos esperados, material recibido y su promoción (D-12, D-16, D-18; H-11 a H-16, H-29 a H-31, H-33, H-36) | `BLOCK_03` |
-| `BLOCK_05` | Interfaz de usuario del subsistema (H-25) | `BLOCK_03`, `BLOCK_04` |
+| `BLOCK_04` | Emisión y respuesta: circulación asimétrica por modo, puerta de emisión, respuesta parcial con archivos y autoría diferenciada, matriz de responsabilidad, documentos esperados, paquete de información de entrada y su promoción (D-12, D-16, D-18, D-20; H-11 a H-16, H-29 a H-31, H-33, H-36) | `BLOCK_03` |
+| `BLOCK_02B` | Ubicación física jerárquica del documento (D-14) | `BLOCK_02` |
+| `BLOCK_05` | Interfaz de usuario del subsistema (H-25) | `BLOCK_03`, `BLOCK_04`, `BLOCK_02B` |
 
 El rol documental (D-09) gobierna el ciclo completo, por lo que el contexto de proyecto pasa a ser el primer bloque funcional: ya no puede quedar detrás del ciclo de revisión.
+
+La ubicación física (D-14) se separó del contexto de proyecto al abrir `BLOCK_02`. Es un catálogo auto-referencial completo —con recálculo de rutas, snapshot en el documento y propagación auditada— y no bloquea al ciclo interno, de modo que puede ejecutarse en paralelo a `BLOCK_03` y `BLOCK_04`. Conserva el identificador `BLOCK_02B` para no renumerar los bloques ya referenciados. Su configuración de habilitación y obligatoriedad reside en `DocProjectSettings`, que `BLOCK_02` deja creado.
 
 Diferidos, con su propio análisis y sin fecha asignada:
 

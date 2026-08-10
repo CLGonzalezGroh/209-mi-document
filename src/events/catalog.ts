@@ -43,6 +43,11 @@ export const AuditAction = {
   TerminateDocumentType: "TerminateDocumentType",
   ActivateDocumentType: "ActivateDocumentType",
   DeleteDocumentType: "DeleteDocumentType",
+
+  // Contexto de proyecto (BLOQUE 02)
+  DeclareProjectSettings: "DeclareProjectSettings",
+  AssignProjectMember: "AssignProjectMember",
+  RevokeProjectMember: "RevokeProjectMember",
 } as const
 
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
@@ -75,6 +80,9 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   [AuditAction.TerminateDocumentType]: DocObjectType.DOCUMENT_TYPE,
   [AuditAction.ActivateDocumentType]: DocObjectType.DOCUMENT_TYPE,
   [AuditAction.DeleteDocumentType]: DocObjectType.DOCUMENT_TYPE,
+  [AuditAction.DeclareProjectSettings]: DocObjectType.DOC_PROJECT_SETTINGS,
+  [AuditAction.AssignProjectMember]: DocObjectType.DOC_PROJECT_MEMBER,
+  [AuditAction.RevokeProjectMember]: DocObjectType.DOC_PROJECT_MEMBER,
 }
 
 // ================================
@@ -153,4 +161,6 @@ export const DOC_OBJECT_READ_PERMISSION: Record<DocObjectType, string> = {
   [DocObjectType.TRANSMITTAL]: PERMISSIONS.DOCUMENTS_TRANSMITTAL_READ,
   [DocObjectType.DOCUMENT_CLASS]: PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_READ,
   [DocObjectType.DOCUMENT_TYPE]: PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_READ,
+  [DocObjectType.DOC_PROJECT_SETTINGS]: PERMISSIONS.DOCUMENTS_PROJECT_SETTINGS_READ,
+  [DocObjectType.DOC_PROJECT_MEMBER]: PERMISSIONS.DOCUMENTS_PROJECT_MEMBER_READ,
 }

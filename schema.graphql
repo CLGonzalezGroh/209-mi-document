@@ -442,6 +442,10 @@ enum DocObjectType {
   DOCUMENT_CLASS
   "Tipo de documento"
   DOCUMENT_TYPE
+  "Configuración documental de un proyecto"
+  DOC_PROJECT_SETTINGS
+  "Membresía documental de un proyecto"
+  DOC_PROJECT_MEMBER
 }
 
 "Objeto del dominio documental para inputs"
@@ -462,6 +466,10 @@ enum DocObjectTypeInput {
   DOCUMENT_CLASS
   "Tipo de documento"
   DOCUMENT_TYPE
+  "Configuración documental de un proyecto"
+  DOC_PROJECT_SETTINGS
+  "Membresía documental de un proyecto"
+  DOC_PROJECT_MEMBER
 }
 
 "Nivel del log para inputs"
@@ -570,10 +578,8 @@ type Document @key(fields: "id") {
   description: String
   "Módulo al que pertenece"
   module: ModuleType!
-  "Tipo de entidad asociada en el módulo (ej: finding, action)"
-  entityType: String
-  "ID de la entidad asociada en otro subgraph"
-  entityId: Int
+  "Proyecto al que pertenece. Nulo en el régimen de publicación, documentación que no circula"
+  projectId: Int
   "Tipo de documento"
   documentType: DocumentType!
   "Clase de documento"
@@ -941,6 +947,113 @@ type ScannedFileStats {
 }
 
 # ═══════════════════════════════════════════════════════
+# CONTEXTO DE PROYECTO
+# ═══════════════════════════════════════════════════════
+
+"Rol documental que el proyecto declara. Determina el orden entre el circuito de revisión y el transmittal"
+enum DocumentRole {
+  "Emisor: el sistema es de la ingeniería; el circuito precede a la emisión"
+  ISSUER
+  "Receptor: el sistema es de la planta; la emisión precede a la calificación"
+  RECEIVER
+  "Interno: no hay contraparte; el ciclo termina en la aprobación"
+  INTERNAL
+}
+
+"Rol documental del proyecto, para inputs"
+enum DocumentRoleInput {
+  "Emisor: el sistema es de la ingeniería; el circuito precede a la emisión"
+  ISSUER
+  "Receptor: el sistema es de la planta; la emisión precede a la calificación"
+  RECEIVER
+  "Interno: no hay contraparte; el ciclo termina en la aprobación"
+  INTERNAL
+}
+
+"Lado del proyecto al que pertenece un miembro"
+enum DocProjectSide {
+  "Organización que hospeda el sistema. Único lado posible en proyectos internos"
+  HOST
+  "Cliente en modo Emisor, contratista en modo Receptor"
+  COUNTERPARTY
+}
+
+"Lado del proyecto, para inputs"
+enum DocProjectSideInput {
+  "Organización que hospeda el sistema. Único lado posible en proyectos internos"
+  HOST
+  "Cliente en modo Emisor, contratista en modo Receptor"
+  COUNTERPARTY
+}
+
+"""
+Configuración documental de un proyecto. Un registro por proyecto.
+Declara el rol documental y, cuando corresponde, la contraparte.
+"""
+type DocProjectSettings {
+  "Identificador único"
+  id: Int!
+  "Fecha de creación"
+  createdAt: DateTime!
+  "Fecha de última modificación"
+  updatedAt: DateTime
+  "Proyecto al que corresponde"
+  projectId: Int!
+  "Rol documental declarado"
+  documentRole: DocumentRole!
+  "Nombre de la contraparte. Nulo en proyectos internos, que no la tienen"
+  counterpartyName: String
+}
+
+"Declaración de la configuración documental de un proyecto"
+input DeclareDocProjectSettingsInput {
+  "Proyecto al que corresponde"
+  projectId: Int!
+  "Rol documental a declarar"
+  documentRole: DocumentRoleInput!
+  "Nombre de la contraparte. Obligatorio en Emisor y Receptor, prohibido en Interno"
+  counterpartyName: String
+}
+
+"""
+Membresía documental de un proyecto. Habilita el acceso de un usuario al
+proyecto y declara de qué lado está. No define rol ni permisos: provienen del
+servicio de administración global.
+"""
+type DocProjectMember {
+  "Identificador único"
+  id: Int!
+  "Fecha de creación"
+  createdAt: DateTime!
+  "Proyecto al que da acceso"
+  projectId: Int!
+  "Usuario habilitado"
+  user: UserName
+  "Lado del proyecto al que pertenece"
+  side: DocProjectSide!
+  "Fecha de alta"
+  assignedAt: DateTime!
+  "Usuario que dio el alta"
+  assignedBy: UserName
+  "Si la membresía está vigente"
+  isActive: Boolean!
+  "Fecha de baja. Nula mientras la membresía esté vigente"
+  revokedAt: DateTime
+  "Usuario que dio la baja"
+  revokedBy: UserName
+}
+
+"Alta de un miembro en un proyecto documental"
+input AssignDocProjectMemberInput {
+  "Proyecto al que se incorpora"
+  projectId: Int!
+  "Usuario a incorporar"
+  userId: Int!
+  "Lado del proyecto al que pertenece"
+  side: DocProjectSideInput!
+}
+
+# ═══════════════════════════════════════════════════════
 # TRAZABILIDAD FUNCIONAL
 # ═══════════════════════════════════════════════════════
 
@@ -965,6 +1078,10 @@ type DocWorkflowEvent {
   fromState: String
   "Estado resultante"
   toState: String
+  "Proyecto del objeto afectado. Derivado, nunca informado por quien emite"
+  projectId: Int
+  "Módulo del objeto afectado. Derivado, nunca informado por quien emite"
+  module: ModuleType
 }
 
 """
@@ -986,6 +1103,10 @@ type DocAuditEvent {
   action: String!
   "Datos contextuales de la acción"
   meta: JSON
+  "Proyecto del objeto afectado. Derivado, nunca informado por quien emite"
+  projectId: Int
+  "Módulo del objeto afectado. Derivado, nunca informado por quien emite"
+  module: ModuleType
 }
 
 # ═══════════════════════════════════════════════════════
@@ -1274,10 +1395,8 @@ input CreateDocumentInput {
   description: String
   "Módulo al que pertenece"
   module: ModuleTypeInput!
-  "Tipo de entidad asociada"
-  entityType: String
-  "ID de la entidad asociada"
-  entityId: Int
+  "Proyecto al que pertenece. Obligatorio cuando el módulo es PROJECTS, prohibido en el resto"
+  projectId: Int
   "ID del tipo de documento"
   documentTypeId: Int!
   "ID de la clase de documento"
@@ -1663,8 +1782,6 @@ type Query {
   "Documentos filtrados por referencia de módulo"
   documentsByModule(
     module: ModuleTypeInput!
-    entityType: String
-    entityId: Int
     pagination: PaginationInput
     orderBy: DocumentOrderByInput
   ): DocumentConnection!
@@ -1802,13 +1919,33 @@ type Query {
   docWorkflowEvents(
     objectType: DocObjectTypeInput!
     objectId: Int!
+    "Acota la traza a un módulo. El contexto se persiste derivado del objeto"
+    module: ModuleTypeInput
+    "Acota la traza a un proyecto. El contexto se persiste derivado del objeto"
+    projectId: Int
   ): [DocWorkflowEvent!]!
 
   "Acciones ejecutadas sobre un objeto, en orden cronológico"
   docAuditEvents(
     objectType: DocObjectTypeInput!
     objectId: Int!
+    "Acota la traza a un módulo. El contexto se persiste derivado del objeto"
+    module: ModuleTypeInput
+    "Acota la traza a un proyecto. El contexto se persiste derivado del objeto"
+    projectId: Int
   ): [DocAuditEvent!]!
+
+  # ─── Contexto de proyecto ───
+
+  "Configuración documental de un proyecto. Nula si todavía no declaró su rol"
+  docProjectSettings(projectId: Int!): DocProjectSettings
+
+  "Miembros de un proyecto documental"
+  docProjectMembers(
+    projectId: Int!
+    "Incluye las membresías dadas de baja. Por defecto solo las vigentes"
+    includeRevoked: Boolean
+  ): [DocProjectMember!]!
 }
 
 # ═══════════════════════════════════════════════════════
@@ -1850,6 +1987,25 @@ type DependencyCheck @shareable {
 # ═══════════════════════════════════════════════════════
 
 type Mutation {
+  # ─── Contexto de proyecto ───
+  """
+  Declara el rol documental del proyecto y su contraparte.
+  Es administrativa: se gobierna solo por el permiso global, porque un proyecto
+  sin configuración tampoco tiene miembros a quienes exigir membresía.
+  """
+  declareDocProjectSettings(
+    input: DeclareDocProjectSettingsInput!
+  ): DocProjectSettings!
+
+  """
+  Incorpora un usuario al proyecto, o lo reincorpora si estaba dado de baja.
+  Administrativa por el mismo motivo que la anterior.
+  """
+  assignDocProjectMember(input: AssignDocProjectMemberInput!): DocProjectMember!
+
+  "Da de baja una membresía. Baja lógica: conserva alta, baja y actor"
+  revokeDocProjectMember(id: Int!): DocProjectMember!
+
   # ─── Documentos ───
   "Crear un nuevo documento con su primera revisión y versión"
   createDocument(input: CreateDocumentInput!): Document!

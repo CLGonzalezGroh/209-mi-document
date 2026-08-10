@@ -1,0 +1,422 @@
+import assert from "node:assert/strict"
+import test, { after, before } from "node:test"
+import jwt from "jsonwebtoken"
+import { prisma } from "../lib/prisma.js"
+import { ResolverContext } from "../types.js"
+import { DocProjectSide, DocumentRole, ModuleType } from "../generated/prisma/enums.js"
+import { documentResolvers } from "./documents.js"
+import { transmittalResolvers } from "./transmittals.js"
+import { projectSettingsResolvers } from "./projectSettings.js"
+import { projectMemberResolvers } from "./projectMembers.js"
+import { AuditAction } from "../events/catalog.js"
+
+/**
+ * Arnés de integración de la autorización (BLOQUE 02, B7).
+ *
+ * Ejercita los resolvers con un contexto REAL: token firmado, primera capa
+ * validada contra mi-admin y segunda capa contra la base. Es la evidencia que
+ * ni la compilación ni las pruebas puras pueden dar — en la fase B se comprobó
+ * que `tsc` pasa limpio sobre código roto en tiempo de ejecución.
+ *
+ * Requisitos, por eso vive en un script aparte (`test:block02-integration`):
+ *  - `mi-admin` corriendo en ADMIN_API_URL;
+ *  - el usuario de prueba con el rol documental completo;
+ *  - la base local del módulo.
+ *
+ * El token se firma localmente con AUTH_JWT_SECRET, el mismo que usa mi-admin
+ * para revalidarlo. No se persiste ni sale de localhost.
+ */
+
+const USER_ID = 3
+const ROLE_IDS = [1, 16] // view + doc-full
+
+const PROYECTO_CON_MEMBRESIA = -424401
+const PROYECTO_SIN_MEMBRESIA = -424402
+const CODIGO = "TEST-BLOCK02"
+
+let context: ResolverContext
+let docConMembresia: number
+let docSinMembresia: number
+let docPublicado: number
+let transmittalSinMembresia: number
+
+const limpiar = async () => {
+  await prisma.transmittal.deleteMany({
+    where: { projectId: { in: [PROYECTO_CON_MEMBRESIA, PROYECTO_SIN_MEMBRESIA] } },
+  })
+  await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
+  await prisma.docProjectMember.deleteMany({ where: { userId: USER_ID } })
+  await prisma.docProjectSettings.deleteMany({
+    where: { projectId: { in: [PROYECTO_CON_MEMBRESIA, PROYECTO_SIN_MEMBRESIA] } },
+  })
+  await prisma.docAuditEvent.deleteMany({
+    where: { projectId: { in: [PROYECTO_CON_MEMBRESIA, PROYECTO_SIN_MEMBRESIA] } },
+  })
+}
+
+const crearDocumento = async (sufijo: string, module: ModuleType, projectId: number | null) => {
+  const tipo = await prisma.documentType.findFirst({ select: { id: true } })
+  const doc = await prisma.document.create({
+    data: {
+      code: `${CODIGO}-${sufijo}`,
+      title: `Documento de prueba ${sufijo}`,
+      module,
+      projectId,
+      documentTypeId: tipo!.id,
+      createdById: USER_ID,
+      updatedById: USER_ID,
+    },
+  })
+  return doc.id
+}
+
+before(async () => {
+  await limpiar()
+
+  const token = jwt.sign({ id: USER_ID, roles: ROLE_IDS }, process.env.AUTH_JWT_SECRET as string, {
+    expiresIn: "1h",
+  })
+  context = { orm: prisma, token: `Bearer ${token}` } as ResolverContext
+
+  docConMembresia = await crearDocumento("A", ModuleType.PROJECTS, PROYECTO_CON_MEMBRESIA)
+  docSinMembresia = await crearDocumento("B", ModuleType.PROJECTS, PROYECTO_SIN_MEMBRESIA)
+  docPublicado = await crearDocumento("PUB", ModuleType.QUALITY, null)
+
+  const transmittal = await prisma.transmittal.create({
+    data: {
+      code: `${CODIGO}-TR`,
+      projectId: PROYECTO_SIN_MEMBRESIA,
+      issuedTo: "Cliente de prueba",
+      issuedById: USER_ID,
+    },
+  })
+  transmittalSinMembresia = transmittal.id
+
+  // El usuario es miembro de UN SOLO proyecto
+  await prisma.docProjectMember.create({
+    data: {
+      projectId: PROYECTO_CON_MEMBRESIA,
+      userId: USER_ID,
+      side: DocProjectSide.HOST,
+      assignedById: USER_ID,
+    },
+  })
+})
+
+after(async () => {
+  await limpiar()
+  await prisma.$disconnect()
+})
+
+const codigoDeError = async (fn: () => Promise<unknown>): Promise<string> => {
+  try {
+    await fn()
+    return "SIN_ERROR"
+  } catch (error: any) {
+    return error?.extensions?.code ?? "DESCONOCIDO"
+  }
+}
+
+// --- Doble capa estricta sobre un objeto ---
+
+test("con membresía vigente, la operación sobre el objeto prospera", async () => {
+  const documento: any = await documentResolvers.Query.documentById(
+    null,
+    { id: docConMembresia },
+    context,
+  )
+
+  assert.equal(documento.id, docConMembresia)
+})
+
+test("sin membresía en el proyecto del objeto, se rechaza con FORBIDDEN", async () => {
+  assert.equal(
+    await codigoDeError(() =>
+      documentResolvers.Query.documentById(null, { id: docSinMembresia }, context),
+    ),
+    "FORBIDDEN",
+  )
+})
+
+test("el régimen de publicación se alcanza solo con el permiso global", async () => {
+  // Documento sin proyecto: no hay membresía que exigir (B1)
+  const documento: any = await documentResolvers.Query.documentById(
+    null,
+    { id: docPublicado },
+    context,
+  )
+
+  assert.equal(documento.id, docPublicado)
+})
+
+test("un objeto inexistente corta con NOT_FOUND y no con FORBIDDEN", async () => {
+  assert.equal(
+    await codigoDeError(() => documentResolvers.Query.documentById(null, { id: -1 }, context)),
+    "NOT_FOUND",
+  )
+})
+
+// --- Segunda capa como filtro en los listados ---
+
+test("el listado filtra en lugar de rechazar", async () => {
+  const respuesta: any = await documentResolvers.Query.documents(
+    null,
+    { filter: { query: CODIGO }, pagination: { skip: 0, take: 50 } },
+    context,
+  )
+
+  const ids = respuesta.items.map((d: any) => d.id)
+
+  assert.ok(ids.includes(docConMembresia), "falta el documento del proyecto con membresía")
+  assert.ok(ids.includes(docPublicado), "falta el documento publicado")
+  assert.ok(!ids.includes(docSinMembresia), "se filtró el documento de un proyecto ajeno")
+})
+
+test("el listado de transmittals excluye los proyectos sin membresía", async () => {
+  const respuesta: any = await transmittalResolvers.Query.transmittals(
+    null,
+    { filter: { query: CODIGO }, pagination: { skip: 0, take: 50 } },
+    context,
+  )
+
+  assert.equal(
+    respuesta.items.filter((t: any) => t.id === transmittalSinMembresia).length,
+    0,
+  )
+})
+
+test("el proyecto como argumento explícito exige membresía", async () => {
+  assert.equal(
+    await codigoDeError(() =>
+      transmittalResolvers.Query.transmittalsByProject(
+        null,
+        { projectId: PROYECTO_SIN_MEMBRESIA },
+        context,
+      ),
+    ),
+    "FORBIDDEN",
+  )
+})
+
+// --- Invariante del contexto (B1) ---
+
+test("un documento de proyecto sin proyecto se rechaza antes de autorizar", async () => {
+  assert.equal(
+    await codigoDeError(() =>
+      documentResolvers.Mutation.createDocument(
+        null,
+        {
+          input: {
+            code: `${CODIGO}-INV`,
+            title: "Inválido",
+            module: ModuleType.PROJECTS,
+            documentTypeId: 1,
+            fileKey: "k",
+            fileName: "f",
+            fileSize: 1,
+            mimeType: "application/pdf",
+          },
+        },
+        context,
+      ),
+    ),
+    "BAD_USER_INPUT",
+  )
+})
+
+test("crear en un proyecto ajeno se rechaza con FORBIDDEN", async () => {
+  assert.equal(
+    await codigoDeError(() =>
+      documentResolvers.Mutation.createDocument(
+        null,
+        {
+          input: {
+            code: `${CODIGO}-AJENO`,
+            title: "Ajeno",
+            module: ModuleType.PROJECTS,
+            projectId: PROYECTO_SIN_MEMBRESIA,
+            documentTypeId: 1,
+            fileKey: "k",
+            fileName: "f",
+            fileSize: 1,
+            mimeType: "application/pdf",
+          },
+        },
+        context,
+      ),
+    ),
+    "FORBIDDEN",
+  )
+})
+
+// --- La baja de la membresía retira el acceso, de punta a punta ---
+
+// --- Contexto de proyecto: configuración y membresía (fase F) ---
+
+test("la configuración se declara y se lee, y emite su traza", async () => {
+  const settings: any = await projectSettingsResolvers.Mutation.declareDocProjectSettings(
+    null,
+    {
+      input: {
+        projectId: PROYECTO_CON_MEMBRESIA,
+        documentRole: DocumentRole.ISSUER,
+        counterpartyName: "Planta de prueba",
+      },
+    },
+    context,
+  )
+
+  assert.equal(settings.documentRole, DocumentRole.ISSUER)
+
+  const leida: any = await projectSettingsResolvers.Query.docProjectSettings(
+    null,
+    { projectId: PROYECTO_CON_MEMBRESIA },
+    context,
+  )
+  assert.equal(leida.counterpartyName, "Planta de prueba")
+
+  // La traza del objeto nuevo lleva su proyecto, derivado (B9)
+  const eventos = await prisma.docAuditEvent.findMany({
+    where: { objectId: settings.id, action: AuditAction.DeclareProjectSettings },
+  })
+  assert.equal(eventos.length, 1)
+  assert.equal(eventos[0].projectId, PROYECTO_CON_MEMBRESIA)
+})
+
+test("un proyecto interno no admite contraparte", async () => {
+  assert.equal(
+    await codigoDeError(() =>
+      projectSettingsResolvers.Mutation.declareDocProjectSettings(
+        null,
+        {
+          input: {
+            projectId: PROYECTO_SIN_MEMBRESIA,
+            documentRole: DocumentRole.INTERNAL,
+            counterpartyName: "Alguien",
+          },
+        },
+        context,
+      ),
+    ),
+    "BAD_USER_INPUT",
+  )
+})
+
+test("el rol no puede cambiarse si el proyecto ya tiene documentos", async () => {
+  // PROYECTO_CON_MEMBRESIA ya tiene un documento creado en el before
+  assert.equal(
+    await codigoDeError(() =>
+      projectSettingsResolvers.Mutation.declareDocProjectSettings(
+        null,
+        {
+          input: {
+            projectId: PROYECTO_CON_MEMBRESIA,
+            documentRole: DocumentRole.RECEIVER,
+            counterpartyName: "Otro",
+          },
+        },
+        context,
+      ),
+    ),
+    "CONFLICT",
+  )
+})
+
+test("administrar la membresía no exige membresía previa", async () => {
+  // Es el caso de arranque: el primer miembro de un proyecto no puede exigir una
+  // membresía que todavía no existe. Se administra con el permiso global.
+  const miembro: any = await projectMemberResolvers.Mutation.assignDocProjectMember(
+    null,
+    {
+      input: {
+        projectId: PROYECTO_SIN_MEMBRESIA,
+        userId: USER_ID,
+        side: DocProjectSide.COUNTERPARTY,
+      },
+    },
+    context,
+  )
+
+  assert.equal(miembro.side, DocProjectSide.COUNTERPARTY)
+  assert.equal(miembro.isActive, true)
+
+  // Y ahora sí alcanza el documento de ese proyecto
+  const documento: any = await documentResolvers.Query.documentById(
+    null,
+    { id: docSinMembresia },
+    context,
+  )
+  assert.equal(documento.id, docSinMembresia)
+
+  // Se revierte para no alterar las pruebas siguientes
+  await projectMemberResolvers.Mutation.revokeDocProjectMember(null, { id: miembro.id }, context)
+  assert.equal(
+    await codigoDeError(() =>
+      documentResolvers.Query.documentById(null, { id: docSinMembresia }, context),
+    ),
+    "FORBIDDEN",
+  )
+})
+
+test("el alta repetida reincorpora en lugar de duplicar", async () => {
+  const primera: any = await projectMemberResolvers.Mutation.assignDocProjectMember(
+    null,
+    {
+      input: {
+        projectId: PROYECTO_SIN_MEMBRESIA,
+        userId: USER_ID,
+        side: DocProjectSide.COUNTERPARTY,
+      },
+    },
+    context,
+  )
+
+  const total = await prisma.docProjectMember.count({
+    where: { projectId: PROYECTO_SIN_MEMBRESIA, userId: USER_ID },
+  })
+
+  assert.equal(total, 1, "la unicidad del par usuario–proyecto debe sostenerse")
+  assert.equal(primera.isActive, true)
+  assert.equal(primera.revokedAt, null)
+
+  await projectMemberResolvers.Mutation.revokeDocProjectMember(null, { id: primera.id }, context)
+})
+
+test("el listado de miembros excluye las bajas salvo que se pidan", async () => {
+  const vigentes: any = await projectMemberResolvers.Query.docProjectMembers(
+    null,
+    { projectId: PROYECTO_SIN_MEMBRESIA },
+    context,
+  )
+  const todas: any = await projectMemberResolvers.Query.docProjectMembers(
+    null,
+    { projectId: PROYECTO_SIN_MEMBRESIA, includeRevoked: true },
+    context,
+  )
+
+  assert.equal(vigentes.length, 0)
+  assert.ok(todas.length > 0, "la baja debe conservarse, no borrarse")
+})
+
+test("dar de baja la membresía retira el acceso al objeto", async () => {
+  const membresia = await prisma.docProjectMember.findFirstOrThrow({
+    where: { projectId: PROYECTO_CON_MEMBRESIA, userId: USER_ID },
+  })
+
+  await prisma.docProjectMember.update({
+    where: { id: membresia.id },
+    data: { isActive: false, revokedAt: new Date(), revokedById: USER_ID },
+  })
+
+  const codigo = await codigoDeError(() =>
+    documentResolvers.Query.documentById(null, { id: docConMembresia }, context),
+  )
+
+  // Se restituye para no dejar el estado alterado a las pruebas siguientes
+  await prisma.docProjectMember.update({
+    where: { id: membresia.id },
+    data: { isActive: true, revokedAt: null, revokedById: null },
+  })
+
+  assert.equal(codigo, "FORBIDDEN")
+})

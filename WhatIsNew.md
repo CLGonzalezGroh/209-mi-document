@@ -397,3 +397,53 @@ Primer bloque de la evolución documentada en `docs/EVOLUTION/BLOCK_01_TRAZABILI
 - Requiere aplicar la migración Prisma `add_domain_events` en la BD `mi_document` de cada cliente. Es **puramente aditiva**: un enum, dos tablas y tres índices, sin `ALTER` ni `DROP`.
 
 ---
+
+# What's new in María Ingeniería API Documents 2.3.0
+
+2026-08-09
+
+## Contexto de proyecto y rol documental
+
+Segundo bloque de la evolución documentada en `docs/EVOLUTION/BLOCK_02_CONTEXTO_DE_PROYECTO.md`. Incorpora la pertenencia del documento a un proyecto y el alcance de acceso por membresía. **No modifica el ciclo de revisión ni la circulación.**
+
+### Cambio incompatible del contrato
+
+- Se retiran **`entityType` y `entityId`** del tipo `Document`, del input `CreateDocumentInput` —donde eran obligatorios— y de los argumentos de `documentsByModule`. Los reemplaza `projectId`.
+- `rover subgraph check` los marca como incompatibles. Se aceptaron con evidencia: la comparación se hizo contra **0 operaciones registradas**, la webapp no los consumía y `mi-quality` tampoco. **No se tocaron** los argumentos homónimos de `checkDocumentDependencies`, que identifican la entidad a borrar y no columnas de `Document`, ni nada de `Attachment`.
+- Consecuencia funcional declarada: `checkDocumentDependencies` deja de contar documentos en sus ramas `FINDING` y `ACTION`. La rama `PROJECT` mejora, porque pasa a contar por `projectId`.
+
+### Modelo
+
+- **`Document.projectId`**, referencia externa sin clave foránea. Obligatorio por invariante cuando el módulo es `PROJECTS`; nulo en el resto, donde identifica el régimen de publicación: documentación que no circula y se gobierna por permiso global y clasificación.
+- La unicidad del código pasa a **dos índices únicos parciales**: por proyecto para los documentos en circulación, por módulo para los publicados. Reemplaza a `[code, module, entityType, entityId]`, cuya tupla con columnas anulables no impedía duplicados.
+- **`DocProjectSettings`**: un registro por proyecto con el rol documental —`ISSUER`, `RECEIVER` o `INTERNAL`— y el nombre de la contraparte, exigido en los dos primeros y prohibido en el tercero. El rol es inmutable desde que el proyecto tiene documentos o transmittals.
+- **`DocProjectMember`**: membresía que habilita el acceso a un proyecto y declara el lado, `HOST` o `COUNTERPARTY`. Única por par usuario–proyecto, con baja lógica que conserva alta, baja y actor. No define rol ni permisos.
+- Los eventos de dominio incorporan **`projectId` y `module`**, derivados del objeto afectado y nunca informados por quien emite. `DocObjectType` suma `DOC_PROJECT_SETTINGS` y `DOC_PROJECT_MEMBER`.
+
+### Autorización
+
+- La autorización pasa a combinar **dos capas**: el permiso global de `mi-admin` y la membresía vigente en el proyecto. Se aplica a las **27 operaciones** del subsistema documental.
+- Dos formas según la operación: las que recaen sobre un objeto **exigen** membresía y rechazan con `FORBIDDEN`; los listados que no nombran un proyecto **filtran** el resultado a los proyectos alcanzados. Un listado que rechazara sería inutilizable, y un objeto que solo filtrara dejaría el acceso abierto.
+- Administrar la configuración y la membresía se gobierna **solo por el permiso global**: el primer miembro de un proyecto no puede exigir una membresía que todavía no existe.
+- **`ScannedFile` y `Area` quedan explícitamente fuera.** Sus 22 operaciones conservan la autorización global vigente: son el único subsistema con datos en producción y ningún usuario tiene membresía todavía.
+
+### API
+
+- Consultas nuevas: `docProjectSettings(projectId)` y `docProjectMembers(projectId, includeRevoked)`.
+- Mutaciones nuevas: `declareDocProjectSettings`, `assignDocProjectMember` —que reincorpora si la membresía existía— y `revokeDocProjectMember`.
+- `docWorkflowEvents` y `docAuditEvents` admiten filtrar por `module` y `projectId`.
+- Seis permisos nuevos sobre dos recursos, en `@CLGonzalezGroh/mi-common` **2.5.0**: `documentsProjectSettings` y `documentsProjectMember`. Requieren `npm run seed:permissions` en `mi-admin` de cada despliegue.
+
+### Pruebas
+
+- **72 pruebas** en total. `npm run test:block02` sin base, `test:block02-db` con base, y `test:block02-all` que agrega la integración.
+- Arnés de **integración** nuevo (`test:block02-integration`): ejercita los resolvers con token firmado y primera capa validada contra `mi-admin`. **Requiere `mi-admin` corriendo.** Levanta la limitación que el bloque anterior había declarado insalvable.
+
+### Migraciones
+
+Dos, a aplicar en la BD `mi_document` de cada cliente:
+
+- `add_project_context` — **contiene `DROP COLUMN`** de `entityType` y `entityId`, además de las altas. Solo debe aplicarse tras verificar que las tablas del subsistema documental están vacías en esa base.
+- `add_project_context_object_types` — puramente aditiva, dos valores de enumeración.
+
+---

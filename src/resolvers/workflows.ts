@@ -2,8 +2,13 @@ import { GraphQLError } from "graphql"
 import { ResolverContext } from "../types.js"
 import { PERMISSIONS } from "@CLGonzalezGroh/mi-common"
 import { userAuthorization } from "../utils/userAuthorization.js"
+import {
+  assertObjectAccess,
+  projectScopeAuthorization,
+} from "../utils/projectAuthorization.js"
 import { handleError } from "../utils/handleError.js"
 import {
+  DocObjectType,
   RevisionStatus,
   WorkflowStatus,
   StepStatus,
@@ -73,9 +78,13 @@ export const workflowResolvers = {
       { userId: targetUserId }: { userId: number },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
+      // Listado sin proyecto en los argumentos: la segunda capa filtra (B7).
+      // El paso alcanza su proyecto a través de workflow → revisión → documento,
+      // de modo que el alcance se anida en lugar de aplicarse a la raíz.
+      const { userId, scope } = await projectScopeAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_WORKFLOW_LIST],
         context,
+        includeWithoutProject: true,
       })
       logger.info("pendingReviewSteps", { userId })
 
@@ -88,6 +97,7 @@ export const workflowResolvers = {
               status: {
                 in: [WorkflowStatus.PENDING, WorkflowStatus.IN_PROGRESS],
               },
+              revision: { document: scope },
             },
           },
           include: stepIncludes,
@@ -113,15 +123,17 @@ export const workflowResolvers = {
       { status }: { status: WorkflowStatus },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
+      // Listado sin proyecto en los argumentos: la segunda capa filtra (B7).
+      const { userId, scope } = await projectScopeAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_WORKFLOW_LIST],
         context,
+        includeWithoutProject: true,
       })
       logger.info("workflowsByStatus", { userId })
 
       try {
         const workflows = await context.orm.reviewWorkflow.findMany({
-          where: { status },
+          where: { status, revision: { document: scope } },
           include: workflowIncludes,
           orderBy: { createdAt: "desc" },
         })
@@ -164,6 +176,15 @@ export const workflowResolvers = {
         context,
       })
       logger.info("initiateReview", { userId })
+
+      // Fuera del try: un rechazo de autorización no es un error del servicio
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT_REVISION,
+        objectId: revisionId,
+        context,
+        notFoundMessage: "Revisión no encontrada",
+      })
 
       try {
         // Verificar que la revisión existe y está en DRAFT
@@ -278,6 +299,15 @@ export const workflowResolvers = {
         context,
       })
       logger.info("approveStep", { userId })
+
+      // Fuera del try: un rechazo de autorización no es un error del servicio
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.REVIEW_STEP,
+        objectId: stepId,
+        context,
+        notFoundMessage: "Paso no encontrado",
+      })
 
       try {
         // Obtener el step con su workflow
@@ -453,6 +483,15 @@ export const workflowResolvers = {
       })
       logger.info("rejectStep", { userId })
 
+      // Fuera del try: un rechazo de autorización no es un error del servicio
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.REVIEW_STEP,
+        objectId: stepId,
+        context,
+        notFoundMessage: "Paso no encontrado",
+      })
+
       try {
         const step = await context.orm.reviewStep.findFirst({
           where: { id: stepId },
@@ -591,6 +630,15 @@ export const workflowResolvers = {
         context,
       })
       logger.info("cancelWorkflow", { userId })
+
+      // Fuera del try: un rechazo de autorización no es un error del servicio
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.REVIEW_WORKFLOW,
+        objectId: workflowId,
+        context,
+        notFoundMessage: "Workflow no encontrado",
+      })
 
       try {
         const workflow = await context.orm.reviewWorkflow.findFirst({

@@ -5,6 +5,7 @@ import {
   type AuditAction,
   type WorkflowEvent,
 } from "./catalog.js"
+import { resolveEventContext } from "../utils/objectContext.js"
 
 /**
  * Emisión de eventos de dominio (Bloque 01).
@@ -57,33 +58,65 @@ export const buildWorkflowEvent = (input: WorkflowEventInput) => ({
   createdById: input.actorId ?? null,
 })
 
-/** Registra una acción ejecutada por un usuario o por el sistema. */
+/**
+ * Registra una acción ejecutada por un usuario o por el sistema.
+ * El contexto —proyecto y módulo— se deriva del objeto afectado (B9).
+ */
 export const emitAuditEvent = async (
   client: Prisma.TransactionClient,
   input: AuditEventInput,
 ): Promise<void> => {
-  await client.docAuditEvent.create({ data: buildAuditEvent(input) })
+  const evento = buildAuditEvent(input)
+  const contexto = await resolveEventContext(
+    client,
+    evento.objectType,
+    evento.objectId,
+  )
+
+  await client.docAuditEvent.create({ data: { ...evento, ...contexto } })
 }
 
-/** Registra una transición de estado. */
+/** Registra una transición de estado, con el contexto derivado del objeto (B9). */
 export const emitWorkflowEvent = async (
   client: Prisma.TransactionClient,
   input: WorkflowEventInput,
 ): Promise<void> => {
-  await client.docWorkflowEvent.create({ data: buildWorkflowEvent(input) })
+  const evento = buildWorkflowEvent(input)
+  const contexto = await resolveEventContext(
+    client,
+    evento.objectType,
+    evento.objectId,
+  )
+
+  await client.docWorkflowEvent.create({ data: { ...evento, ...contexto } })
 }
 
 /**
  * Registra varias transiciones en una sola operación.
  * Una acción puede producir varias transiciones (B4): al completarse un circuito
  * se aprueba la revisión y se deja en `SUPERSEDED` a cada revisión anterior.
+ *
+ * El contexto se deriva por objeto, no una sola vez: las transiciones de una
+ * misma acción pueden recaer sobre objetos distintos.
  */
 export const emitWorkflowEvents = async (
   client: Prisma.TransactionClient,
   inputs: WorkflowEventInput[],
 ): Promise<void> => {
   if (inputs.length === 0) return
-  await client.docWorkflowEvent.createMany({
-    data: inputs.map(buildWorkflowEvent),
-  })
+
+  const eventos = await Promise.all(
+    inputs.map(async (input) => {
+      const evento = buildWorkflowEvent(input)
+      const contexto = await resolveEventContext(
+        client,
+        evento.objectType,
+        evento.objectId,
+      )
+
+      return { ...evento, ...contexto }
+    }),
+  )
+
+  await client.docWorkflowEvent.createMany({ data: eventos })
 }

@@ -73,6 +73,16 @@ export type TransmittalItem = Prisma.TransmittalItemModel
  */
 export type Attachment = Prisma.AttachmentModel
 /**
+ * Model DocProjectSettings
+ * 
+ */
+export type DocProjectSettings = Prisma.DocProjectSettingsModel
+/**
+ * Model DocProjectMember
+ * 
+ */
+export type DocProjectMember = Prisma.DocProjectMemberModel
+/**
  * Model DocWorkflowEvent
  * 
  */

@@ -395,6 +395,8 @@ export const ModelName = {
   Transmittal: 'Transmittal',
   TransmittalItem: 'TransmittalItem',
   Attachment: 'Attachment',
+  DocProjectSettings: 'DocProjectSettings',
+  DocProjectMember: 'DocProjectMember',
   DocWorkflowEvent: 'DocWorkflowEvent',
   DocAuditEvent: 'DocAuditEvent',
   ScannedFile: 'ScannedFile',
@@ -416,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "documentClass" | "documentType" | "document" | "taskDocumentReference" | "documentRevision" | "documentVersion" | "reviewWorkflow" | "reviewStep" | "transmittal" | "transmittalItem" | "attachment" | "docWorkflowEvent" | "docAuditEvent" | "scannedFile" | "area" | "documentSysLog" | "documentSysLogArchive"
+    modelProps: "documentClass" | "documentType" | "document" | "taskDocumentReference" | "documentRevision" | "documentVersion" | "reviewWorkflow" | "reviewStep" | "transmittal" | "transmittalItem" | "attachment" | "docProjectSettings" | "docProjectMember" | "docWorkflowEvent" | "docAuditEvent" | "scannedFile" | "area" | "documentSysLog" | "documentSysLogArchive"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1234,6 +1236,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DocProjectSettings: {
+      payload: Prisma.$DocProjectSettingsPayload<ExtArgs>
+      fields: Prisma.DocProjectSettingsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocProjectSettingsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectSettingsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocProjectSettingsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectSettingsPayload>
+        }
+        findFirst: {
+          args: Prisma.DocProjectSettingsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectSettingsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocProjectSettingsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectSettingsPayload>
+        }
+        findMany: {
+          args: Prisma.DocProjectSettingsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectSettingsPayload>[]
+        }
+        create: {
+          args: Prisma.DocProjectSettingsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectSettingsPayload>
+        }
+        createMany: {
+          args: Prisma.DocProjectSettingsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocProjectSettingsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectSettingsPayload>[]
+        }
+        delete: {
+          args: Prisma.DocProjectSettingsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectSettingsPayload>
+        }
+        update: {
+          args: Prisma.DocProjectSettingsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectSettingsPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocProjectSettingsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocProjectSettingsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocProjectSettingsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectSettingsPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocProjectSettingsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectSettingsPayload>
+        }
+        aggregate: {
+          args: Prisma.DocProjectSettingsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocProjectSettings>
+        }
+        groupBy: {
+          args: Prisma.DocProjectSettingsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocProjectSettingsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocProjectSettingsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocProjectSettingsCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocProjectMember: {
+      payload: Prisma.$DocProjectMemberPayload<ExtArgs>
+      fields: Prisma.DocProjectMemberFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocProjectMemberFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectMemberPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocProjectMemberFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectMemberPayload>
+        }
+        findFirst: {
+          args: Prisma.DocProjectMemberFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectMemberPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocProjectMemberFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectMemberPayload>
+        }
+        findMany: {
+          args: Prisma.DocProjectMemberFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectMemberPayload>[]
+        }
+        create: {
+          args: Prisma.DocProjectMemberCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectMemberPayload>
+        }
+        createMany: {
+          args: Prisma.DocProjectMemberCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocProjectMemberCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectMemberPayload>[]
+        }
+        delete: {
+          args: Prisma.DocProjectMemberDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectMemberPayload>
+        }
+        update: {
+          args: Prisma.DocProjectMemberUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectMemberPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocProjectMemberDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocProjectMemberUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocProjectMemberUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectMemberPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocProjectMemberUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocProjectMemberPayload>
+        }
+        aggregate: {
+          args: Prisma.DocProjectMemberAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocProjectMember>
+        }
+        groupBy: {
+          args: Prisma.DocProjectMemberGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocProjectMemberGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocProjectMemberCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocProjectMemberCountAggregateOutputType> | number
+        }
+      }
+    }
     DocWorkflowEvent: {
       payload: Prisma.$DocWorkflowEventPayload<ExtArgs>
       fields: Prisma.DocWorkflowEventFieldRefs
@@ -1764,8 +1914,7 @@ export const DocumentScalarFieldEnum = {
   title: 'title',
   description: 'description',
   module: 'module',
-  entityType: 'entityType',
-  entityId: 'entityId',
+  projectId: 'projectId',
   documentTypeId: 'documentTypeId',
   documentClassId: 'documentClassId',
   revisionScheme: 'revisionScheme',
@@ -1896,6 +2045,39 @@ export const AttachmentScalarFieldEnum = {
 export type AttachmentScalarFieldEnum = (typeof AttachmentScalarFieldEnum)[keyof typeof AttachmentScalarFieldEnum]
 
 
+export const DocProjectSettingsScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  projectId: 'projectId',
+  documentRole: 'documentRole',
+  counterpartyName: 'counterpartyName'
+} as const
+
+export type DocProjectSettingsScalarFieldEnum = (typeof DocProjectSettingsScalarFieldEnum)[keyof typeof DocProjectSettingsScalarFieldEnum]
+
+
+export const DocProjectMemberScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  isSys: 'isSys',
+  projectId: 'projectId',
+  userId: 'userId',
+  side: 'side',
+  assignedAt: 'assignedAt',
+  assignedById: 'assignedById',
+  isActive: 'isActive',
+  revokedAt: 'revokedAt',
+  revokedById: 'revokedById'
+} as const
+
+export type DocProjectMemberScalarFieldEnum = (typeof DocProjectMemberScalarFieldEnum)[keyof typeof DocProjectMemberScalarFieldEnum]
+
+
 export const DocWorkflowEventScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -1904,7 +2086,9 @@ export const DocWorkflowEventScalarFieldEnum = {
   objectId: 'objectId',
   name: 'name',
   fromState: 'fromState',
-  toState: 'toState'
+  toState: 'toState',
+  projectId: 'projectId',
+  module: 'module'
 } as const
 
 export type DocWorkflowEventScalarFieldEnum = (typeof DocWorkflowEventScalarFieldEnum)[keyof typeof DocWorkflowEventScalarFieldEnum]
@@ -1917,7 +2101,9 @@ export const DocAuditEventScalarFieldEnum = {
   objectType: 'objectType',
   objectId: 'objectId',
   action: 'action',
-  meta: 'meta'
+  meta: 'meta',
+  projectId: 'projectId',
+  module: 'module'
 } as const
 
 export type DocAuditEventScalarFieldEnum = (typeof DocAuditEventScalarFieldEnum)[keyof typeof DocAuditEventScalarFieldEnum]
@@ -2239,6 +2425,34 @@ export type ListEnumClientStatusFieldRefInput<$PrismaModel> = FieldRefInputType<
 
 
 /**
+ * Reference to a field of type 'DocumentRole'
+ */
+export type EnumDocumentRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentRole'>
+    
+
+
+/**
+ * Reference to a field of type 'DocumentRole[]'
+ */
+export type ListEnumDocumentRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentRole[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DocProjectSide'
+ */
+export type EnumDocProjectSideFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocProjectSide'>
+    
+
+
+/**
+ * Reference to a field of type 'DocProjectSide[]'
+ */
+export type ListEnumDocProjectSideFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocProjectSide[]'>
+    
+
+
+/**
  * Reference to a field of type 'DocObjectType'
  */
 export type EnumDocObjectTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocObjectType'>
@@ -2456,6 +2670,8 @@ export type GlobalOmitConfig = {
   transmittal?: Prisma.TransmittalOmit
   transmittalItem?: Prisma.TransmittalItemOmit
   attachment?: Prisma.AttachmentOmit
+  docProjectSettings?: Prisma.DocProjectSettingsOmit
+  docProjectMember?: Prisma.DocProjectMemberOmit
   docWorkflowEvent?: Prisma.DocWorkflowEventOmit
   docAuditEvent?: Prisma.DocAuditEventOmit
   scannedFile?: Prisma.ScannedFileOmit

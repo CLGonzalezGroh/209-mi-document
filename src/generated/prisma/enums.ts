@@ -132,6 +132,23 @@ export const TaskDocumentRole = {
 export type TaskDocumentRole = (typeof TaskDocumentRole)[keyof typeof TaskDocumentRole]
 
 
+export const DocumentRole = {
+  ISSUER: 'ISSUER',
+  RECEIVER: 'RECEIVER',
+  INTERNAL: 'INTERNAL'
+} as const
+
+export type DocumentRole = (typeof DocumentRole)[keyof typeof DocumentRole]
+
+
+export const DocProjectSide = {
+  HOST: 'HOST',
+  COUNTERPARTY: 'COUNTERPARTY'
+} as const
+
+export type DocProjectSide = (typeof DocProjectSide)[keyof typeof DocProjectSide]
+
+
 export const DocObjectType = {
   DOCUMENT: 'DOCUMENT',
   DOCUMENT_REVISION: 'DOCUMENT_REVISION',
@@ -140,7 +157,9 @@ export const DocObjectType = {
   REVIEW_STEP: 'REVIEW_STEP',
   TRANSMITTAL: 'TRANSMITTAL',
   DOCUMENT_CLASS: 'DOCUMENT_CLASS',
-  DOCUMENT_TYPE: 'DOCUMENT_TYPE'
+  DOCUMENT_TYPE: 'DOCUMENT_TYPE',
+  DOC_PROJECT_SETTINGS: 'DOC_PROJECT_SETTINGS',
+  DOC_PROJECT_MEMBER: 'DOC_PROJECT_MEMBER'
 } as const
 
 export type DocObjectType = (typeof DocObjectType)[keyof typeof DocObjectType]

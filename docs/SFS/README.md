@@ -60,8 +60,11 @@ Los estados `PROPUESTO`, `APROBADO_PENDIENTE` e `IMPLEMENTADO_CON_BRECHA` perten
 | `00_Convenciones.md` | Convenciones de idioma, nomenclatura y promoción documental | Draft de cobertura |
 | `domain/00_transversal/10_DOM-001_DocWorkflowEvent.md` | Transición de estado de un objeto del dominio | Approved |
 | `domain/00_transversal/20_DOM-002_DocAuditEvent.md` | Acción ejecutada sobre un objeto del dominio | Approved |
+| `domain/05_project/10_DOM-003_DocProjectSettings.md` | Rol documental que el proyecto declara y su contraparte | Approved |
+| `domain/05_project/20_DOM-004_DocProjectMember.md` | Membresía que habilita el acceso a un proyecto | Approved |
+| `domain/05_project/80_Principios_del_Modelo.md` | Principios del contexto de proyecto: regímenes, alcance y autorización | Approved |
 
-Los dos Objetos del Dominio incorporados provienen del bloque de trazabilidad funcional. La organización conceptual del dominio —modelos, arquitectura y su índice— se incorporará cuando los bloques correspondientes se promuevan; hasta entonces, este índice cumple esa función.
+Los dos primeros Objetos del Dominio provienen del bloque de trazabilidad funcional; los dos siguientes, junto con los principios del contexto de proyecto, del bloque de contexto de proyecto y rol documental. La organización conceptual del dominio —modelos, arquitectura y su índice— se incorporará cuando los bloques correspondientes se promuevan; hasta entonces, este índice cumple esa función.
 
 ## Estructura prevista
 

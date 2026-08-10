@@ -6,6 +6,13 @@ import {
   PERMISSIONS,
 } from "@CLGonzalezGroh/mi-common"
 import { userAuthorization } from "../utils/userAuthorization.js"
+import {
+  applyProjectScope,
+  assertObjectAccess,
+  projectAuthorization,
+  projectScopeAuthorization,
+} from "../utils/projectAuthorization.js"
+import { DocObjectType } from "../generated/prisma/enums.js"
 import { handleError } from "../utils/handleError.js"
 import { buildTransmittalOrderBy } from "../utils/orderByHelper.js"
 import { TransmittalStatus, ClientStatus, SysLogModule } from "../generated/prisma/enums.js"
@@ -78,6 +85,16 @@ export const transmittalResolvers = {
       })
       logger.info("transmittalById", { userId })
 
+      // Fuera del try: un rechazo de autorización no es un error del servicio.
+      // El transmittal lleva su propio projectId, y nunca es nulo.
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.TRANSMITTAL,
+        objectId: id,
+        context,
+        notFoundMessage: "Transmittal no encontrado",
+      })
+
       try {
         const transmittal = await context.orm.transmittal.findFirst({
           where: { id },
@@ -120,9 +137,12 @@ export const transmittalResolvers = {
       },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
+      // Listado sin proyecto en los argumentos: la segunda capa filtra (B7).
+      // Sin el régimen de publicación: Transmittal.projectId es obligatorio.
+      const { userId, scope } = await projectScopeAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_LIST],
         context,
+        includeWithoutProject: false,
       })
       logger.info("transmittals", { userId })
 
@@ -148,10 +168,15 @@ export const transmittalResolvers = {
         }
 
         const orderByClause = buildTransmittalOrderBy(orderBy)
-        const totalItems = await context.orm.transmittal.count({ where })
+
+        // El alcance se incorpora bajo AND para no pisar el OR de la búsqueda
+        const scopedWhere = applyProjectScope(where, scope)
+        const totalItems = await context.orm.transmittal.count({
+          where: scopedWhere,
+        })
 
         const transmittals = await context.orm.transmittal.findMany({
-          where,
+          where: scopedWhere,
           skip,
           take,
           orderBy: orderByClause,
@@ -198,8 +223,10 @@ export const transmittalResolvers = {
       },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
+      // El proyecto es argumento explícito: doble capa estricta
+      const userId = await projectAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_LIST],
+        projectId,
         context,
       })
       logger.info("transmittalsByProject", { userId })
@@ -265,8 +292,10 @@ export const transmittalResolvers = {
       },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
+      // El proyecto viene en el input: doble capa estricta, sin nulo posible
+      const userId = await projectAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_CREATE],
+        projectId: input.projectId,
         context,
       })
       logger.info("createTransmittal", { userId })
@@ -341,6 +370,16 @@ export const transmittalResolvers = {
         context,
       })
       logger.info("issueTransmittal", { userId })
+
+      // Fuera del try: un rechazo de autorización no es un error del servicio.
+      // El transmittal lleva su propio projectId, y nunca es nulo.
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.TRANSMITTAL,
+        objectId: id,
+        context,
+        notFoundMessage: "Transmittal no encontrado",
+      })
 
       try {
         const transmittal = await context.orm.transmittal.findFirst({
@@ -428,6 +467,16 @@ export const transmittalResolvers = {
         context,
       })
       logger.info("respondTransmittal", { userId })
+
+      // Fuera del try: un rechazo de autorización no es un error del servicio.
+      // El transmittal lleva su propio projectId, y nunca es nulo.
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.TRANSMITTAL,
+        objectId: id,
+        context,
+        notFoundMessage: "Transmittal no encontrado",
+      })
 
       try {
         const transmittal = await context.orm.transmittal.findFirst({
@@ -517,6 +566,16 @@ export const transmittalResolvers = {
         context,
       })
       logger.info("closeTransmittal", { userId })
+
+      // Fuera del try: un rechazo de autorización no es un error del servicio.
+      // El transmittal lleva su propio projectId, y nunca es nulo.
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.TRANSMITTAL,
+        objectId: id,
+        context,
+        notFoundMessage: "Transmittal no encontrado",
+      })
 
       try {
         const transmittal = await context.orm.transmittal.findFirst({

@@ -250,6 +250,21 @@ export const resolverTypes = {
     },
   },
 
+  DocProjectMember: {
+    user: (parent: { userId: number }) => ({
+      __typename: "UserName",
+      id: parent.userId,
+    }),
+    assignedBy: (parent: { assignedById: number }) => ({
+      __typename: "UserName",
+      id: parent.assignedById,
+    }),
+    revokedBy: (parent: { revokedById: number | null }) => {
+      if (parent.revokedById === null) return null
+      return { __typename: "UserName", id: parent.revokedById }
+    },
+  },
+
   Attachment: {
     __resolveReference: async (ref: { id: number }) => {
       return prisma.attachment.findFirst({

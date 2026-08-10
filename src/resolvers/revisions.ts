@@ -2,8 +2,13 @@ import { GraphQLError } from "graphql"
 import { ResolverContext } from "../types.js"
 import { PERMISSIONS } from "@CLGonzalezGroh/mi-common"
 import { userAuthorization } from "../utils/userAuthorization.js"
+import { assertObjectAccess } from "../utils/projectAuthorization.js"
 import { handleError } from "../utils/handleError.js"
-import { RevisionStatus, RevisionScheme } from "../generated/prisma/enums.js"
+import {
+  DocObjectType,
+  RevisionStatus,
+  RevisionScheme,
+} from "../generated/prisma/enums.js"
 import { AuditAction, WorkflowEvent } from "../events/catalog.js"
 import { emitAuditEvent, emitWorkflowEvent } from "../events/emit.js"
 
@@ -98,6 +103,15 @@ export const revisionResolvers = {
       })
       logger.info("revisionById", { userId })
 
+      // Fuera del try: un rechazo de autorización no es un error del servicio
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT_REVISION,
+        objectId: id,
+        context,
+        notFoundMessage: "Revisión no encontrada",
+      })
+
       try {
         const revision = await context.orm.documentRevision.findFirst({
           where: { id },
@@ -151,6 +165,15 @@ export const revisionResolvers = {
         context,
       })
       logger.info("createRevision", { userId })
+
+      // La revisión se abre sobre un documento: el proyecto es el del documento
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT,
+        objectId: documentId,
+        context,
+        notFoundMessage: "Documento no encontrado",
+      })
 
       try {
         // Verificar que el documento existe

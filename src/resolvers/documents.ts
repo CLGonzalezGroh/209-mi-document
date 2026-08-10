@@ -9,9 +9,21 @@ import {
   TerminatedFilter,
 } from "@CLGonzalezGroh/mi-common"
 import { userAuthorization } from "../utils/userAuthorization.js"
+import {
+  applyProjectScope,
+  assertObjectAccess,
+  projectAuthorization,
+  projectScopeAuthorization,
+} from "../utils/projectAuthorization.js"
+import { assertDocumentContext } from "../utils/documentContext.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentOrderBy } from "../utils/orderByHelper.js"
-import { ModuleType, RevisionStatus, RevisionScheme } from "../generated/prisma/enums.js"
+import {
+  DocObjectType,
+  ModuleType,
+  RevisionStatus,
+  RevisionScheme,
+} from "../generated/prisma/enums.js"
 import { AuditAction, WorkflowEvent } from "../events/catalog.js"
 import { emitAuditEvent, emitWorkflowEvent } from "../events/emit.js"
 import { Document } from "../generated/prisma/client.js"
@@ -56,11 +68,23 @@ export const documentResolvers = {
       { id }: { id: number },
       context: ResolverContext,
     ) => {
+      // Doble capa: permiso global, lectura del proyecto del objeto, membresía.
+      // Ese orden es el correcto: no se lee la base antes de verificar el permiso.
       const userId = await userAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_READ],
         context,
       })
       logger.info("documentById", { userId })
+
+      // Fuera del try: un rechazo por permiso o por membresía no es un error del
+      // servicio, y handleError lo registraría como ERROR en DocumentSysLog.
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT,
+        objectId: id,
+        context,
+        notFoundMessage: "Documento no encontrado",
+      })
 
       try {
         const document = await context.orm.document.findFirst({
@@ -102,9 +126,13 @@ export const documentResolvers = {
       },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
+      // Listado sin proyecto en los argumentos: la segunda capa se aplica como
+      // FILTRO, no como rechazo. Incorpora los documentos sin proyecto, que son
+      // el régimen de publicación y se gobiernan solo por el permiso global (B7).
+      const { userId, scope } = await projectScopeAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_LIST],
         context,
+        includeWithoutProject: true,
       })
       logger.info("documents", { userId })
 
@@ -155,12 +183,15 @@ export const documentResolvers = {
         // Construir ordenamiento
         const orderByClause = buildDocumentOrderBy(orderBy)
 
+        // El alcance se incorpora bajo AND para no pisar el OR de la búsqueda
+        const scopedWhere = applyProjectScope(where, scope)
+
         // Obtener total de elementos
-        const totalItems = await context.orm.document.count({ where })
+        const totalItems = await context.orm.document.count({ where: scopedWhere })
 
         // Obtener documentos paginados
         const documents = await context.orm.document.findMany({
-          where,
+          where: scopedWhere,
           skip,
           take,
           orderBy: orderByClause,
@@ -200,22 +231,20 @@ export const documentResolvers = {
       _: any,
       {
         module,
-        entityType,
-        entityId,
         pagination,
         orderBy,
       }: {
         module: ModuleType
-        entityType?: string
-        entityId?: number
         pagination?: PaginationInput
         orderBy?: DocumentOrderByInput
       },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
+      // Listado sin proyecto en los argumentos: la segunda capa filtra (B7).
+      const { userId, scope } = await projectScopeAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_LIST],
         context,
+        includeWithoutProject: true,
       })
       logger.info("documentsByModule", { userId })
 
@@ -223,24 +252,18 @@ export const documentResolvers = {
         const skip = pagination?.skip || 0
         const take = pagination?.take || 10
 
+        // Los filtros por entityType y entityId se retiraron con las columnas (B3)
         const where: any = {
           module,
           terminatedAt: null,
         }
 
-        if (entityType) {
-          where.entityType = entityType
-        }
-
-        if (entityId) {
-          where.entityId = entityId
-        }
-
         const orderByClause = buildDocumentOrderBy(orderBy)
-        const totalItems = await context.orm.document.count({ where })
+        const scopedWhere = applyProjectScope(where, scope)
+        const totalItems = await context.orm.document.count({ where: scopedWhere })
 
         const documents = await context.orm.document.findMany({
-          where,
+          where: scopedWhere,
           skip,
           take,
           orderBy: orderByClause,
@@ -278,9 +301,11 @@ export const documentResolvers = {
       { filter }: { filter?: DocumentFilterInput },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
+      // Listado sin proyecto en los argumentos: la segunda capa filtra (B7).
+      const { userId, scope } = await projectScopeAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_SELECT],
         context,
+        includeWithoutProject: true,
       })
       logger.info("documentsSelectList", { userId })
 
@@ -299,7 +324,7 @@ export const documentResolvers = {
         }
 
         const documents = await context.orm.document.findMany({
-          where,
+          where: applyProjectScope(where, scope),
           select: { id: true, code: true, title: true },
           orderBy: { code: "asc" },
         })
@@ -335,8 +360,7 @@ export const documentResolvers = {
           title: string
           description?: string
           module: ModuleType
-          entityType?: string
-          entityId?: number
+          projectId?: number
           documentTypeId: number
           documentClassId?: number
           revisionScheme?: RevisionScheme
@@ -350,8 +374,15 @@ export const documentResolvers = {
       },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
+      // El invariante de B1 se exige ANTES de autorizar por proyecto: no tiene
+      // sentido verificar membresía sobre un contexto que no es representable.
+      assertDocumentContext(input.module, input.projectId)
+
+      // El proyecto viene en el input, de modo que la doble capa es estricta.
+      // Nulo cuando el módulo no es PROJECTS: régimen de publicación (B1).
+      const userId = await projectAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CREATE],
+        projectId: input.projectId ?? null,
         context,
       })
       logger.info("createDocument", { userId })
@@ -372,8 +403,7 @@ export const documentResolvers = {
               title: input.title,
               description: input.description,
               module: input.module,
-              entityType: input.entityType,
-              entityId: input.entityId,
+              projectId: input.projectId,
               documentTypeId: input.documentTypeId,
               documentClassId: input.documentClassId,
               revisionScheme,
@@ -457,6 +487,14 @@ export const documentResolvers = {
       })
       logger.info("updateDocument", { userId })
 
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT,
+        objectId: id,
+        context,
+        notFoundMessage: "Documento no encontrado",
+      })
+
       try {
         const { documentTypeId, documentClassId, ...rest } = input
 
@@ -516,6 +554,14 @@ export const documentResolvers = {
       })
       logger.info("terminateDocument", { userId })
 
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT,
+        objectId: id,
+        context,
+        notFoundMessage: "Documento no encontrado",
+      })
+
       try {
         const document = await context.orm.$transaction(async (tx) => {
           const updated = await tx.document.update({
@@ -569,6 +615,14 @@ export const documentResolvers = {
       })
       logger.info("activateDocument", { userId })
 
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT,
+        objectId: id,
+        context,
+        notFoundMessage: "Documento no encontrado",
+      })
+
       try {
         const document = await context.orm.$transaction(async (tx) => {
           const updated = await tx.document.update({
@@ -621,6 +675,14 @@ export const documentResolvers = {
         context,
       })
       logger.info("switchRevisionScheme", { userId })
+
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT,
+        objectId: id,
+        context,
+        notFoundMessage: "Documento no encontrado",
+      })
 
       try {
         const existing = await context.orm.document.findFirst({
