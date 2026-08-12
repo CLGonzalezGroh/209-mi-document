@@ -113,8 +113,8 @@ Los siguientes puntos requieren revisión antes de convertirse en reglas aprobad
 | H-17 | Documento sin proyecto | `Document` no tiene `projectId`. Su contexto se expresa con `module` más `entityType`/`entityId` genéricos, mientras que `Transmittal`, `Area` y `ScannedFile` sí tienen `projectId`. No hay forma directa de listar los documentos de un proyecto. Resuelto por D-06. | `LISTO_PARA_PROMOVER` |
 | H-18 | Doble vínculo documento–tarea | Coexisten `Document.projectTaskId` (entregable principal) y `TaskDocumentReference` con rol `OUTPUT`. Ambos expresan producción documental de una tarea y pueden contradecirse. Diferido por D-07. | `PROPUESTO` |
 | H-28 | Módulos sin uso real | `Document.module` admite seis módulos, pero no existe ningún consumidor fuera de proyectos: `mi-quality` solo invoca `checkDocumentDependencies` para proteger borrados y nunca crea documentos; la webapp solo consume los catálogos. `entityType`/`entityId` no tienen usos productivos. | `LISTO_PARA_PROMOVER` |
-| H-19 | Unicidad con columnas anulables | `Document`, `DocumentClass` y `DocumentType` declaran unicidad sobre tuplas que incluyen columnas anulables. Cuando `module`, `entityType`, `entityId` o `classId` son nulos, la restricción no impide duplicados. `BLOCK_02` lo cierra para `Document` con dos índices únicos parciales (B2); subsiste en los dos catálogos. | `IMPLEMENTADO_CON_BRECHA` |
-| H-20 | Documento sin archivo imposible | `createDocument` exige `fileKey`, `fileName`, `fileSize` y `mimeType`. No es posible registrar un documento previsto antes de contar con su archivo. | `PROPUESTO` |
+| H-19 | Unicidad con columnas anulables | `Document`, `DocumentClass` y `DocumentType` declaran unicidad sobre tuplas que incluyen columnas anulables. Cuando `module`, `entityType`, `entityId` o `classId` son nulos, la restricción no impide duplicados. `BLOCK_02` lo cerró para `Document` con dos índices únicos parciales (B2). `BLOCK_03` lo cierra para los dos catálogos con `NULLS NOT DISTINCT`, disponible desde PostgreSQL 15 y verificado en los tres ambientes. A diferencia del resto del subsistema, **estos catálogos tienen datos productivos**: exige verificar duplicados preexistentes por cliente antes de migrar. | `APROBADO_PENDIENTE` |
+| H-20 | Documento sin archivo imposible | `createDocument` exige `fileKey`, `fileName`, `fileSize` y `mimeType`. No es posible registrar un documento previsto antes de contar con su archivo. Deja de ser una mejora independiente: al abarcar el circuito la elaboración (D-03), el archivo es el **producto** de un paso y no puede exigirse al crear el documento. `BLOCK_03` lo incorpora. | `APROBADO_PENDIENTE` |
 | H-21 | Adjuntos sin ciclo de vida ni consumidores | `Attachment` carece de `terminatedAt` y `updatedAt`, y no se relaciona con `Document`. Sus operaciones están expuestas en GraphQL, pero no las consume ni la webapp ni `mi-quality`. Diferido por D-08. | `PROPUESTO` |
 | H-22 | Permisos poco específicos | `createRevision` y `registerVersion` exigen `DOCUMENTS_DOCUMENT_CREATE` en lugar de un permiso propio de revisión; `cancelWorkflow` exige `DOCUMENTS_WORKFLOW_CREATE`. | `PROPUESTO` |
 | H-27 | Integridad del archivo opcional | `DocumentVersion.checksum` es anulable y ninguna operación lo exige. Si la firma debe acreditar el contenido aprobado (D-05), una versión sometida a aprobación sin checksum no es verificable. | `APROBADO_PENDIENTE` |
@@ -171,11 +171,25 @@ Los documentos que no requieren revisión formal utilizan un **workflow mínimo*
 
 Alternativa descartada: una operación de aprobación directa que omita el workflow cuando `requiresWorkflow` es falso. Se descarta porque abriría un segundo camino a `APPROVED` sin firma ni trazabilidad, y duplicaría las reglas de transición.
 
-Pendientes de definición al abrir el bloque:
+Definido al abrir `BLOCK_03`, y amplía el alcance de esta decisión:
 
-- si el workflow mínimo se crea automáticamente junto con la revisión o requiere `initiateReview` explícito;
-- a quién se asigna su único paso: al autor de la revisión o a un aprobador derivado del `DocumentType`;
-- qué significa `DocumentType.requiresWorkflow` bajo esta regla. Deja de indicar si hay workflow y pasa a distinguir el circuito formal del mínimo, por lo que su nombre y semántica deben revisarse.
+- **el circuito se instancia con la revisión y abarca el ciclo completo.** No empieza cuando el documento está hecho: su primer paso es el **armado** (`ASSIGN`), donde se designan el elaborador y los revisores, y el segundo es la **elaboración** (`PREPARE`), asignado al elaborador. Completar la elaboración es someter a revisión. La secuencia queda `ASSIGN` ▸ `PREPARE` ▸ `REVIEW` ▸ `APPROVE` ▸ `ACKNOWLEDGE`, y los dos nombres nuevos los aporta el propio dominio: el rótulo de un plano declara *Prepared by / Reviewed by / Approved by*;
+- en consecuencia, **`initiateReview` deja de existir como operación**: se reparte en definir el circuito —completa el armado y crea los pasos siguientes— y someter —completa la elaboración—;
+- **el workflow mínimo deja de ser un objeto aparte** y pasa a ser un resultado del armado: un circuito cuya designación se limita a un único paso de aprobación. No necesita regla propia, y con ello se resuelve a quién se asigna su paso único: a quien el armado designe;
+- **el circuito se reinstancia en lugares distintos según la salida**. El rechazo abre uno nuevo desde `PREPARE`, **copiando** el elenco del anterior; una revisión nueva abre uno desde `ASSIGN`, donde el elenco puede cambiar; la cancelación devuelve al armado (D-17). El elenco se copia y no se referencia, para que reasignar un paso del circuito nuevo no altere la historia del anterior;
+- `DocumentType.requiresWorkflow` **cambia de significado**: ya no indica si hay circuito —siempre lo hay— sino si corresponde el formal o el mínimo. Su nombre se revisa en el bloque, y se trata como sugerencia del armado y no como invariante.
+
+La revisión conserva sus estados: permanece en `DRAFT` mientras el circuito está en armado o en elaboración, y pasa a `IN_REVIEW` al someterse. El detalle de dónde está el trabajo lo da el paso vigente, de modo que no hace falta un estado por paso.
+
+**El circuito se propone con una plantilla y se confirma en el armado.** La plantilla declara los pasos de revisión y aprobación, con actores preasignados o sin ellos, y tiene alcance por proyecto con refinamiento por clase y por tipo de documento, resolviéndose la más específica. No incluye el armado ni la elaboración, que el sistema pone siempre. Sus valores **se copian** al materializarse los pasos: cambiar la plantilla no altera circuitos en curso.
+
+**El elaborador nunca se preasigna**, porque designarlo es distribuir carga de trabajo y se decide documento por documento. Por eso el paso de armado tiene contenido incluso con la plantilla más completa.
+
+**El único actor que debe conocerse al crear el documento es el armador**, que se designa de forma obligatoria, con un valor por defecto configurado en el proyecto —habitualmente el jefe de proyecto—. Puede serlo cualquiera con permiso y membresía vigente: no se crea un padrón de armadores habilitados. Que el alta se lo asigne al jefe de proyecto y este lo derive al jefe de especialidad es la reasignación de D-04 aplicada a ese paso, y no requiere ningún concepto adicional.
+
+En consecuencia, **no existe documento sin circuito**: lo que en la práctica se describe como dar de alta el documento y asignarle el workflow después es un circuito con su paso de armado pendiente. Los pasos siguientes se materializan al completarse el armado, y no antes, porque hasta entonces no tienen actor.
+
+Esto tiene un efecto sobre H-20 que el plan no había previsto: **el archivo pasa a ser el producto del paso de elaboración**, de modo que no puede exigirse al crear el documento. La primera versión deja de crearse en el alta, y la precondición se traslada: someter exige al menos una versión con su `checksum`.
 
 ### D-04 — La aprobación admite delegación, pero queda registrada
 
@@ -187,11 +201,16 @@ A cambio, el modelo registra **quién resolvió efectivamente** el paso, además
 
 Alternativa descartada: exigir coincidencia entre asignado y actor. Se descarta porque bloquea la operación real ante ausencias sin aportar garantía adicional, dado que la trazabilidad se obtiene registrando la diferencia.
 
-Pendientes de definición al abrir el bloque:
+Ampliada al abrir `BLOCK_03`: **el paso también se reasigna.** La firma delegada resuelve el momento —alguien firma por otro— y la reasignación resuelve la conducción: el revisor que no está, o la redistribución de carga de trabajo, incluida la elaboración de un documento ya asignado. Las dos capacidades conviven y no se reemplazan.
 
-- si la resolución delegada exige un permiso distinto del ordinario. El módulo ya tiene precedente de esta distinción en `DOCUMENTS_SCANNED_FILE_ADMIN_UPDATE`, y aplicar el mismo criterio a los workflows permitiría auditar quién puede firmar por otro;
-- si la delegación requiere justificación obligatoria;
-- alcance de `pendingReviewSteps` sobre pasos ajenos (H-07), que debe seguir el mismo criterio.
+La reasignación alcanza a los pasos pendientes, incluido el vigente, y **no a los ya resueltos**, cuya firma acredita quién los resolvió. No altera el circuito: cambia el actor, nunca el tipo del paso, su orden ni cuántos son. Que la estructura del circuito sea inmutable una vez armada es lo que le conserva su uso propio a la cancelación de D-17, que es la vía para rearmarlo.
+
+Definido al abrir `BLOCK_03`:
+
+- **la resolución delegada exige un permiso especial**, siguiendo el precedente de `DOCUMENTS_SCANNED_FILE_ADMIN_UPDATE`. Es además **el mismo permiso que gobierna todo acto sobre el trabajo ajeno**: firmar por otro, reasignar un paso, registrar una versión sobre un paso ajeno y consultar pendientes ajenos. Uno solo, no cuatro;
+- **la delegación exige motivo**, conservado en el paso y dentro del payload firmado. Es lo que la vuelve trazable y no solo permitida;
+- **quién resolvió efectivamente el paso se registra siempre**, y la divergencia con el asignado se deriva de ambos campos en lugar de almacenarse como indicador;
+- **`pendingReviewSteps` devuelve los del usuario autenticado** (H-07). Su argumento pasa a opcional: informado y distinto del autenticado, exige el permiso especial. Sigue acotado por membresía, de modo que el permiso habilita ver pendientes ajenos, no proyectos ajenos.
 
 ### D-05 — La firma acredita quién aprobó y qué aprobó
 
@@ -206,7 +225,17 @@ La firma de un paso debe permitir demostrar, a posteriori, **qué contenido exac
 
 Los datos firmados se **persisten junto al hash**. Un hash cuyos insumos no se conservan no es verificable y no constituye evidencia.
 
-Consecuencia sobre el modelo (H-27): el `checksum` de la versión deja de ser opcional para toda versión sometida a aprobación. Debe definirse al abrir el bloque si se exige en el momento de registrar la versión o al iniciar el workflow, y cómo se tratan las versiones ya existentes sin checksum.
+Ampliada al abrir `BLOCK_03`: la firma incorpora además **la metadata del documento vigente al firmar** —código, título, clase y tipo—. El motivo es material: esa metadata está impresa dentro del archivo, en el rótulo del plano, y a menudo el código mismo se compone de la clase y el tipo. La clasificación no es descripción sino **identidad**, de modo que acreditar "qué se aprobó" exige acreditar también cómo estaba identificado.
+
+De ahí se desprende una regla que no es del versionado sino de la identidad: **con una revisión aprobada, la metadata del documento se congela**, y corregirla exige abrir una revisión nueva. Es lo que el control documental hace igual, porque un rótulo distinto es un documento distinto. Mientras la revisión vigente no esté aprobada, la metadata se edita libremente; abrir la revisión siguiente vuelve a habilitarla.
+
+Su contracara es la definición de versión, que el mismo bloque fija: **una versión es un archivo**. Un cambio de metadata nunca produce una versión —es una actualización auditada del documento— y una versión, una vez creada, no se modifica ni se elimina.
+
+Consecuencia sobre el modelo (H-27): el `checksum` de la versión deja de ser opcional. Definido al abrir `BLOCK_03`: **se exige en toda versión**, sin regla condicional. No hay versiones existentes que tratar, y cualquier alternativa obligaría a decidir qué pasa con la que entró sin checksum y después resulta ser la firmada.
+
+Queda declarada una dependencia: **hoy nadie lo calcula.** `mi-fileserver` no lo produce, y el precedente portable es el de digitalización, donde el navegador lo computa antes de pedir la URL presignada. Es la única regla de ese bloque cuyo cumplimiento depende de un componente que no construye.
+
+La firma se modela como **objeto propio**, uno por firma, con su payload persistido: separarla del paso permite declararla inmutable sin excepciones, mientras que el paso sigue actualizándose.
 
 ### D-06 — El documento pertenece a un proyecto
 
@@ -294,6 +323,10 @@ Las versiones se generan **a lo largo de todo el circuito**, no solo ante un rec
 
 El mismo mecanismo aplica en modo Receptor: cuando el personal de la planta incorpora marcas sobre el documento recibido, esa intervención genera una versión.
 
+Definido al abrir `BLOCK_03`: **la versión la registra quien tiene asignado el paso vigente**, más quien cuente con el permiso superior que gobierna la firma delegada y la reasignación. No es una restricción de identidad sino de momento: cada versión es el producto del paso que se está ejecutando. De ahí que **una revisión aprobada no admita versiones nuevas**, porque no tiene paso vigente — y es lo que impide que la firma quede acreditando una versión que dejó de ser la última.
+
+Se admiten dos recorridos de inicio: el documento nuevo, cuya primera versión la aporta el elaborador, y el documento preexistente, cuyo archivo se adjunta al darlo de alta. En ambos, comentar no genera versión: la genera **intervenir sobre el archivo**.
+
 **Las versiones son secuenciales dentro de la revisión y la última es la vigente.** Esa es toda la regla: no se clasifica el origen ni la naturaleza de cada versión. La disciplina del propio ciclo lo resuelve — las versiones con marcas son las que acompañan un rechazo y devuelven el documento a borrador; la versión que se aprueba es una versión limpia. Lo único que el modelo debe garantizar es que la secuencia sea inequívoca, cosa que la unicidad de `[revisionId, versionNumber]` ya sostiene.
 
 En consecuencia:
@@ -333,6 +366,12 @@ Esto no altera D-05: la firma sigue referenciando la `DocumentVersion` vigente a
 El workflow **no registra explícitamente la versión con la que cerró**. Rige la misma regla de D-10: dentro de la revisión las versiones son secuenciales y la última es la vigente, de modo que el circuito cierra sobre ella. La correlación entre un workflow cerrado y la versión de ese momento queda igualmente recuperable por cronología, dado que tanto las versiones como el cierre del workflow están fechados.
 
 Un circuito cierra aprobando una versión limpia. Las versiones con marcas son las que acompañan un rechazo, y ese rechazo devuelve el documento a borrador. En modo Receptor la calificación de la planta cierra la revisión del mismo modo, con o sin comentarios.
+
+Precisado al abrir `BLOCK_03`: **varios circuitos por revisión es el caso de los roles Emisor e Interno, no del Receptor.** La regla uniforme es que **el rechazo devuelve el trabajo a quien elabora**; lo que cambia es dónde vive esa persona. En Emisor e Interno está dentro del sistema, el trabajo vuelve a la elaboración y se abre un circuito nuevo. En Receptor está afuera —el contratista sube documentación ya aprobada por sus propios medios (D-18)— de modo que no hay a quién devolverle nada: **la revisión admite un solo circuito y su calificación la cierra, se apruebe o se rechace**, y la emisión siguiente lleva revisión nueva.
+
+No es una excepción a D-10 sino su aplicación: en modo Receptor el circuito no es el ciclo interno, es el mecanismo con que la contraparte produce su respuesta, y toda respuesta cierra la revisión emitida.
+
+Dos consecuencias estructurales para `BLOCK_04`, que `BLOCK_03` deja habilitadas: que un circuito pueda armarse **sin paso de elaboración**, porque el documento llega elaborado desde afuera; y que la conclusión de un circuito pueda ser **terminal para la revisión** en lugar de devolverla a borrador.
 
 ### D-15 — El acceso se acota por membresía de proyecto
 
@@ -436,7 +475,7 @@ Pendiente de definición al abrir el bloque: el traslado de la emisión al siste
 
 ### D-17 — Cancelar un circuito lo aborta, pero no borra historia
 
-**Estado:** Propuesta — pendiente de confirmación.
+**Estado:** Aprobada. Confirmada y **ampliada** al abrir `BLOCK_03`: se conserva que la cancelación no elimina historia y que adopta identidad propia con su motivo en el modelo, cae la restricción de cancelar solo antes de la primera firma, y se distingue cancelar el circuito de **abortar la revisión**.
 
 Cancelar un `ReviewWorkflow` significa abortar el proceso de revisión: la revisión vuelve al estado que tenía antes de iniciarse el circuito. Eso ya ocurre y es correcto.
 
@@ -447,18 +486,31 @@ Cancelar un `ReviewWorkflow` significa abortar el proceso de revisión: la revis
 3. **Las versiones intermedias son trabajo, no descarte.** La versión marcada por el revisor constituye la observación misma; eliminarla suprime el registro de qué se objetó.
 4. **Pertenencia.** Las versiones pertenecen a la revisión, no al workflow. Que la cancelación de un circuito elimine historia de otro objeto invierte la relación. Además, la numeración es secuencial y única por revisión: eliminar deja huecos o fuerza renumerar.
 
-**Cancelar y rechazar son salidas distintas:**
+**Son tres salidas distintas, y conviene no confundirlas:**
 
-- **cancelar**: el circuito no debió iniciarse —pasos mal armados, asignación equivocada, envío prematuro—;
-- **rechazar**: el circuito se ejecutó y concluyó negativamente.
+- **cancelar el circuito**: quedó mal armado —falta un paso, sobra otro, o se designó el circuito mínimo donde correspondía el formal— o se sometió lo que no correspondía. La revisión sobrevive: vuelve a borrador con sus versiones y **se rearma desde el paso de armado** (D-03, D-11). Es la salida que la reasignación de D-04 no cubre, porque aquella cambia quién y esta cambia cómo está armado;
+- **rechazar**: el circuito se ejecutó y concluyó negativamente. La revisión vuelve a borrador y se corrige con una versión nueva (D-10);
+- **abortar la revisión**: la revisión dejó de tener sentido y no va a emitirse. Se abandona entera, con su circuito si lo tiene.
 
-De ahí la regla propuesta: **la cancelación se admite únicamente mientras ningún paso haya sido resuelto**. Cuando ya hay una firma, el circuito corrió y la salida es el rechazo. Así la cancelación nunca destruye evidencia, porque solo se permite mientras no existe evidencia que destruir.
+**La cancelación se admite en cualquier punto, aun con pasos ya firmados.** Es el caso real: se abre una revisión, se avanza, y a mitad del circuito se concluye que no corresponde continuarla. Exigir que ninguna firma exista obligaría a completar un circuito que ya se sabe inútil, o a rechazarlo simulando un rechazo que nadie emitió.
 
-El caso del circuito trabado —un revisor ausente con pasos previos ya aprobados— no requiere cancelación: lo resuelve la delegación registrada de D-04.
+Esto no reabre el riesgo que motivaba la restricción, porque **nada se elimina**: la revisión abortada permanece en la historia con su circuito, sus versiones y las firmas que alcanzó a reunir, junto con el motivo del abandono. La evidencia queda intacta por construcción, que era el fin que la restricción perseguía.
+
+**La revisión abortada no consume código de revisión.** Es el mismo principio con que D-10 impide que el rechazo interno agote la secuencia: lo que la contraparte ve son las revisiones que salieron. Sobre un documento en revisión `A` puede abrirse `B`, abortarse, y abrirse más adelante otra vez `B`, que se completa. La `B` abortada queda en la historia sin ocupar el código.
+
+**Una revisión se aborta mientras no esté aprobada.** Aprobada, la revisión es el documento vigente y lo que corresponde es abrir la siguiente. Como la emisión exige aprobación interna (D-18), una revisión abortada nunca fue emitida.
+
+Al no aprobarse nunca, tampoco superseda a la anterior: **volver a la revisión anterior no requiere restituir nada**, porque la vigente nunca dejó de serlo.
+
+El caso del circuito trabado —un revisor ausente con pasos previos ya aprobados— no requiere ninguna de las dos cancelaciones: lo resuelve la delegación registrada de D-04.
 
 Si se necesita retomar el archivo previo a la revisión, no hace falta eliminar: siendo la última versión la vigente (D-10), se registra nuevamente ese archivo como versión siguiente. La historia avanza, no retrocede.
 
 Esto resuelve H-05: la cancelación deja de expresarse como `REJECTED`, adopta identidad propia y su motivo pasa a residir en el modelo en lugar del registro técnico.
+
+Forma definida al abrir `BLOCK_03`: **cada una de las dos cancelaciones tiene su estado propio** —en el workflow y en la revisión—, ambos acompañados de fecha, actor y motivo, y ambos con su transición en el catálogo. La traza también las distingue: hoy cancelar emite la transición de rechazo, que es la misma confusión de H-05 trasladada al registro. Los pasos pendientes quedan salteados, como hoy, y **los ya resueltos conservan su estado y su firma**.
+
+El estado de revisión obsoleta no se reutiliza para esto: obsoleto es lo que dejó de aplicar, no lo que se abandonó antes de salir.
 
 ### D-16 — Material recibido y documento controlado son cosas distintas
 
@@ -550,19 +602,29 @@ Esa diferencia existe porque acá la revisión es una entidad con ciclo de vida 
 
 Esto resuelve H-09: los códigos arbitrarios dejan de ser una brecha y pasan a ser el comportamiento propio de `FREE_TEXT`, inadmisible bajo los esquemas enumerados.
 
-**El caso letras y luego números se resuelve a mano.** El control documental cambia el esquema del documento cuando corresponde, mediante la operación que hoy existe. `switchRevisionScheme` deja de ser un defecto y pasa a ser una capacidad legítima.
+**El caso letras y luego números se resuelve a mano**, y al abrir `BLOCK_03` se definió cómo: **el esquema no se persiste en el documento.** Se elige al crear cada revisión, y el sistema propone el código.
+
+- **la primera revisión** toma el esquema del proyecto, o el valor por defecto del despliegue;
+- **las siguientes** calculan el código a partir de la última revisión no abortada, **infiriendo el esquema de la forma de su código**: dígitos continúan en `NUMERIC`, letras en `ALPHA`. La inferencia solo interpreta valores que el propio sistema generó, porque bajo `FREE_TEXT` el código lo escribe el usuario;
+- **cambiar de esquema** es elegir otro en ese momento, y la secuencia se reinicia.
+
+En consecuencia se retiran `Document.revisionScheme` y la operación `switchRevisionScheme`, que deja de existir en lugar de volverse capacidad legítima.
+
+El motivo es que un esquema almacenado **puede contradecir a los hechos**: declararlo `NUMERIC` con la revisión vigente en `A` afirma algo que el documento no muestra, y obliga a inventar una precondición para tapar la incoherencia. Sin atributo, la incoherencia no puede existir. La precedencia de tres niveles se conserva; lo que cambia es que el escalón del documento se **lee** de su última revisión en lugar de guardarse.
+
+Lo que se pierde, declarado: un documento no puede fijar de antemano el esquema que va a seguir. Existe la secuencia de sus revisiones, que es el hecho, y el usuario elige en el momento en que importa, con el código propuesto a la vista.
 
 Alternativa descartada: que el cambio de esquema se dispare solo al aprobarse para construcción. Se descarta porque ata la convención de numeración al estado del documento, y no todas las organizaciones hacen coincidir ambos momentos.
 
 Observación sobre H-10: al cambiar a `NUMERIC` un documento con revisiones `A`, `B`, `C`, la implementación actual genera `0` como siguiente código. Lo que se había registrado como defecto resulta ser exactamente el comportamiento buscado para este caso. El problema residual es otro y subsiste: la secuencia queda `A, B, C, 0, 1`, de modo que **ordenar revisiones por su código pierde sentido** y el orden debe establecerse por secuencia de creación.
 
-Pendientes de definición al abrir el bloque:
+Resuelto en `BLOCK_02`: la configuración por proyecto reside en `DocProjectSettings` (B4). La pregunta por el momento en que se admite el cambio de esquema **desapareció** al no persistirse el atributo.
 
-- dónde reside la configuración por proyecto. El módulo no tiene entidad de proyecto propia —`projectId` es una referencia externa sin clave foránea, como en `Area`— por lo que la configuración sería un registro por proyecto con esa misma convención;
-- si el cambio de esquema exige que no haya una revisión en curso;
-- extraer la generación de códigos a un util propio, como se hizo en digitalización con `src/utils/revisionScheme.ts`. Hoy vive dentro de `src/resolvers/revisions.ts`;
-- nombre del recurso de permisos. La spec de digitalización dejó deliberadamente libre el nombre genérico para este caso, prefijando el suyo como `digitalizationCatalogSettings`;
-- si la configuración incorpora además la etiqueta del atributo, como hace `CatalogSettings`. No se consideró necesario, dado que "revisión" es terminología establecida en el dominio documental.
+También definido al abrir `BLOCK_03`:
+
+- **existe un valor por defecto del despliegue**, como registro único con el patrón de `CatalogSettings`. Permite fijar la convención del cliente sin desplegar y sin configurar proyecto por proyecto;
+- **la generación de códigos se extrae a un util propio**, como en digitalización, incorporando además la inferencia del esquema a partir del último código. Hoy vive dentro de `src/resolvers/revisions.ts`. Se porta la generación del **sucesor** y no la de la lista de valores: acá el sistema calcula el siguiente código, mientras que allá valida contra un conjunto cerrado;
+- **la configuración no incorpora etiqueta**, a diferencia de `CatalogSettings`: "revisión" es terminología establecida en el dominio documental.
 
 ### D-12 — La respuesta de la contraparte se registra siempre, la ingrese quien la ingrese
 
@@ -621,7 +683,13 @@ En consecuencia, un proyecto Interno:
 
 **La comunicación de lo aprobado se resuelve dentro del circuito.** Cuando hay que dejar constancia de que alguien tomó conocimiento del documento vigente, eso es un paso del workflow —`StepType.ACKNOWLEDGE`— y no una emisión. En el caso de la planta, la comunicación efectiva ocurre más adelante, al promoverse el documento al módulo de activos, que notifica la versión nueva a quienes corresponde. No se incorpora ninguna capacidad de distribución a este módulo.
 
-Esto eleva la importancia de H-04: los pasos de toma de conocimiento que hoy quedan `PENDING` de forma permanente dejan de ser un defecto cosmético y pasan a ser **el mecanismo con que se comunica un documento interno aprobado**. `BLOCK_03` debe cerrarlos.
+Esto eleva la importancia de H-04: los pasos de toma de conocimiento que hoy quedan `PENDING` de forma permanente dejan de ser un defecto cosmético y pasan a ser **el mecanismo con que se comunica un documento interno aprobado**.
+
+Definido al abrir `BLOCK_03`: **el acuse no bloquea la aprobación y se resuelve después de ella.** El circuito cierra con los pasos que deciden —`REVIEW` y `APPROVE`—, y los de toma de conocimiento quedan pendientes hasta que cada destinatario los acuse, con una operación propia y sin permiso adicional. Bloquear la aprobación invertiría la función del acuse, que es comunicar lo ya aprobado; cerrarlo de oficio lo convertiría en un registro vacío.
+
+Requiere además corregir la consulta de pendientes, que hoy los oculta apenas el circuito se completa: los acuses viven precisamente en circuitos cerrados, que es el conjunto que esa consulta excluye. Sin esa corrección nadie recibe el aviso ni puede cerrarlos, que es la razón por la que hoy quedan pendientes para siempre.
+
+`StepStatus` incorpora para eso un estado terminal de **cumplimiento**, distinto de la aprobación: los pasos de armado, elaboración y toma de conocimiento se cumplen, no juzgan. Deja explícita una partición que hasta ahora estaba implícita en el código: solo `REVIEW` y `APPROVE` pueden rechazar, y solo ellos cuentan para completar el circuito.
 
 Alternativa descartada: tratar el proyecto interno como modo Emisor sin emisión. Se descarta porque obligaría a declarar una contraparte que no existe, dejaría `APPROVED` con semántica ambigua y mostraría en la interfaz acciones de emisión que nunca se usan.
 
@@ -652,6 +720,69 @@ Pendientes de definición al abrir el bloque:
 - cómo se expresa el sentido del paquete en modo Receptor, donde la planta entrega material al contratista, y qué parte del paquete alcanza la contraparte;
 - si el paquete admite ser cargado por la propia contraparte o solo por el anfitrión;
 - cómo ingresa un paquete comprimido, que D-16 ya dejaba abierto.
+
+### D-21 — El catálogo documental admite alcance por proyecto
+
+**Estado:** Aprobada en su alcance. Su forma se define al abrir el bloque correspondiente.
+
+`DocumentClass` y `DocumentType` son hoy catálogos **globales del despliegue**, con `module` opcional donde nulo significa disponible para todos los módulos. Eso ya resuelve dos de los tres alcances que el negocio necesita:
+
+- **compartido entre módulos** — la entrada sin módulo, que es lo que permite que un mismo catálogo sirva a proyectos y a activos. Es el caso deseado, porque lo que se produce en un proyecto termina en la biblioteca de planta;
+- **propio de un módulo** — la entrada con módulo declarado.
+
+Falta el tercero: **el catálogo propio del proyecto.** Una empresa de ingeniería trabaja para plantas distintas, y cómo se clasifican los documentos lo determina el cliente, no el despliegue. Dos proyectos pueden tener catálogos enteramente distintos porque son para dos plantas distintas.
+
+**El eje del módulo no puede cubrirlo**: el módulo agrupa por función —proyectos, calidad, activos— mientras que el proyecto agrupa por contrato. Un catálogo del módulo de proyectos sería necesariamente el mismo para todos los clientes.
+
+**Un catálogo es un conjunto, no un valor**, y esa es la diferencia con las demás configuraciones por proyecto de este plan. En el esquema de revisión (D-13) o en la plantilla del circuito (D-03) la definición más específica **reemplaza** a la general. Acá lo que se resuelve es qué entradas están disponibles, de modo que el proyecto debe poder **heredar** el catálogo del módulo —y ampliarlo— o tener el **suyo propio**, y declarar cuál de las dos cosas hace.
+
+El proyecto solo tiene sentido como alcance cuando `module = PROJECTS`, con la misma forma del invariante que D-06 fija para `Document`.
+
+Consecuencia sobre la unicidad: el alcance por proyecto agrega otra columna anulable a las tuplas de H-19. `BLOCK_03` las cierra con `NULLS NOT DISTINCT`, de modo que el mecanismo ya queda decidido y esta decisión no vuelve a plantearlo.
+
+**Es la primera vez que un cambio de este plan toca algo con interfaz y datos en producción.** La webapp ya tiene pantallas de catálogos, y `ScannedFile` referencia ambas entidades en el único cliente con uso real. La migración es aditiva —todo lo existente queda como global— pero la resolución cambia en cada consulta y en cada selector, y esa parte debe planificarse con el mismo cuidado que la salida de `ScannedFile`.
+
+Pendientes de definición al abrir el bloque:
+
+- **cómo declara el proyecto si hereda o reemplaza**, y si esa declaración vive en `DocProjectSettings` junto con las demás;
+- si un catálogo propio puede **sembrarse copiando** el del módulo, y si esa copia es puntual o permanente;
+- si una entrada heredada puede **excluirse** en un proyecto, o si la única forma de no verla es no heredar;
+- qué pasa con un documento ya clasificado cuando su entrada deja de estar disponible. La orientación es la de D-13: la validación ocurre solo en escritura y nunca revalida lo existente;
+- cómo se traduce la clasificación al promover un documento a la biblioteca de planta, donde el catálogo es el del activo y no el del proyecto (nota prospectiva del cierre de proyecto).
+
+### D-22 — La calificación es un catálogo configurable, no una enumeración
+
+**Estado:** Aprobada en su alcance. Su forma se define en `BLOCK_04`.
+
+Hoy la respuesta de la contraparte se expresa con `ClientStatus`, **enumeración fija de cuatro valores** en `TransmittalItem`. No resiste el uso real: cada cliente tiene su propio juego de calificaciones, con **sus códigos y su cantidad** —tres, cuatro o cinco—, y el rótulo que el usuario ve es el del cliente, no una traducción nuestra.
+
+Se modela como catálogo, con el mismo criterio de alcance de D-21: valor por defecto del despliegue y configuración por proyecto, porque el proyecto **es** el contrato con una contraparte.
+
+Cada entrada declara su **código**, su **rótulo** y su **efecto**. El código y el rótulo son lo que el usuario ve; el efecto es lo único que el sistema interpreta.
+
+**El efecto no es aprobado o rechazado.** Lo que cambia el tratamiento aguas abajo son dos preguntas independientes:
+
+| Calificación habitual | ¿Habilita usar el documento? | ¿Obliga a emitir una revisión nueva? |
+| --------------------- | ---------------------------- | ------------------------------------ |
+| Aprobado | Sí | No |
+| Aprobado con comentarios | Sí | **Sí** |
+| Revisado sin objeción | Sí | No |
+| Rechazado | **No** | Sí |
+
+Con ese par se explica sin casos especiales por qué "aprobado con comentarios" no es ni una cosa ni la otra —que es justamente lo que un mapeo binario pierde— y por qué cada calificación tiene un tratamiento distinto del lado de la ingeniería. La cuarta combinación no existe: si el documento no sirve, hay que volver a emitirlo.
+
+**No es un campo más al lado de aprobar y rechazar: es el resultado del paso.** El circuito conserva su desenlace interno binario —el paso queda aprobado o rechazado, derivado del efecto—, de modo que su lógica no se ramifica. La calificación es lo que el usuario elige y lo que la interfaz muestra.
+
+**Sirve a los dos modos con el mismo catálogo.** En modo Receptor la planta emite la calificación al cerrar el circuito; en modo Emisor el control documental transcribe la que el cliente devolvió (D-12). Misma lista y mismos efectos: esa es la razón para modelarla una sola vez.
+
+Pertenece a `BLOCK_04`, junto con el circuito del rol Receptor y la respuesta de la contraparte. `BLOCK_03` solo debe no impedirla: conserva el desenlace binario del paso y no incorpora semántica de calificación al circuito.
+
+Pendientes de definición al abrir el bloque:
+
+- si el catálogo reemplaza a `ClientStatus` o convive con él durante alguna etapa;
+- si el efecto se expresa como dos indicadores o como una enumeración de tres valores, dado que solo tres combinaciones son válidas;
+- dónde se registra la calificación —en el paso que la produce, en la revisión que cierra, o en el ítem del transmittal— y a cuáles de los tres se propaga;
+- cómo se ordena y se presenta la lista, y si admite baja lógica cuando ya fue usada.
 
 ## Cuestión de fondo pendiente
 
@@ -766,12 +897,15 @@ Orden propuesto. Cada bloque se abre con su propio documento, con línea base co
 | ------ | --------- | ---------- |
 | `BLOCK_01` | Trazabilidad funcional: eventos de workflow y auditoría (D-01) | — |
 | `BLOCK_02` | Contexto de proyecto y rol documental: `projectId`, modo Emisor / Receptor, membresía y alcance de acceso, unicidad del código, retiro de `entityType`/`entityId`, contexto de los eventos (D-06, D-09, D-15; H-17, H-24, H-28, H-32; cierra H-19 para `Document`) | `BLOCK_01` |
-| `BLOCK_03` | Ciclo interno: revisión externa y versión interna, versiones durante el circuito, circuitos sucesivos por revisión, esquema de revisión configurable, workflow mínimo, delegación registrada, cancelación con identidad propia y firma verificable (D-03, D-04, D-05, D-10, D-11, D-13, D-17; H-01 a H-10, H-27, H-34) | `BLOCK_02` |
-| `BLOCK_04` | Emisión y respuesta: circulación asimétrica por modo, puerta de emisión, respuesta parcial con archivos y autoría diferenciada, matriz de responsabilidad, documentos esperados, paquete de información de entrada y su promoción (D-12, D-16, D-18, D-20; H-11 a H-16, H-29 a H-31, H-33, H-36) | `BLOCK_03` |
+| `BLOCK_03` | Ciclo interno: revisión externa y versión interna, versiones durante el circuito, circuito instanciado con la revisión —con armado y elaboración—, circuitos sucesivos por revisión, esquema de revisión configurable, delegación y reasignación, abandono de la revisión y cancelación con identidad propia, y firma verificable (D-03, D-04, D-05, D-10, D-11, D-13, D-17; H-01 a H-10, H-27, H-34) | `BLOCK_02` |
+| `BLOCK_04` | Emisión y respuesta: circulación asimétrica por modo, **circuito del rol Receptor y catálogo de calificaciones**, puerta de emisión, respuesta parcial con archivos y autoría diferenciada, matriz de responsabilidad, documentos esperados, paquete de información de entrada y su promoción (D-12, D-16, D-18, D-20, D-22; H-11 a H-16, H-29 a H-31, H-33, H-36) | `BLOCK_03` |
 | `BLOCK_02B` | Ubicación física jerárquica del documento (D-14) | `BLOCK_02` |
+| `BLOCK_02C` | Alcance por proyecto de los catálogos documentales, con herencia del catálogo del módulo (D-21) | `BLOCK_02`, `BLOCK_03` por la unicidad |
 | `BLOCK_05` | Interfaz de usuario del subsistema (H-25) | `BLOCK_03`, `BLOCK_04`, `BLOCK_02B` |
 
 El rol documental (D-09) gobierna el ciclo completo, por lo que el contexto de proyecto pasa a ser el primer bloque funcional: ya no puede quedar detrás del ciclo de revisión.
+
+El alcance por proyecto de los catálogos (D-21) se registró al abrir `BLOCK_03` y también se separó, con el identificador `BLOCK_02C`. No pertenece al ciclo interno y **es el primer bloque que altera un objeto con interfaz y datos en producción**, de modo que su ejecución tiene condiciones propias. `BLOCK_03` le deja resuelto el mecanismo de unicidad con nulos.
 
 La ubicación física (D-14) se separó del contexto de proyecto al abrir `BLOCK_02`. Es un catálogo auto-referencial completo —con recálculo de rutas, snapshot en el documento y propagación auditada— y no bloquea al ciclo interno, de modo que puede ejecutarse en paralelo a `BLOCK_03` y `BLOCK_04`. Conserva el identificador `BLOCK_02B` para no renumerar los bloques ya referenciados. Su configuración de habilitación y obligatoriedad reside en `DocProjectSettings`, que `BLOCK_02` deja creado.
 

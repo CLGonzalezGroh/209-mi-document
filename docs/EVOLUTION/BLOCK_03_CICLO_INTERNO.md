@@ -1,0 +1,525 @@
+# Bloque 03 — Ciclo interno de revisión
+
+**Estado:** `APROBADO_PENDIENTE` — definido en su totalidad, sin implementar.
+**Versión:** 1.0
+**Depende de:** `BLOCK_02`, cuyo contexto de proyecto y autorización en dos capas este bloque da por sentados.
+**Decisiones que ejecuta:** D-03, D-04, D-05, D-10, D-11, D-13, D-17 y la consecuencia de D-19 sobre la toma de conocimiento. Resuelve H-01 a H-10, H-20, H-27 y H-34, y cierra H-19 en los dos catálogos.
+**Registro de definiciones:** `BLOCK_03_REGISTRO_DE_DEFINICIONES.md`, con el planteo y las alternativas de cada decisión.
+
+## Objetivo
+
+Corregir el ciclo del documento: cómo se arma el circuito, quién elabora, cómo se generan versiones, cómo se somete a uno o varios circuitos de aprobación, qué acredita la firma, y cómo se sale de un rechazo, de una cancelación o de un abandono.
+
+**Es el primer bloque que cambia reglas funcionales.** `BLOCK_01` sustituyó el registro y `BLOCK_02` agregó contexto sin tocar el ciclo; acá cambian estados, precondiciones, operaciones y contrato.
+
+## Línea base confirmada
+
+Verificada sobre el código después de `BLOCK_02`. El relevamiento completo está en el registro de definiciones; lo que sigue es lo que condiciona el trabajo.
+
+- **El circuito empieza tarde y termina mal.** Se crea con `initiateReview`, cuando el documento ya está hecho: la elaboración y su asignación no existen en el modelo. `ReviewWorkflow.revisionId` es `@unique`, de modo que una revisión admite un solo circuito.
+- **H-01 está confirmado en el código**: `rejectStep` devuelve la revisión a `DRAFT`, `initiateReview` rechaza un segundo circuito por la unicidad, y `createRevision` rechaza abrir otra revisión mientras haya una en `DRAFT`. Las tres juntas dejan al documento sin salida.
+- **La firma no acredita nada verificable.** `SHA-256(stepId + userId + timestamp + action)`, sin la versión, sin el `checksum` y **sin persistir los insumos** (H-06). `approveStep` tampoco verifica que el actor sea el asignado (H-03).
+- **Los pasos `ACKNOWLEDGE` quedan pendientes y además invisibles**: `completesWorkflow` los excluye del cálculo, y `pendingReviewSteps` filtra por circuitos abiertos, de modo que dejan de listarse apenas el workflow se completa. Nadie los ve ni puede cerrarlos.
+- **La cancelación es indistinguible del rechazo**: deja el workflow en `REJECTED`, emite la transición de rechazo y guarda el motivo solo en el `meta` del evento (H-05).
+- **`RevisionScheme` tiene dos valores** —`ALPHABETICAL` y `NUMERIC`—, vive en el documento, y `createRevision` acepta cualquier código sin validarlo (H-09). `DocumentType.requiresWorkflow` se persiste y **no se consulta nunca** (H-02).
+- **`checksum` es anulable y nadie lo calcula**: no está en `mi-fileserver`, que por diseño no ve los bytes. El precedente portable es digitalización, donde el navegador lo computa antes de pedir la URL presignada.
+- **`Document.currentRevision` tiene dos implementaciones divergentes** en el mismo resolver, que pueden devolver revisiones distintas para el mismo documento.
+- **`202-mi-common` no tiene permiso de revisión ni de versión** (H-22), por lo que `createRevision` y `registerVersion` exigen permiso de documento. El precedente de un permiso administrativo es `DOCUMENTS_SCANNED_FILE_ADMIN_UPDATE`.
+- **Ningún consumidor.** No hay pantallas del ciclo y ningún subgraph invoca estas operaciones: los cambios incompatibles de contrato no rompen a nadie.
+- **43 pruebas puras** corriendo hoy, y 72 en total con base e integración. `src/utils/reviewWorkflow.ts` ya aísla la lógica del circuito y declara en su comentario que su corrección corresponde a este bloque.
+- **PostgreSQL 16** en producción y en testing, 17 en local: `NULLS NOT DISTINCT` está disponible.
+
+## Decisiones ya aprobadas que aplican
+
+- **D-03** — toda revisión se aprueba por workflow. Ampliada por `B1`: el circuito abarca además el armado y la elaboración.
+- **D-04** — la aprobación admite delegación registrada. Ampliada por `B9`: se incorpora la reasignación.
+- **D-05** — la firma acredita quién aprobó y qué aprobó, con los datos firmados persistidos.
+- **D-10** — la revisión es la unidad externa y la versión la iteración interna.
+- **D-11** — una revisión admite varios circuitos sucesivos.
+- **D-13** — el esquema de revisión es configurable, con tres valores.
+- **D-17** — cancelar aborta sin borrar historia. Confirmada y ampliada por `B11`.
+- **D-19** — en el rol `INTERNAL` la aprobación es terminal, y la toma de conocimiento comunica el documento aprobado.
+- **B1 y B5 de `BLOCK_01`** — prefijo `Doc` en los nombres genéricos; acciones en imperativo y transiciones en participio.
+- **B7 de `BLOCK_02`** — autorización en dos capas, con filtrado en los listados.
+
+## Alcance incluido
+
+1. El circuito completo, desde el armado hasta la toma de conocimiento, instanciado con la revisión.
+2. La plantilla del circuito y la designación obligatoria del armador.
+3. Varios circuitos sucesivos por revisión, con un solo circuito abierto.
+4. El documento y la revisión que se crean sin archivo (H-20).
+5. La versión como archivo inmutable, con `checksum` obligatorio.
+6. El congelamiento de la metadata con la revisión aprobada.
+7. La firma como objeto propio, con su payload persistido.
+8. Delegación y reasignación, bajo un permiso único.
+9. El cierre de la toma de conocimiento.
+10. La cancelación del circuito y el abandono de la revisión.
+11. El esquema de revisión propuesto y no persistido.
+12. La revisión vigente y la revisión en curso, resueltas en un solo lugar.
+13. El cierre de H-19 en `DocumentClass` y `DocumentType`.
+14. Exposición GraphQL de todo lo anterior, y pruebas automatizadas.
+
+## Fuera de alcance
+
+- **Toda la circulación**: transmittals, respuesta de la contraparte, puerta de emisión, matriz de responsabilidad, documentos esperados y paquete de información de entrada. Es `BLOCK_04`.
+- **El circuito del rol Receptor**, que solo existe después de una recepción. `B16` declara sus dos particularidades y este bloque las **habilita**, no las implementa.
+- **El catálogo de calificaciones de la contraparte** (D-22), que reemplaza a la enumeración fija `ClientStatus`.
+- **Los estados terminales de la revisión por respuesta de la contraparte** (D-10).
+- **La validación del `checksum` por el almacenamiento**, diferida a un trabajo propio sobre `mi-fileserver` (registro, Q49).
+- **La ubicación física jerárquica** (D-14), que es `BLOCK_02B`, y **el alcance por proyecto de los catálogos** (D-21), que es `BLOCK_02C`.
+- **La interfaz de usuario** (`BLOCK_05`), incluido el cálculo del `checksum` en la carga.
+- **H-22 en su parte de catálogo**: recursos de permiso propios para revisión y versión.
+- `Attachment` (D-08), `TaskDocumentReference` y `Document.projectTaskId` (D-07). `ScannedFile` y `Area`.
+
+## Decisiones del bloque
+
+### B1 — El circuito abarca el ciclo completo y se instancia con la revisión
+
+El circuito deja de ser el trámite de aprobación de un documento terminado y pasa a ser el ciclo entero. **Se crea junto con la revisión**, no con `initiateReview`.
+
+| Paso | `StepType` | Quién | Completarlo significa |
+| ---- | ---------- | ----- | --------------------- |
+| Armado | `ASSIGN` | El armador designado al crear la revisión | Quedan designados el elaborador y los revisores, y **se materializan los pasos siguientes** |
+| Elaboración | `PREPARE` | El elaborador designado | El documento está hecho y **se somete a revisión** |
+| Revisión, aprobación, toma de conocimiento | `REVIEW`, `APPROVE`, `ACKNOWLEDGE` | Los designados | Lo que ya significan hoy |
+
+Los dos nombres nuevos los aporta el dominio: el rótulo de un plano declara *Prepared by / Reviewed by / Approved by*. `PREPARE` es elaborar el documento; `ASSIGN` es el acto sobre el circuito, que no es lo mismo.
+
+**`initiateReview` desaparece** y se reparte en dos operaciones: **definir el circuito** —completa el armado— y **someter** —completa la elaboración—.
+
+**Estados de la revisión:** `DRAFT` mientras el circuito está en armado o en elaboración; `IN_REVIEW` desde que se somete. No se agregan estados: el detalle de dónde está el trabajo lo da el paso vigente, y duplicarlo en la revisión crearía dos máquinas de estados describiendo lo mismo.
+
+**Reinstanciación, según la salida:**
+
+| Salida | Circuito nuevo | Elenco |
+| ------ | -------------- | ------ |
+| Rechazo | Desde `PREPARE` | El mismo, **copiado** |
+| Cancelación del circuito (`B11`) | Desde `ASSIGN` | Redefinible |
+| Revisión nueva | Desde `ASSIGN` | Redefinible |
+
+El elenco se **copia** y no se referencia: reasignar un paso del circuito nuevo no debe alterar la historia del anterior.
+
+**El workflow mínimo de D-03 deja de ser un objeto**: es un circuito cuyo armado designa un único paso de aprobación. No necesita regla propia.
+
+**`DocumentType.requiresWorkflow` se renombra a `requiresFormalReview`** y pasa a distinguir el circuito formal del mínimo. Es **sugerencia y no invariante**: propone el armado, no lo impone. Mismo criterio con que D-18 trata la matriz de responsabilidad.
+
+### B2 — Una revisión tiene un solo circuito abierto
+
+`ReviewWorkflow.revisionId` deja de ser único, conforme a D-11. Lo reemplaza un **índice único parcial**:
+
+```sql
+CREATE UNIQUE INDEX review_workflows_open_revision_key
+  ON review_workflows (revision_id) WHERE status = 'IN_PROGRESS';
+```
+
+Prisma no expresa índices parciales: va como SQL en la migración y se documenta como comentario en el modelo, igual que en B2 de `BLOCK_02`.
+
+Bajo `B1` el índice describe el estado normal y no solo un tope: **toda revisión viva tiene exactamente un circuito abierto**, desde que nace hasta que se aprueba o se abandona.
+
+**El circuito vigente se deriva**; no se almacena un `currentWorkflowId`, que sería un dato derivado con riesgo de desincronizarse.
+
+**Contrato:** `DocumentRevision.workflow` se retira y lo reemplazan `workflows: [ReviewWorkflow!]!` y `currentWorkflow: ReviewWorkflow`. Conservar el singular perpetuaría la lectura de que hay uno solo.
+
+**`WorkflowStatus.PENDING` se retira** (H-08): el circuito nace iniciado. Arrastra tres cambios — el filtro de `pendingReviewSteps`, el `@default` de `ReviewWorkflow.status`, y el valor en `WorkflowStatusInput`.
+
+**`RevisionStatus.OBSOLETE` se conserva sin uso**, declarado como tal, hasta que `BLOCK_04` defina los estados terminales por respuesta. Retirarlo para reponerlo costaría dos migraciones de enumeración.
+
+### B3 — La plantilla propone el circuito; el armado lo define
+
+**Una plantilla con sus pasos**: orden, tipo y **actor preasignado opcional**.
+
+- **Alcance por proyecto, con refinamiento por clase y por tipo de documento.** Las columnas de clase y tipo admiten nulo y **la más específica gana**: tipo, después clase, después proyecto. La plantilla del proyecto con ambas nulas **es** su default, sin necesidad de una marca aparte.
+- **Unicidad del alcance con `NULLS NOT DISTINCT`**, disponible desde PostgreSQL 15 y verificado en los tres ambientes. Sin eso la tupla con dos columnas anulables repetiría el defecto de H-19.
+- **La plantilla no incluye el armado ni la elaboración.** Esos pasos los pone el sistema **según el rol del proyecto**: en el rol Receptor no hay elaboración (`B16`).
+- **Los valores se copian al materializarse.** Cambiar la plantilla no altera circuitos en curso, con el mismo criterio del snapshot de D-14 y del payload firmado de `B7`.
+
+**El elaborador nunca se preasigna.** Designarlo es distribuir carga de trabajo y se decide documento por documento. Por eso el armado tiene contenido incluso con la plantilla más completa, y por eso siempre existe.
+
+**El armador se designa al crear el documento y es obligatorio.** Es el único actor que debe conocerse en el alta; todo lo demás lo trae la plantilla o lo decide el armado.
+
+- Con **valor por defecto configurado en `DocProjectSettings`** —habitualmente el jefe de proyecto—, de modo que en la práctica el campo llega lleno.
+- **Puede serlo cualquiera con permiso y membresía vigente.** No se crea un padrón de armadores: sería una tercera lista y D-15 ya descartó multiplicarlas.
+- **El paso de armado se reasigna como cualquier otro** (`B9`). Es lo que cubre que el alta se lo asigne al jefe de proyecto y este lo derive al jefe de especialidad.
+
+**Entre el alta y el armado existe el circuito**, con su paso de armado pendiente y la plantilla propuesta referenciada. **Los pasos siguientes se materializan al completarse el armado**, y no antes, porque hasta entonces no tienen actor y `ReviewStep.assignedToId` no admite nulo.
+
+En consecuencia **no existe documento sin circuito**: lo que en la práctica se describe como dar de alta ahora y asignar el workflow después es este estado, y no una excepción a D-03.
+
+La plantilla propuesta se resuelve por alcance en el alta y **puede cambiarse**, por quien crea el documento y por el armador. Propone, no impone.
+
+### B4 — Una versión es un archivo, y es inmutable
+
+| Nivel | Qué incluye | Qué produce al cambiar |
+| ----- | ----------- | ---------------------- |
+| Documento | Código, título, descripción, clase, tipo | Actualización auditada |
+| Revisión | Código de revisión, estado | Transición de la revisión |
+| Versión | `fileKey`, `fileName`, `fileSize`, `mimeType`, `checksum` | **Solo existe con archivo nuevo** |
+
+Lo que la versión guarda no es metadata del documento sino **descripción del archivo**: no puede cambiar sin que cambie el archivo. Es lo que le da sentido a D-05 — la firma acredita una versión porque una versión **es** un archivo.
+
+**La versión no se modifica ni se elimina**, y eso incluye su comentario: si quedó mal, la corrección va en la traza y no editando la evidencia.
+
+**El comentario es opcional.** La observación casi siempre viaja dentro del archivo, como marcas; el comentario es complemento y no el registro de la objeción. Exigirlo reintroduciría por la puerta de atrás la clasificación de versiones que D-10 descarta y que H-35 dejó `DESCARTADO`.
+
+**El `checksum` es obligatorio en toda versión** (H-27). No hay datos productivos, de modo que la migración es directa, y cualquier regla condicional obligaría a decidir qué pasa con la versión que entró sin él y después resulta ser la firmada.
+
+**Declarado: hoy nadie lo calcula.** `mi-fileserver` no lo produce y por diseño no ve los bytes. Hasta que exista `BLOCK_05`, quien invoque la API debe enviarlo. Es la única regla del bloque cuyo cumplimiento depende de un componente que este bloque no construye.
+
+### B5 — La versión la produce quien tiene el paso vigente
+
+**No es una restricción de identidad sino de momento**: cada versión es el producto del paso que se está ejecutando. La elabora el elaborador, la marca el revisor, la marca el aprobador.
+
+- El **permiso de `B9`** habilita hacerlo por otro.
+- **Una revisión aprobada no admite versiones nuevas**, porque no tiene paso vigente. Es lo que impide que la firma quede acreditando una versión que dejó de ser la última.
+- **Al crear el documento o la revisión, quien crea puede adjuntar el archivo inicial.** El archivo deja de ser obligatorio (H-20), no admisible.
+- **Registrar una versión no cambia el estado de la revisión**: durante el circuito permanece en `IN_REVIEW`. Solo el rechazo la devuelve a `DRAFT`.
+
+**Comentar no genera versión; marcar el archivo sí.** El comentario del revisor vive en el paso, que ya lo tiene.
+
+Los dos recorridos que el bloque debe sostener:
+
+| | Documento nuevo | Documento preexistente |
+| - | --------------- | ---------------------- |
+| **v1** | La registra el elaborador en su paso | La adjunta quien da de alta el documento |
+| **v2** | El revisor marca el archivo | El elaborador incorpora el cambio del proyecto |
+| **v3…** | El aprobador aprueba, o marca y rechaza | El revisor marca, si tiene observaciones |
+
+**La vigente es la última, y coincide con la aprobada**: como el circuito cierra aprobando y después no se admiten versiones, la última versión de una revisión aprobada es la que se aprobó.
+
+### B6 — La metadata se congela con la revisión aprobada
+
+**Toda la metadata del documento**, y se corrige abriendo una revisión nueva.
+
+El motivo es material: parte de la metadata está **impresa dentro del archivo**. El rótulo lleva el código, el título y a menudo la clase y el tipo — de hecho el código habitualmente **se compone** de clase y tipo. La clasificación no es descripción sino **identidad**.
+
+- Mientras la revisión vigente **no esté aprobada**, la metadata se edita libremente.
+- **Aprobada, se congela.** Corregirla exige abrir una revisión nueva, que es lo que el control documental hace igual: un rótulo distinto es un documento distinto.
+- **Abrir la revisión siguiente la vuelve a habilitar.**
+
+**La metadata vigente al firmar se incorpora al payload firmado** (`B7`): la firma pasa a acreditar la identificación además del contenido, que es lo que D-05 persigue, y el snapshot por revisión queda resuelto sin estructura nueva.
+
+Tres bordes declarados:
+
+- **El esquema de revisión queda fuera**: es configuración de cómo se numeran las revisiones siguientes, no identificación de esta.
+- **Colisión a resolver en `BLOCK_02B`**: D-14 admite corregir un nodo de ubicación y propagarlo de forma auditada a documentos ya emitidos. Es una excepción controlada a este congelamiento y las dos reglas deben conciliarse allí.
+- **Abandonar una revisión no revierte la metadata** cambiada mientras estaba abierta. El documento queda declarando algo que ninguna revisión aprobada reproduce, hasta que se emita la siguiente. Retroceder sería peor.
+
+### B7 — La firma es un objeto propio con su payload
+
+`DocStepSignature`, **uno por firma**, referenciado por el paso. La firma es evidencia inmutable y el paso se sigue actualizando; separarlos permite declararla inmutable sin excepciones y la hace trazable con su propio tipo de objeto.
+
+**Se persiste el payload canónico serializado** que se usó para calcular el hash, más el algoritmo. Un hash sin sus insumos no es verificable, que es el defecto de H-06.
+
+Contenido del payload:
+
+- el **paso**, su **workflow** y su **revisión**;
+- la **versión vigente al firmar**, con su número, `fileKey` y `checksum`;
+- la **metadata del documento** vigente al firmar (`B6`);
+- el usuario **asignado** y el que **resolvió**, y el motivo cuando difieren (`B9`);
+- la **acción** y el momento.
+
+**El rechazo firma igual que la aprobación** — de hecho su evidencia importa más, porque documenta qué se objetó.
+
+**Firman los pasos que actúan sobre una versión**: `PREPARE`, `REVIEW`, `APPROVE` y `ACKNOWLEDGE`. **`ASSIGN` no firma**: al completarse puede no existir todavía ninguna versión, de modo que no habría objeto que acreditar; su evidencia es el evento de auditoría.
+
+Son exactamente las casillas del rótulo más el acuse: quien elabora firma lo que entrega, quien revisa firma lo que revisó, quien aprueba firma lo que aprobó, y quien toma conocimiento firma lo que vio.
+
+**Las firmas anteriores no se invalidan cuando aparece una versión nueva.** Cada una acredita la versión sobre la que actuó su autor y **ninguna afirma nada sobre las posteriores**. Cuando el cambio es sustantivo, lo que corresponde no es invalidar sino **retirar la revisión del circuito** (`B11`).
+
+### B8 — Hay pasos que deciden y pasos que se cumplen
+
+`StepStatus` incorpora **`COMPLETED`**, estado terminal de cumplimiento para los pasos que no emiten juicio: `ASSIGN`, `PREPARE` y `ACKNOWLEDGE`. Dejarlos en `APPROVED` diría que alguien aprobó el armado.
+
+Deja explícita una partición que hoy vive escondida en `completesWorkflow`:
+
+- **`REVIEW` y `APPROVE` deciden**: son los únicos que pueden rechazar y los únicos que cuentan para completar el circuito;
+- **`ASSIGN`, `PREPARE` y `ACKNOWLEDGE` se cumplen.**
+
+Cumplir y juzgar son cosas distintas, pero **ambas se acreditan**: la partición no coincide con la de `B7` sobre qué pasos firman.
+
+### B9 — Delegar y reasignar, bajo un permiso único
+
+**Se registra siempre quién resolvió efectivamente el paso** (`resolvedById`), y la divergencia con el asignado se **deriva** de ambos campos. Un indicador booleano sería un dato calculable que puede contradecir a los que lo originan.
+
+**La delegación exige motivo**, conservado en el paso y dentro del payload firmado. Es lo que la vuelve trazable y no solo permitida.
+
+**Se incorpora la reasignación del paso**, que convive con la firma delegada y resuelve otra cosa: la delegación resuelve el momento, la reasignación la conducción — el revisor que no está, o la redistribución de carga de trabajo, incluida la elaboración de un documento ya asignado.
+
+- Alcanza a los pasos **pendientes**, incluido el vigente. **Un paso resuelto no se reasigna**: su firma acredita quién lo resolvió.
+- **No altera el circuito**: cambia el actor, nunca el tipo del paso, su orden ni cuántos son.
+- Es **acción de auditoría y no transición de estado**, porque el paso sigue `PENDING`. El historial de asignados queda en la traza, sin columna nueva.
+
+**La estructura del circuito es inmutable una vez armada**: no se agregan, quitan ni reordenan pasos. La excepción aparente no lo es — el armado **crea** los pasos siguientes, y la inmutabilidad rige desde que se completa. Es lo que le deja a la cancelación un uso propio (`B11`).
+
+**Un solo permiso especial gobierna todo acto sobre el trabajo ajeno**: firmar por otro, reasignar, registrar una versión sobre un paso ajeno y consultar pendientes ajenos. Sigue el precedente de `DOCUMENTS_SCANNED_FILE_ADMIN_UPDATE`.
+
+**`pendingReviewSteps` devuelve los del usuario autenticado** (H-07). Su argumento `userId` pasa a **opcional**: informado y distinto, exige el permiso especial. Sigue acotado por membresía — el permiso habilita ver pendientes ajenos, no proyectos ajenos.
+
+### B10 — La toma de conocimiento cierra después de la aprobación
+
+El circuito cierra con los pasos que deciden, y **los acuses se resuelven después**, con operación propia. Es lo que D-19 describe: el acuse **comunica** un documento ya aprobado, de modo que bloquear la aprobación invertiría su función y cerrarlo de oficio lo convertiría en un registro vacío.
+
+Exige tres cosas, ninguna opcional:
+
+1. **Una operación de acuse**, que hoy no existe;
+2. **el estado terminal de `B8`**;
+3. **corregir `pendingReviewSteps`**, que hoy los oculta apenas el circuito se completa. Los acuses viven precisamente en circuitos cerrados, que es el conjunto que esa consulta excluye — es la razón por la que hoy quedan pendientes para siempre.
+
+**Sin permiso propio**: `DOCUMENTS_WORKFLOW_UPDATE`, el mismo de aprobar y rechazar. Un acuse es la resolución de un paso asignado.
+
+### B11 — Cancelar el circuito y abortar la revisión son dos actos
+
+D-17 se confirma y se amplía: **se conserva** que la cancelación no elimina historia y que adopta identidad propia con su motivo en el modelo; **cae** la restricción de cancelar solo antes de la primera firma.
+
+**Se cancela en cualquier punto, aun con pasos ya firmados.** El caso que lo exige es el real: se abre una revisión, se avanza, y a mitad del circuito se concluye que no corresponde continuarla. Exigir que ninguna firma exista obligaría a completar un circuito que ya se sabe inútil, o a rechazarlo simulando un rechazo que nadie emitió. **El riesgo que motivaba la restricción no se reabre porque nada se elimina.**
+
+| Acto | Cuándo | Efecto |
+| ---- | ------ | ------ |
+| **Cancelar el circuito** | Quedó mal armado, o se sometió lo que no correspondía | El circuito queda cancelado; **la revisión sobrevive**, vuelve a `DRAFT` y se rearma desde `ASSIGN` |
+| **Abortar la revisión** | La revisión dejó de tener sentido | La revisión queda abortada en la historia; si tiene circuito abierto, se cancela con ella |
+
+Ambas exigen motivo. **La reasignación no las suple**: cubre *quién*, mientras que la cancelación cubre *cómo está armado* y *qué se sometió*. Como `B9` fija que los pasos no se editan, un paso olvidado no tiene otra salida que rearmar.
+
+**Formas:**
+
+- `WorkflowStatus.CANCELLED`, con `cancelledAt`, `cancelledById` y `cancelReason`, y transición `WorkflowCancelled`. Hoy la cancelación emite la transición de rechazo, que es la misma confusión de H-05 trasladada a la traza. Los pasos pendientes quedan `SKIPPED` y **los resueltos conservan su estado y su firma**.
+- `RevisionStatus.CANCELLED`, con los mismos tres campos y transición `RevisionCancelled`. **No se reutiliza `OBSOLETE`**: obsoleto es lo que dejó de aplicar, no lo que se abandonó antes de salir.
+
+**Solo se aborta una revisión no aprobada** — `DRAFT` o `IN_REVIEW`. Aprobada, la revisión es el documento vigente y lo que corresponde es abrir la siguiente. Como la emisión exige aprobación (D-18), **una revisión abortada nunca fue emitida**, y este bloque no le deja a `BLOCK_04` ningún caso de transmittal sobre una revisión abandonada.
+
+**No hace falta restituir la revisión anterior**: la supersesión ocurre al aprobarse la sucesora, y una abortada nunca se aprueba. La anterior nunca dejó de estar vigente.
+
+**Permisos**: `DOCUMENTS_WORKFLOW_UPDATE` para cancelar el circuito —hoy exige `CREATE`, que es la parte de H-22 que este bloque toca— y `DOCUMENTS_DOCUMENT_UPDATE` para abortar la revisión.
+
+### B12 — La revisión abortada no consume código
+
+Sobre un documento en revisión `A` puede abrirse `B`, abortarse, y abrirse más adelante otra vez `B`, que se completa. Es el mismo principio con que D-10 impide que el rechazo interno agote la secuencia: **lo que la contraparte ve son las revisiones que salieron.**
+
+Exige dos cambios, y uno solo no alcanza:
+
+1. **La unicidad `@@unique([documentId, revisionCode])` se reemplaza por un índice único parcial** que excluye a las abortadas:
+
+   ```sql
+   CREATE UNIQUE INDEX document_revisions_code_key
+     ON document_revisions (document_id, revision_code) WHERE status <> 'CANCELLED';
+   ```
+
+2. **El cálculo del código sucesor ignora las abortadas.** Sin esto el sistema propondría `C` donde el usuario espera `B`.
+
+Consecuencia aceptada: un documento puede tener **varias revisiones abortadas con el mismo código**. Es correcto y el índice lo admite; cada una se distingue por su fecha y su motivo.
+
+**Las revisiones se ordenan por secuencia de creación y nunca por código** (H-10). Con el cambio de esquema la secuencia puede quedar `A, B, C, 0, 1`, de modo que ordenar por código pierde sentido. Es invariante y no observación: alcanza a cada `orderBy` del módulo, a la derivación del sucesor —la última **no abortada** por creación— y a la interfaz de `BLOCK_05`.
+
+### B13 — El esquema de revisión se propone y no se persiste
+
+`RevisionScheme` pasa a `ALPHA`, `NUMERIC` y `FREE_TEXT`, alineado con el precedente de digitalización.
+
+**El esquema no se guarda en el documento. Se elige al crear la revisión, y el sistema propone el código.**
+
+- **Primera revisión** — el código se propone según el esquema del proyecto, o el valor por defecto del despliegue.
+- **Revisiones siguientes** — el código se calcula a partir de la **última revisión no abortada**, infiriendo el esquema de la forma de su código: dígitos continúan en `NUMERIC`, letras en `ALPHA`. La inferencia solo interpreta valores que el propio sistema generó, porque bajo `FREE_TEXT` el código lo escribe el usuario.
+- **Cambiar de esquema** es elegir otro en ese momento, y la secuencia se reinicia: de `C` a `NUMERIC` da `0`, que es lo que H-10 describía como el comportamiento buscado.
+
+El motivo es que un esquema almacenado **puede contradecir a los hechos**: declararlo `NUMERIC` con la revisión vigente en `A` afirma algo que el documento no muestra, y obliga a inventar una precondición para tapar la incoherencia.
+
+**Se retiran `Document.revisionScheme`, la operación `switchRevisionScheme` y su acción de auditoría.**
+
+La precedencia de tres niveles se conserva —documento, proyecto, despliegue— pero **el escalón del documento se lee de su última revisión en lugar de guardarse**.
+
+**Validación de los códigos** (H-09): bajo `ALPHA` y `NUMERIC` el sistema calcula el código y **rechaza el informado**; bajo `FREE_TEXT` lo ingresa el usuario y solo se valida que no se repita entre las revisiones no abortadas.
+
+**Configuración**: el esquema por proyecto reside en `DocProjectSettings` (B4 de `BLOCK_02`), y el valor por defecto del despliegue en un **registro único**, con el patrón de `CatalogSettings`. **Sin etiqueta configurable**: "revisión" es terminología establecida del dominio.
+
+**Se extrae `src/utils/revisionScheme.ts`**, con la generación del **sucesor** y la inferencia del esquema. No se porta `revisionListSize`: la lista responde a validar contra un conjunto cerrado, que es el problema de digitalización y no el de acá.
+
+Lo que se pierde, declarado: un documento no puede fijar de antemano el esquema que va a seguir. Existe la secuencia de sus revisiones, que es el hecho.
+
+### B14 — Revisión vigente y revisión en curso
+
+| Campo | Qué devuelve |
+| ----- | ------------ |
+| `currentRevision` | **La última aprobada, y solo la aprobada.** Nulo mientras el documento no haya aprobado ninguna |
+| `lastRevision` | **La última no abortada por secuencia de creación**, en cualquier estado |
+
+Con `A` aprobada y `B` en circuito, `currentRevision` es `A` y `lastRevision` es `B`. **Ninguna considera las abortadas.**
+
+**Se exponen y no se derivan en cada consumidor.** Ambas son derivables, y precisamente por eso las dos ramas divergentes de `currentRevision` llegaron a devolver revisiones distintas para el mismo documento. Resolverlas en un solo lugar es la corrección.
+
+Dos apoyos: **a lo sumo hay una revisión en `APPROVED`**, porque aprobar supersede a las anteriores; y **`lastRevision` es la misma revisión de la que `B12` deriva el código sucesor** — una sola regla con dos usos.
+
+**`currentRevision` cambia de significado sin cambiar de forma**: hoy cae en `DRAFT` cuando no hay aprobada. `rover subgraph check` no lo va a señalar y debe declararse por escrito en la evidencia.
+
+**Frontera con `BLOCK_04`**: cuando la respuesta de la contraparte cierre la revisión emitida, habrá que revisar si la vigente sigue siendo la que está en `APPROVED`.
+
+### B15 — La unicidad de los catálogos se cierra con `NULLS NOT DISTINCT`
+
+Cierra la parte de H-19 que `BLOCK_02` dejó abierta.
+
+| Modelo | Restricción | Cuándo no impide el duplicado |
+| ------ | ----------- | ----------------------------- |
+| `DocumentClass` | `[name, module]`, `[code, module]` | `module` nulo |
+| `DocumentType` | `[name, classId, module]`, `[code, classId, module]` | `module` o `classId` nulos |
+
+**El caso que no protegen es el más frecuente**: un catálogo recién sembrado tiene casi todas sus entradas sin módulo y sin clase. No cambia ninguna regla funcional: la restricción pasa a impedir lo que siempre quiso impedir.
+
+**Condición operativa, distinta del resto del bloque: estos catálogos tienen datos en producción.** La migración falla si ya existen duplicados. Antes de aplicarla hay que verificarlo por cliente con una consulta de solo lectura y **limpiar los que aparezcan** — a diferencia de la precondición de `BLOCK_02`, donde un resultado no vacío cancelaba la migración.
+
+Deja preparado el terreno para D-21, que agrega otra columna anulable a estas mismas tuplas.
+
+### B16 — El ciclo no se ramifica por rol
+
+| Rol | Circuitos por revisión | Cómo termina |
+| --- | ---------------------- | ------------ |
+| **Emisor** | Varios: cada rechazo abre uno nuevo | La aprobación habilita la emisión al cliente |
+| **Interno** | Varios, igual que Emisor | La aprobación es terminal |
+| **Receptor** | **Uno solo**: la calificación cierra la revisión | La calificación se comunica a quien emitió |
+
+**Las dos diferencias del rol Receptor se desprenden de un solo hecho: allí la elaboración no ocurre dentro del sistema.** El contratista sube documentación ya aprobada por sus propios medios y la planta no modela su ciclo interno (D-18), de modo que el circuito no tiene a quién devolverle el trabajo.
+
+La regla uniforme es **el rechazo devuelve el trabajo a quien elabora**; lo que cambia es dónde vive esa persona. En Receptor está afuera, así que la revisión se cierra y la siguiente emisión lleva revisión nueva — que es D-10 aplicada, no una regla nueva: allí el circuito no es el ciclo interno sino el mecanismo con que la contraparte produce su respuesta.
+
+**Como ese circuito solo existe después de una recepción, pertenece a `BLOCK_04`.** Este bloque construye el ciclo tal como lo viven Emisor e Interno, idénticos entre sí salvo por lo que ocurre después de aprobar.
+
+**Lo que este bloque deja habilitado:**
+
+- que un circuito pueda armarse **sin paso de elaboración** (`B3`);
+- que la conclusión de un circuito pueda ser **terminal para la revisión**;
+- que el armado admita ser **propuesto por una matriz de responsabilidad** y no solo por una plantilla: en la forma de `B3`, la matriz de D-18 es otra fuente de propuesta para el mismo paso.
+
+**Los tres finales son comunicaciones y ninguna forma parte del circuito**: la emisión al cliente y la calificación al contratista son `BLOCK_04`; el aviso interno ya está resuelto acá, porque en el rol Interno la comunicación **es** el paso de toma de conocimiento (`B10`).
+
+## Cambios de modelo
+
+| Objeto | Cambio |
+| ------ | ------ |
+| `StepType` | `+ ASSIGN`, `+ PREPARE` |
+| `StepStatus` | `+ COMPLETED` |
+| `WorkflowStatus` | `− PENDING`, `+ CANCELLED` |
+| `RevisionStatus` | `+ CANCELLED`; `OBSOLETE` se conserva sin uso |
+| `RevisionScheme` | `ALPHABETICAL → ALPHA`, `+ FREE_TEXT` |
+| `ReviewWorkflow` | Cae `@unique` en `revisionId`; índice parcial de circuito abierto; `+ cancelledAt`, `cancelledById`, `cancelReason`; referencia a la plantilla propuesta |
+| `ReviewStep` | `+ resolvedById`, motivo de delegación; `signatureHash` se traslada a la firma |
+| `DocStepSignature` | **Nuevo**: payload canónico, hash, algoritmo. Inmutable |
+| `DocumentRevision` | `+ assignedOrganizerId`; `+ CANCELLED` con sus tres campos; unicidad del código por índice parcial |
+| `DocumentVersion` | `checksum` pasa a obligatorio |
+| `Document` | `− revisionScheme` |
+| `DocumentType` | `requiresWorkflow → requiresFormalReview` |
+| `DocWorkflowTemplate` y sus pasos | **Nuevos**, con alcance `[projectId, classId, typeId]` y `NULLS NOT DISTINCT` |
+| `DocSettings` | **Nuevo**: registro único con el esquema por defecto del despliegue |
+| `DocProjectSettings` | `+ revisionScheme`, `+ defaultOrganizerId` |
+| `DocumentClass`, `DocumentType` | Sus cuatro restricciones pasan a `NULLS NOT DISTINCT` |
+
+Cuatro índices únicos parciales en total en el módulo: los dos de `Document` que `BLOCK_02` creó, más los de `B2` y `B12`.
+
+## Mapa de operaciones
+
+| Operación | Cambio |
+| --------- | ------ |
+| `createDocument` | Deja de exigir archivo; designa armador; instancia el circuito con su paso `ASSIGN`; propone plantilla y código; ya no recibe esquema |
+| `createRevision` | Igual que la anterior; valida el código según el esquema; ignora abortadas al derivar el sucesor |
+| `updateDocument` | Precondición nueva: rechaza si la revisión vigente está aprobada (`B6`) |
+| `registerVersion` | Admite `IN_REVIEW`; exige `checksum` y paso vigente; admite el permiso especial |
+| `initiateReview` | **Se retira.** La reemplazan `defineWorkflow` y `submitRevision` |
+| `defineWorkflow` | **Nueva**: completa `ASSIGN`, designa elaborador y revisores, materializa los pasos |
+| `submitRevision` | **Nueva**: completa `PREPARE`, exige al menos una versión, pasa la revisión a `IN_REVIEW` |
+| `approveStep` | Firma con payload; registra `resolvedById` y motivo; excluye `ACKNOWLEDGE` del cómputo por tipo y no por excepción |
+| `rejectStep` | Igual, y **reinstancia el circuito desde `PREPARE`** copiando el elenco |
+| `acknowledgeStep` | **Nueva**: cierra un paso `ACKNOWLEDGE` en `COMPLETED`, con firma |
+| `reassignStep` | **Nueva**: cambia el actor de un paso pendiente, con motivo y permiso especial |
+| `cancelWorkflow` | Precondición nueva; estado `CANCELLED` con motivo en el modelo; permiso `WORKFLOW_UPDATE` |
+| `cancelRevision` | **Nueva**: aborta la revisión en `DRAFT` o `IN_REVIEW`, con motivo |
+| `switchRevisionScheme` | **Se retira** |
+| `pendingReviewSteps` | `userId` opcional; incluye acuses de circuitos cerrados; sin `PENDING` en el filtro |
+| `workflowsByStatus` | Sin `PENDING`; `+ CANCELLED` |
+| `docProjectSettings`, `declareDocProjectSettings` | Suman esquema y armador por defecto |
+| Plantillas y `DocSettings` | **Nuevas**: lectura y administración |
+| `Document.currentRevision`, `lastRevision` | Una única implementación, con la semántica de `B14` |
+
+**Autorización**: todas conservan la capa de `BLOCK_02`. Las operaciones nuevas siguen el mismo mapa — doble capa sobre objeto, filtrado en listados.
+
+## Trazabilidad
+
+- **Tipos de objeto nuevos**: `DOC_STEP_SIGNATURE` y `DOC_WORKFLOW_TEMPLATE`, con su derivador de contexto en `objectContext.ts`. La prueba de `BLOCK_01` que verifica que ningún tipo quede sin regla debe seguir pasando.
+- **Acciones de auditoría nuevas**: `DefineWorkflow`, `SubmitRevision`, `AcknowledgeStep`, `ReassignStep`, `CancelRevision`, más las de plantilla y configuración. **Se retira `SwitchRevisionScheme`.**
+- **Transiciones nuevas**: `WorkflowCancelled`, `RevisionCancelled`, `StepCompleted`.
+- La prueba que fija el número de acciones del catálogo se actualiza explicando por qué, como se hizo en `BLOCK_02`.
+
+## Fases de implementación
+
+| Fase | Contenido |
+| ---- | --------- |
+| A | **Permisos**: el permiso especial de `B9` y el del registro de configuración del despliegue, en `202-mi-common`; alta en el seed de `205-mi-admin` y asignación a los roles; republicación y actualización de la dependencia. |
+| B | **Modelo y migración**: enumeraciones, entidades nuevas, columnas, los dos índices parciales y las cuatro restricciones de catálogo. Precedida por la verificación de duplicados de `B15`. |
+| C | **Utilidades puras**: `revisionScheme` con sucesor e inferencia; construcción y verificación del payload firmado; extensión de `reviewWorkflow` con la partición de `B8`. |
+| D | **Operaciones**, según el mapa, resolver por resolver. |
+| E | **Trazabilidad**: tipos, acciones, transiciones y derivadores de contexto. |
+| F | **Contrato GraphQL**, con los retiros declarados. |
+| G | **Pruebas** de las tres capas. |
+| H | **Cierre documental**: recién entonces se evalúa la promoción a la SFS. |
+
+La fase A precede a todas, como en `BLOCK_02`: sin los permisos publicados no hay con qué autorizar las operaciones nuevas.
+
+## Estrategia de pruebas
+
+Mismo enfoque que los bloques anteriores: `node:test` con `node --import tsx --test`, sin dependencias nuevas.
+
+**Puras**, extendiendo `src/utils/reviewWorkflow.test.ts`:
+
+- completitud del circuito con acuses pendientes, y la partición de `B8`;
+- pasos salteados por rechazo y por cancelación;
+- cálculo del código sucesor por esquema, **inferencia del esquema** y omisión de las abortadas;
+- resolución de la plantilla por alcance, con la más específica ganando;
+- construcción del payload firmado y su verificación posterior;
+- precondiciones: metadata congelada, cancelación, abandono, registro de versión.
+
+**Contra base**:
+
+- los dos índices parciales —circuito abierto único, y código único entre no abortadas—;
+- las cuatro restricciones de catálogo con módulo y clase nulos;
+- la unicidad del alcance de la plantilla con nulos;
+- la inmutabilidad de la firma y la secuencia de versiones con varios circuitos.
+
+**Integración**, sobre el arnés de `BLOCK_02`, **cuatro recorridos completos**:
+
+1. **Documento nuevo** — alta con armador, armado, elaboración, someter, revisión, aprobación y acuse.
+2. **Documento preexistente** — alta con archivo adjunto, y el resto del recorrido.
+3. **Rechazo** — versión marcada, rechazo, circuito nuevo desde `PREPARE` con el mismo elenco, corrección y aprobación. Es el escenario que H-01 hoy vuelve imposible.
+4. **Abandono** — circuito a mitad de camino con un paso firmado, abandono con motivo, y revisión nueva que **recupera el mismo código**.
+
+## Criterios de aceptación
+
+1. Los cuatro recorridos de integración se ejecutan de punta a punta.
+2. Una revisión rechazada admite corrección y un circuito nuevo sin consumir código — H-01 cerrado.
+3. Un documento sin revisión formal llega a aprobado por un circuito de un solo paso de aprobación — H-02 cerrado.
+4. Toda resolución de paso registra quién la ejecutó, y la delegación queda visible y motivada — H-03 cerrado.
+5. Un paso pendiente se reasigna sin alterar la estructura del circuito, y uno resuelto no admite reasignación.
+6. El alta designa al armador y propone la plantilla resuelta por alcance; el armado la confirma o la cambia y materializa los pasos.
+7. Un documento se crea sin archivo y su primera versión aparece durante la elaboración; someter exige al menos una versión con `checksum` — H-20 y H-27 cerrados.
+8. Con una revisión aprobada la metadata no se edita, y abrir la siguiente la habilita.
+9. Los pasos de toma de conocimiento tienen operación, estado terminal y visibilidad — H-04 cerrado.
+10. La cancelación es distinguible del rechazo y conserva su motivo en el modelo — H-05 cerrado.
+11. El ciclo `A` aprobada ▸ `B` abortada a mitad de circuito ▸ `B` nueva completada se ejecuta, y el sistema propone `B` y no `C`.
+12. `currentRevision` devuelve la aprobada o nada, `lastRevision` la última no abortada, y ambas coinciden en una única implementación.
+13. La firma es verificable a posteriori sobre datos persistidos, e incluye la identificación del documento — H-06 cerrado.
+14. `pendingReviewSteps` devuelve los propios, y los ajenos solo con el permiso especial — H-07 cerrado.
+15. Los códigos responden al esquema vigente y el orden de las revisiones no depende del código — H-09 y H-10 cerrados.
+16. Ninguna operación modifica ni elimina una versión existente — H-34 cerrado.
+17. Las cuatro restricciones de los catálogos rechazan el duplicado con módulo o clase nulos, después de verificar y limpiar duplicados preexistentes en cada cliente — **H-19 cerrado por completo**.
+18. Ninguna regla de circulación cambió: `BLOCK_04` parte del estado que dejó `BLOCK_02`, con lo que `B16` deja habilitado.
+19. `prisma validate`, `migrate`, `tsc --noEmit` y `npm run build` sin error; las 72 pruebas previas siguen aprobadas.
+20. Verificación de tablas vacías del subsistema documental en cada cliente antes de migrar.
+21. `rover subgraph check` ejecutado, con los retiros documentados y aceptados, y con el **cambio de significado de `currentRevision` declarado por escrito**, que la herramienta no señala.
+22. La SFS se actualiza únicamente después de reunir estas evidencias.
+
+## Referencias
+
+- `README.md`
+- `BLOCK_03_REGISTRO_DE_DEFINICIONES.md` — planteo y alternativas de cada decisión
+- `DOCUMENT_EVOLUTION_PLAN.md` — D-03, D-04, D-05, D-10, D-11, D-13, D-17, D-19, D-21, D-22
+- `BLOCK_01_TRAZABILIDAD_FUNCIONAL.md` — catálogo de eventos y base de pruebas
+- `BLOCK_02_CONTEXTO_DE_PROYECTO.md` — B2, B4, B7 y B9
+- `../SFS/00_Convenciones.md`
+- `../../prisma/schema.prisma`, `../../schema.graphql`
+- `../../src/utils/reviewWorkflow.ts`, `../../src/utils/objectContext.ts`
+- `212-mi-digitalization/src/utils/revisionScheme.ts`
+- `200-mi/docs/specs/DIGITALIZATION_CATALOG_ATTRIBUTES_SPEC.md` — `CatalogSettings`
