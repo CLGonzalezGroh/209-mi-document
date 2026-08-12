@@ -1,6 +1,6 @@
 # Bloque 03 — Ciclo interno de revisión
 
-**Estado:** `APROBADO_PENDIENTE` — definido en su totalidad, sin implementar.
+**Estado:** `APROBADO_PENDIENTE` — definido en su totalidad, con la fase A implementada.
 **Versión:** 1.0
 **Depende de:** `BLOCK_02`, cuyo contexto de proyecto y autorización en dos capas este bloque da por sentados.
 **Decisiones que ejecuta:** D-03, D-04, D-05, D-10, D-11, D-13, D-17 y la consecuencia de D-19 sobre la toma de conocimiento. Resuelve H-01 a H-10, H-20, H-27 y H-34, y cierra H-19 en los dos catálogos.
@@ -510,6 +510,40 @@ Mismo enfoque que los bloques anteriores: `node:test` con `node --import tsx --t
 20. Verificación de tablas vacías del subsistema documental en cada cliente antes de migrar.
 21. `rover subgraph check` ejecutado, con los retiros documentados y aceptados, y con el **cambio de significado de `currentRevision` declarado por escrito**, que la herramienta no señala.
 22. La SFS se actualiza únicamente después de reunir estas evidencias.
+
+## Evidencia de validación
+
+Se completa por fase, como en los bloques anteriores.
+
+### Fase A — permisos
+
+**`202-mi-common` 2.6.0 publicado** en GitHub Packages, con un recurso y tres permisos:
+
+| Recurso | Permisos | Qué gobierna |
+| ------- | -------- | ------------ |
+| `documentsSettings` | `documents:documentsSettings:read`, `:update` | El registro único de configuración del despliegue de `B13`, donde reside el esquema de revisión por defecto |
+| `workflow` | `documents:workflow:admin:update` | El permiso único de `B9` sobre el trabajo ajeno del circuito: firmar por otro, reasignar un paso pendiente, registrar una versión sobre un paso ajeno y consultar pendientes ajenos |
+
+- El permiso especial sigue la forma de `DOCUMENTS_SCANNED_FILE_ADMIN_UPDATE` —acción literal `admin:update` sobre el recurso ya existente— y no crea recurso propio: **no es H-22**, que sigue fuera de alcance. El recurso nuevo es solo el de configuración, que no tenía ninguno.
+- Commit `1d1a561` más el de versión `5355e77`, con tag `v2.6.0`. Local y remoto coinciden; árbol limpio.
+- `prettier --check`, `tsc --noEmit` y `eslint` sin errores. El total del catálogo pasó de 404 a **407 permisos**.
+
+**`205-mi-admin` 2.2.5**, commit `d8294f3`:
+
+- Las tres altas en `prisma/seeds/seedPermissions.ts`, con nombre y descripción, y el reparto en `prisma/seeds/shared/rolePermissions.ts`: **`doc-basic` lee la configuración del despliegue**; **`doc-full` suma su edición y la administración de circuitos ajenos**. El permiso especial queda solo en el rol completo, como el precedente de archivos escaneados.
+- `tsc --noEmit` y `npm run build` sin errores contra la versión publicada. Verificado además que las 407 entradas del seed no tienen códigos repetidos y que ningún rol referencia un código inexistente.
+- Se revirtió otra vez el ruido de regeneración del cliente Prisma, que era solo espacios en blanco.
+- `WhatIsNew.md` actualizado.
+
+**`209-mi-document`**: dependencia en `^2.6.0`, commit `24b3c24`, `tsc --noEmit` y `npm run build` sin errores, y las **72 pruebas siguen aprobadas** — 43 puras (15 de eventos, 7 del circuito, 11 de alcance de proyecto, 10 de configuración y contexto) y 29 de base e integración.
+
+**Aplicación en base, únicamente local** (`mi-admin-pg`, `mi_admin_db`, puerto 5405), con `npm run seed:permissions`, que opera por upsert:
+
+- permisos: 404 → **407**;
+- `role_permissions`: 790 → **794**, es decir las cuatro asignaciones nuevas;
+- reparto verificado en base: `doc-basic` recibe `documentsSettings:read`; `doc-full` recibe los tres.
+
+**Pendiente de esta fase**: la aplicación sobre las bases de los demás clientes (`proion`, `maria`, `austin`, `optimal`). Los permisos existen como constante publicada y como seed, pero todavía no están en esas bases.
 
 ## Referencias
 
