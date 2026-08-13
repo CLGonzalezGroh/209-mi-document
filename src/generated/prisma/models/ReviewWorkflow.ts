@@ -30,12 +30,16 @@ export type ReviewWorkflowAvgAggregateOutputType = {
   id: number | null
   revisionId: number | null
   initiatedById: number | null
+  templateId: number | null
+  cancelledById: number | null
 }
 
 export type ReviewWorkflowSumAggregateOutputType = {
   id: number | null
   revisionId: number | null
   initiatedById: number | null
+  templateId: number | null
+  cancelledById: number | null
 }
 
 export type ReviewWorkflowMinAggregateOutputType = {
@@ -46,6 +50,10 @@ export type ReviewWorkflowMinAggregateOutputType = {
   initiatedById: number | null
   initiatedAt: Date | null
   completedAt: Date | null
+  templateId: number | null
+  cancelledAt: Date | null
+  cancelledById: number | null
+  cancelReason: string | null
 }
 
 export type ReviewWorkflowMaxAggregateOutputType = {
@@ -56,6 +64,10 @@ export type ReviewWorkflowMaxAggregateOutputType = {
   initiatedById: number | null
   initiatedAt: Date | null
   completedAt: Date | null
+  templateId: number | null
+  cancelledAt: Date | null
+  cancelledById: number | null
+  cancelReason: string | null
 }
 
 export type ReviewWorkflowCountAggregateOutputType = {
@@ -66,6 +78,10 @@ export type ReviewWorkflowCountAggregateOutputType = {
   initiatedById: number
   initiatedAt: number
   completedAt: number
+  templateId: number
+  cancelledAt: number
+  cancelledById: number
+  cancelReason: number
   _all: number
 }
 
@@ -74,12 +90,16 @@ export type ReviewWorkflowAvgAggregateInputType = {
   id?: true
   revisionId?: true
   initiatedById?: true
+  templateId?: true
+  cancelledById?: true
 }
 
 export type ReviewWorkflowSumAggregateInputType = {
   id?: true
   revisionId?: true
   initiatedById?: true
+  templateId?: true
+  cancelledById?: true
 }
 
 export type ReviewWorkflowMinAggregateInputType = {
@@ -90,6 +110,10 @@ export type ReviewWorkflowMinAggregateInputType = {
   initiatedById?: true
   initiatedAt?: true
   completedAt?: true
+  templateId?: true
+  cancelledAt?: true
+  cancelledById?: true
+  cancelReason?: true
 }
 
 export type ReviewWorkflowMaxAggregateInputType = {
@@ -100,6 +124,10 @@ export type ReviewWorkflowMaxAggregateInputType = {
   initiatedById?: true
   initiatedAt?: true
   completedAt?: true
+  templateId?: true
+  cancelledAt?: true
+  cancelledById?: true
+  cancelReason?: true
 }
 
 export type ReviewWorkflowCountAggregateInputType = {
@@ -110,6 +138,10 @@ export type ReviewWorkflowCountAggregateInputType = {
   initiatedById?: true
   initiatedAt?: true
   completedAt?: true
+  templateId?: true
+  cancelledAt?: true
+  cancelledById?: true
+  cancelReason?: true
   _all?: true
 }
 
@@ -207,6 +239,10 @@ export type ReviewWorkflowGroupByOutputType = {
   initiatedById: number
   initiatedAt: Date
   completedAt: Date | null
+  templateId: number | null
+  cancelledAt: Date | null
+  cancelledById: number | null
+  cancelReason: string | null
   _count: ReviewWorkflowCountAggregateOutputType | null
   _avg: ReviewWorkflowAvgAggregateOutputType | null
   _sum: ReviewWorkflowSumAggregateOutputType | null
@@ -240,8 +276,13 @@ export type ReviewWorkflowWhereInput = {
   initiatedById?: Prisma.IntFilter<"ReviewWorkflow"> | number
   initiatedAt?: Prisma.DateTimeFilter<"ReviewWorkflow"> | Date | string
   completedAt?: Prisma.DateTimeNullableFilter<"ReviewWorkflow"> | Date | string | null
+  templateId?: Prisma.IntNullableFilter<"ReviewWorkflow"> | number | null
+  cancelledAt?: Prisma.DateTimeNullableFilter<"ReviewWorkflow"> | Date | string | null
+  cancelledById?: Prisma.IntNullableFilter<"ReviewWorkflow"> | number | null
+  cancelReason?: Prisma.StringNullableFilter<"ReviewWorkflow"> | string | null
   revision?: Prisma.XOR<Prisma.DocumentRevisionScalarRelationFilter, Prisma.DocumentRevisionWhereInput>
   steps?: Prisma.ReviewStepListRelationFilter
+  template?: Prisma.XOR<Prisma.DocWorkflowTemplateNullableScalarRelationFilter, Prisma.DocWorkflowTemplateWhereInput> | null
 }
 
 export type ReviewWorkflowOrderByWithRelationInput = {
@@ -252,24 +293,34 @@ export type ReviewWorkflowOrderByWithRelationInput = {
   initiatedById?: Prisma.SortOrder
   initiatedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  templateId?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelledById?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelReason?: Prisma.SortOrderInput | Prisma.SortOrder
   revision?: Prisma.DocumentRevisionOrderByWithRelationInput
   steps?: Prisma.ReviewStepOrderByRelationAggregateInput
+  template?: Prisma.DocWorkflowTemplateOrderByWithRelationInput
 }
 
 export type ReviewWorkflowWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  revisionId?: number
   AND?: Prisma.ReviewWorkflowWhereInput | Prisma.ReviewWorkflowWhereInput[]
   OR?: Prisma.ReviewWorkflowWhereInput[]
   NOT?: Prisma.ReviewWorkflowWhereInput | Prisma.ReviewWorkflowWhereInput[]
   createdAt?: Prisma.DateTimeFilter<"ReviewWorkflow"> | Date | string
+  revisionId?: Prisma.IntFilter<"ReviewWorkflow"> | number
   status?: Prisma.EnumWorkflowStatusFilter<"ReviewWorkflow"> | $Enums.WorkflowStatus
   initiatedById?: Prisma.IntFilter<"ReviewWorkflow"> | number
   initiatedAt?: Prisma.DateTimeFilter<"ReviewWorkflow"> | Date | string
   completedAt?: Prisma.DateTimeNullableFilter<"ReviewWorkflow"> | Date | string | null
+  templateId?: Prisma.IntNullableFilter<"ReviewWorkflow"> | number | null
+  cancelledAt?: Prisma.DateTimeNullableFilter<"ReviewWorkflow"> | Date | string | null
+  cancelledById?: Prisma.IntNullableFilter<"ReviewWorkflow"> | number | null
+  cancelReason?: Prisma.StringNullableFilter<"ReviewWorkflow"> | string | null
   revision?: Prisma.XOR<Prisma.DocumentRevisionScalarRelationFilter, Prisma.DocumentRevisionWhereInput>
   steps?: Prisma.ReviewStepListRelationFilter
-}, "id" | "revisionId">
+  template?: Prisma.XOR<Prisma.DocWorkflowTemplateNullableScalarRelationFilter, Prisma.DocWorkflowTemplateWhereInput> | null
+}, "id">
 
 export type ReviewWorkflowOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -279,6 +330,10 @@ export type ReviewWorkflowOrderByWithAggregationInput = {
   initiatedById?: Prisma.SortOrder
   initiatedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  templateId?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelledById?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelReason?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ReviewWorkflowCountOrderByAggregateInput
   _avg?: Prisma.ReviewWorkflowAvgOrderByAggregateInput
   _max?: Prisma.ReviewWorkflowMaxOrderByAggregateInput
@@ -297,6 +352,10 @@ export type ReviewWorkflowScalarWhereWithAggregatesInput = {
   initiatedById?: Prisma.IntWithAggregatesFilter<"ReviewWorkflow"> | number
   initiatedAt?: Prisma.DateTimeWithAggregatesFilter<"ReviewWorkflow"> | Date | string
   completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ReviewWorkflow"> | Date | string | null
+  templateId?: Prisma.IntNullableWithAggregatesFilter<"ReviewWorkflow"> | number | null
+  cancelledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ReviewWorkflow"> | Date | string | null
+  cancelledById?: Prisma.IntNullableWithAggregatesFilter<"ReviewWorkflow"> | number | null
+  cancelReason?: Prisma.StringNullableWithAggregatesFilter<"ReviewWorkflow"> | string | null
 }
 
 export type ReviewWorkflowCreateInput = {
@@ -305,8 +364,12 @@ export type ReviewWorkflowCreateInput = {
   initiatedById: number
   initiatedAt?: Date | string
   completedAt?: Date | string | null
-  revision: Prisma.DocumentRevisionCreateNestedOneWithoutWorkflowInput
+  cancelledAt?: Date | string | null
+  cancelledById?: number | null
+  cancelReason?: string | null
+  revision: Prisma.DocumentRevisionCreateNestedOneWithoutWorkflowsInput
   steps?: Prisma.ReviewStepCreateNestedManyWithoutWorkflowInput
+  template?: Prisma.DocWorkflowTemplateCreateNestedOneWithoutWorkflowsInput
 }
 
 export type ReviewWorkflowUncheckedCreateInput = {
@@ -317,6 +380,10 @@ export type ReviewWorkflowUncheckedCreateInput = {
   initiatedById: number
   initiatedAt?: Date | string
   completedAt?: Date | string | null
+  templateId?: number | null
+  cancelledAt?: Date | string | null
+  cancelledById?: number | null
+  cancelReason?: string | null
   steps?: Prisma.ReviewStepUncheckedCreateNestedManyWithoutWorkflowInput
 }
 
@@ -326,8 +393,12 @@ export type ReviewWorkflowUpdateInput = {
   initiatedById?: Prisma.IntFieldUpdateOperationsInput | number
   initiatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  revision?: Prisma.DocumentRevisionUpdateOneRequiredWithoutWorkflowNestedInput
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revision?: Prisma.DocumentRevisionUpdateOneRequiredWithoutWorkflowsNestedInput
   steps?: Prisma.ReviewStepUpdateManyWithoutWorkflowNestedInput
+  template?: Prisma.DocWorkflowTemplateUpdateOneWithoutWorkflowsNestedInput
 }
 
 export type ReviewWorkflowUncheckedUpdateInput = {
@@ -338,6 +409,10 @@ export type ReviewWorkflowUncheckedUpdateInput = {
   initiatedById?: Prisma.IntFieldUpdateOperationsInput | number
   initiatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  templateId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   steps?: Prisma.ReviewStepUncheckedUpdateManyWithoutWorkflowNestedInput
 }
 
@@ -349,6 +424,10 @@ export type ReviewWorkflowCreateManyInput = {
   initiatedById: number
   initiatedAt?: Date | string
   completedAt?: Date | string | null
+  templateId?: number | null
+  cancelledAt?: Date | string | null
+  cancelledById?: number | null
+  cancelReason?: string | null
 }
 
 export type ReviewWorkflowUpdateManyMutationInput = {
@@ -357,6 +436,9 @@ export type ReviewWorkflowUpdateManyMutationInput = {
   initiatedById?: Prisma.IntFieldUpdateOperationsInput | number
   initiatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ReviewWorkflowUncheckedUpdateManyInput = {
@@ -367,11 +449,20 @@ export type ReviewWorkflowUncheckedUpdateManyInput = {
   initiatedById?: Prisma.IntFieldUpdateOperationsInput | number
   initiatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  templateId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
-export type ReviewWorkflowNullableScalarRelationFilter = {
-  is?: Prisma.ReviewWorkflowWhereInput | null
-  isNot?: Prisma.ReviewWorkflowWhereInput | null
+export type ReviewWorkflowListRelationFilter = {
+  every?: Prisma.ReviewWorkflowWhereInput
+  some?: Prisma.ReviewWorkflowWhereInput
+  none?: Prisma.ReviewWorkflowWhereInput
+}
+
+export type ReviewWorkflowOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type ReviewWorkflowCountOrderByAggregateInput = {
@@ -382,12 +473,18 @@ export type ReviewWorkflowCountOrderByAggregateInput = {
   initiatedById?: Prisma.SortOrder
   initiatedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  templateId?: Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrder
+  cancelledById?: Prisma.SortOrder
+  cancelReason?: Prisma.SortOrder
 }
 
 export type ReviewWorkflowAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   revisionId?: Prisma.SortOrder
   initiatedById?: Prisma.SortOrder
+  templateId?: Prisma.SortOrder
+  cancelledById?: Prisma.SortOrder
 }
 
 export type ReviewWorkflowMaxOrderByAggregateInput = {
@@ -398,6 +495,10 @@ export type ReviewWorkflowMaxOrderByAggregateInput = {
   initiatedById?: Prisma.SortOrder
   initiatedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  templateId?: Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrder
+  cancelledById?: Prisma.SortOrder
+  cancelReason?: Prisma.SortOrder
 }
 
 export type ReviewWorkflowMinOrderByAggregateInput = {
@@ -408,12 +509,18 @@ export type ReviewWorkflowMinOrderByAggregateInput = {
   initiatedById?: Prisma.SortOrder
   initiatedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  templateId?: Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrder
+  cancelledById?: Prisma.SortOrder
+  cancelReason?: Prisma.SortOrder
 }
 
 export type ReviewWorkflowSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   revisionId?: Prisma.SortOrder
   initiatedById?: Prisma.SortOrder
+  templateId?: Prisma.SortOrder
+  cancelledById?: Prisma.SortOrder
 }
 
 export type ReviewWorkflowScalarRelationFilter = {
@@ -421,36 +528,46 @@ export type ReviewWorkflowScalarRelationFilter = {
   isNot?: Prisma.ReviewWorkflowWhereInput
 }
 
-export type ReviewWorkflowCreateNestedOneWithoutRevisionInput = {
-  create?: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutRevisionInput, Prisma.ReviewWorkflowUncheckedCreateWithoutRevisionInput>
-  connectOrCreate?: Prisma.ReviewWorkflowCreateOrConnectWithoutRevisionInput
-  connect?: Prisma.ReviewWorkflowWhereUniqueInput
+export type ReviewWorkflowCreateNestedManyWithoutRevisionInput = {
+  create?: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutRevisionInput, Prisma.ReviewWorkflowUncheckedCreateWithoutRevisionInput> | Prisma.ReviewWorkflowCreateWithoutRevisionInput[] | Prisma.ReviewWorkflowUncheckedCreateWithoutRevisionInput[]
+  connectOrCreate?: Prisma.ReviewWorkflowCreateOrConnectWithoutRevisionInput | Prisma.ReviewWorkflowCreateOrConnectWithoutRevisionInput[]
+  createMany?: Prisma.ReviewWorkflowCreateManyRevisionInputEnvelope
+  connect?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
 }
 
-export type ReviewWorkflowUncheckedCreateNestedOneWithoutRevisionInput = {
-  create?: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutRevisionInput, Prisma.ReviewWorkflowUncheckedCreateWithoutRevisionInput>
-  connectOrCreate?: Prisma.ReviewWorkflowCreateOrConnectWithoutRevisionInput
-  connect?: Prisma.ReviewWorkflowWhereUniqueInput
+export type ReviewWorkflowUncheckedCreateNestedManyWithoutRevisionInput = {
+  create?: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutRevisionInput, Prisma.ReviewWorkflowUncheckedCreateWithoutRevisionInput> | Prisma.ReviewWorkflowCreateWithoutRevisionInput[] | Prisma.ReviewWorkflowUncheckedCreateWithoutRevisionInput[]
+  connectOrCreate?: Prisma.ReviewWorkflowCreateOrConnectWithoutRevisionInput | Prisma.ReviewWorkflowCreateOrConnectWithoutRevisionInput[]
+  createMany?: Prisma.ReviewWorkflowCreateManyRevisionInputEnvelope
+  connect?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
 }
 
-export type ReviewWorkflowUpdateOneWithoutRevisionNestedInput = {
-  create?: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutRevisionInput, Prisma.ReviewWorkflowUncheckedCreateWithoutRevisionInput>
-  connectOrCreate?: Prisma.ReviewWorkflowCreateOrConnectWithoutRevisionInput
-  upsert?: Prisma.ReviewWorkflowUpsertWithoutRevisionInput
-  disconnect?: Prisma.ReviewWorkflowWhereInput | boolean
-  delete?: Prisma.ReviewWorkflowWhereInput | boolean
-  connect?: Prisma.ReviewWorkflowWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ReviewWorkflowUpdateToOneWithWhereWithoutRevisionInput, Prisma.ReviewWorkflowUpdateWithoutRevisionInput>, Prisma.ReviewWorkflowUncheckedUpdateWithoutRevisionInput>
+export type ReviewWorkflowUpdateManyWithoutRevisionNestedInput = {
+  create?: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutRevisionInput, Prisma.ReviewWorkflowUncheckedCreateWithoutRevisionInput> | Prisma.ReviewWorkflowCreateWithoutRevisionInput[] | Prisma.ReviewWorkflowUncheckedCreateWithoutRevisionInput[]
+  connectOrCreate?: Prisma.ReviewWorkflowCreateOrConnectWithoutRevisionInput | Prisma.ReviewWorkflowCreateOrConnectWithoutRevisionInput[]
+  upsert?: Prisma.ReviewWorkflowUpsertWithWhereUniqueWithoutRevisionInput | Prisma.ReviewWorkflowUpsertWithWhereUniqueWithoutRevisionInput[]
+  createMany?: Prisma.ReviewWorkflowCreateManyRevisionInputEnvelope
+  set?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  disconnect?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  delete?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  connect?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  update?: Prisma.ReviewWorkflowUpdateWithWhereUniqueWithoutRevisionInput | Prisma.ReviewWorkflowUpdateWithWhereUniqueWithoutRevisionInput[]
+  updateMany?: Prisma.ReviewWorkflowUpdateManyWithWhereWithoutRevisionInput | Prisma.ReviewWorkflowUpdateManyWithWhereWithoutRevisionInput[]
+  deleteMany?: Prisma.ReviewWorkflowScalarWhereInput | Prisma.ReviewWorkflowScalarWhereInput[]
 }
 
-export type ReviewWorkflowUncheckedUpdateOneWithoutRevisionNestedInput = {
-  create?: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutRevisionInput, Prisma.ReviewWorkflowUncheckedCreateWithoutRevisionInput>
-  connectOrCreate?: Prisma.ReviewWorkflowCreateOrConnectWithoutRevisionInput
-  upsert?: Prisma.ReviewWorkflowUpsertWithoutRevisionInput
-  disconnect?: Prisma.ReviewWorkflowWhereInput | boolean
-  delete?: Prisma.ReviewWorkflowWhereInput | boolean
-  connect?: Prisma.ReviewWorkflowWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ReviewWorkflowUpdateToOneWithWhereWithoutRevisionInput, Prisma.ReviewWorkflowUpdateWithoutRevisionInput>, Prisma.ReviewWorkflowUncheckedUpdateWithoutRevisionInput>
+export type ReviewWorkflowUncheckedUpdateManyWithoutRevisionNestedInput = {
+  create?: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutRevisionInput, Prisma.ReviewWorkflowUncheckedCreateWithoutRevisionInput> | Prisma.ReviewWorkflowCreateWithoutRevisionInput[] | Prisma.ReviewWorkflowUncheckedCreateWithoutRevisionInput[]
+  connectOrCreate?: Prisma.ReviewWorkflowCreateOrConnectWithoutRevisionInput | Prisma.ReviewWorkflowCreateOrConnectWithoutRevisionInput[]
+  upsert?: Prisma.ReviewWorkflowUpsertWithWhereUniqueWithoutRevisionInput | Prisma.ReviewWorkflowUpsertWithWhereUniqueWithoutRevisionInput[]
+  createMany?: Prisma.ReviewWorkflowCreateManyRevisionInputEnvelope
+  set?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  disconnect?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  delete?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  connect?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  update?: Prisma.ReviewWorkflowUpdateWithWhereUniqueWithoutRevisionInput | Prisma.ReviewWorkflowUpdateWithWhereUniqueWithoutRevisionInput[]
+  updateMany?: Prisma.ReviewWorkflowUpdateManyWithWhereWithoutRevisionInput | Prisma.ReviewWorkflowUpdateManyWithWhereWithoutRevisionInput[]
+  deleteMany?: Prisma.ReviewWorkflowScalarWhereInput | Prisma.ReviewWorkflowScalarWhereInput[]
 }
 
 export type EnumWorkflowStatusFieldUpdateOperationsInput = {
@@ -471,13 +588,59 @@ export type ReviewWorkflowUpdateOneRequiredWithoutStepsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ReviewWorkflowUpdateToOneWithWhereWithoutStepsInput, Prisma.ReviewWorkflowUpdateWithoutStepsInput>, Prisma.ReviewWorkflowUncheckedUpdateWithoutStepsInput>
 }
 
+export type ReviewWorkflowCreateNestedManyWithoutTemplateInput = {
+  create?: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutTemplateInput, Prisma.ReviewWorkflowUncheckedCreateWithoutTemplateInput> | Prisma.ReviewWorkflowCreateWithoutTemplateInput[] | Prisma.ReviewWorkflowUncheckedCreateWithoutTemplateInput[]
+  connectOrCreate?: Prisma.ReviewWorkflowCreateOrConnectWithoutTemplateInput | Prisma.ReviewWorkflowCreateOrConnectWithoutTemplateInput[]
+  createMany?: Prisma.ReviewWorkflowCreateManyTemplateInputEnvelope
+  connect?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+}
+
+export type ReviewWorkflowUncheckedCreateNestedManyWithoutTemplateInput = {
+  create?: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutTemplateInput, Prisma.ReviewWorkflowUncheckedCreateWithoutTemplateInput> | Prisma.ReviewWorkflowCreateWithoutTemplateInput[] | Prisma.ReviewWorkflowUncheckedCreateWithoutTemplateInput[]
+  connectOrCreate?: Prisma.ReviewWorkflowCreateOrConnectWithoutTemplateInput | Prisma.ReviewWorkflowCreateOrConnectWithoutTemplateInput[]
+  createMany?: Prisma.ReviewWorkflowCreateManyTemplateInputEnvelope
+  connect?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+}
+
+export type ReviewWorkflowUpdateManyWithoutTemplateNestedInput = {
+  create?: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutTemplateInput, Prisma.ReviewWorkflowUncheckedCreateWithoutTemplateInput> | Prisma.ReviewWorkflowCreateWithoutTemplateInput[] | Prisma.ReviewWorkflowUncheckedCreateWithoutTemplateInput[]
+  connectOrCreate?: Prisma.ReviewWorkflowCreateOrConnectWithoutTemplateInput | Prisma.ReviewWorkflowCreateOrConnectWithoutTemplateInput[]
+  upsert?: Prisma.ReviewWorkflowUpsertWithWhereUniqueWithoutTemplateInput | Prisma.ReviewWorkflowUpsertWithWhereUniqueWithoutTemplateInput[]
+  createMany?: Prisma.ReviewWorkflowCreateManyTemplateInputEnvelope
+  set?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  disconnect?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  delete?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  connect?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  update?: Prisma.ReviewWorkflowUpdateWithWhereUniqueWithoutTemplateInput | Prisma.ReviewWorkflowUpdateWithWhereUniqueWithoutTemplateInput[]
+  updateMany?: Prisma.ReviewWorkflowUpdateManyWithWhereWithoutTemplateInput | Prisma.ReviewWorkflowUpdateManyWithWhereWithoutTemplateInput[]
+  deleteMany?: Prisma.ReviewWorkflowScalarWhereInput | Prisma.ReviewWorkflowScalarWhereInput[]
+}
+
+export type ReviewWorkflowUncheckedUpdateManyWithoutTemplateNestedInput = {
+  create?: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutTemplateInput, Prisma.ReviewWorkflowUncheckedCreateWithoutTemplateInput> | Prisma.ReviewWorkflowCreateWithoutTemplateInput[] | Prisma.ReviewWorkflowUncheckedCreateWithoutTemplateInput[]
+  connectOrCreate?: Prisma.ReviewWorkflowCreateOrConnectWithoutTemplateInput | Prisma.ReviewWorkflowCreateOrConnectWithoutTemplateInput[]
+  upsert?: Prisma.ReviewWorkflowUpsertWithWhereUniqueWithoutTemplateInput | Prisma.ReviewWorkflowUpsertWithWhereUniqueWithoutTemplateInput[]
+  createMany?: Prisma.ReviewWorkflowCreateManyTemplateInputEnvelope
+  set?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  disconnect?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  delete?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  connect?: Prisma.ReviewWorkflowWhereUniqueInput | Prisma.ReviewWorkflowWhereUniqueInput[]
+  update?: Prisma.ReviewWorkflowUpdateWithWhereUniqueWithoutTemplateInput | Prisma.ReviewWorkflowUpdateWithWhereUniqueWithoutTemplateInput[]
+  updateMany?: Prisma.ReviewWorkflowUpdateManyWithWhereWithoutTemplateInput | Prisma.ReviewWorkflowUpdateManyWithWhereWithoutTemplateInput[]
+  deleteMany?: Prisma.ReviewWorkflowScalarWhereInput | Prisma.ReviewWorkflowScalarWhereInput[]
+}
+
 export type ReviewWorkflowCreateWithoutRevisionInput = {
   createdAt?: Date | string
   status?: $Enums.WorkflowStatus
   initiatedById: number
   initiatedAt?: Date | string
   completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  cancelledById?: number | null
+  cancelReason?: string | null
   steps?: Prisma.ReviewStepCreateNestedManyWithoutWorkflowInput
+  template?: Prisma.DocWorkflowTemplateCreateNestedOneWithoutWorkflowsInput
 }
 
 export type ReviewWorkflowUncheckedCreateWithoutRevisionInput = {
@@ -487,6 +650,10 @@ export type ReviewWorkflowUncheckedCreateWithoutRevisionInput = {
   initiatedById: number
   initiatedAt?: Date | string
   completedAt?: Date | string | null
+  templateId?: number | null
+  cancelledAt?: Date | string | null
+  cancelledById?: number | null
+  cancelReason?: string | null
   steps?: Prisma.ReviewStepUncheckedCreateNestedManyWithoutWorkflowInput
 }
 
@@ -495,34 +662,42 @@ export type ReviewWorkflowCreateOrConnectWithoutRevisionInput = {
   create: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutRevisionInput, Prisma.ReviewWorkflowUncheckedCreateWithoutRevisionInput>
 }
 
-export type ReviewWorkflowUpsertWithoutRevisionInput = {
-  update: Prisma.XOR<Prisma.ReviewWorkflowUpdateWithoutRevisionInput, Prisma.ReviewWorkflowUncheckedUpdateWithoutRevisionInput>
-  create: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutRevisionInput, Prisma.ReviewWorkflowUncheckedCreateWithoutRevisionInput>
-  where?: Prisma.ReviewWorkflowWhereInput
+export type ReviewWorkflowCreateManyRevisionInputEnvelope = {
+  data: Prisma.ReviewWorkflowCreateManyRevisionInput | Prisma.ReviewWorkflowCreateManyRevisionInput[]
+  skipDuplicates?: boolean
 }
 
-export type ReviewWorkflowUpdateToOneWithWhereWithoutRevisionInput = {
-  where?: Prisma.ReviewWorkflowWhereInput
+export type ReviewWorkflowUpsertWithWhereUniqueWithoutRevisionInput = {
+  where: Prisma.ReviewWorkflowWhereUniqueInput
+  update: Prisma.XOR<Prisma.ReviewWorkflowUpdateWithoutRevisionInput, Prisma.ReviewWorkflowUncheckedUpdateWithoutRevisionInput>
+  create: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutRevisionInput, Prisma.ReviewWorkflowUncheckedCreateWithoutRevisionInput>
+}
+
+export type ReviewWorkflowUpdateWithWhereUniqueWithoutRevisionInput = {
+  where: Prisma.ReviewWorkflowWhereUniqueInput
   data: Prisma.XOR<Prisma.ReviewWorkflowUpdateWithoutRevisionInput, Prisma.ReviewWorkflowUncheckedUpdateWithoutRevisionInput>
 }
 
-export type ReviewWorkflowUpdateWithoutRevisionInput = {
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
-  initiatedById?: Prisma.IntFieldUpdateOperationsInput | number
-  initiatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  steps?: Prisma.ReviewStepUpdateManyWithoutWorkflowNestedInput
+export type ReviewWorkflowUpdateManyWithWhereWithoutRevisionInput = {
+  where: Prisma.ReviewWorkflowScalarWhereInput
+  data: Prisma.XOR<Prisma.ReviewWorkflowUpdateManyMutationInput, Prisma.ReviewWorkflowUncheckedUpdateManyWithoutRevisionInput>
 }
 
-export type ReviewWorkflowUncheckedUpdateWithoutRevisionInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
-  initiatedById?: Prisma.IntFieldUpdateOperationsInput | number
-  initiatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  steps?: Prisma.ReviewStepUncheckedUpdateManyWithoutWorkflowNestedInput
+export type ReviewWorkflowScalarWhereInput = {
+  AND?: Prisma.ReviewWorkflowScalarWhereInput | Prisma.ReviewWorkflowScalarWhereInput[]
+  OR?: Prisma.ReviewWorkflowScalarWhereInput[]
+  NOT?: Prisma.ReviewWorkflowScalarWhereInput | Prisma.ReviewWorkflowScalarWhereInput[]
+  id?: Prisma.IntFilter<"ReviewWorkflow"> | number
+  createdAt?: Prisma.DateTimeFilter<"ReviewWorkflow"> | Date | string
+  revisionId?: Prisma.IntFilter<"ReviewWorkflow"> | number
+  status?: Prisma.EnumWorkflowStatusFilter<"ReviewWorkflow"> | $Enums.WorkflowStatus
+  initiatedById?: Prisma.IntFilter<"ReviewWorkflow"> | number
+  initiatedAt?: Prisma.DateTimeFilter<"ReviewWorkflow"> | Date | string
+  completedAt?: Prisma.DateTimeNullableFilter<"ReviewWorkflow"> | Date | string | null
+  templateId?: Prisma.IntNullableFilter<"ReviewWorkflow"> | number | null
+  cancelledAt?: Prisma.DateTimeNullableFilter<"ReviewWorkflow"> | Date | string | null
+  cancelledById?: Prisma.IntNullableFilter<"ReviewWorkflow"> | number | null
+  cancelReason?: Prisma.StringNullableFilter<"ReviewWorkflow"> | string | null
 }
 
 export type ReviewWorkflowCreateWithoutStepsInput = {
@@ -531,7 +706,11 @@ export type ReviewWorkflowCreateWithoutStepsInput = {
   initiatedById: number
   initiatedAt?: Date | string
   completedAt?: Date | string | null
-  revision: Prisma.DocumentRevisionCreateNestedOneWithoutWorkflowInput
+  cancelledAt?: Date | string | null
+  cancelledById?: number | null
+  cancelReason?: string | null
+  revision: Prisma.DocumentRevisionCreateNestedOneWithoutWorkflowsInput
+  template?: Prisma.DocWorkflowTemplateCreateNestedOneWithoutWorkflowsInput
 }
 
 export type ReviewWorkflowUncheckedCreateWithoutStepsInput = {
@@ -542,6 +721,10 @@ export type ReviewWorkflowUncheckedCreateWithoutStepsInput = {
   initiatedById: number
   initiatedAt?: Date | string
   completedAt?: Date | string | null
+  templateId?: number | null
+  cancelledAt?: Date | string | null
+  cancelledById?: number | null
+  cancelReason?: string | null
 }
 
 export type ReviewWorkflowCreateOrConnectWithoutStepsInput = {
@@ -566,7 +749,11 @@ export type ReviewWorkflowUpdateWithoutStepsInput = {
   initiatedById?: Prisma.IntFieldUpdateOperationsInput | number
   initiatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  revision?: Prisma.DocumentRevisionUpdateOneRequiredWithoutWorkflowNestedInput
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revision?: Prisma.DocumentRevisionUpdateOneRequiredWithoutWorkflowsNestedInput
+  template?: Prisma.DocWorkflowTemplateUpdateOneWithoutWorkflowsNestedInput
 }
 
 export type ReviewWorkflowUncheckedUpdateWithoutStepsInput = {
@@ -577,6 +764,169 @@ export type ReviewWorkflowUncheckedUpdateWithoutStepsInput = {
   initiatedById?: Prisma.IntFieldUpdateOperationsInput | number
   initiatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  templateId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type ReviewWorkflowCreateWithoutTemplateInput = {
+  createdAt?: Date | string
+  status?: $Enums.WorkflowStatus
+  initiatedById: number
+  initiatedAt?: Date | string
+  completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  cancelledById?: number | null
+  cancelReason?: string | null
+  revision: Prisma.DocumentRevisionCreateNestedOneWithoutWorkflowsInput
+  steps?: Prisma.ReviewStepCreateNestedManyWithoutWorkflowInput
+}
+
+export type ReviewWorkflowUncheckedCreateWithoutTemplateInput = {
+  id?: number
+  createdAt?: Date | string
+  revisionId: number
+  status?: $Enums.WorkflowStatus
+  initiatedById: number
+  initiatedAt?: Date | string
+  completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  cancelledById?: number | null
+  cancelReason?: string | null
+  steps?: Prisma.ReviewStepUncheckedCreateNestedManyWithoutWorkflowInput
+}
+
+export type ReviewWorkflowCreateOrConnectWithoutTemplateInput = {
+  where: Prisma.ReviewWorkflowWhereUniqueInput
+  create: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutTemplateInput, Prisma.ReviewWorkflowUncheckedCreateWithoutTemplateInput>
+}
+
+export type ReviewWorkflowCreateManyTemplateInputEnvelope = {
+  data: Prisma.ReviewWorkflowCreateManyTemplateInput | Prisma.ReviewWorkflowCreateManyTemplateInput[]
+  skipDuplicates?: boolean
+}
+
+export type ReviewWorkflowUpsertWithWhereUniqueWithoutTemplateInput = {
+  where: Prisma.ReviewWorkflowWhereUniqueInput
+  update: Prisma.XOR<Prisma.ReviewWorkflowUpdateWithoutTemplateInput, Prisma.ReviewWorkflowUncheckedUpdateWithoutTemplateInput>
+  create: Prisma.XOR<Prisma.ReviewWorkflowCreateWithoutTemplateInput, Prisma.ReviewWorkflowUncheckedCreateWithoutTemplateInput>
+}
+
+export type ReviewWorkflowUpdateWithWhereUniqueWithoutTemplateInput = {
+  where: Prisma.ReviewWorkflowWhereUniqueInput
+  data: Prisma.XOR<Prisma.ReviewWorkflowUpdateWithoutTemplateInput, Prisma.ReviewWorkflowUncheckedUpdateWithoutTemplateInput>
+}
+
+export type ReviewWorkflowUpdateManyWithWhereWithoutTemplateInput = {
+  where: Prisma.ReviewWorkflowScalarWhereInput
+  data: Prisma.XOR<Prisma.ReviewWorkflowUpdateManyMutationInput, Prisma.ReviewWorkflowUncheckedUpdateManyWithoutTemplateInput>
+}
+
+export type ReviewWorkflowCreateManyRevisionInput = {
+  id?: number
+  createdAt?: Date | string
+  status?: $Enums.WorkflowStatus
+  initiatedById: number
+  initiatedAt?: Date | string
+  completedAt?: Date | string | null
+  templateId?: number | null
+  cancelledAt?: Date | string | null
+  cancelledById?: number | null
+  cancelReason?: string | null
+}
+
+export type ReviewWorkflowUpdateWithoutRevisionInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
+  initiatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  initiatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steps?: Prisma.ReviewStepUpdateManyWithoutWorkflowNestedInput
+  template?: Prisma.DocWorkflowTemplateUpdateOneWithoutWorkflowsNestedInput
+}
+
+export type ReviewWorkflowUncheckedUpdateWithoutRevisionInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
+  initiatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  initiatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  templateId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steps?: Prisma.ReviewStepUncheckedUpdateManyWithoutWorkflowNestedInput
+}
+
+export type ReviewWorkflowUncheckedUpdateManyWithoutRevisionInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
+  initiatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  initiatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  templateId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type ReviewWorkflowCreateManyTemplateInput = {
+  id?: number
+  createdAt?: Date | string
+  revisionId: number
+  status?: $Enums.WorkflowStatus
+  initiatedById: number
+  initiatedAt?: Date | string
+  completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  cancelledById?: number | null
+  cancelReason?: string | null
+}
+
+export type ReviewWorkflowUpdateWithoutTemplateInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
+  initiatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  initiatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revision?: Prisma.DocumentRevisionUpdateOneRequiredWithoutWorkflowsNestedInput
+  steps?: Prisma.ReviewStepUpdateManyWithoutWorkflowNestedInput
+}
+
+export type ReviewWorkflowUncheckedUpdateWithoutTemplateInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revisionId?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
+  initiatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  initiatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  steps?: Prisma.ReviewStepUncheckedUpdateManyWithoutWorkflowNestedInput
+}
+
+export type ReviewWorkflowUncheckedUpdateManyWithoutTemplateInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revisionId?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumWorkflowStatusFieldUpdateOperationsInput | $Enums.WorkflowStatus
+  initiatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  initiatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -618,8 +968,13 @@ export type ReviewWorkflowSelect<ExtArgs extends runtime.Types.Extensions.Intern
   initiatedById?: boolean
   initiatedAt?: boolean
   completedAt?: boolean
+  templateId?: boolean
+  cancelledAt?: boolean
+  cancelledById?: boolean
+  cancelReason?: boolean
   revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
   steps?: boolean | Prisma.ReviewWorkflow$stepsArgs<ExtArgs>
+  template?: boolean | Prisma.ReviewWorkflow$templateArgs<ExtArgs>
   _count?: boolean | Prisma.ReviewWorkflowCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reviewWorkflow"]>
 
@@ -631,7 +986,12 @@ export type ReviewWorkflowSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   initiatedById?: boolean
   initiatedAt?: boolean
   completedAt?: boolean
+  templateId?: boolean
+  cancelledAt?: boolean
+  cancelledById?: boolean
+  cancelReason?: boolean
   revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
+  template?: boolean | Prisma.ReviewWorkflow$templateArgs<ExtArgs>
 }, ExtArgs["result"]["reviewWorkflow"]>
 
 export type ReviewWorkflowSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -642,7 +1002,12 @@ export type ReviewWorkflowSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   initiatedById?: boolean
   initiatedAt?: boolean
   completedAt?: boolean
+  templateId?: boolean
+  cancelledAt?: boolean
+  cancelledById?: boolean
+  cancelReason?: boolean
   revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
+  template?: boolean | Prisma.ReviewWorkflow$templateArgs<ExtArgs>
 }, ExtArgs["result"]["reviewWorkflow"]>
 
 export type ReviewWorkflowSelectScalar = {
@@ -653,19 +1018,26 @@ export type ReviewWorkflowSelectScalar = {
   initiatedById?: boolean
   initiatedAt?: boolean
   completedAt?: boolean
+  templateId?: boolean
+  cancelledAt?: boolean
+  cancelledById?: boolean
+  cancelReason?: boolean
 }
 
-export type ReviewWorkflowOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "revisionId" | "status" | "initiatedById" | "initiatedAt" | "completedAt", ExtArgs["result"]["reviewWorkflow"]>
+export type ReviewWorkflowOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "revisionId" | "status" | "initiatedById" | "initiatedAt" | "completedAt" | "templateId" | "cancelledAt" | "cancelledById" | "cancelReason", ExtArgs["result"]["reviewWorkflow"]>
 export type ReviewWorkflowInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
   steps?: boolean | Prisma.ReviewWorkflow$stepsArgs<ExtArgs>
+  template?: boolean | Prisma.ReviewWorkflow$templateArgs<ExtArgs>
   _count?: boolean | Prisma.ReviewWorkflowCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ReviewWorkflowIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
+  template?: boolean | Prisma.ReviewWorkflow$templateArgs<ExtArgs>
 }
 export type ReviewWorkflowIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   revision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
+  template?: boolean | Prisma.ReviewWorkflow$templateArgs<ExtArgs>
 }
 
 export type $ReviewWorkflowPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -673,6 +1045,7 @@ export type $ReviewWorkflowPayload<ExtArgs extends runtime.Types.Extensions.Inte
   objects: {
     revision: Prisma.$DocumentRevisionPayload<ExtArgs>
     steps: Prisma.$ReviewStepPayload<ExtArgs>[]
+    template: Prisma.$DocWorkflowTemplatePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -682,6 +1055,10 @@ export type $ReviewWorkflowPayload<ExtArgs extends runtime.Types.Extensions.Inte
     initiatedById: number
     initiatedAt: Date
     completedAt: Date | null
+    templateId: number | null
+    cancelledAt: Date | null
+    cancelledById: number | null
+    cancelReason: string | null
   }, ExtArgs["result"]["reviewWorkflow"]>
   composites: {}
 }
@@ -1078,6 +1455,7 @@ export interface Prisma__ReviewWorkflowClient<T, Null = never, ExtArgs extends r
   readonly [Symbol.toStringTag]: "PrismaPromise"
   revision<T extends Prisma.DocumentRevisionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentRevisionDefaultArgs<ExtArgs>>): Prisma.Prisma__DocumentRevisionClient<runtime.Types.Result.GetResult<Prisma.$DocumentRevisionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   steps<T extends Prisma.ReviewWorkflow$stepsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReviewWorkflow$stepsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewStepPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  template<T extends Prisma.ReviewWorkflow$templateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReviewWorkflow$templateArgs<ExtArgs>>): Prisma.Prisma__DocWorkflowTemplateClient<runtime.Types.Result.GetResult<Prisma.$DocWorkflowTemplatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1114,6 +1492,10 @@ export interface ReviewWorkflowFieldRefs {
   readonly initiatedById: Prisma.FieldRef<"ReviewWorkflow", 'Int'>
   readonly initiatedAt: Prisma.FieldRef<"ReviewWorkflow", 'DateTime'>
   readonly completedAt: Prisma.FieldRef<"ReviewWorkflow", 'DateTime'>
+  readonly templateId: Prisma.FieldRef<"ReviewWorkflow", 'Int'>
+  readonly cancelledAt: Prisma.FieldRef<"ReviewWorkflow", 'DateTime'>
+  readonly cancelledById: Prisma.FieldRef<"ReviewWorkflow", 'Int'>
+  readonly cancelReason: Prisma.FieldRef<"ReviewWorkflow", 'String'>
 }
     
 
@@ -1536,6 +1918,25 @@ export type ReviewWorkflow$stepsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.ReviewStepScalarFieldEnum | Prisma.ReviewStepScalarFieldEnum[]
+}
+
+/**
+ * ReviewWorkflow.template
+ */
+export type ReviewWorkflow$templateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocWorkflowTemplate
+   */
+  select?: Prisma.DocWorkflowTemplateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocWorkflowTemplate
+   */
+  omit?: Prisma.DocWorkflowTemplateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocWorkflowTemplateInclude<ExtArgs> | null
+  where?: Prisma.DocWorkflowTemplateWhereInput
 }
 
 /**

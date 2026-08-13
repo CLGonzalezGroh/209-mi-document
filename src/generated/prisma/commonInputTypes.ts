@@ -226,13 +226,6 @@ export type EnumModuleTypeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel> | $Enums.ModuleType
 }
 
-export type EnumRevisionSchemeFilter<$PrismaModel = never> = {
-  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel>
-  in?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
-  notIn?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel> | $Enums.RevisionScheme
-}
-
 export type EnumModuleTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.ModuleType | Prisma.EnumModuleTypeFieldRefInput<$PrismaModel>
   in?: $Enums.ModuleType[] | Prisma.ListEnumModuleTypeFieldRefInput<$PrismaModel>
@@ -241,16 +234,6 @@ export type EnumModuleTypeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
-}
-
-export type EnumRevisionSchemeWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel>
-  in?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
-  notIn?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumRevisionSchemeWithAggregatesFilter<$PrismaModel> | $Enums.RevisionScheme
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel>
 }
 
 export type EnumTaskDocumentRoleFilter<$PrismaModel = never> = {
@@ -396,6 +379,13 @@ export type EnumDocumentRoleFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumDocumentRoleFilter<$PrismaModel> | $Enums.DocumentRole
 }
 
+export type EnumRevisionSchemeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumRevisionSchemeNullableFilter<$PrismaModel> | $Enums.RevisionScheme | null
+}
+
 export type EnumDocumentRoleWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.DocumentRole | Prisma.EnumDocumentRoleFieldRefInput<$PrismaModel>
   in?: $Enums.DocumentRole[] | Prisma.ListEnumDocumentRoleFieldRefInput<$PrismaModel>
@@ -404,6 +394,33 @@ export type EnumDocumentRoleWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumDocumentRoleFilter<$PrismaModel>
   _max?: Prisma.NestedEnumDocumentRoleFilter<$PrismaModel>
+}
+
+export type EnumRevisionSchemeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumRevisionSchemeNullableWithAggregatesFilter<$PrismaModel> | $Enums.RevisionScheme | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRevisionSchemeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRevisionSchemeNullableFilter<$PrismaModel>
+}
+
+export type EnumRevisionSchemeFilter<$PrismaModel = never> = {
+  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel>
+  in?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel> | $Enums.RevisionScheme
+}
+
+export type EnumRevisionSchemeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel>
+  in?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRevisionSchemeWithAggregatesFilter<$PrismaModel> | $Enums.RevisionScheme
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel>
 }
 
 export type EnumDocProjectSideFilter<$PrismaModel = never> = {
@@ -784,13 +801,6 @@ export type NestedEnumModuleTypeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel> | $Enums.ModuleType
 }
 
-export type NestedEnumRevisionSchemeFilter<$PrismaModel = never> = {
-  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel>
-  in?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
-  notIn?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel> | $Enums.RevisionScheme
-}
-
 export type NestedEnumModuleTypeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.ModuleType | Prisma.EnumModuleTypeFieldRefInput<$PrismaModel>
   in?: $Enums.ModuleType[] | Prisma.ListEnumModuleTypeFieldRefInput<$PrismaModel>
@@ -799,16 +809,6 @@ export type NestedEnumModuleTypeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumModuleTypeFilter<$PrismaModel>
-}
-
-export type NestedEnumRevisionSchemeWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel>
-  in?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
-  notIn?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumRevisionSchemeWithAggregatesFilter<$PrismaModel> | $Enums.RevisionScheme
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel>
 }
 
 export type NestedEnumTaskDocumentRoleFilter<$PrismaModel = never> = {
@@ -954,6 +954,13 @@ export type NestedEnumDocumentRoleFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumDocumentRoleFilter<$PrismaModel> | $Enums.DocumentRole
 }
 
+export type NestedEnumRevisionSchemeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumRevisionSchemeNullableFilter<$PrismaModel> | $Enums.RevisionScheme | null
+}
+
 export type NestedEnumDocumentRoleWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.DocumentRole | Prisma.EnumDocumentRoleFieldRefInput<$PrismaModel>
   in?: $Enums.DocumentRole[] | Prisma.ListEnumDocumentRoleFieldRefInput<$PrismaModel>
@@ -962,6 +969,33 @@ export type NestedEnumDocumentRoleWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumDocumentRoleFilter<$PrismaModel>
   _max?: Prisma.NestedEnumDocumentRoleFilter<$PrismaModel>
+}
+
+export type NestedEnumRevisionSchemeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumRevisionSchemeNullableWithAggregatesFilter<$PrismaModel> | $Enums.RevisionScheme | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRevisionSchemeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRevisionSchemeNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumRevisionSchemeFilter<$PrismaModel = never> = {
+  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel>
+  in?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel> | $Enums.RevisionScheme
+}
+
+export type NestedEnumRevisionSchemeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.RevisionScheme | Prisma.EnumRevisionSchemeFieldRefInput<$PrismaModel>
+  in?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumRevisionSchemeWithAggregatesFilter<$PrismaModel> | $Enums.RevisionScheme
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumRevisionSchemeFilter<$PrismaModel>
 }
 
 export type NestedEnumDocProjectSideFilter<$PrismaModel = never> = {

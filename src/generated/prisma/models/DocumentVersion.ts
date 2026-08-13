@@ -241,7 +241,7 @@ export type DocumentVersionGroupByOutputType = {
   fileName: string
   fileSize: number
   mimeType: string
-  checksum: string | null
+  checksum: string
   comment: string | null
   _count: DocumentVersionCountAggregateOutputType | null
   _avg: DocumentVersionAvgAggregateOutputType | null
@@ -278,7 +278,7 @@ export type DocumentVersionWhereInput = {
   fileName?: Prisma.StringFilter<"DocumentVersion"> | string
   fileSize?: Prisma.IntFilter<"DocumentVersion"> | number
   mimeType?: Prisma.StringFilter<"DocumentVersion"> | string
-  checksum?: Prisma.StringNullableFilter<"DocumentVersion"> | string | null
+  checksum?: Prisma.StringFilter<"DocumentVersion"> | string
   comment?: Prisma.StringNullableFilter<"DocumentVersion"> | string | null
   revision?: Prisma.XOR<Prisma.DocumentRevisionScalarRelationFilter, Prisma.DocumentRevisionWhereInput>
 }
@@ -293,7 +293,7 @@ export type DocumentVersionOrderByWithRelationInput = {
   fileName?: Prisma.SortOrder
   fileSize?: Prisma.SortOrder
   mimeType?: Prisma.SortOrder
-  checksum?: Prisma.SortOrderInput | Prisma.SortOrder
+  checksum?: Prisma.SortOrder
   comment?: Prisma.SortOrderInput | Prisma.SortOrder
   revision?: Prisma.DocumentRevisionOrderByWithRelationInput
 }
@@ -312,7 +312,7 @@ export type DocumentVersionWhereUniqueInput = Prisma.AtLeast<{
   fileName?: Prisma.StringFilter<"DocumentVersion"> | string
   fileSize?: Prisma.IntFilter<"DocumentVersion"> | number
   mimeType?: Prisma.StringFilter<"DocumentVersion"> | string
-  checksum?: Prisma.StringNullableFilter<"DocumentVersion"> | string | null
+  checksum?: Prisma.StringFilter<"DocumentVersion"> | string
   comment?: Prisma.StringNullableFilter<"DocumentVersion"> | string | null
   revision?: Prisma.XOR<Prisma.DocumentRevisionScalarRelationFilter, Prisma.DocumentRevisionWhereInput>
 }, "id" | "revisionId_versionNumber">
@@ -327,7 +327,7 @@ export type DocumentVersionOrderByWithAggregationInput = {
   fileName?: Prisma.SortOrder
   fileSize?: Prisma.SortOrder
   mimeType?: Prisma.SortOrder
-  checksum?: Prisma.SortOrderInput | Prisma.SortOrder
+  checksum?: Prisma.SortOrder
   comment?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DocumentVersionCountOrderByAggregateInput
   _avg?: Prisma.DocumentVersionAvgOrderByAggregateInput
@@ -349,7 +349,7 @@ export type DocumentVersionScalarWhereWithAggregatesInput = {
   fileName?: Prisma.StringWithAggregatesFilter<"DocumentVersion"> | string
   fileSize?: Prisma.IntWithAggregatesFilter<"DocumentVersion"> | number
   mimeType?: Prisma.StringWithAggregatesFilter<"DocumentVersion"> | string
-  checksum?: Prisma.StringNullableWithAggregatesFilter<"DocumentVersion"> | string | null
+  checksum?: Prisma.StringWithAggregatesFilter<"DocumentVersion"> | string
   comment?: Prisma.StringNullableWithAggregatesFilter<"DocumentVersion"> | string | null
 }
 
@@ -361,7 +361,7 @@ export type DocumentVersionCreateInput = {
   fileName: string
   fileSize: number
   mimeType: string
-  checksum?: string | null
+  checksum: string
   comment?: string | null
   revision: Prisma.DocumentRevisionCreateNestedOneWithoutVersionsInput
 }
@@ -376,7 +376,7 @@ export type DocumentVersionUncheckedCreateInput = {
   fileName: string
   fileSize: number
   mimeType: string
-  checksum?: string | null
+  checksum: string
   comment?: string | null
 }
 
@@ -388,7 +388,7 @@ export type DocumentVersionUpdateInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checksum?: Prisma.StringFieldUpdateOperationsInput | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   revision?: Prisma.DocumentRevisionUpdateOneRequiredWithoutVersionsNestedInput
 }
@@ -403,7 +403,7 @@ export type DocumentVersionUncheckedUpdateInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checksum?: Prisma.StringFieldUpdateOperationsInput | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -417,7 +417,7 @@ export type DocumentVersionCreateManyInput = {
   fileName: string
   fileSize: number
   mimeType: string
-  checksum?: string | null
+  checksum: string
   comment?: string | null
 }
 
@@ -429,7 +429,7 @@ export type DocumentVersionUpdateManyMutationInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checksum?: Prisma.StringFieldUpdateOperationsInput | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -443,7 +443,7 @@ export type DocumentVersionUncheckedUpdateManyInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checksum?: Prisma.StringFieldUpdateOperationsInput | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -570,7 +570,7 @@ export type DocumentVersionCreateWithoutRevisionInput = {
   fileName: string
   fileSize: number
   mimeType: string
-  checksum?: string | null
+  checksum: string
   comment?: string | null
 }
 
@@ -583,7 +583,7 @@ export type DocumentVersionUncheckedCreateWithoutRevisionInput = {
   fileName: string
   fileSize: number
   mimeType: string
-  checksum?: string | null
+  checksum: string
   comment?: string | null
 }
 
@@ -626,7 +626,7 @@ export type DocumentVersionScalarWhereInput = {
   fileName?: Prisma.StringFilter<"DocumentVersion"> | string
   fileSize?: Prisma.IntFilter<"DocumentVersion"> | number
   mimeType?: Prisma.StringFilter<"DocumentVersion"> | string
-  checksum?: Prisma.StringNullableFilter<"DocumentVersion"> | string | null
+  checksum?: Prisma.StringFilter<"DocumentVersion"> | string
   comment?: Prisma.StringNullableFilter<"DocumentVersion"> | string | null
 }
 
@@ -639,7 +639,7 @@ export type DocumentVersionCreateManyRevisionInput = {
   fileName: string
   fileSize: number
   mimeType: string
-  checksum?: string | null
+  checksum: string
   comment?: string | null
 }
 
@@ -651,7 +651,7 @@ export type DocumentVersionUpdateWithoutRevisionInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checksum?: Prisma.StringFieldUpdateOperationsInput | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -664,7 +664,7 @@ export type DocumentVersionUncheckedUpdateWithoutRevisionInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checksum?: Prisma.StringFieldUpdateOperationsInput | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -677,7 +677,7 @@ export type DocumentVersionUncheckedUpdateManyWithoutRevisionInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checksum?: Prisma.StringFieldUpdateOperationsInput | string
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -768,7 +768,7 @@ export type $DocumentVersionPayload<ExtArgs extends runtime.Types.Extensions.Int
     fileName: string
     fileSize: number
     mimeType: string
-    checksum: string | null
+    checksum: string
     comment: string | null
   }, ExtArgs["result"]["documentVersion"]>
   composites: {}

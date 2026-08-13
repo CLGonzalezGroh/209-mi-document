@@ -82,6 +82,11 @@ export type ReviewWorkflow = Prisma.ReviewWorkflowModel
  */
 export type ReviewStep = Prisma.ReviewStepModel
 /**
+ * Model DocStepSignature
+ * 
+ */
+export type DocStepSignature = Prisma.DocStepSignatureModel
+/**
  * Model Transmittal
  * 
  */
@@ -101,6 +106,21 @@ export type Attachment = Prisma.AttachmentModel
  * 
  */
 export type DocProjectSettings = Prisma.DocProjectSettingsModel
+/**
+ * Model DocSettings
+ * 
+ */
+export type DocSettings = Prisma.DocSettingsModel
+/**
+ * Model DocWorkflowTemplate
+ * 
+ */
+export type DocWorkflowTemplate = Prisma.DocWorkflowTemplateModel
+/**
+ * Model DocWorkflowTemplateStep
+ * 
+ */
+export type DocWorkflowTemplateStep = Prisma.DocWorkflowTemplateStepModel
 /**
  * Model DocProjectMember
  * 

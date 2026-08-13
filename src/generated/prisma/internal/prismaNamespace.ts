@@ -392,10 +392,14 @@ export const ModelName = {
   DocumentVersion: 'DocumentVersion',
   ReviewWorkflow: 'ReviewWorkflow',
   ReviewStep: 'ReviewStep',
+  DocStepSignature: 'DocStepSignature',
   Transmittal: 'Transmittal',
   TransmittalItem: 'TransmittalItem',
   Attachment: 'Attachment',
   DocProjectSettings: 'DocProjectSettings',
+  DocSettings: 'DocSettings',
+  DocWorkflowTemplate: 'DocWorkflowTemplate',
+  DocWorkflowTemplateStep: 'DocWorkflowTemplateStep',
   DocProjectMember: 'DocProjectMember',
   DocWorkflowEvent: 'DocWorkflowEvent',
   DocAuditEvent: 'DocAuditEvent',
@@ -418,7 +422,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "documentClass" | "documentType" | "document" | "taskDocumentReference" | "documentRevision" | "documentVersion" | "reviewWorkflow" | "reviewStep" | "transmittal" | "transmittalItem" | "attachment" | "docProjectSettings" | "docProjectMember" | "docWorkflowEvent" | "docAuditEvent" | "scannedFile" | "area" | "documentSysLog" | "documentSysLogArchive"
+    modelProps: "documentClass" | "documentType" | "document" | "taskDocumentReference" | "documentRevision" | "documentVersion" | "reviewWorkflow" | "reviewStep" | "docStepSignature" | "transmittal" | "transmittalItem" | "attachment" | "docProjectSettings" | "docSettings" | "docWorkflowTemplate" | "docWorkflowTemplateStep" | "docProjectMember" | "docWorkflowEvent" | "docAuditEvent" | "scannedFile" | "area" | "documentSysLog" | "documentSysLogArchive"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1014,6 +1018,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DocStepSignature: {
+      payload: Prisma.$DocStepSignaturePayload<ExtArgs>
+      fields: Prisma.DocStepSignatureFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocStepSignatureFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocStepSignaturePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocStepSignatureFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocStepSignaturePayload>
+        }
+        findFirst: {
+          args: Prisma.DocStepSignatureFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocStepSignaturePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocStepSignatureFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocStepSignaturePayload>
+        }
+        findMany: {
+          args: Prisma.DocStepSignatureFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocStepSignaturePayload>[]
+        }
+        create: {
+          args: Prisma.DocStepSignatureCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocStepSignaturePayload>
+        }
+        createMany: {
+          args: Prisma.DocStepSignatureCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocStepSignatureCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocStepSignaturePayload>[]
+        }
+        delete: {
+          args: Prisma.DocStepSignatureDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocStepSignaturePayload>
+        }
+        update: {
+          args: Prisma.DocStepSignatureUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocStepSignaturePayload>
+        }
+        deleteMany: {
+          args: Prisma.DocStepSignatureDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocStepSignatureUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocStepSignatureUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocStepSignaturePayload>[]
+        }
+        upsert: {
+          args: Prisma.DocStepSignatureUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocStepSignaturePayload>
+        }
+        aggregate: {
+          args: Prisma.DocStepSignatureAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocStepSignature>
+        }
+        groupBy: {
+          args: Prisma.DocStepSignatureGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocStepSignatureGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocStepSignatureCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocStepSignatureCountAggregateOutputType> | number
+        }
+      }
+    }
     Transmittal: {
       payload: Prisma.$TransmittalPayload<ExtArgs>
       fields: Prisma.TransmittalFieldRefs
@@ -1307,6 +1385,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.DocProjectSettingsCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.DocProjectSettingsCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocSettings: {
+      payload: Prisma.$DocSettingsPayload<ExtArgs>
+      fields: Prisma.DocSettingsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocSettingsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocSettingsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocSettingsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocSettingsPayload>
+        }
+        findFirst: {
+          args: Prisma.DocSettingsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocSettingsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocSettingsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocSettingsPayload>
+        }
+        findMany: {
+          args: Prisma.DocSettingsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocSettingsPayload>[]
+        }
+        create: {
+          args: Prisma.DocSettingsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocSettingsPayload>
+        }
+        createMany: {
+          args: Prisma.DocSettingsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocSettingsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocSettingsPayload>[]
+        }
+        delete: {
+          args: Prisma.DocSettingsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocSettingsPayload>
+        }
+        update: {
+          args: Prisma.DocSettingsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocSettingsPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocSettingsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocSettingsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocSettingsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocSettingsPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocSettingsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocSettingsPayload>
+        }
+        aggregate: {
+          args: Prisma.DocSettingsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocSettings>
+        }
+        groupBy: {
+          args: Prisma.DocSettingsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocSettingsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocSettingsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocSettingsCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocWorkflowTemplate: {
+      payload: Prisma.$DocWorkflowTemplatePayload<ExtArgs>
+      fields: Prisma.DocWorkflowTemplateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocWorkflowTemplateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocWorkflowTemplateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplatePayload>
+        }
+        findFirst: {
+          args: Prisma.DocWorkflowTemplateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocWorkflowTemplateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplatePayload>
+        }
+        findMany: {
+          args: Prisma.DocWorkflowTemplateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplatePayload>[]
+        }
+        create: {
+          args: Prisma.DocWorkflowTemplateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplatePayload>
+        }
+        createMany: {
+          args: Prisma.DocWorkflowTemplateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocWorkflowTemplateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplatePayload>[]
+        }
+        delete: {
+          args: Prisma.DocWorkflowTemplateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplatePayload>
+        }
+        update: {
+          args: Prisma.DocWorkflowTemplateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplatePayload>
+        }
+        deleteMany: {
+          args: Prisma.DocWorkflowTemplateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocWorkflowTemplateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocWorkflowTemplateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplatePayload>[]
+        }
+        upsert: {
+          args: Prisma.DocWorkflowTemplateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplatePayload>
+        }
+        aggregate: {
+          args: Prisma.DocWorkflowTemplateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocWorkflowTemplate>
+        }
+        groupBy: {
+          args: Prisma.DocWorkflowTemplateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocWorkflowTemplateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocWorkflowTemplateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocWorkflowTemplateCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocWorkflowTemplateStep: {
+      payload: Prisma.$DocWorkflowTemplateStepPayload<ExtArgs>
+      fields: Prisma.DocWorkflowTemplateStepFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocWorkflowTemplateStepFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplateStepPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocWorkflowTemplateStepFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplateStepPayload>
+        }
+        findFirst: {
+          args: Prisma.DocWorkflowTemplateStepFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplateStepPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocWorkflowTemplateStepFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplateStepPayload>
+        }
+        findMany: {
+          args: Prisma.DocWorkflowTemplateStepFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplateStepPayload>[]
+        }
+        create: {
+          args: Prisma.DocWorkflowTemplateStepCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplateStepPayload>
+        }
+        createMany: {
+          args: Prisma.DocWorkflowTemplateStepCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocWorkflowTemplateStepCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplateStepPayload>[]
+        }
+        delete: {
+          args: Prisma.DocWorkflowTemplateStepDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplateStepPayload>
+        }
+        update: {
+          args: Prisma.DocWorkflowTemplateStepUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplateStepPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocWorkflowTemplateStepDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocWorkflowTemplateStepUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocWorkflowTemplateStepUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplateStepPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocWorkflowTemplateStepUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkflowTemplateStepPayload>
+        }
+        aggregate: {
+          args: Prisma.DocWorkflowTemplateStepAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocWorkflowTemplateStep>
+        }
+        groupBy: {
+          args: Prisma.DocWorkflowTemplateStepGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocWorkflowTemplateStepGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocWorkflowTemplateStepCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocWorkflowTemplateStepCountAggregateOutputType> | number
         }
       }
     }
@@ -1896,7 +2196,7 @@ export const DocumentTypeScalarFieldEnum = {
   module: 'module',
   classId: 'classId',
   description: 'description',
-  requiresWorkflow: 'requiresWorkflow'
+  requiresFormalReview: 'requiresFormalReview'
 } as const
 
 export type DocumentTypeScalarFieldEnum = (typeof DocumentTypeScalarFieldEnum)[keyof typeof DocumentTypeScalarFieldEnum]
@@ -1917,7 +2217,6 @@ export const DocumentScalarFieldEnum = {
   projectId: 'projectId',
   documentTypeId: 'documentTypeId',
   documentClassId: 'documentClassId',
-  revisionScheme: 'revisionScheme',
   projectTaskId: 'projectTaskId'
 } as const
 
@@ -1946,7 +2245,11 @@ export const DocumentRevisionScalarFieldEnum = {
   revisionCode: 'revisionCode',
   status: 'status',
   approvedById: 'approvedById',
-  approvedAt: 'approvedAt'
+  approvedAt: 'approvedAt',
+  assignedOrganizerId: 'assignedOrganizerId',
+  cancelledAt: 'cancelledAt',
+  cancelledById: 'cancelledById',
+  cancelReason: 'cancelReason'
 } as const
 
 export type DocumentRevisionScalarFieldEnum = (typeof DocumentRevisionScalarFieldEnum)[keyof typeof DocumentRevisionScalarFieldEnum]
@@ -1976,7 +2279,11 @@ export const ReviewWorkflowScalarFieldEnum = {
   status: 'status',
   initiatedById: 'initiatedById',
   initiatedAt: 'initiatedAt',
-  completedAt: 'completedAt'
+  completedAt: 'completedAt',
+  templateId: 'templateId',
+  cancelledAt: 'cancelledAt',
+  cancelledById: 'cancelledById',
+  cancelReason: 'cancelReason'
 } as const
 
 export type ReviewWorkflowScalarFieldEnum = (typeof ReviewWorkflowScalarFieldEnum)[keyof typeof ReviewWorkflowScalarFieldEnum]
@@ -1992,10 +2299,24 @@ export const ReviewStepScalarFieldEnum = {
   status: 'status',
   comments: 'comments',
   completedAt: 'completedAt',
-  signatureHash: 'signatureHash'
+  resolvedById: 'resolvedById',
+  delegationReason: 'delegationReason'
 } as const
 
 export type ReviewStepScalarFieldEnum = (typeof ReviewStepScalarFieldEnum)[keyof typeof ReviewStepScalarFieldEnum]
+
+
+export const DocStepSignatureScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  stepId: 'stepId',
+  algorithm: 'algorithm',
+  payload: 'payload',
+  hash: 'hash'
+} as const
+
+export type DocStepSignatureScalarFieldEnum = (typeof DocStepSignatureScalarFieldEnum)[keyof typeof DocStepSignatureScalarFieldEnum]
 
 
 export const TransmittalScalarFieldEnum = {
@@ -2053,10 +2374,53 @@ export const DocProjectSettingsScalarFieldEnum = {
   updatedById: 'updatedById',
   projectId: 'projectId',
   documentRole: 'documentRole',
-  counterpartyName: 'counterpartyName'
+  counterpartyName: 'counterpartyName',
+  revisionScheme: 'revisionScheme',
+  defaultOrganizerId: 'defaultOrganizerId'
 } as const
 
 export type DocProjectSettingsScalarFieldEnum = (typeof DocProjectSettingsScalarFieldEnum)[keyof typeof DocProjectSettingsScalarFieldEnum]
+
+
+export const DocSettingsScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  revisionScheme: 'revisionScheme'
+} as const
+
+export type DocSettingsScalarFieldEnum = (typeof DocSettingsScalarFieldEnum)[keyof typeof DocSettingsScalarFieldEnum]
+
+
+export const DocWorkflowTemplateScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  terminatedAt: 'terminatedAt',
+  isSys: 'isSys',
+  name: 'name',
+  description: 'description',
+  projectId: 'projectId',
+  documentClassId: 'documentClassId',
+  documentTypeId: 'documentTypeId'
+} as const
+
+export type DocWorkflowTemplateScalarFieldEnum = (typeof DocWorkflowTemplateScalarFieldEnum)[keyof typeof DocWorkflowTemplateScalarFieldEnum]
+
+
+export const DocWorkflowTemplateStepScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  templateId: 'templateId',
+  stepOrder: 'stepOrder',
+  stepType: 'stepType',
+  assignedToId: 'assignedToId'
+} as const
+
+export type DocWorkflowTemplateStepScalarFieldEnum = (typeof DocWorkflowTemplateStepScalarFieldEnum)[keyof typeof DocWorkflowTemplateStepScalarFieldEnum]
 
 
 export const DocProjectMemberScalarFieldEnum = {
@@ -2299,20 +2663,6 @@ export type ListEnumModuleTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$P
 
 
 /**
- * Reference to a field of type 'RevisionScheme'
- */
-export type EnumRevisionSchemeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RevisionScheme'>
-    
-
-
-/**
- * Reference to a field of type 'RevisionScheme[]'
- */
-export type ListEnumRevisionSchemeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RevisionScheme[]'>
-    
-
-
-/**
  * Reference to a field of type 'TaskDocumentRole'
  */
 export type EnumTaskDocumentRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TaskDocumentRole'>
@@ -2435,6 +2785,20 @@ export type EnumDocumentRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
  * Reference to a field of type 'DocumentRole[]'
  */
 export type ListEnumDocumentRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentRole[]'>
+    
+
+
+/**
+ * Reference to a field of type 'RevisionScheme'
+ */
+export type EnumRevisionSchemeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RevisionScheme'>
+    
+
+
+/**
+ * Reference to a field of type 'RevisionScheme[]'
+ */
+export type ListEnumRevisionSchemeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RevisionScheme[]'>
     
 
 
@@ -2667,10 +3031,14 @@ export type GlobalOmitConfig = {
   documentVersion?: Prisma.DocumentVersionOmit
   reviewWorkflow?: Prisma.ReviewWorkflowOmit
   reviewStep?: Prisma.ReviewStepOmit
+  docStepSignature?: Prisma.DocStepSignatureOmit
   transmittal?: Prisma.TransmittalOmit
   transmittalItem?: Prisma.TransmittalItemOmit
   attachment?: Prisma.AttachmentOmit
   docProjectSettings?: Prisma.DocProjectSettingsOmit
+  docSettings?: Prisma.DocSettingsOmit
+  docWorkflowTemplate?: Prisma.DocWorkflowTemplateOmit
+  docWorkflowTemplateStep?: Prisma.DocWorkflowTemplateStepOmit
   docProjectMember?: Prisma.DocProjectMemberOmit
   docWorkflowEvent?: Prisma.DocWorkflowEventOmit
   docAuditEvent?: Prisma.DocAuditEventOmit

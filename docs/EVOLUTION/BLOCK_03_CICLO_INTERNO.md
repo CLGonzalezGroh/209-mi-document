@@ -545,6 +545,47 @@ Se completa por fase, como en los bloques anteriores.
 
 **Pendiente de esta fase**: la aplicación sobre las bases de los demás clientes (`proion`, `maria`, `austin`, `optimal`). Los permisos existen como constante publicada y como seed, pero todavía no están en esas bases.
 
+### Fase B — modelo y migración
+
+Ejecutada sobre la base local de desarrollo (`mi-document-pg`, `mi_document_db`, puerto 5409, PostgreSQL 17.9), con respaldo previo.
+
+**Precondición verificada primero**, con `prisma/checks/block03_precondicion.sql`: veredicto **`APTO PARA MIGRAR`** — subsistema documental en 0 filas y **ningún grupo duplicado** en los catálogos, que es la condición propia de `B15`. Los catálogos locales tienen 5 clases y 3 tipos, todos con módulo informado.
+
+- `prisma validate` sin error. Migración `20260812120000_add_internal_review_cycle`, aplicada con `prisma migrate deploy`. Son **10 migraciones** en total.
+- **El orden de la migración no es el que genera `prisma migrate diff`.** El generador emite el cambio de `RevisionScheme` antes de crear las tablas que la usan y antes de que `documents` pierda su columna, de modo que la migración fallaría. Se reordenó a mano y se verificó que `migrate diff` contra el estado resultante devuelva **una migración vacía**: el archivo y el esquema coinciden.
+- **`requiresWorkflow` se renombró con `ALTER TABLE ... RENAME COLUMN`** y no con el `DROP`/`ADD` que genera Prisma, para conservar los valores ya cargados. Verificado en base sobre los tres tipos existentes.
+- **Los `ADD VALUE` fijan la posición del valor nuevo.** Sin `BEFORE`/`AFTER` el valor queda al final del tipo, y el orden físico de una enumeración es el que PostgreSQL usa al ordenar por esa columna: `ASSIGN` y `PREPARE` habrían quedado después de `ACKNOWLEDGE`, invirtiendo la secuencia del circuito. Las cinco enumeraciones quedaron en base con el orden que declara el modelo.
+
+| Enumeración | Estado en base |
+| ----------- | -------------- |
+| `StepType` | `ASSIGN`, `PREPARE`, `REVIEW`, `APPROVE`, `ACKNOWLEDGE` |
+| `StepStatus` | `PENDING`, `COMPLETED`, `APPROVED`, `REJECTED`, `SKIPPED` |
+| `WorkflowStatus` | `IN_PROGRESS`, `COMPLETED`, `REJECTED`, `CANCELLED` — sin `PENDING` |
+| `RevisionStatus` | `DRAFT`, `IN_REVIEW`, `APPROVED`, `SUPERSEDED`, `CANCELLED`, `OBSOLETE` |
+| `RevisionScheme` | `ALPHA`, `NUMERIC`, `FREE_TEXT` |
+
+**Entidades nuevas**: `doc_step_signatures`, `doc_settings`, `doc_workflow_templates` y `doc_workflow_template_steps`. **Columnas**: las de cancelación en revisión y circuito, `assignedOrganizerId`, `templateId`, `resolvedById`, `delegationReason`, `revisionScheme` y `defaultOrganizerId` en la configuración de proyecto. **Retiros**: `Document.revisionScheme`, `ReviewStep.signatureHash` y el `@unique` de `ReviewWorkflow.revisionId`.
+
+**Los nueve índices especiales existen en base y fueron probados en las dos direcciones**, dentro de una transacción revertida:
+
+| Caso | Resultado |
+| ---- | --------- |
+| Clase o tipo duplicado con `module`/`classId` nulos | **Rechazado** por las cuatro restricciones de `B15` |
+| Segunda plantilla con el mismo alcance, todo nulo | **Rechazada** por `doc_workflow_templates_scope_key` |
+| Plantilla refinada por clase sobre el mismo proyecto nulo | Aceptada |
+| Dos revisiones `A` abortadas sobre el mismo documento | **Aceptadas** — el código no se consume (`B12`) |
+| Segunda revisión `A` no abortada | **Rechazada** por `document_revisions_code_key` |
+| Circuitos sucesivos cancelado + rechazado + abierto | **Aceptados** — es H-01 cerrado en la base |
+| Segundo circuito abierto sobre la misma revisión | **Rechazado** por `review_workflows_open_revision_key` |
+| Versión sin `checksum` | **Rechazada** por la restricción `NOT NULL` |
+| Segunda firma sobre el mismo paso | **Rechazada** por `doc_step_signatures_stepId_key` |
+
+Las cuatro restricciones de catálogo y el alcance de la plantilla se declaran igual como `@@unique` en el modelo, aunque la cláusula la aporte la migración: Prisma no expresa `NULLS NOT DISTINCT` pero tampoco la ve, de modo que retirarlas del modelo dejaría una deriva permanente y perdería la clave compuesta en el cliente. Los índices parciales, en cambio, son invisibles para Prisma y viven solo en SQL, como en `BLOCK_02`.
+
+**`prisma.config.ts` incorpora `shadowDatabaseUrl`**, que `migrate diff` sobre un directorio de migraciones ahora exige. Es de desarrollo: `migrate deploy` no la usa.
+
+**Estado declarado al cerrar la fase**: `tsc --noEmit` reporta **12 errores**, todos en resolvers —`documents`, `revisions`, `versions` y `workflows`—, y **4 de las 16 pruebas de integración fallan** por la misma causa. Son exactamente las operaciones que la fase D reescribe: `revisionScheme` retirado, `checksum` obligatorio, `WorkflowStatus.PENDING` retirado y `revision.workflow` ahora plural. Las **56 pruebas restantes siguen aprobadas**, incluidas las 43 puras.
+
 ## Referencias
 
 - `README.md`

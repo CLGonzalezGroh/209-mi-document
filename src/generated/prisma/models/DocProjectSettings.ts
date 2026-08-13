@@ -31,6 +31,7 @@ export type DocProjectSettingsAvgAggregateOutputType = {
   createdById: number | null
   updatedById: number | null
   projectId: number | null
+  defaultOrganizerId: number | null
 }
 
 export type DocProjectSettingsSumAggregateOutputType = {
@@ -38,6 +39,7 @@ export type DocProjectSettingsSumAggregateOutputType = {
   createdById: number | null
   updatedById: number | null
   projectId: number | null
+  defaultOrganizerId: number | null
 }
 
 export type DocProjectSettingsMinAggregateOutputType = {
@@ -49,6 +51,8 @@ export type DocProjectSettingsMinAggregateOutputType = {
   projectId: number | null
   documentRole: $Enums.DocumentRole | null
   counterpartyName: string | null
+  revisionScheme: $Enums.RevisionScheme | null
+  defaultOrganizerId: number | null
 }
 
 export type DocProjectSettingsMaxAggregateOutputType = {
@@ -60,6 +64,8 @@ export type DocProjectSettingsMaxAggregateOutputType = {
   projectId: number | null
   documentRole: $Enums.DocumentRole | null
   counterpartyName: string | null
+  revisionScheme: $Enums.RevisionScheme | null
+  defaultOrganizerId: number | null
 }
 
 export type DocProjectSettingsCountAggregateOutputType = {
@@ -71,6 +77,8 @@ export type DocProjectSettingsCountAggregateOutputType = {
   projectId: number
   documentRole: number
   counterpartyName: number
+  revisionScheme: number
+  defaultOrganizerId: number
   _all: number
 }
 
@@ -80,6 +88,7 @@ export type DocProjectSettingsAvgAggregateInputType = {
   createdById?: true
   updatedById?: true
   projectId?: true
+  defaultOrganizerId?: true
 }
 
 export type DocProjectSettingsSumAggregateInputType = {
@@ -87,6 +96,7 @@ export type DocProjectSettingsSumAggregateInputType = {
   createdById?: true
   updatedById?: true
   projectId?: true
+  defaultOrganizerId?: true
 }
 
 export type DocProjectSettingsMinAggregateInputType = {
@@ -98,6 +108,8 @@ export type DocProjectSettingsMinAggregateInputType = {
   projectId?: true
   documentRole?: true
   counterpartyName?: true
+  revisionScheme?: true
+  defaultOrganizerId?: true
 }
 
 export type DocProjectSettingsMaxAggregateInputType = {
@@ -109,6 +121,8 @@ export type DocProjectSettingsMaxAggregateInputType = {
   projectId?: true
   documentRole?: true
   counterpartyName?: true
+  revisionScheme?: true
+  defaultOrganizerId?: true
 }
 
 export type DocProjectSettingsCountAggregateInputType = {
@@ -120,6 +134,8 @@ export type DocProjectSettingsCountAggregateInputType = {
   projectId?: true
   documentRole?: true
   counterpartyName?: true
+  revisionScheme?: true
+  defaultOrganizerId?: true
   _all?: true
 }
 
@@ -218,6 +234,8 @@ export type DocProjectSettingsGroupByOutputType = {
   projectId: number
   documentRole: $Enums.DocumentRole
   counterpartyName: string | null
+  revisionScheme: $Enums.RevisionScheme | null
+  defaultOrganizerId: number | null
   _count: DocProjectSettingsCountAggregateOutputType | null
   _avg: DocProjectSettingsAvgAggregateOutputType | null
   _sum: DocProjectSettingsSumAggregateOutputType | null
@@ -252,6 +270,8 @@ export type DocProjectSettingsWhereInput = {
   projectId?: Prisma.IntFilter<"DocProjectSettings"> | number
   documentRole?: Prisma.EnumDocumentRoleFilter<"DocProjectSettings"> | $Enums.DocumentRole
   counterpartyName?: Prisma.StringNullableFilter<"DocProjectSettings"> | string | null
+  revisionScheme?: Prisma.EnumRevisionSchemeNullableFilter<"DocProjectSettings"> | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.IntNullableFilter<"DocProjectSettings"> | number | null
 }
 
 export type DocProjectSettingsOrderByWithRelationInput = {
@@ -263,6 +283,8 @@ export type DocProjectSettingsOrderByWithRelationInput = {
   projectId?: Prisma.SortOrder
   documentRole?: Prisma.SortOrder
   counterpartyName?: Prisma.SortOrderInput | Prisma.SortOrder
+  revisionScheme?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultOrganizerId?: Prisma.SortOrderInput | Prisma.SortOrder
 }
 
 export type DocProjectSettingsWhereUniqueInput = Prisma.AtLeast<{
@@ -277,6 +299,8 @@ export type DocProjectSettingsWhereUniqueInput = Prisma.AtLeast<{
   updatedById?: Prisma.IntFilter<"DocProjectSettings"> | number
   documentRole?: Prisma.EnumDocumentRoleFilter<"DocProjectSettings"> | $Enums.DocumentRole
   counterpartyName?: Prisma.StringNullableFilter<"DocProjectSettings"> | string | null
+  revisionScheme?: Prisma.EnumRevisionSchemeNullableFilter<"DocProjectSettings"> | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.IntNullableFilter<"DocProjectSettings"> | number | null
 }, "id" | "projectId">
 
 export type DocProjectSettingsOrderByWithAggregationInput = {
@@ -288,6 +312,8 @@ export type DocProjectSettingsOrderByWithAggregationInput = {
   projectId?: Prisma.SortOrder
   documentRole?: Prisma.SortOrder
   counterpartyName?: Prisma.SortOrderInput | Prisma.SortOrder
+  revisionScheme?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultOrganizerId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DocProjectSettingsCountOrderByAggregateInput
   _avg?: Prisma.DocProjectSettingsAvgOrderByAggregateInput
   _max?: Prisma.DocProjectSettingsMaxOrderByAggregateInput
@@ -307,6 +333,8 @@ export type DocProjectSettingsScalarWhereWithAggregatesInput = {
   projectId?: Prisma.IntWithAggregatesFilter<"DocProjectSettings"> | number
   documentRole?: Prisma.EnumDocumentRoleWithAggregatesFilter<"DocProjectSettings"> | $Enums.DocumentRole
   counterpartyName?: Prisma.StringNullableWithAggregatesFilter<"DocProjectSettings"> | string | null
+  revisionScheme?: Prisma.EnumRevisionSchemeNullableWithAggregatesFilter<"DocProjectSettings"> | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.IntNullableWithAggregatesFilter<"DocProjectSettings"> | number | null
 }
 
 export type DocProjectSettingsCreateInput = {
@@ -317,6 +345,8 @@ export type DocProjectSettingsCreateInput = {
   projectId: number
   documentRole: $Enums.DocumentRole
   counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
 }
 
 export type DocProjectSettingsUncheckedCreateInput = {
@@ -328,6 +358,8 @@ export type DocProjectSettingsUncheckedCreateInput = {
   projectId: number
   documentRole: $Enums.DocumentRole
   counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
 }
 
 export type DocProjectSettingsUpdateInput = {
@@ -338,6 +370,8 @@ export type DocProjectSettingsUpdateInput = {
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
   counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type DocProjectSettingsUncheckedUpdateInput = {
@@ -349,6 +383,8 @@ export type DocProjectSettingsUncheckedUpdateInput = {
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
   counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type DocProjectSettingsCreateManyInput = {
@@ -360,6 +396,8 @@ export type DocProjectSettingsCreateManyInput = {
   projectId: number
   documentRole: $Enums.DocumentRole
   counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
 }
 
 export type DocProjectSettingsUpdateManyMutationInput = {
@@ -370,6 +408,8 @@ export type DocProjectSettingsUpdateManyMutationInput = {
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
   counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type DocProjectSettingsUncheckedUpdateManyInput = {
@@ -381,6 +421,8 @@ export type DocProjectSettingsUncheckedUpdateManyInput = {
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
   counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type DocProjectSettingsCountOrderByAggregateInput = {
@@ -392,6 +434,8 @@ export type DocProjectSettingsCountOrderByAggregateInput = {
   projectId?: Prisma.SortOrder
   documentRole?: Prisma.SortOrder
   counterpartyName?: Prisma.SortOrder
+  revisionScheme?: Prisma.SortOrder
+  defaultOrganizerId?: Prisma.SortOrder
 }
 
 export type DocProjectSettingsAvgOrderByAggregateInput = {
@@ -399,6 +443,7 @@ export type DocProjectSettingsAvgOrderByAggregateInput = {
   createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
+  defaultOrganizerId?: Prisma.SortOrder
 }
 
 export type DocProjectSettingsMaxOrderByAggregateInput = {
@@ -410,6 +455,8 @@ export type DocProjectSettingsMaxOrderByAggregateInput = {
   projectId?: Prisma.SortOrder
   documentRole?: Prisma.SortOrder
   counterpartyName?: Prisma.SortOrder
+  revisionScheme?: Prisma.SortOrder
+  defaultOrganizerId?: Prisma.SortOrder
 }
 
 export type DocProjectSettingsMinOrderByAggregateInput = {
@@ -421,6 +468,8 @@ export type DocProjectSettingsMinOrderByAggregateInput = {
   projectId?: Prisma.SortOrder
   documentRole?: Prisma.SortOrder
   counterpartyName?: Prisma.SortOrder
+  revisionScheme?: Prisma.SortOrder
+  defaultOrganizerId?: Prisma.SortOrder
 }
 
 export type DocProjectSettingsSumOrderByAggregateInput = {
@@ -428,10 +477,15 @@ export type DocProjectSettingsSumOrderByAggregateInput = {
   createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
+  defaultOrganizerId?: Prisma.SortOrder
 }
 
 export type EnumDocumentRoleFieldUpdateOperationsInput = {
   set?: $Enums.DocumentRole
+}
+
+export type NullableEnumRevisionSchemeFieldUpdateOperationsInput = {
+  set?: $Enums.RevisionScheme | null
 }
 
 
@@ -445,6 +499,8 @@ export type DocProjectSettingsSelect<ExtArgs extends runtime.Types.Extensions.In
   projectId?: boolean
   documentRole?: boolean
   counterpartyName?: boolean
+  revisionScheme?: boolean
+  defaultOrganizerId?: boolean
 }, ExtArgs["result"]["docProjectSettings"]>
 
 export type DocProjectSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -456,6 +512,8 @@ export type DocProjectSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.
   projectId?: boolean
   documentRole?: boolean
   counterpartyName?: boolean
+  revisionScheme?: boolean
+  defaultOrganizerId?: boolean
 }, ExtArgs["result"]["docProjectSettings"]>
 
 export type DocProjectSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -467,6 +525,8 @@ export type DocProjectSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.
   projectId?: boolean
   documentRole?: boolean
   counterpartyName?: boolean
+  revisionScheme?: boolean
+  defaultOrganizerId?: boolean
 }, ExtArgs["result"]["docProjectSettings"]>
 
 export type DocProjectSettingsSelectScalar = {
@@ -478,9 +538,11 @@ export type DocProjectSettingsSelectScalar = {
   projectId?: boolean
   documentRole?: boolean
   counterpartyName?: boolean
+  revisionScheme?: boolean
+  defaultOrganizerId?: boolean
 }
 
-export type DocProjectSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "projectId" | "documentRole" | "counterpartyName", ExtArgs["result"]["docProjectSettings"]>
+export type DocProjectSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "projectId" | "documentRole" | "counterpartyName" | "revisionScheme" | "defaultOrganizerId", ExtArgs["result"]["docProjectSettings"]>
 
 export type $DocProjectSettingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DocProjectSettings"
@@ -494,6 +556,8 @@ export type $DocProjectSettingsPayload<ExtArgs extends runtime.Types.Extensions.
     projectId: number
     documentRole: $Enums.DocumentRole
     counterpartyName: string | null
+    revisionScheme: $Enums.RevisionScheme | null
+    defaultOrganizerId: number | null
   }, ExtArgs["result"]["docProjectSettings"]>
   composites: {}
 }
@@ -925,6 +989,8 @@ export interface DocProjectSettingsFieldRefs {
   readonly projectId: Prisma.FieldRef<"DocProjectSettings", 'Int'>
   readonly documentRole: Prisma.FieldRef<"DocProjectSettings", 'DocumentRole'>
   readonly counterpartyName: Prisma.FieldRef<"DocProjectSettings", 'String'>
+  readonly revisionScheme: Prisma.FieldRef<"DocProjectSettings", 'RevisionScheme'>
+  readonly defaultOrganizerId: Prisma.FieldRef<"DocProjectSettings", 'Int'>
 }
     
 

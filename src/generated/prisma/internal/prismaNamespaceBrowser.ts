@@ -59,10 +59,14 @@ export const ModelName = {
   DocumentVersion: 'DocumentVersion',
   ReviewWorkflow: 'ReviewWorkflow',
   ReviewStep: 'ReviewStep',
+  DocStepSignature: 'DocStepSignature',
   Transmittal: 'Transmittal',
   TransmittalItem: 'TransmittalItem',
   Attachment: 'Attachment',
   DocProjectSettings: 'DocProjectSettings',
+  DocSettings: 'DocSettings',
+  DocWorkflowTemplate: 'DocWorkflowTemplate',
+  DocWorkflowTemplateStep: 'DocWorkflowTemplateStep',
   DocProjectMember: 'DocProjectMember',
   DocWorkflowEvent: 'DocWorkflowEvent',
   DocAuditEvent: 'DocAuditEvent',
@@ -117,7 +121,7 @@ export const DocumentTypeScalarFieldEnum = {
   module: 'module',
   classId: 'classId',
   description: 'description',
-  requiresWorkflow: 'requiresWorkflow'
+  requiresFormalReview: 'requiresFormalReview'
 } as const
 
 export type DocumentTypeScalarFieldEnum = (typeof DocumentTypeScalarFieldEnum)[keyof typeof DocumentTypeScalarFieldEnum]
@@ -138,7 +142,6 @@ export const DocumentScalarFieldEnum = {
   projectId: 'projectId',
   documentTypeId: 'documentTypeId',
   documentClassId: 'documentClassId',
-  revisionScheme: 'revisionScheme',
   projectTaskId: 'projectTaskId'
 } as const
 
@@ -167,7 +170,11 @@ export const DocumentRevisionScalarFieldEnum = {
   revisionCode: 'revisionCode',
   status: 'status',
   approvedById: 'approvedById',
-  approvedAt: 'approvedAt'
+  approvedAt: 'approvedAt',
+  assignedOrganizerId: 'assignedOrganizerId',
+  cancelledAt: 'cancelledAt',
+  cancelledById: 'cancelledById',
+  cancelReason: 'cancelReason'
 } as const
 
 export type DocumentRevisionScalarFieldEnum = (typeof DocumentRevisionScalarFieldEnum)[keyof typeof DocumentRevisionScalarFieldEnum]
@@ -197,7 +204,11 @@ export const ReviewWorkflowScalarFieldEnum = {
   status: 'status',
   initiatedById: 'initiatedById',
   initiatedAt: 'initiatedAt',
-  completedAt: 'completedAt'
+  completedAt: 'completedAt',
+  templateId: 'templateId',
+  cancelledAt: 'cancelledAt',
+  cancelledById: 'cancelledById',
+  cancelReason: 'cancelReason'
 } as const
 
 export type ReviewWorkflowScalarFieldEnum = (typeof ReviewWorkflowScalarFieldEnum)[keyof typeof ReviewWorkflowScalarFieldEnum]
@@ -213,10 +224,24 @@ export const ReviewStepScalarFieldEnum = {
   status: 'status',
   comments: 'comments',
   completedAt: 'completedAt',
-  signatureHash: 'signatureHash'
+  resolvedById: 'resolvedById',
+  delegationReason: 'delegationReason'
 } as const
 
 export type ReviewStepScalarFieldEnum = (typeof ReviewStepScalarFieldEnum)[keyof typeof ReviewStepScalarFieldEnum]
+
+
+export const DocStepSignatureScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  stepId: 'stepId',
+  algorithm: 'algorithm',
+  payload: 'payload',
+  hash: 'hash'
+} as const
+
+export type DocStepSignatureScalarFieldEnum = (typeof DocStepSignatureScalarFieldEnum)[keyof typeof DocStepSignatureScalarFieldEnum]
 
 
 export const TransmittalScalarFieldEnum = {
@@ -274,10 +299,53 @@ export const DocProjectSettingsScalarFieldEnum = {
   updatedById: 'updatedById',
   projectId: 'projectId',
   documentRole: 'documentRole',
-  counterpartyName: 'counterpartyName'
+  counterpartyName: 'counterpartyName',
+  revisionScheme: 'revisionScheme',
+  defaultOrganizerId: 'defaultOrganizerId'
 } as const
 
 export type DocProjectSettingsScalarFieldEnum = (typeof DocProjectSettingsScalarFieldEnum)[keyof typeof DocProjectSettingsScalarFieldEnum]
+
+
+export const DocSettingsScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  revisionScheme: 'revisionScheme'
+} as const
+
+export type DocSettingsScalarFieldEnum = (typeof DocSettingsScalarFieldEnum)[keyof typeof DocSettingsScalarFieldEnum]
+
+
+export const DocWorkflowTemplateScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  terminatedAt: 'terminatedAt',
+  isSys: 'isSys',
+  name: 'name',
+  description: 'description',
+  projectId: 'projectId',
+  documentClassId: 'documentClassId',
+  documentTypeId: 'documentTypeId'
+} as const
+
+export type DocWorkflowTemplateScalarFieldEnum = (typeof DocWorkflowTemplateScalarFieldEnum)[keyof typeof DocWorkflowTemplateScalarFieldEnum]
+
+
+export const DocWorkflowTemplateStepScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  templateId: 'templateId',
+  stepOrder: 'stepOrder',
+  stepType: 'stepType',
+  assignedToId: 'assignedToId'
+} as const
+
+export type DocWorkflowTemplateStepScalarFieldEnum = (typeof DocWorkflowTemplateStepScalarFieldEnum)[keyof typeof DocWorkflowTemplateStepScalarFieldEnum]
 
 
 export const DocProjectMemberScalarFieldEnum = {

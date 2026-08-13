@@ -33,37 +33,51 @@ enum SysLogModule {
   COMERCIAL
 }
 
+// Esquema con que se numera la revisión siguiente (BLOQUE 03, B13).
+// NO se persiste en el documento: se elige al crear cada revisión y el sistema
+// propone el código. El escalón del documento se lee de su última revisión.
+// Alineado con el precedente de digitalización (CatalogRevisionScheme).
 enum RevisionScheme {
-  ALPHABETICAL // A, B, C, ..., Z, AA, AB, ...
-  NUMERIC // 0, 1, 2, 3, ...
+  ALPHA // A, B, C, ..., Z, AA, AB, ... (generado por el sistema)
+  NUMERIC // 0, 1, 2, 3, ... (generado por el sistema)
+  FREE_TEXT // Texto libre, lo escribe el usuario
 }
 
 enum RevisionStatus {
-  DRAFT // En borrador, se pueden subir nuevas versiones
-  IN_REVIEW // Enviado a workflow de revisión
-  APPROVED // Aprobado, no se puede modificar
-  SUPERSEDED // Reemplazado por una nueva revisión
-  OBSOLETE // Obsoleto, ya no aplica
+  DRAFT // En elaboración: el circuito está en armado o en elaboración
+  IN_REVIEW // Sometida: el circuito avanza por revisión y aprobación
+  APPROVED // Aprobada, metadata congelada, no admite versiones nuevas
+  SUPERSEDED // Reemplazada por una revisión posterior aprobada
+  CANCELLED // Abandonada antes de aprobarse (BLOQUE 03, B11). No consume código
+  OBSOLETE // SIN USO — reservado para los estados terminales por respuesta de la
+  // contraparte que define BLOCK_04. Declarado sin uso para no
+  // pagar dos migraciones de enumeración (B2).
 }
 
 enum WorkflowStatus {
-  PENDING // Creado pero no iniciado
-  IN_PROGRESS // Al menos un step en proceso
-  COMPLETED // Todos los steps aprobados
-  REJECTED // Al menos un step rechazado
+  IN_PROGRESS // Circuito abierto. Nace así: el circuito se instancia iniciado (B2)
+  COMPLETED // Los pasos que deciden se resolvieron favorablemente
+  REJECTED // Un paso que decide rechazó
+  CANCELLED // Retirado sin juicio, con motivo propio (BLOQUE 03, B11)
 }
 
+// Pasos del circuito, en el orden en que se recorren (BLOQUE 03, B1).
+// Los dos primeros los pone el sistema y no la plantilla; los tres últimos
+// son las casillas del rótulo del plano más el acuse.
 enum StepType {
+  ASSIGN // Armado: designa elaborador y revisores, y materializa los pasos siguientes
+  PREPARE // Elaboración: el documento está hecho y se somete a revisión
   REVIEW // Revisión técnica
   APPROVE // Aprobación formal
   ACKNOWLEDGE // Toma de conocimiento
 }
 
 enum StepStatus {
-  PENDING // No evaluado aún
-  APPROVED // Aprobado por el asignado
-  REJECTED // Rechazado por el asignado
-  SKIPPED // Saltado (ej: aprobador anterior ya rechazó)
+  PENDING // No resuelto aún
+  COMPLETED // Cumplido, sin emitir juicio: ASSIGN, PREPARE y ACKNOWLEDGE (B8)
+  APPROVED // Aprobado por quien resolvió: solo REVIEW y APPROVE
+  REJECTED // Rechazado por quien resolvió: solo REVIEW y APPROVE
+  SKIPPED // Saltado por rechazo o por cancelación del circuito
 }
 
 enum TransmittalStatus {
@@ -137,12 +151,19 @@ model DocumentClass {
   sortOrder   Int         @default(0)
 
   // Relaciones
-  documentTypes DocumentType[]
-  documents     Document[]
-  scannedFiles  ScannedFile[]
+  documentTypes     DocumentType[]
+  documents         Document[]
+  scannedFiles      ScannedFile[]
+  workflowTemplates DocWorkflowTemplate[]
 
-  @@unique([name, module]) // Único dentro del mismo módulo
-  @@unique([code, module]) // Único dentro del mismo módulo
+  // Los dos índices se recrean con NULLS NOT DISTINCT en la migración de
+  // BLOQUE 03, B15, porque Prisma no expresa esa cláusula. Se declaran igual
+  // acá para conservar la clave compuesta en el cliente y para que la ausencia
+  // no se lea como deriva. Cierra H-19 en el catálogo: sin la cláusula, dos
+  // entradas sin módulo —el caso más frecuente en un catálogo recién sembrado—
+  // no se consideraban duplicadas.
+  @@unique([name, module]) // NULLS NOT DISTINCT en la base
+  @@unique([code, module]) // NULLS NOT DISTINCT en la base
   @@map("document_classes")
 }
 
@@ -155,20 +176,28 @@ model DocumentType {
   terminatedAt DateTime?
   isSys        Boolean   @default(false)
 
-  name             String // "Procedimiento", "Plano", "Informe"
-  code             String // "PROC", "DWG", "RPT"
-  module           ModuleType? // null = disponible para todos los módulos
-  classId          Int? // null = disponible para todas las clases
-  description      String?
-  requiresWorkflow Boolean     @default(false)
+  name        String // "Procedimiento", "Plano", "Informe"
+  code        String // "PROC", "DWG", "RPT"
+  module      ModuleType? // null = disponible para todos los módulos
+  classId     Int? // null = disponible para todas las clases
+  description String?
+
+  // Distingue el circuito formal del mínimo (BLOQUE 03, B1). Bajo D-03 toda
+  // revisión tiene circuito, de modo que ya no indica si lo hay.
+  // Es SUGERENCIA y no invariante: propone el armado, no lo impone.
+  requiresFormalReview Boolean @default(false)
 
   // Relaciones
-  class        DocumentClass? @relation(fields: [classId], references: [id])
-  documents    Document[]
-  scannedFiles ScannedFile[]
+  class             DocumentClass?        @relation(fields: [classId], references: [id])
+  documents         Document[]
+  scannedFiles      ScannedFile[]
+  workflowTemplates DocWorkflowTemplate[]
 
-  @@unique([name, classId, module]) // Único dentro de la misma clase y módulo
-  @@unique([code, classId, module]) // Único dentro de la misma clase y módulo
+  // Mismo tratamiento que en DocumentClass (B15): los dos índices se recrean
+  // con NULLS NOT DISTINCT en la migración. Con classId o module nulos la
+  // restricción anterior no impedía el duplicado.
+  @@unique([name, classId, module]) // NULLS NOT DISTINCT en la base
+  @@unique([code, classId, module]) // NULLS NOT DISTINCT en la base
   @@index([classId])
   @@map("document_types")
 }
@@ -197,7 +226,11 @@ model Document {
 
   documentTypeId  Int
   documentClassId Int? // Clase de documento (null = sin clasificar)
-  revisionScheme  RevisionScheme @default(ALPHABETICAL) // Esquema de revisión actual
+
+  // NO hay revisionScheme: el esquema no se persiste (BLOQUE 03, B13). Se elige
+  // al crear cada revisión y se infiere de la última revisión no abortada.
+  // Un esquema almacenado podía contradecir a los hechos —declarar NUMERIC con
+  // la revisión vigente en A— y obligaba a una precondición para taparlo.
 
   // Federación A.5: documento como entregable de una tarea de proyecto (capa 1)
   // null cuando module ≠ PROJECTS o cuando todavía no fue vinculado.
@@ -258,13 +291,32 @@ model DocumentRevision {
   approvedById Int?
   approvedAt   DateTime?
 
+  // Armador designado al crear la revisión (BLOQUE 03, B3). Obligatorio: es el
+  // único actor que debe conocerse en el alta, porque todo lo demás lo trae la
+  // plantilla o lo decide el armado. Su valor por defecto lo aporta
+  // DocProjectSettings.defaultOrganizerId. Referencia externa sin FK: User vive
+  // en mi-admin. El paso de armado se reasigna después como cualquier otro (B9).
+  assignedOrganizerId Int
+
+  // Abandono de la revisión (BLOQUE 03, B11). Solo desde DRAFT o IN_REVIEW:
+  // aprobada, la revisión es el documento vigente y lo que corresponde es abrir
+  // la siguiente. El motivo vive en el modelo y no en el meta de un evento (H-05).
+  cancelledAt   DateTime?
+  cancelledById Int?
+  cancelReason  String?
+
   // Relaciones
   document         Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
   versions         DocumentVersion[]
-  workflow         ReviewWorkflow?
+  workflows        ReviewWorkflow[] // Varios circuitos sucesivos (D-11, B2)
   transmittalItems TransmittalItem[]
 
-  @@unique([documentId, revisionCode])
+  // Unicidad del código por ÍNDICE ÚNICO PARCIAL, creado en SQL (BLOQUE 03, B12):
+  //   document_revisions_code_key  UNIQUE (documentId, revisionCode) WHERE status <> 'CANCELLED'
+  // La revisión abortada no consume código: sobre A puede abrirse B, abortarse y
+  // volver a abrirse B. Un documento puede tener varias abortadas con el mismo
+  // código, y cada una se distingue por su fecha y su motivo.
+  @@index([documentId])
   @@map("document_revisions")
 }
 
@@ -280,8 +332,14 @@ model DocumentVersion {
   fileName      String // Nombre original del archivo
   fileSize      Int // Tamaño en bytes
   mimeType      String // "application/pdf", "image/jpeg"
-  checksum      String? // SHA-256 para integridad
-  comment       String? // "Corrección del conexionado en la página 5"
+
+  // SHA-256, OBLIGATORIO en toda versión (BLOQUE 03, B4 y H-27). Es lo que la
+  // firma acredita, junto con la metadata del documento.
+  // DECLARADO: hoy nadie lo calcula. mi-fileserver no ve los bytes por diseño,
+  // de modo que hasta BLOCK_05 debe enviarlo quien invoca la API.
+  checksum String
+
+  comment String? // "Corrección del conexionado en la página 5". Opcional (B4)
 
   // Relaciones
   revision DocumentRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
@@ -290,43 +348,116 @@ model DocumentVersion {
   @@map("document_versions")
 }
 
-// Workflow de revisión (ISO 9001)
+// Circuito de revisión (ISO 9001). Bajo BLOQUE 03, B1 abarca el ciclo completo:
+// se instancia CON LA REVISIÓN y no con la sumisión, y arranca en el armado.
+// Una revisión admite varios circuitos sucesivos (D-11, B2): el rechazo abre uno
+// desde PREPARE con el mismo elenco copiado, y la cancelación uno desde ASSIGN.
 model ReviewWorkflow {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
 
-  revisionId    Int            @unique
-  status        WorkflowStatus @default(PENDING)
+  revisionId    Int
+  status        WorkflowStatus @default(IN_PROGRESS) // El circuito nace iniciado (B2)
   initiatedById Int
   initiatedAt   DateTime       @default(now())
   completedAt   DateTime?
 
-  // Relaciones
-  revision DocumentRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
-  steps    ReviewStep[]
+  // Plantilla propuesta al instanciarse (BLOQUE 03, B3). Solo referencia de
+  // procedencia: los valores SE COPIAN al materializarse los pasos, de modo que
+  // cambiar la plantilla no altera circuitos en curso.
+  templateId Int?
 
+  // Cancelación del circuito (BLOQUE 03, B11), distinguible del rechazo. Se
+  // admite en cualquier punto, aun con pasos firmados: nada se elimina.
+  cancelledAt   DateTime?
+  cancelledById Int?
+  cancelReason  String?
+
+  // Relaciones
+  revision DocumentRevision     @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  steps    ReviewStep[]
+  template DocWorkflowTemplate? @relation(fields: [templateId], references: [id])
+
+  // Un solo circuito abierto por revisión, por ÍNDICE ÚNICO PARCIAL en SQL (B2):
+  //   review_workflows_open_revision_key  UNIQUE (revisionId) WHERE status = 'IN_PROGRESS'
+  // Reemplaza al @unique de revisionId, que admitía un solo circuito por revisión
+  // y dejaba al documento rechazado sin salida (H-01). El circuito vigente se
+  // DERIVA: no se almacena un currentWorkflowId, que podría desincronizarse.
+  @@index([revisionId])
+  @@index([templateId])
   @@map("review_workflows")
 }
 
-// Pasos individuales del workflow
+// Pasos individuales del circuito. Su estructura es inmutable una vez armada
+// (B9): no se agregan, quitan ni reordenan. Lo único editable es el actor.
 model ReviewStep {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
 
-  workflowId    Int
-  stepOrder     Int // Orden de ejecución
-  stepType      StepType // REVIEW, APPROVE, ACKNOWLEDGE
-  assignedToId  Int // Referencia al User del sistema admin
-  status        StepStatus @default(PENDING)
-  comments      String?
-  completedAt   DateTime?
-  signatureHash String? // Hash para trazabilidad ISO
+  workflowId   Int
+  stepOrder    Int // Orden de ejecución
+  stepType     StepType // ASSIGN, PREPARE, REVIEW, APPROVE, ACKNOWLEDGE
+  assignedToId Int // Referencia al User del sistema admin
+  status       StepStatus @default(PENDING)
+  comments     String?
+  completedAt  DateTime?
+
+  // Quién resolvió efectivamente el paso (BLOQUE 03, B9). Siempre informado al
+  // resolverse; nulo mientras el paso está pendiente. La delegación se DERIVA de
+  // la divergencia con assignedToId: un booleano sería un dato calculable que
+  // puede contradecir a los dos campos que lo originan.
+  resolvedById Int?
+
+  // Motivo, obligatorio cuando quien resuelve no es el asignado (B9). Se
+  // conserva acá y dentro del payload firmado.
+  delegationReason String?
+
+  // El signatureHash se trasladó a DocStepSignature (B7): un hash sin sus
+  // insumos no es verificable, que es el defecto de H-06.
 
   // Relaciones
-  workflow ReviewWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflow  ReviewWorkflow    @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  signature DocStepSignature?
 
   @@unique([workflowId, stepOrder])
+  @@index([assignedToId])
   @@map("review_steps")
+}
+
+// Firma de un paso (BLOQUE 03, B7 y D-05). Objeto propio, uno por firma,
+// referenciado por el paso: la firma es evidencia INMUTABLE y el paso se sigue
+// actualizando, de modo que separarlos permite declararla inmutable sin
+// excepciones y le da su propio tipo de objeto en la traza.
+//
+// Firman los pasos que actúan sobre una versión —PREPARE, REVIEW, APPROVE y
+// ACKNOWLEDGE—. ASSIGN NO firma: al completarse puede no existir todavía
+// ninguna versión, de modo que no habría objeto que acreditar.
+//
+// Ninguna firma afirma nada sobre las versiones posteriores: cada una acredita
+// aquella sobre la que actuó su autor.
+model DocStepSignature {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  createdById Int // Coincide con ReviewStep.resolvedById
+
+  stepId Int @unique // Un paso se resuelve una sola vez
+
+  // Payload canónico SERIALIZADO tal como se usó para calcular el hash, más el
+  // algoritmo. Es texto y no Json a propósito: jsonb normaliza y reordena las
+  // claves, con lo que el hash dejaría de poder recalcularse sobre lo guardado.
+  //
+  // Contenido: el paso, su circuito y su revisión; la versión vigente al firmar
+  // con su número, fileKey y checksum; la metadata del documento vigente al
+  // firmar (B6); el usuario asignado y el que resolvió, con el motivo cuando
+  // difieren; y la acción —aprobación o rechazo— con su momento.
+  algorithm String @default("SHA-256")
+  payload   String @db.Text
+  hash      String
+
+  // Relaciones
+  step ReviewStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+
+  @@map("doc_step_signatures")
 }
 
 // Transmittals de ingeniería
@@ -412,7 +543,115 @@ model DocProjectSettings {
   // que por definición no tiene contraparte.
   counterpartyName String?
 
+  // Esquema con que el proyecto propone el código de la PRIMERA revisión de sus
+  // documentos (BLOQUE 03, B13). Nulo = rige el valor por defecto del despliegue
+  // (DocSettings). De la segunda revisión en adelante el esquema se infiere de la
+  // última revisión no abortada, que es el escalón del documento.
+  revisionScheme RevisionScheme?
+
+  // Armador por defecto del proyecto —habitualmente el jefe de proyecto—, con el
+  // que el alta llega con el campo lleno (B3). Nulo = sin valor por defecto, y
+  // quien crea el documento debe designarlo. Referencia externa sin FK.
+  defaultOrganizerId Int?
+
   @@map("doc_project_settings")
+}
+
+// ================================
+// CICLO INTERNO — BLOQUE 03
+// ================================
+
+// Configuración documental del despliegue (BLOQUE 03, B13 y Q23).
+// REGISTRO ÚNICO, con el patrón de CatalogSettings de digitalización: fija la
+// convención del cliente sin desplegar y sin configurar proyecto por proyecto.
+// Es el último escalón de la precedencia documento ▸ proyecto ▸ despliegue.
+model DocSettings {
+  id          Int       @id @default(1)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+  updatedById Int       @default(1)
+
+  // Esquema con que se propone el código de una primera revisión cuando el
+  // proyecto no declara el suyo. SIN etiqueta configurable: "revisión" es
+  // terminología establecida del dominio documental (B13).
+  revisionScheme RevisionScheme @default(ALPHA)
+
+  @@map("doc_settings")
+}
+
+// Plantilla del circuito (BLOQUE 03, B3). PROPONE el circuito; el armado lo
+// define. Sin ella el armador declararía el circuito paso por paso en cada
+// documento, que es el trabajo que el control documental no puede asumir.
+//
+// Alcance por proyecto, con refinamiento por clase y por tipo de documento:
+// se resuelve contra la tupla del propio documento y GANA LA MÁS ESPECÍFICA
+// —tipo, después clase, después proyecto—. La plantilla del proyecto con clase
+// y tipo nulos ES su default, sin necesidad de una marca aparte.
+//
+// projectId nulo alcanza a los documentos del régimen de publicación (BLOQUE 02,
+// B1), que no pertenecen a ningún proyecto.
+model DocWorkflowTemplate {
+  id           Int       @id @default(autoincrement())
+  createdAt    DateTime  @default(now())
+  createdById  Int
+  updatedAt    DateTime? @updatedAt
+  updatedById  Int       @default(1)
+  terminatedAt DateTime?
+  isSys        Boolean   @default(false)
+
+  name        String
+  description String?
+
+  // Alcance. Referencia externa sin FK para projectId: Project vive en mi-project.
+  projectId       Int?
+  documentClassId Int?
+  documentTypeId  Int?
+
+  // Relaciones
+  documentClass DocumentClass?            @relation(fields: [documentClassId], references: [id])
+  documentType  DocumentType?             @relation(fields: [documentTypeId], references: [id])
+  steps         DocWorkflowTemplateStep[]
+  workflows     ReviewWorkflow[]
+
+  // Unicidad del alcance, recreada con NULLS NOT DISTINCT en la migración (B3).
+  // Sin la cláusula, la tupla con columnas anulables repetiría el defecto de H-19.
+  // Acá corresponde y en B2 de BLOQUE 02 no: allá una sola tupla expresaba dos
+  // reglas distintas; acá es una única regla con refinamientos opcionales.
+  @@unique([projectId, documentClassId, documentTypeId], map: "doc_workflow_templates_scope_key") // NULLS NOT DISTINCT en la base
+  @@index([projectId])
+  @@index([documentClassId])
+  @@index([documentTypeId])
+  @@map("doc_workflow_templates")
+}
+
+// Pasos de la plantilla: orden, tipo y actor preasignado opcional.
+//
+// NO incluye el armado ni la elaboración: esos dos pasos los pone el sistema,
+// según el rol documental del proyecto —en el rol Receptor no hay elaboración
+// (B16)—. Una plantilla que pudiera omitirlos permitiría circuitos sin elaborador.
+//
+// El ELABORADOR NUNCA SE PREASIGNA: designarlo es distribuir carga de trabajo y
+// se decide documento por documento. Por eso el armado tiene contenido incluso
+// con la plantilla más completa, y por eso siempre existe.
+model DocWorkflowTemplateStep {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  templateId Int
+  stepOrder  Int
+
+  // Solo REVIEW, APPROVE y ACKNOWLEDGE. ASSIGN y PREPARE los pone el sistema.
+  stepType StepType
+
+  // Actor preasignado, opcional. Nulo = lo designa el armado.
+  // Referencia externa sin FK: User vive en mi-admin.
+  assignedToId Int?
+
+  // Relaciones
+  template DocWorkflowTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, stepOrder])
+  @@map("doc_workflow_template_steps")
 }
 
 // Membresía documental de un proyecto (D-15).

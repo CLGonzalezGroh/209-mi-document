@@ -35,8 +35,9 @@ export type SysLogModule = (typeof SysLogModule)[keyof typeof SysLogModule]
 
 
 export const RevisionScheme = {
-  ALPHABETICAL: 'ALPHABETICAL',
-  NUMERIC: 'NUMERIC'
+  ALPHA: 'ALPHA',
+  NUMERIC: 'NUMERIC',
+  FREE_TEXT: 'FREE_TEXT'
 } as const
 
 export type RevisionScheme = (typeof RevisionScheme)[keyof typeof RevisionScheme]
@@ -47,6 +48,7 @@ export const RevisionStatus = {
   IN_REVIEW: 'IN_REVIEW',
   APPROVED: 'APPROVED',
   SUPERSEDED: 'SUPERSEDED',
+  CANCELLED: 'CANCELLED',
   OBSOLETE: 'OBSOLETE'
 } as const
 
@@ -54,16 +56,18 @@ export type RevisionStatus = (typeof RevisionStatus)[keyof typeof RevisionStatus
 
 
 export const WorkflowStatus = {
-  PENDING: 'PENDING',
   IN_PROGRESS: 'IN_PROGRESS',
   COMPLETED: 'COMPLETED',
-  REJECTED: 'REJECTED'
+  REJECTED: 'REJECTED',
+  CANCELLED: 'CANCELLED'
 } as const
 
 export type WorkflowStatus = (typeof WorkflowStatus)[keyof typeof WorkflowStatus]
 
 
 export const StepType = {
+  ASSIGN: 'ASSIGN',
+  PREPARE: 'PREPARE',
   REVIEW: 'REVIEW',
   APPROVE: 'APPROVE',
   ACKNOWLEDGE: 'ACKNOWLEDGE'
@@ -74,6 +78,7 @@ export type StepType = (typeof StepType)[keyof typeof StepType]
 
 export const StepStatus = {
   PENDING: 'PENDING',
+  COMPLETED: 'COMPLETED',
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED',
   SKIPPED: 'SKIPPED'

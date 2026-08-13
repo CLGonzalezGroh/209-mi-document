@@ -31,6 +31,7 @@ export type ReviewStepAvgAggregateOutputType = {
   workflowId: number | null
   stepOrder: number | null
   assignedToId: number | null
+  resolvedById: number | null
 }
 
 export type ReviewStepSumAggregateOutputType = {
@@ -38,6 +39,7 @@ export type ReviewStepSumAggregateOutputType = {
   workflowId: number | null
   stepOrder: number | null
   assignedToId: number | null
+  resolvedById: number | null
 }
 
 export type ReviewStepMinAggregateOutputType = {
@@ -50,7 +52,8 @@ export type ReviewStepMinAggregateOutputType = {
   status: $Enums.StepStatus | null
   comments: string | null
   completedAt: Date | null
-  signatureHash: string | null
+  resolvedById: number | null
+  delegationReason: string | null
 }
 
 export type ReviewStepMaxAggregateOutputType = {
@@ -63,7 +66,8 @@ export type ReviewStepMaxAggregateOutputType = {
   status: $Enums.StepStatus | null
   comments: string | null
   completedAt: Date | null
-  signatureHash: string | null
+  resolvedById: number | null
+  delegationReason: string | null
 }
 
 export type ReviewStepCountAggregateOutputType = {
@@ -76,7 +80,8 @@ export type ReviewStepCountAggregateOutputType = {
   status: number
   comments: number
   completedAt: number
-  signatureHash: number
+  resolvedById: number
+  delegationReason: number
   _all: number
 }
 
@@ -86,6 +91,7 @@ export type ReviewStepAvgAggregateInputType = {
   workflowId?: true
   stepOrder?: true
   assignedToId?: true
+  resolvedById?: true
 }
 
 export type ReviewStepSumAggregateInputType = {
@@ -93,6 +99,7 @@ export type ReviewStepSumAggregateInputType = {
   workflowId?: true
   stepOrder?: true
   assignedToId?: true
+  resolvedById?: true
 }
 
 export type ReviewStepMinAggregateInputType = {
@@ -105,7 +112,8 @@ export type ReviewStepMinAggregateInputType = {
   status?: true
   comments?: true
   completedAt?: true
-  signatureHash?: true
+  resolvedById?: true
+  delegationReason?: true
 }
 
 export type ReviewStepMaxAggregateInputType = {
@@ -118,7 +126,8 @@ export type ReviewStepMaxAggregateInputType = {
   status?: true
   comments?: true
   completedAt?: true
-  signatureHash?: true
+  resolvedById?: true
+  delegationReason?: true
 }
 
 export type ReviewStepCountAggregateInputType = {
@@ -131,7 +140,8 @@ export type ReviewStepCountAggregateInputType = {
   status?: true
   comments?: true
   completedAt?: true
-  signatureHash?: true
+  resolvedById?: true
+  delegationReason?: true
   _all?: true
 }
 
@@ -231,7 +241,8 @@ export type ReviewStepGroupByOutputType = {
   status: $Enums.StepStatus
   comments: string | null
   completedAt: Date | null
-  signatureHash: string | null
+  resolvedById: number | null
+  delegationReason: string | null
   _count: ReviewStepCountAggregateOutputType | null
   _avg: ReviewStepAvgAggregateOutputType | null
   _sum: ReviewStepSumAggregateOutputType | null
@@ -267,8 +278,10 @@ export type ReviewStepWhereInput = {
   status?: Prisma.EnumStepStatusFilter<"ReviewStep"> | $Enums.StepStatus
   comments?: Prisma.StringNullableFilter<"ReviewStep"> | string | null
   completedAt?: Prisma.DateTimeNullableFilter<"ReviewStep"> | Date | string | null
-  signatureHash?: Prisma.StringNullableFilter<"ReviewStep"> | string | null
+  resolvedById?: Prisma.IntNullableFilter<"ReviewStep"> | number | null
+  delegationReason?: Prisma.StringNullableFilter<"ReviewStep"> | string | null
   workflow?: Prisma.XOR<Prisma.ReviewWorkflowScalarRelationFilter, Prisma.ReviewWorkflowWhereInput>
+  signature?: Prisma.XOR<Prisma.DocStepSignatureNullableScalarRelationFilter, Prisma.DocStepSignatureWhereInput> | null
 }
 
 export type ReviewStepOrderByWithRelationInput = {
@@ -281,8 +294,10 @@ export type ReviewStepOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   comments?: Prisma.SortOrderInput | Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  signatureHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  resolvedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  delegationReason?: Prisma.SortOrderInput | Prisma.SortOrder
   workflow?: Prisma.ReviewWorkflowOrderByWithRelationInput
+  signature?: Prisma.DocStepSignatureOrderByWithRelationInput
 }
 
 export type ReviewStepWhereUniqueInput = Prisma.AtLeast<{
@@ -299,8 +314,10 @@ export type ReviewStepWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumStepStatusFilter<"ReviewStep"> | $Enums.StepStatus
   comments?: Prisma.StringNullableFilter<"ReviewStep"> | string | null
   completedAt?: Prisma.DateTimeNullableFilter<"ReviewStep"> | Date | string | null
-  signatureHash?: Prisma.StringNullableFilter<"ReviewStep"> | string | null
+  resolvedById?: Prisma.IntNullableFilter<"ReviewStep"> | number | null
+  delegationReason?: Prisma.StringNullableFilter<"ReviewStep"> | string | null
   workflow?: Prisma.XOR<Prisma.ReviewWorkflowScalarRelationFilter, Prisma.ReviewWorkflowWhereInput>
+  signature?: Prisma.XOR<Prisma.DocStepSignatureNullableScalarRelationFilter, Prisma.DocStepSignatureWhereInput> | null
 }, "id" | "workflowId_stepOrder">
 
 export type ReviewStepOrderByWithAggregationInput = {
@@ -313,7 +330,8 @@ export type ReviewStepOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   comments?: Prisma.SortOrderInput | Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  signatureHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  resolvedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  delegationReason?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ReviewStepCountOrderByAggregateInput
   _avg?: Prisma.ReviewStepAvgOrderByAggregateInput
   _max?: Prisma.ReviewStepMaxOrderByAggregateInput
@@ -334,7 +352,8 @@ export type ReviewStepScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumStepStatusWithAggregatesFilter<"ReviewStep"> | $Enums.StepStatus
   comments?: Prisma.StringNullableWithAggregatesFilter<"ReviewStep"> | string | null
   completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ReviewStep"> | Date | string | null
-  signatureHash?: Prisma.StringNullableWithAggregatesFilter<"ReviewStep"> | string | null
+  resolvedById?: Prisma.IntNullableWithAggregatesFilter<"ReviewStep"> | number | null
+  delegationReason?: Prisma.StringNullableWithAggregatesFilter<"ReviewStep"> | string | null
 }
 
 export type ReviewStepCreateInput = {
@@ -345,8 +364,10 @@ export type ReviewStepCreateInput = {
   status?: $Enums.StepStatus
   comments?: string | null
   completedAt?: Date | string | null
-  signatureHash?: string | null
+  resolvedById?: number | null
+  delegationReason?: string | null
   workflow: Prisma.ReviewWorkflowCreateNestedOneWithoutStepsInput
+  signature?: Prisma.DocStepSignatureCreateNestedOneWithoutStepInput
 }
 
 export type ReviewStepUncheckedCreateInput = {
@@ -359,7 +380,9 @@ export type ReviewStepUncheckedCreateInput = {
   status?: $Enums.StepStatus
   comments?: string | null
   completedAt?: Date | string | null
-  signatureHash?: string | null
+  resolvedById?: number | null
+  delegationReason?: string | null
+  signature?: Prisma.DocStepSignatureUncheckedCreateNestedOneWithoutStepInput
 }
 
 export type ReviewStepUpdateInput = {
@@ -370,8 +393,10 @@ export type ReviewStepUpdateInput = {
   status?: Prisma.EnumStepStatusFieldUpdateOperationsInput | $Enums.StepStatus
   comments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  signatureHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resolvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  delegationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workflow?: Prisma.ReviewWorkflowUpdateOneRequiredWithoutStepsNestedInput
+  signature?: Prisma.DocStepSignatureUpdateOneWithoutStepNestedInput
 }
 
 export type ReviewStepUncheckedUpdateInput = {
@@ -384,7 +409,9 @@ export type ReviewStepUncheckedUpdateInput = {
   status?: Prisma.EnumStepStatusFieldUpdateOperationsInput | $Enums.StepStatus
   comments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  signatureHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resolvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  delegationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  signature?: Prisma.DocStepSignatureUncheckedUpdateOneWithoutStepNestedInput
 }
 
 export type ReviewStepCreateManyInput = {
@@ -397,7 +424,8 @@ export type ReviewStepCreateManyInput = {
   status?: $Enums.StepStatus
   comments?: string | null
   completedAt?: Date | string | null
-  signatureHash?: string | null
+  resolvedById?: number | null
+  delegationReason?: string | null
 }
 
 export type ReviewStepUpdateManyMutationInput = {
@@ -408,7 +436,8 @@ export type ReviewStepUpdateManyMutationInput = {
   status?: Prisma.EnumStepStatusFieldUpdateOperationsInput | $Enums.StepStatus
   comments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  signatureHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resolvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  delegationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ReviewStepUncheckedUpdateManyInput = {
@@ -421,7 +450,8 @@ export type ReviewStepUncheckedUpdateManyInput = {
   status?: Prisma.EnumStepStatusFieldUpdateOperationsInput | $Enums.StepStatus
   comments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  signatureHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resolvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  delegationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ReviewStepListRelationFilter = {
@@ -449,7 +479,8 @@ export type ReviewStepCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   comments?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
-  signatureHash?: Prisma.SortOrder
+  resolvedById?: Prisma.SortOrder
+  delegationReason?: Prisma.SortOrder
 }
 
 export type ReviewStepAvgOrderByAggregateInput = {
@@ -457,6 +488,7 @@ export type ReviewStepAvgOrderByAggregateInput = {
   workflowId?: Prisma.SortOrder
   stepOrder?: Prisma.SortOrder
   assignedToId?: Prisma.SortOrder
+  resolvedById?: Prisma.SortOrder
 }
 
 export type ReviewStepMaxOrderByAggregateInput = {
@@ -469,7 +501,8 @@ export type ReviewStepMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   comments?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
-  signatureHash?: Prisma.SortOrder
+  resolvedById?: Prisma.SortOrder
+  delegationReason?: Prisma.SortOrder
 }
 
 export type ReviewStepMinOrderByAggregateInput = {
@@ -482,7 +515,8 @@ export type ReviewStepMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   comments?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
-  signatureHash?: Prisma.SortOrder
+  resolvedById?: Prisma.SortOrder
+  delegationReason?: Prisma.SortOrder
 }
 
 export type ReviewStepSumOrderByAggregateInput = {
@@ -490,6 +524,12 @@ export type ReviewStepSumOrderByAggregateInput = {
   workflowId?: Prisma.SortOrder
   stepOrder?: Prisma.SortOrder
   assignedToId?: Prisma.SortOrder
+  resolvedById?: Prisma.SortOrder
+}
+
+export type ReviewStepScalarRelationFilter = {
+  is?: Prisma.ReviewStepWhereInput
+  isNot?: Prisma.ReviewStepWhereInput
 }
 
 export type ReviewStepCreateNestedManyWithoutWorkflowInput = {
@@ -542,6 +582,20 @@ export type EnumStepStatusFieldUpdateOperationsInput = {
   set?: $Enums.StepStatus
 }
 
+export type ReviewStepCreateNestedOneWithoutSignatureInput = {
+  create?: Prisma.XOR<Prisma.ReviewStepCreateWithoutSignatureInput, Prisma.ReviewStepUncheckedCreateWithoutSignatureInput>
+  connectOrCreate?: Prisma.ReviewStepCreateOrConnectWithoutSignatureInput
+  connect?: Prisma.ReviewStepWhereUniqueInput
+}
+
+export type ReviewStepUpdateOneRequiredWithoutSignatureNestedInput = {
+  create?: Prisma.XOR<Prisma.ReviewStepCreateWithoutSignatureInput, Prisma.ReviewStepUncheckedCreateWithoutSignatureInput>
+  connectOrCreate?: Prisma.ReviewStepCreateOrConnectWithoutSignatureInput
+  upsert?: Prisma.ReviewStepUpsertWithoutSignatureInput
+  connect?: Prisma.ReviewStepWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ReviewStepUpdateToOneWithWhereWithoutSignatureInput, Prisma.ReviewStepUpdateWithoutSignatureInput>, Prisma.ReviewStepUncheckedUpdateWithoutSignatureInput>
+}
+
 export type ReviewStepCreateWithoutWorkflowInput = {
   createdAt?: Date | string
   stepOrder: number
@@ -550,7 +604,9 @@ export type ReviewStepCreateWithoutWorkflowInput = {
   status?: $Enums.StepStatus
   comments?: string | null
   completedAt?: Date | string | null
-  signatureHash?: string | null
+  resolvedById?: number | null
+  delegationReason?: string | null
+  signature?: Prisma.DocStepSignatureCreateNestedOneWithoutStepInput
 }
 
 export type ReviewStepUncheckedCreateWithoutWorkflowInput = {
@@ -562,7 +618,9 @@ export type ReviewStepUncheckedCreateWithoutWorkflowInput = {
   status?: $Enums.StepStatus
   comments?: string | null
   completedAt?: Date | string | null
-  signatureHash?: string | null
+  resolvedById?: number | null
+  delegationReason?: string | null
+  signature?: Prisma.DocStepSignatureUncheckedCreateNestedOneWithoutStepInput
 }
 
 export type ReviewStepCreateOrConnectWithoutWorkflowInput = {
@@ -604,7 +662,78 @@ export type ReviewStepScalarWhereInput = {
   status?: Prisma.EnumStepStatusFilter<"ReviewStep"> | $Enums.StepStatus
   comments?: Prisma.StringNullableFilter<"ReviewStep"> | string | null
   completedAt?: Prisma.DateTimeNullableFilter<"ReviewStep"> | Date | string | null
-  signatureHash?: Prisma.StringNullableFilter<"ReviewStep"> | string | null
+  resolvedById?: Prisma.IntNullableFilter<"ReviewStep"> | number | null
+  delegationReason?: Prisma.StringNullableFilter<"ReviewStep"> | string | null
+}
+
+export type ReviewStepCreateWithoutSignatureInput = {
+  createdAt?: Date | string
+  stepOrder: number
+  stepType: $Enums.StepType
+  assignedToId: number
+  status?: $Enums.StepStatus
+  comments?: string | null
+  completedAt?: Date | string | null
+  resolvedById?: number | null
+  delegationReason?: string | null
+  workflow: Prisma.ReviewWorkflowCreateNestedOneWithoutStepsInput
+}
+
+export type ReviewStepUncheckedCreateWithoutSignatureInput = {
+  id?: number
+  createdAt?: Date | string
+  workflowId: number
+  stepOrder: number
+  stepType: $Enums.StepType
+  assignedToId: number
+  status?: $Enums.StepStatus
+  comments?: string | null
+  completedAt?: Date | string | null
+  resolvedById?: number | null
+  delegationReason?: string | null
+}
+
+export type ReviewStepCreateOrConnectWithoutSignatureInput = {
+  where: Prisma.ReviewStepWhereUniqueInput
+  create: Prisma.XOR<Prisma.ReviewStepCreateWithoutSignatureInput, Prisma.ReviewStepUncheckedCreateWithoutSignatureInput>
+}
+
+export type ReviewStepUpsertWithoutSignatureInput = {
+  update: Prisma.XOR<Prisma.ReviewStepUpdateWithoutSignatureInput, Prisma.ReviewStepUncheckedUpdateWithoutSignatureInput>
+  create: Prisma.XOR<Prisma.ReviewStepCreateWithoutSignatureInput, Prisma.ReviewStepUncheckedCreateWithoutSignatureInput>
+  where?: Prisma.ReviewStepWhereInput
+}
+
+export type ReviewStepUpdateToOneWithWhereWithoutSignatureInput = {
+  where?: Prisma.ReviewStepWhereInput
+  data: Prisma.XOR<Prisma.ReviewStepUpdateWithoutSignatureInput, Prisma.ReviewStepUncheckedUpdateWithoutSignatureInput>
+}
+
+export type ReviewStepUpdateWithoutSignatureInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stepOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  stepType?: Prisma.EnumStepTypeFieldUpdateOperationsInput | $Enums.StepType
+  assignedToId?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumStepStatusFieldUpdateOperationsInput | $Enums.StepStatus
+  comments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  delegationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workflow?: Prisma.ReviewWorkflowUpdateOneRequiredWithoutStepsNestedInput
+}
+
+export type ReviewStepUncheckedUpdateWithoutSignatureInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workflowId?: Prisma.IntFieldUpdateOperationsInput | number
+  stepOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  stepType?: Prisma.EnumStepTypeFieldUpdateOperationsInput | $Enums.StepType
+  assignedToId?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumStepStatusFieldUpdateOperationsInput | $Enums.StepStatus
+  comments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  delegationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ReviewStepCreateManyWorkflowInput = {
@@ -616,7 +745,8 @@ export type ReviewStepCreateManyWorkflowInput = {
   status?: $Enums.StepStatus
   comments?: string | null
   completedAt?: Date | string | null
-  signatureHash?: string | null
+  resolvedById?: number | null
+  delegationReason?: string | null
 }
 
 export type ReviewStepUpdateWithoutWorkflowInput = {
@@ -627,7 +757,9 @@ export type ReviewStepUpdateWithoutWorkflowInput = {
   status?: Prisma.EnumStepStatusFieldUpdateOperationsInput | $Enums.StepStatus
   comments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  signatureHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resolvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  delegationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  signature?: Prisma.DocStepSignatureUpdateOneWithoutStepNestedInput
 }
 
 export type ReviewStepUncheckedUpdateWithoutWorkflowInput = {
@@ -639,7 +771,9 @@ export type ReviewStepUncheckedUpdateWithoutWorkflowInput = {
   status?: Prisma.EnumStepStatusFieldUpdateOperationsInput | $Enums.StepStatus
   comments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  signatureHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resolvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  delegationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  signature?: Prisma.DocStepSignatureUncheckedUpdateOneWithoutStepNestedInput
 }
 
 export type ReviewStepUncheckedUpdateManyWithoutWorkflowInput = {
@@ -651,7 +785,8 @@ export type ReviewStepUncheckedUpdateManyWithoutWorkflowInput = {
   status?: Prisma.EnumStepStatusFieldUpdateOperationsInput | $Enums.StepStatus
   comments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  signatureHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resolvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  delegationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -666,8 +801,10 @@ export type ReviewStepSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   status?: boolean
   comments?: boolean
   completedAt?: boolean
-  signatureHash?: boolean
+  resolvedById?: boolean
+  delegationReason?: boolean
   workflow?: boolean | Prisma.ReviewWorkflowDefaultArgs<ExtArgs>
+  signature?: boolean | Prisma.ReviewStep$signatureArgs<ExtArgs>
 }, ExtArgs["result"]["reviewStep"]>
 
 export type ReviewStepSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -680,7 +817,8 @@ export type ReviewStepSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   status?: boolean
   comments?: boolean
   completedAt?: boolean
-  signatureHash?: boolean
+  resolvedById?: boolean
+  delegationReason?: boolean
   workflow?: boolean | Prisma.ReviewWorkflowDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reviewStep"]>
 
@@ -694,7 +832,8 @@ export type ReviewStepSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   status?: boolean
   comments?: boolean
   completedAt?: boolean
-  signatureHash?: boolean
+  resolvedById?: boolean
+  delegationReason?: boolean
   workflow?: boolean | Prisma.ReviewWorkflowDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reviewStep"]>
 
@@ -708,12 +847,14 @@ export type ReviewStepSelectScalar = {
   status?: boolean
   comments?: boolean
   completedAt?: boolean
-  signatureHash?: boolean
+  resolvedById?: boolean
+  delegationReason?: boolean
 }
 
-export type ReviewStepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "workflowId" | "stepOrder" | "stepType" | "assignedToId" | "status" | "comments" | "completedAt" | "signatureHash", ExtArgs["result"]["reviewStep"]>
+export type ReviewStepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "workflowId" | "stepOrder" | "stepType" | "assignedToId" | "status" | "comments" | "completedAt" | "resolvedById" | "delegationReason", ExtArgs["result"]["reviewStep"]>
 export type ReviewStepInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   workflow?: boolean | Prisma.ReviewWorkflowDefaultArgs<ExtArgs>
+  signature?: boolean | Prisma.ReviewStep$signatureArgs<ExtArgs>
 }
 export type ReviewStepIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   workflow?: boolean | Prisma.ReviewWorkflowDefaultArgs<ExtArgs>
@@ -726,6 +867,7 @@ export type $ReviewStepPayload<ExtArgs extends runtime.Types.Extensions.Internal
   name: "ReviewStep"
   objects: {
     workflow: Prisma.$ReviewWorkflowPayload<ExtArgs>
+    signature: Prisma.$DocStepSignaturePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -737,7 +879,8 @@ export type $ReviewStepPayload<ExtArgs extends runtime.Types.Extensions.Internal
     status: $Enums.StepStatus
     comments: string | null
     completedAt: Date | null
-    signatureHash: string | null
+    resolvedById: number | null
+    delegationReason: string | null
   }, ExtArgs["result"]["reviewStep"]>
   composites: {}
 }
@@ -1133,6 +1276,7 @@ readonly fields: ReviewStepFieldRefs;
 export interface Prisma__ReviewStepClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   workflow<T extends Prisma.ReviewWorkflowDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReviewWorkflowDefaultArgs<ExtArgs>>): Prisma.Prisma__ReviewWorkflowClient<runtime.Types.Result.GetResult<Prisma.$ReviewWorkflowPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  signature<T extends Prisma.ReviewStep$signatureArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReviewStep$signatureArgs<ExtArgs>>): Prisma.Prisma__DocStepSignatureClient<runtime.Types.Result.GetResult<Prisma.$DocStepSignaturePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1171,7 +1315,8 @@ export interface ReviewStepFieldRefs {
   readonly status: Prisma.FieldRef<"ReviewStep", 'StepStatus'>
   readonly comments: Prisma.FieldRef<"ReviewStep", 'String'>
   readonly completedAt: Prisma.FieldRef<"ReviewStep", 'DateTime'>
-  readonly signatureHash: Prisma.FieldRef<"ReviewStep", 'String'>
+  readonly resolvedById: Prisma.FieldRef<"ReviewStep", 'Int'>
+  readonly delegationReason: Prisma.FieldRef<"ReviewStep", 'String'>
 }
     
 
@@ -1570,6 +1715,25 @@ export type ReviewStepDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many ReviewSteps to delete.
    */
   limit?: number
+}
+
+/**
+ * ReviewStep.signature
+ */
+export type ReviewStep$signatureArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocStepSignature
+   */
+  select?: Prisma.DocStepSignatureSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocStepSignature
+   */
+  omit?: Prisma.DocStepSignatureOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocStepSignatureInclude<ExtArgs> | null
+  where?: Prisma.DocStepSignatureWhereInput
 }
 
 /**

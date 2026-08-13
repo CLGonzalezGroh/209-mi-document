@@ -275,6 +275,7 @@ export type DocumentClassWhereInput = {
   documentTypes?: Prisma.DocumentTypeListRelationFilter
   documents?: Prisma.DocumentListRelationFilter
   scannedFiles?: Prisma.ScannedFileListRelationFilter
+  workflowTemplates?: Prisma.DocWorkflowTemplateListRelationFilter
 }
 
 export type DocumentClassOrderByWithRelationInput = {
@@ -292,6 +293,7 @@ export type DocumentClassOrderByWithRelationInput = {
   documentTypes?: Prisma.DocumentTypeOrderByRelationAggregateInput
   documents?: Prisma.DocumentOrderByRelationAggregateInput
   scannedFiles?: Prisma.ScannedFileOrderByRelationAggregateInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateOrderByRelationAggregateInput
 }
 
 export type DocumentClassWhereUniqueInput = Prisma.AtLeast<{
@@ -314,6 +316,7 @@ export type DocumentClassWhereUniqueInput = Prisma.AtLeast<{
   documentTypes?: Prisma.DocumentTypeListRelationFilter
   documents?: Prisma.DocumentListRelationFilter
   scannedFiles?: Prisma.ScannedFileListRelationFilter
+  workflowTemplates?: Prisma.DocWorkflowTemplateListRelationFilter
 }, "id" | "name_module" | "code_module">
 
 export type DocumentClassOrderByWithAggregationInput = {
@@ -366,6 +369,7 @@ export type DocumentClassCreateInput = {
   documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutClassInput
   documents?: Prisma.DocumentCreateNestedManyWithoutDocumentClassInput
   scannedFiles?: Prisma.ScannedFileCreateNestedManyWithoutDocumentClassInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateCreateNestedManyWithoutDocumentClassInput
 }
 
 export type DocumentClassUncheckedCreateInput = {
@@ -383,6 +387,7 @@ export type DocumentClassUncheckedCreateInput = {
   documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutClassInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocumentClassInput
   scannedFiles?: Prisma.ScannedFileUncheckedCreateNestedManyWithoutDocumentClassInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocumentClassInput
 }
 
 export type DocumentClassUpdateInput = {
@@ -399,6 +404,7 @@ export type DocumentClassUpdateInput = {
   documentTypes?: Prisma.DocumentTypeUpdateManyWithoutClassNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutDocumentClassNestedInput
   scannedFiles?: Prisma.ScannedFileUpdateManyWithoutDocumentClassNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUpdateManyWithoutDocumentClassNestedInput
 }
 
 export type DocumentClassUncheckedUpdateInput = {
@@ -416,6 +422,7 @@ export type DocumentClassUncheckedUpdateInput = {
   documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutClassNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocumentClassNestedInput
   scannedFiles?: Prisma.ScannedFileUncheckedUpdateManyWithoutDocumentClassNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocumentClassNestedInput
 }
 
 export type DocumentClassCreateManyInput = {
@@ -592,6 +599,22 @@ export type DocumentClassUpdateOneWithoutDocumentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentClassUpdateToOneWithWhereWithoutDocumentsInput, Prisma.DocumentClassUpdateWithoutDocumentsInput>, Prisma.DocumentClassUncheckedUpdateWithoutDocumentsInput>
 }
 
+export type DocumentClassCreateNestedOneWithoutWorkflowTemplatesInput = {
+  create?: Prisma.XOR<Prisma.DocumentClassCreateWithoutWorkflowTemplatesInput, Prisma.DocumentClassUncheckedCreateWithoutWorkflowTemplatesInput>
+  connectOrCreate?: Prisma.DocumentClassCreateOrConnectWithoutWorkflowTemplatesInput
+  connect?: Prisma.DocumentClassWhereUniqueInput
+}
+
+export type DocumentClassUpdateOneWithoutWorkflowTemplatesNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentClassCreateWithoutWorkflowTemplatesInput, Prisma.DocumentClassUncheckedCreateWithoutWorkflowTemplatesInput>
+  connectOrCreate?: Prisma.DocumentClassCreateOrConnectWithoutWorkflowTemplatesInput
+  upsert?: Prisma.DocumentClassUpsertWithoutWorkflowTemplatesInput
+  disconnect?: Prisma.DocumentClassWhereInput | boolean
+  delete?: Prisma.DocumentClassWhereInput | boolean
+  connect?: Prisma.DocumentClassWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentClassUpdateToOneWithWhereWithoutWorkflowTemplatesInput, Prisma.DocumentClassUpdateWithoutWorkflowTemplatesInput>, Prisma.DocumentClassUncheckedUpdateWithoutWorkflowTemplatesInput>
+}
+
 export type DocumentClassCreateNestedOneWithoutScannedFilesInput = {
   create?: Prisma.XOR<Prisma.DocumentClassCreateWithoutScannedFilesInput, Prisma.DocumentClassUncheckedCreateWithoutScannedFilesInput>
   connectOrCreate?: Prisma.DocumentClassCreateOrConnectWithoutScannedFilesInput
@@ -621,6 +644,7 @@ export type DocumentClassCreateWithoutDocumentTypesInput = {
   sortOrder?: number
   documents?: Prisma.DocumentCreateNestedManyWithoutDocumentClassInput
   scannedFiles?: Prisma.ScannedFileCreateNestedManyWithoutDocumentClassInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateCreateNestedManyWithoutDocumentClassInput
 }
 
 export type DocumentClassUncheckedCreateWithoutDocumentTypesInput = {
@@ -637,6 +661,7 @@ export type DocumentClassUncheckedCreateWithoutDocumentTypesInput = {
   sortOrder?: number
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocumentClassInput
   scannedFiles?: Prisma.ScannedFileUncheckedCreateNestedManyWithoutDocumentClassInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocumentClassInput
 }
 
 export type DocumentClassCreateOrConnectWithoutDocumentTypesInput = {
@@ -668,6 +693,7 @@ export type DocumentClassUpdateWithoutDocumentTypesInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   documents?: Prisma.DocumentUpdateManyWithoutDocumentClassNestedInput
   scannedFiles?: Prisma.ScannedFileUpdateManyWithoutDocumentClassNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUpdateManyWithoutDocumentClassNestedInput
 }
 
 export type DocumentClassUncheckedUpdateWithoutDocumentTypesInput = {
@@ -684,6 +710,7 @@ export type DocumentClassUncheckedUpdateWithoutDocumentTypesInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocumentClassNestedInput
   scannedFiles?: Prisma.ScannedFileUncheckedUpdateManyWithoutDocumentClassNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocumentClassNestedInput
 }
 
 export type DocumentClassCreateWithoutDocumentsInput = {
@@ -699,6 +726,7 @@ export type DocumentClassCreateWithoutDocumentsInput = {
   sortOrder?: number
   documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutClassInput
   scannedFiles?: Prisma.ScannedFileCreateNestedManyWithoutDocumentClassInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateCreateNestedManyWithoutDocumentClassInput
 }
 
 export type DocumentClassUncheckedCreateWithoutDocumentsInput = {
@@ -715,6 +743,7 @@ export type DocumentClassUncheckedCreateWithoutDocumentsInput = {
   sortOrder?: number
   documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutClassInput
   scannedFiles?: Prisma.ScannedFileUncheckedCreateNestedManyWithoutDocumentClassInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocumentClassInput
 }
 
 export type DocumentClassCreateOrConnectWithoutDocumentsInput = {
@@ -746,6 +775,7 @@ export type DocumentClassUpdateWithoutDocumentsInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   documentTypes?: Prisma.DocumentTypeUpdateManyWithoutClassNestedInput
   scannedFiles?: Prisma.ScannedFileUpdateManyWithoutDocumentClassNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUpdateManyWithoutDocumentClassNestedInput
 }
 
 export type DocumentClassUncheckedUpdateWithoutDocumentsInput = {
@@ -762,6 +792,89 @@ export type DocumentClassUncheckedUpdateWithoutDocumentsInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutClassNestedInput
   scannedFiles?: Prisma.ScannedFileUncheckedUpdateManyWithoutDocumentClassNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocumentClassNestedInput
+}
+
+export type DocumentClassCreateWithoutWorkflowTemplatesInput = {
+  createdAt?: Date | string
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  name: string
+  code: string
+  module?: $Enums.ModuleType | null
+  description?: string | null
+  sortOrder?: number
+  documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutClassInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutDocumentClassInput
+  scannedFiles?: Prisma.ScannedFileCreateNestedManyWithoutDocumentClassInput
+}
+
+export type DocumentClassUncheckedCreateWithoutWorkflowTemplatesInput = {
+  id?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  name: string
+  code: string
+  module?: $Enums.ModuleType | null
+  description?: string | null
+  sortOrder?: number
+  documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutClassInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocumentClassInput
+  scannedFiles?: Prisma.ScannedFileUncheckedCreateNestedManyWithoutDocumentClassInput
+}
+
+export type DocumentClassCreateOrConnectWithoutWorkflowTemplatesInput = {
+  where: Prisma.DocumentClassWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocumentClassCreateWithoutWorkflowTemplatesInput, Prisma.DocumentClassUncheckedCreateWithoutWorkflowTemplatesInput>
+}
+
+export type DocumentClassUpsertWithoutWorkflowTemplatesInput = {
+  update: Prisma.XOR<Prisma.DocumentClassUpdateWithoutWorkflowTemplatesInput, Prisma.DocumentClassUncheckedUpdateWithoutWorkflowTemplatesInput>
+  create: Prisma.XOR<Prisma.DocumentClassCreateWithoutWorkflowTemplatesInput, Prisma.DocumentClassUncheckedCreateWithoutWorkflowTemplatesInput>
+  where?: Prisma.DocumentClassWhereInput
+}
+
+export type DocumentClassUpdateToOneWithWhereWithoutWorkflowTemplatesInput = {
+  where?: Prisma.DocumentClassWhereInput
+  data: Prisma.XOR<Prisma.DocumentClassUpdateWithoutWorkflowTemplatesInput, Prisma.DocumentClassUncheckedUpdateWithoutWorkflowTemplatesInput>
+}
+
+export type DocumentClassUpdateWithoutWorkflowTemplatesInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  documentTypes?: Prisma.DocumentTypeUpdateManyWithoutClassNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutDocumentClassNestedInput
+  scannedFiles?: Prisma.ScannedFileUpdateManyWithoutDocumentClassNestedInput
+}
+
+export type DocumentClassUncheckedUpdateWithoutWorkflowTemplatesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutClassNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocumentClassNestedInput
+  scannedFiles?: Prisma.ScannedFileUncheckedUpdateManyWithoutDocumentClassNestedInput
 }
 
 export type DocumentClassCreateWithoutScannedFilesInput = {
@@ -777,6 +890,7 @@ export type DocumentClassCreateWithoutScannedFilesInput = {
   sortOrder?: number
   documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutClassInput
   documents?: Prisma.DocumentCreateNestedManyWithoutDocumentClassInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateCreateNestedManyWithoutDocumentClassInput
 }
 
 export type DocumentClassUncheckedCreateWithoutScannedFilesInput = {
@@ -793,6 +907,7 @@ export type DocumentClassUncheckedCreateWithoutScannedFilesInput = {
   sortOrder?: number
   documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutClassInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocumentClassInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocumentClassInput
 }
 
 export type DocumentClassCreateOrConnectWithoutScannedFilesInput = {
@@ -824,6 +939,7 @@ export type DocumentClassUpdateWithoutScannedFilesInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   documentTypes?: Prisma.DocumentTypeUpdateManyWithoutClassNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutDocumentClassNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUpdateManyWithoutDocumentClassNestedInput
 }
 
 export type DocumentClassUncheckedUpdateWithoutScannedFilesInput = {
@@ -840,6 +956,7 @@ export type DocumentClassUncheckedUpdateWithoutScannedFilesInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutClassNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocumentClassNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocumentClassNestedInput
 }
 
 
@@ -851,12 +968,14 @@ export type DocumentClassCountOutputType = {
   documentTypes: number
   documents: number
   scannedFiles: number
+  workflowTemplates: number
 }
 
 export type DocumentClassCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documentTypes?: boolean | DocumentClassCountOutputTypeCountDocumentTypesArgs
   documents?: boolean | DocumentClassCountOutputTypeCountDocumentsArgs
   scannedFiles?: boolean | DocumentClassCountOutputTypeCountScannedFilesArgs
+  workflowTemplates?: boolean | DocumentClassCountOutputTypeCountWorkflowTemplatesArgs
 }
 
 /**
@@ -890,6 +1009,13 @@ export type DocumentClassCountOutputTypeCountScannedFilesArgs<ExtArgs extends ru
   where?: Prisma.ScannedFileWhereInput
 }
 
+/**
+ * DocumentClassCountOutputType without action
+ */
+export type DocumentClassCountOutputTypeCountWorkflowTemplatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocWorkflowTemplateWhereInput
+}
+
 
 export type DocumentClassSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -906,6 +1032,7 @@ export type DocumentClassSelect<ExtArgs extends runtime.Types.Extensions.Interna
   documentTypes?: boolean | Prisma.DocumentClass$documentTypesArgs<ExtArgs>
   documents?: boolean | Prisma.DocumentClass$documentsArgs<ExtArgs>
   scannedFiles?: boolean | Prisma.DocumentClass$scannedFilesArgs<ExtArgs>
+  workflowTemplates?: boolean | Prisma.DocumentClass$workflowTemplatesArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentClassCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["documentClass"]>
 
@@ -956,6 +1083,7 @@ export type DocumentClassInclude<ExtArgs extends runtime.Types.Extensions.Intern
   documentTypes?: boolean | Prisma.DocumentClass$documentTypesArgs<ExtArgs>
   documents?: boolean | Prisma.DocumentClass$documentsArgs<ExtArgs>
   scannedFiles?: boolean | Prisma.DocumentClass$scannedFilesArgs<ExtArgs>
+  workflowTemplates?: boolean | Prisma.DocumentClass$workflowTemplatesArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentClassCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DocumentClassIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -967,6 +1095,7 @@ export type $DocumentClassPayload<ExtArgs extends runtime.Types.Extensions.Inter
     documentTypes: Prisma.$DocumentTypePayload<ExtArgs>[]
     documents: Prisma.$DocumentPayload<ExtArgs>[]
     scannedFiles: Prisma.$ScannedFilePayload<ExtArgs>[]
+    workflowTemplates: Prisma.$DocWorkflowTemplatePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1377,6 +1506,7 @@ export interface Prisma__DocumentClassClient<T, Null = never, ExtArgs extends ru
   documentTypes<T extends Prisma.DocumentClass$documentTypesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentClass$documentTypesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentTypePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documents<T extends Prisma.DocumentClass$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentClass$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   scannedFiles<T extends Prisma.DocumentClass$scannedFilesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentClass$scannedFilesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScannedFilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  workflowTemplates<T extends Prisma.DocumentClass$workflowTemplatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentClass$workflowTemplatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocWorkflowTemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1879,6 +2009,30 @@ export type DocumentClass$scannedFilesArgs<ExtArgs extends runtime.Types.Extensi
   take?: number
   skip?: number
   distinct?: Prisma.ScannedFileScalarFieldEnum | Prisma.ScannedFileScalarFieldEnum[]
+}
+
+/**
+ * DocumentClass.workflowTemplates
+ */
+export type DocumentClass$workflowTemplatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocWorkflowTemplate
+   */
+  select?: Prisma.DocWorkflowTemplateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocWorkflowTemplate
+   */
+  omit?: Prisma.DocWorkflowTemplateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocWorkflowTemplateInclude<ExtArgs> | null
+  where?: Prisma.DocWorkflowTemplateWhereInput
+  orderBy?: Prisma.DocWorkflowTemplateOrderByWithRelationInput | Prisma.DocWorkflowTemplateOrderByWithRelationInput[]
+  cursor?: Prisma.DocWorkflowTemplateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocWorkflowTemplateScalarFieldEnum | Prisma.DocWorkflowTemplateScalarFieldEnum[]
 }
 
 /**
