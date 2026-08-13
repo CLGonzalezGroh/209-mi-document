@@ -17,11 +17,21 @@
 --
 -- Es de SOLO LECTURA. No modifica nada.
 --
--- Uso, desde 210-mi-deploy y por cada cliente:
---   ./deploy.sh <cliente> testing exec db \
---     "psql -U \$POSTGRES_USER -d mi_document -f -" < ../209-mi-document/prisma/checks/block03_precondicion.sql
+-- CÓMO EJECUTARLO CONTRA UN CLIENTE: usar el script del repositorio de
+-- despliegue, que lleva una copia de este SQL embebida y resuelve la conexión
+-- de cada ambiente:
 --
--- O pegando el contenido en una sesión psql contra la base mi_document.
+--   cd 210-mi-deploy
+--   ./check-document-precondition.sh all testing
+--   ./check-document-precondition.sh optimal production
+--
+-- Vive allá embebido a propósito: el servidor no tiene este repositorio
+-- clonado, y publicar en él dispara la construcción de la imagen. **Si este
+-- archivo cambia, actualizar también `210-mi-deploy/check-document-precondition.sh`.**
+--
+-- Acá queda como fuente canónica y para correrlo contra la base local:
+--   docker exec -i mi-document-pg psql -U mi_document -d mi_document_db -f - \
+--     < prisma/checks/block03_precondicion.sql
 -- =============================================================================
 
 \echo '--- Versión del servidor: NULLS NOT DISTINCT requiere PostgreSQL 15 o superior ---'
