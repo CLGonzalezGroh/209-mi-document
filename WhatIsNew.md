@@ -447,3 +447,47 @@ Dos, a aplicar en la BD `mi_document` de cada cliente:
 - `add_project_context_object_types` — puramente aditiva, dos valores de enumeración.
 
 ---
+
+# What's new in María Ingeniería API Documents 2.4.0
+
+2026-08-12
+
+## Ciclo interno de revisión
+
+Tercer bloque de la evolución documentada en `docs/EVOLUTION/BLOCK_03_CICLO_INTERNO.md`. **Es el primer bloque que cambia reglas funcionales**: el circuito abarca ahora el ciclo completo, desde el armado hasta la toma de conocimiento.
+
+**En curso.** Fases A, B y C aplicadas; D a H pendientes. El servicio **todavía no compila**: los resolvers se reescriben en la fase D.
+
+### Permisos (fase A)
+
+Requieren `@CLGonzalezGroh/mi-common` **2.6.0** y `npm run seed:permissions` en `mi-admin` de cada despliegue.
+
+- **`documents:documentsSettings:read` y `:update`** — recurso nuevo, para el registro único de configuración documental del despliegue.
+- **`documents:workflow:admin:update`** — permiso único sobre el trabajo ajeno del circuito: firmar por otro, reasignar un paso pendiente, registrar una versión sobre un paso ajeno y consultar pendientes ajenos. Sigue el precedente de `documents:scannedFile:admin:update`.
+- Reparto: `doc-basic` lee la configuración del despliegue; `doc-full` suma su edición y la administración de circuitos ajenos.
+
+### Modelo y migración (fase B)
+
+Migración `add_internal_review_cycle`, a aplicar en la BD `mi_document` de cada cliente. **Dos precondiciones**, verificables con `prisma/checks/block03_precondicion.sql`: el subsistema documental debe estar vacío en esa base, y los catálogos no deben tener duplicados con `module` o `classId` nulos —si los hay, hay que limpiarlos antes o la creación de los índices falla—.
+
+- **Enumeraciones**: `StepType` suma `ASSIGN` y `PREPARE`; `StepStatus` suma `COMPLETED`, estado terminal de los pasos que se cumplen sin juzgar; `WorkflowStatus` **pierde `PENDING`** y suma `CANCELLED`; `RevisionStatus` suma `CANCELLED`; `RevisionScheme` pasa a `ALPHA`, `NUMERIC` y `FREE_TEXT`.
+- **El circuito se instancia con la revisión** y admite varios sucesivos: cae el `@unique` de `ReviewWorkflow.revisionId` y lo reemplaza un índice parcial que admite **un solo circuito abierto** por revisión. Es lo que deja salida al documento rechazado.
+- **La revisión abandonada no consume código**: la unicidad de `[documentId, revisionCode]` pasa a un índice parcial que excluye a las abortadas, de modo que sobre `A` puede abrirse `B`, abortarse y volver a abrirse `B`.
+- **`DocStepSignature`**: la firma como objeto propio e inmutable, con el payload canónico persistido junto al hash y el algoritmo. `ReviewStep` pierde `signatureHash` y suma `resolvedById` y el motivo de delegación.
+- **`DocWorkflowTemplate`** y sus pasos: plantilla del circuito con alcance `[projectId, documentClassId, documentTypeId]`, donde gana la más específica. **`DocSettings`**: registro único con el esquema de revisión por defecto del despliegue.
+- **`DocumentRevision`** suma el armador designado —obligatorio— y los tres campos del abandono; `ReviewWorkflow` suma los de la cancelación y la plantilla propuesta.
+- **`DocumentVersion.checksum` pasa a obligatorio.** Declarado: hoy nadie lo calcula —`mi-fileserver` no ve los bytes por diseño—, de modo que hasta la interfaz debe enviarlo quien invoca la API.
+- **`Document` pierde `revisionScheme`**: el esquema no se persiste, se elige al crear cada revisión. **`DocumentType.requiresWorkflow` se renombra a `requiresFormalReview`**, conservando los valores cargados.
+- Las **cuatro restricciones de `DocumentClass` y `DocumentType`** pasan a `NULLS NOT DISTINCT`: hasta ahora dos entradas sin módulo no se consideraban duplicadas, que es el caso más frecuente en un catálogo recién sembrado.
+
+### Utilidades (fase C)
+
+- **`revisionScheme`**: sucesor del código, inferencia del esquema a partir del último código, y la validación que faltaba —bajo `ALPHA` y `NUMERIC` el sistema calcula el código y rechaza el informado; bajo `FREE_TEXT` lo ingresa el usuario—. Cambiar de esquema reinicia la secuencia: de `C` a `NUMERIC` da `0`. Las revisiones se ordenan **por creación y nunca por código**.
+- **`stepSignature`**: construcción del payload canónico y verificación posterior sobre lo persistido. La firma pasa a acreditar la versión con su `checksum` y la metadata del documento vigente al firmar, además de quién estaba asignado y quién resolvió.
+- **`reviewWorkflow`**: la partición entre pasos que **deciden** —`REVIEW` y `APPROVE`— y pasos que **se cumplen** —`ASSIGN`, `PREPARE` y `ACKNOWLEDGE`— deja de estar implícita.
+
+### Pruebas
+
+**82 pruebas puras**, de 43. `npm run test:block03` corre las seis suites sin base.
+
+---
