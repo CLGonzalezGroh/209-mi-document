@@ -945,6 +945,8 @@ Migración aplicada al arrancar el contenedor, sobre la base gestionada `mi_docu
 
 **Con esto el bloque queda aplicado en los cinco clientes desplegados**: `rbb`, `optimal` y `proion` en testing, y `optimal` y `proion` en producción.
 
+**Verificación funcional de cierre.** La pantalla de archivos escaneados de `optimal` en producción **lista sus archivos correctamente**. Es la comprobación que importaba: fue la que rompió en testing por el renombre de `requiresFormalReview`, es la única con datos productivos reales —3.277 archivos—, y pertenece al subsistema que este bloque declara **fuera de alcance**. Que funcione confirma de punta a punta que el ciclo interno se incorporó sin alterar lo que no debía tocar.
+
 **Un hallazgo operativo ajeno al bloque, anotado porque apareció acá.** El respaldo previo de `proion` informó éxito **sin respaldar nada** —`Resumen: 0/0 OK`—. La causa es que `backup.sh` recorre los servicios declarados en `BACKUP_SERVICES_<CLIENTE>` del `.env` del cliente y filtra por el pedido: **`MI_DOCUMENT` no figura en la lista de `proion`**, de modo que el filtro descartó todo. No comprometió esta migración, porque el subsistema documental de ese cliente estaba y sigue vacío, pero **su base `mi_document` está fuera de la rotación de respaldos** justo cuando el módulo empieza a usarse. Conviene resolverlo antes de que el ciclo tenga datos.
 
 El defecto de fondo es que **el script informa éxito cuando no respaldó nada**: un resumen `0/0 OK` debería ser una advertencia y no un visto bueno.
