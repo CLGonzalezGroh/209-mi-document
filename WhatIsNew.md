@@ -456,7 +456,9 @@ Dos, a aplicar en la BD `mi_document` de cada cliente:
 
 Tercer bloque de la evolución documentada en `docs/EVOLUTION/BLOCK_03_CICLO_INTERNO.md`. **Es el primer bloque que cambia reglas funcionales**: el circuito abarca ahora el ciclo completo, desde el armado hasta la toma de conocimiento.
 
-**En curso.** Fases A a G aplicadas; queda el cierre documental.
+**Implementado y validado en local; sin desplegar.** Las ocho fases del bloque están ejecutadas. **La migración es incompatible con el código en producción** —`assignedOrganizerId` es obligatorio y el alta desplegada no lo informa—, de modo que modelo, operaciones y contrato tienen que desplegarse en la misma ventana.
+
+Antes de migrar cada cliente hay que correr `prisma/checks/block03_precondicion.sql`: exige el subsistema documental vacío **y** los catálogos sin duplicados con módulo o clase nulos. Un duplicado no cancela la migración, obliga a limpiarlo antes.
 
 ### Permisos (fase A)
 
@@ -518,7 +520,7 @@ Tipos nuevos: `DocStepSignature`, `DocWorkflowTemplate`, `DocWorkflowTemplateSte
 
 ### Pruebas
 
-**174 pruebas**, de 72: **101 puras**, **42 contra base** y **31 de integración**. `npm run test:block03` corre las suites sin base, `test:block03-db` agrega las de base y `test:block03-all` la integración completa.
+**177 pruebas**, de 72: **101 puras**, **42 contra base** y **34 de integración**. `npm run test:block03` corre las suites sin base, `test:block03-db` agrega las de base y `test:block03-all` la integración completa.
 
 - **Cuatro recorridos de punta a punta**: documento nuevo, documento preexistente con archivo adjunto, rechazo con circuito nuevo sobre la misma revisión, y abandono a mitad de circuito con recuperación del código.
 - **Restricciones del modelo contra base**: los dos índices parciales, las cuatro restricciones de catálogo con nulos, el alcance de la plantilla, la firma única por paso y la continuidad de la secuencia de versiones entre circuitos.

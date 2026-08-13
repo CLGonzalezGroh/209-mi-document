@@ -38,10 +38,13 @@ import { verifySignature } from "../utils/stepSignature.js"
 
 const USER_ID = 3
 const ROLE_IDS = [1, 16] // view + doc-full
+const ROLE_IDS_BASICO = [1, 15] // view + doc-basic: SIN el permiso especial de B9
+const OTRO_USUARIO = 1
 const PROYECTO = -424406
 const CODIGO = "TEST-BLOCK03"
 
 let context: ResolverContext
+let contextoBasico: ResolverContext
 let documentTypeId: number
 
 const limpiar = async () => {
@@ -62,6 +65,16 @@ before(async () => {
     { expiresIn: "1h" },
   )
   context = { orm: prisma, token: `Bearer ${token}` } as ResolverContext
+
+  const tokenBasico = jwt.sign(
+    { id: USER_ID, roles: ROLE_IDS_BASICO },
+    process.env.AUTH_JWT_SECRET as string,
+    { expiresIn: "1h" },
+  )
+  contextoBasico = {
+    orm: prisma,
+    token: `Bearer ${tokenBasico}`,
+  } as ResolverContext
 
   const tipo = await prisma.documentType.findFirstOrThrow({ select: { id: true } })
   documentTypeId = tipo.id
@@ -484,15 +497,46 @@ test("recorrido 4: abandonar a mitad de circuito y recuperar el código", async 
   )
   assert.equal(revB2.revisionCode, "B")
 
-  // La anterior nunca dejó de estar vigente: no hizo falta restituirla
+  // Y se completa: el ciclo A ▸ B abandonada ▸ B nueva termina aprobado
+  const wfB2 = await armar(revB2.workflows[0].id, [StepType.APPROVE])
+  await versionResolvers.Mutation.registerVersion(
+    null,
+    { revisionId: revB2.id, input: archivo(3) },
+    context,
+  )
+  await workflowResolvers.Mutation.submitRevision(
+    null,
+    { revisionId: revB2.id },
+    context,
+  )
+  await workflowResolvers.Mutation.approveStep(
+    null,
+    { stepId: (await pasoDe(wfB2.id, StepType.APPROVE)).id },
+    context,
+  )
+  assert.equal(
+    (await prisma.documentRevision.findUniqueOrThrow({ where: { id: revB2.id } }))
+      .status,
+    RevisionStatus.APPROVED,
+  )
+  // Al aprobarse, A queda superada
+  assert.equal(
+    (await prisma.documentRevision.findUniqueOrThrow({ where: { id: revA.id } }))
+      .status,
+    RevisionStatus.SUPERSEDED,
+  )
+
+  // La anterior nunca dejó de estar vigente hasta que la sucesora se aprobó
   const documento = await prisma.document.findUniqueOrThrow({
     where: { id: doc.id },
     include: { revisions: true },
   })
   const current = await resolverTypes.Document.currentRevision(documento)
   const last = await resolverTypes.Document.lastRevision(documento)
-  assert.equal((current as any)?.revisionCode, "A")
+  assert.equal((current as any)?.id, revB2.id)
   assert.equal((last as any)?.id, revB2.id)
+  // Ninguna de las dos considera la abandonada
+  assert.notEqual((current as any)?.id, revB.id)
 })
 
 // ════════════════════════════════════════════════════════════
@@ -778,4 +822,145 @@ test("la traza registra las acciones nuevas del ciclo", async () => {
   ]) {
     assert.ok(nombres.includes(esperada), `falta la acción ${esperada}`)
   }
+})
+
+test("la delegación exige permiso y motivo, y queda dentro de lo firmado (H-03)", async () => {
+  // El paso lo resuelve quien lo tiene asignado. Actuar por otro es un acto
+  // distinto: exige el permiso especial Y motivo, que es lo que lo vuelve
+  // trazable y no solo permitido (B9).
+  const doc = await crear("DELEG")
+  const revision = doc.revisions[0]
+  const wf = await armar(revision.workflows[0].id, [StepType.APPROVE])
+
+  await versionResolvers.Mutation.registerVersion(
+    null,
+    { revisionId: revision.id, input: archivo(1) },
+    context,
+  )
+  await workflowResolvers.Mutation.submitRevision(
+    null,
+    { revisionId: revision.id },
+    context,
+  )
+
+  // El paso de aprobación pasa a otra persona
+  const aprobacion = await pasoDe(wf.id, StepType.APPROVE)
+  await workflowResolvers.Mutation.reassignStep(
+    null,
+    {
+      stepId: aprobacion.id,
+      assignedToId: OTRO_USUARIO,
+      reason: "El aprobador designado está de licencia",
+    },
+    context,
+  )
+
+  // Sin el permiso especial, resolverlo por otro se rechaza
+  assert.equal(
+    await codigoDeError(() =>
+      workflowResolvers.Mutation.approveStep(
+        null,
+        { stepId: aprobacion.id, delegationReason: "urgencia" },
+        contextoBasico,
+      ),
+    ),
+    "FORBIDDEN",
+  )
+
+  // Con el permiso pero sin motivo, tampoco
+  assert.equal(
+    await codigoDeError(() =>
+      workflowResolvers.Mutation.approveStep(
+        null,
+        { stepId: aprobacion.id },
+        context,
+      ),
+    ),
+    "BAD_USER_INPUT",
+  )
+
+  // Con permiso y motivo, se resuelve y queda registrado quién lo hizo
+  await workflowResolvers.Mutation.approveStep(
+    null,
+    { stepId: aprobacion.id, delegationReason: "Cierre de mes: firma el jefe" },
+    context,
+  )
+
+  const resuelto = await prisma.reviewStep.findUniqueOrThrow({
+    where: { id: aprobacion.id },
+  })
+  assert.equal(resuelto.assignedToId, OTRO_USUARIO)
+  assert.equal(resuelto.resolvedById, USER_ID)
+  assert.ok(resuelto.delegationReason)
+
+  // Y la divergencia viaja dentro del payload firmado
+  const firma = await prisma.docStepSignature.findFirstOrThrow({
+    where: { stepId: aprobacion.id },
+  })
+  const payload = JSON.parse(firma.payload)
+  assert.equal(payload.actor.assignedToId, OTRO_USUARIO)
+  assert.equal(payload.actor.resolvedById, USER_ID)
+  assert.equal(payload.actor.delegationReason, "Cierre de mes: firma el jefe")
+  assert.deepEqual(verifySignature(firma), { valid: true })
+})
+
+test("consultar pendientes ajenos sin el permiso especial se rechaza (H-07)", async () => {
+  // Los propios se consultan siempre; los de otro exigen el permiso.
+  const propios: any = await workflowResolvers.Query.pendingReviewSteps(
+    null,
+    {},
+    contextoBasico,
+  )
+  assert.ok(Array.isArray(propios))
+
+  assert.equal(
+    await codigoDeError(() =>
+      workflowResolvers.Query.pendingReviewSteps(
+        null,
+        { userId: OTRO_USUARIO },
+        contextoBasico,
+      ),
+    ),
+    "FORBIDDEN",
+  )
+})
+
+test("el alta propone la plantilla resuelta por alcance, y el armado puede no seguirla", async () => {
+  // La plantilla PROPONE y el armado DEFINE (B3).
+  const plantilla = await prisma.docWorkflowTemplate.create({
+    data: {
+      name: `${CODIGO} plantilla de proyecto`,
+      projectId: PROYECTO,
+      createdById: USER_ID,
+      steps: {
+        create: [
+          { stepOrder: 1, stepType: StepType.REVIEW },
+          { stepOrder: 2, stepType: StepType.APPROVE },
+        ],
+      },
+    },
+  })
+
+  const doc = await crear("PLANT")
+  const revision = doc.revisions[0]
+
+  // El circuito nace referenciando la plantilla que le corresponde por alcance
+  assert.equal(revision.workflows[0].templateId, plantilla.id)
+
+  // Y el armado puede cambiarla: acá se arma con un solo paso de aprobación
+  const armado = await armar(revision.workflows[0].id, [StepType.APPROVE])
+  assert.deepEqual(
+    armado.steps.map((s: any) => s.stepType),
+    [StepType.ASSIGN, StepType.PREPARE, StepType.APPROVE],
+  )
+
+  // Cambiar la plantilla después no altera el circuito ya materializado
+  await prisma.docWorkflowTemplate.update({
+    where: { id: plantilla.id },
+    data: { terminatedAt: new Date() },
+  })
+  const intacto = await prisma.reviewStep.count({
+    where: { workflowId: armado.id },
+  })
+  assert.equal(intacto, 3)
 })

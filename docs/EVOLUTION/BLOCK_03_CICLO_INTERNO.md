@@ -1,6 +1,6 @@
 # Bloque 03 — Ciclo interno de revisión
 
-**Estado:** `APROBADO_PENDIENTE` — definido en su totalidad, con la fase A implementada.
+**Estado:** `LISTO_PARA_PROMOVER` — implementado y validado en local. Resta la verificación por cliente y el despliegue; la SFS se escribe después.
 **Versión:** 1.0
 **Depende de:** `BLOCK_02`, cuyo contexto de proyecto y autorización en dos capas este bloque da por sentados.
 **Decisiones que ejecuta:** D-03, D-04, D-05, D-10, D-11, D-13, D-17 y la consecuencia de D-19 sobre la toma de conocimiento. Resuelve H-01 a H-10, H-20, H-27 y H-34, y cierra H-19 en los dos catálogos.
@@ -770,6 +770,72 @@ Once casos más cubren los criterios que los recorridos no tocan: el **circuito 
 **El humo de la fase D se retira**: la prueba de integración lo absorbe y lo supera, y mantener dos recorridos paralelos habría dejado uno desactualizado.
 
 **Sobre la estrategia de pruebas del bloque**: las precondiciones —metadata congelada, cancelación, abandono, registro de versión— figuraban entre las puras. Se implementaron **como integración**, porque ninguna es pura: todas dependen del estado de la revisión en la base. Lo puro de cada una —la partición de `B8`, el sucesor, el payload— ya está cubierto en sus utilidades.
+
+### Fase H — cierre documental
+
+**Criterios de aceptación: 19 de 22 verificados, 2 pendientes de despliegue y 1 en consecuencia.**
+
+Al revisarlos uno por uno aparecieron **tres criterios implementados pero sin prueba que los cubriera**. Se cerraron antes de evaluar, con tres casos de integración más: la delegación con permiso y motivo, el rechazo de pendientes ajenos sin el permiso, y la plantilla propuesta por alcance en el alta. **177 pruebas** en total.
+
+| # | Criterio | Estado |
+| - | -------- | ------ |
+| 1 | Los cuatro recorridos de integración se ejecutan de punta a punta | Verificado |
+| 2 | Revisión rechazada: corrección y circuito nuevo sin consumir código — **H-01** | Verificado — recorrido 3 |
+| 3 | Documento sin revisión formal aprobado por un circuito de un solo paso — **H-02** | Verificado |
+| 4 | Toda resolución registra quién la ejecutó; delegación visible y motivada — **H-03** | Verificado — **prueba agregada en esta fase** |
+| 5 | Un paso pendiente se reasigna; uno resuelto no | Verificado |
+| 6 | El alta designa armador y propone plantilla por alcance; el armado la confirma o la cambia | Verificado — **prueba agregada en esta fase** |
+| 7 | Documento sin archivo; someter exige una versión con `checksum` — **H-20, H-27** | Verificado |
+| 8 | Metadata congelada con la revisión aprobada, y rehabilitada por la siguiente | Verificado |
+| 9 | Toma de conocimiento con operación, estado terminal y visibilidad — **H-04** | Verificado |
+| 10 | Cancelación distinguible del rechazo, con motivo en el modelo — **H-05** | Verificado — emite `WorkflowCancelled` y no `WorkflowRejected` |
+| 11 | `A` aprobada ▸ `B` abortada ▸ `B` nueva completada; el sistema propone `B` | Verificado — recorrido 4, con `B` aprobada y `A` superada |
+| 12 | `currentRevision` y `lastRevision` con la semántica de `B14`, en una sola implementación | Verificado |
+| 13 | Firma verificable a posteriori, con la identificación del documento — **H-06** | Verificado |
+| 14 | `pendingReviewSteps` propios; ajenos solo con el permiso especial — **H-07** | Verificado — **las dos direcciones**, con un contexto de rol `doc-basic` |
+| 15 | Códigos según el esquema; orden de revisiones independiente del código — **H-09, H-10** | Verificado |
+| 16 | Ninguna operación modifica ni elimina una versión — **H-34** | Verificado — por recorrido del contrato |
+| 17 | Las cuatro restricciones de catálogo, **tras verificar y limpiar duplicados en cada cliente** — H-19 | **Parcial**: verificado en local, donde no había duplicados. Falta por cliente |
+| 18 | Ninguna regla de circulación cambió | Verificado — ver abajo |
+| 19 | `prisma validate`, `migrate`, `tsc`, `build`; las 72 pruebas previas aprobadas | Verificado — ver abajo |
+| 20 | Tablas documentales vacías **en cada cliente** antes de migrar | **Pendiente** — solo local |
+| 21 | `rover subgraph check` con los retiros y el cambio de `currentRevision` declarados | Verificado |
+| 22 | La SFS se actualiza solo después de reunir estas evidencias | **En consecuencia: no corresponde todavía** |
+
+**Criterio 18, verificado por diferencia y no por declaración.** Entre el commit que abrió el bloque y este, `transmittals.ts`, `attachments.ts`, `scannedFiles.ts`, `areas.ts` y `dependencies.ts` **no registran una sola línea de cambio**, y el modelo no toca `Transmittal`, `TransmittalItem`, `PurposeCode` ni `ClientStatus`. `mi-quality` compila sin cambios. `BLOCK_04` parte exactamente del estado que dejó `BLOCK_02`, con lo que `B16` deja habilitado.
+
+**Criterio 19, con una precisión.** De las **72 pruebas previas**, 71 siguen intactas palabra por palabra y **una sola cambió**: la que fija el número de acciones del catálogo, que pasó de 28 a 35 explicando el saldo —dos retiros y nueve altas—. Es el cambio que el propio bloque prescribe. Ninguna prueba previa fue retirada.
+
+#### Evaluación de la promoción a la SFS
+
+**El bloque no se promueve todavía, y el motivo no es el código.**
+
+La implementación está completa y validada: las 17 operaciones del mapa, las 11 migraciones, el contrato con `rover` aprobado y 177 pruebas en las tres capas. Lo que falta es de otra naturaleza —**los criterios 17 y 20 solo pueden verificarse contra las bases de cada cliente**, y este bloque se desarrolló íntegramente en local por decisión explícita:
+
+- **La verificación hay que rehacerla el día del despliegue de todos modos.** Los catálogos tienen datos productivos y se mueven; una comprobación adelantada sería un aviso temprano, no un sustituto.
+- **La migración es incompatible con el código desplegado hoy.** `assignedOrganizerId` es `NOT NULL` y el `createDocument` en producción no lo informa, de modo que migrar antes de desplegar el subgraph rompería el alta de documentos. Modelo, operaciones y contrato tienen que viajar juntos.
+
+Promover a la SFS ahora afirmaría como comportamiento vigente algo que ningún despliegue ejecuta. **Estado del bloque: `LISTO_PARA_PROMOVER`.**
+
+#### Condiciones de despliegue, por cliente
+
+Lo que resta ejecutar, en este orden. Los clientes desplegados son `rbb`, `optimal` y `proion` en testing, y `optimal` y `proion` en producción.
+
+1. **Precondición**, con `prisma/checks/block03_precondicion.sql`: veredicto `APTO PARA MIGRAR`. Un resultado con duplicados **no cancela la migración: obliga a limpiarlos antes**, que es lo contrario del veredicto de `BLOCK_02`.
+2. **Línea base del subsistema legado** —`scanned_files`, `areas`, `document_sys_logs`—, para poder demostrar después que quedó intacto. `optimal` en producción es el único con uso real.
+3. **Permisos**: `npm run seed:permissions` en `mi-admin`. 404 → 407 permisos, 790 → 794 asignaciones.
+4. **Migración**: las dos del bloque, con el subgraph nuevo en la misma ventana.
+5. **Verificación posterior**: legado sin disminuir —el criterio es que no baje, no que sea igual—, y estructura confirmada.
+
+Recién con esa evidencia reunida corresponde escribir la SFS y marcar `PROMOVIDO_A_SFS`.
+
+#### Qué va a promoverse, y qué no
+
+Anotado ahora para que la decisión no se rehaga desde cero:
+
+- **Sí**: el circuito como ciclo completo con sus cinco tipos de paso y la partición entre los que deciden y los que se cumplen; la revisión con sus circuitos sucesivos y su armador; la versión como archivo inmutable con `checksum`; la firma con payload verificable; la plantilla y su resolución por alcance; el esquema de revisión propuesto y no persistido; y las dos lecturas del documento vigente.
+- **No**: nada que dependa del rol Receptor. `B16` **habilita** el circuito sin elaboración y la conclusión terminal, pero no los implementa: son `BLOCK_04`. Es el mismo criterio con que `BLOCK_02` se abstuvo de promover el comportamiento del rol sobre el ciclo.
+- **`Document` recién ahora puede promoverse por completo**: pierde `revisionScheme`, gana las dos lecturas de revisión y su metadata queda gobernada por el congelamiento. `BLOCK_02` lo había diferido por esto mismo.
 
 ## Referencias
 
