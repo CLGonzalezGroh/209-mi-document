@@ -666,6 +666,37 @@ Las 17 operaciones del mapa, resolver por resolver. **`tsc --noEmit` y `npm run 
 
 **Lo que queda para la fase F, declarado**: `schema.graphql` todavía declara `initiateReview` y `switchRevisionScheme` —que ya no tienen resolver— y no declara ninguna de las siete operaciones nuevas, de modo que son inalcanzables por GraphQL. El subgrafo **sí arma** —se verificó con `buildSubgraphSchema`—, pero esas dos operaciones fallarían en ejecución si alguien las invocara. No hay consumidores.
 
+### Fase E — trazabilidad
+
+**El grueso se ejecutó en la fase D**, porque una operación que no puede registrar lo que hizo no está terminada: el catálogo, los tres tipos de objeto y sus derivadores viajaron con los resolvers y quedaron registrados allí. Lo que esta fase aporta es **la verificación que faltaba**, que es justamente lo que no da ni la compilación ni la prueba pura.
+
+**Ninguna acción ni transición quedó sin emisor.** Se recorrieron las **35 acciones** y las **24 transiciones** del catálogo contra los resolvers: todas tienen al menos uno. Es el control que impide que una entrada del catálogo quede declarada y muerta, o que una operación registre con un nombre que nadie más usa.
+
+**Prueba nueva contra base**, `src/utils/objectContextPersistence.test.ts`, con **11 casos** que cubren **los trece tipos de objeto**:
+
+| Verificado | Resultado |
+| ---------- | --------- |
+| Documento de proyecto, y documento publicado sin proyecto | Proyecto y módulo derivados; en el publicado el módulo es el único eje |
+| Revisión, versión, circuito y paso | Derivan del documento, cadena completa |
+| **Firma** | Deriva del paso: un nivel más en la misma cadena, la más larga del módulo |
+| Transmittal | Lleva su proyecto; el módulo es `PROJECTS` por lo que el modelo afirma |
+| Clases y tipos | Sin proyecto, con su módulo opcional |
+| Configuración y membresía de proyecto | Con proyecto, sin módulo |
+| **Plantilla** | Con el proyecto de su alcance, sin módulo |
+| **Configuración del despliegue** | Sin proyecto y sin módulo — es lo que la vuelve el último escalón |
+| Objeto inexistente, en los trece tipos | **`null`**, y no contexto vacío |
+
+El último caso es el que la autorización necesita: distinguir «no pertenece a ningún proyecto» —que autoriza por permiso global— de «no existe» —que debe cortar con `NOT_FOUND`—. Confundirlos autorizaría operaciones sobre objetos inexistentes. **Una derivación equivocada no rompe la compilación**, porque el `Record` solo exige que la función exista: por eso esta prueba es la única evidencia posible.
+
+**Dos cosas declaradas:**
+
+- **`DOC_STEP_SIGNATURE` no tiene acción ni transición propias, y es correcto.** La firma se crea dentro de la resolución del paso, que ya emite `ApproveStep`, `RejectStep`, `SubmitRevision` o `AcknowledgeStep`; una acción aparte duplicaría el mismo hecho. El tipo existe para que la firma sea **direccionable**: se le puede consultar la traza y se le deriva contexto para autorizar su lectura.
+- **`docWorkflowEvents` y `docAuditEvents` no necesitaron cambios.** Resuelven el permiso desde el catálogo y el alcance desde el derivador, de modo que los tres tipos nuevos quedaron consultables sin tocar el resolver. Es lo que `BLOCK_01` perseguía al derivar en lugar de declarar.
+
+**Ninguno de los seis resolvers nuevos o reescritos escribe en `DocumentSysLog`**: la traza funcional va por eventos y el log operacional queda para los errores, que es la separación de `BLOCK_01`.
+
+**Pruebas**: **141 en total**, de 130. 101 puras, **24 contra base** —11 nuevas— y 16 de integración, todas aprobadas.
+
 ## Referencias
 
 - `README.md`

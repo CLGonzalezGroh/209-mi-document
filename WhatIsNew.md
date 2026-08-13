@@ -456,7 +456,7 @@ Dos, a aplicar en la BD `mi_document` de cada cliente:
 
 Tercer bloque de la evolución documentada en `docs/EVOLUTION/BLOCK_03_CICLO_INTERNO.md`. **Es el primer bloque que cambia reglas funcionales**: el circuito abarca ahora el ciclo completo, desde el armado hasta la toma de conocimiento.
 
-**En curso.** Fases A, B, C y D aplicadas; E a H pendientes. El servicio compila y construye, pero **las operaciones nuevas todavía no están declaradas en el contrato GraphQL**: se exponen en la fase F.
+**En curso.** Fases A a E aplicadas; F a H pendientes. El servicio compila y construye, pero **las operaciones nuevas todavía no están declaradas en el contrato GraphQL**: se exponen en la fase F.
 
 ### Permisos (fase A)
 
@@ -502,9 +502,12 @@ Migración `add_internal_review_cycle`, a aplicar en la BD `mi_document` de cada
 - El catálogo pasa de **28 a 35 acciones** de auditoría: retira `InitiateReview` y `SwitchRevisionScheme`, y suma `DefineWorkflow`, `SubmitRevision`, `AcknowledgeStep`, `ReassignStep`, `CancelRevision`, las tres de plantilla y `DeclareDocSettings`.
 - Transiciones nuevas: `WorkflowCancelled` —que separa la cancelación del rechazo, hasta ahora indistinguibles en la traza—, `RevisionCancelled` y `StepCompleted`.
 - Tipos de objeto nuevos: `DOC_STEP_SIGNATURE`, `DOC_WORKFLOW_TEMPLATE` y `DOC_SETTINGS`, con su derivador de contexto. Migración `add_internal_cycle_object_types`, puramente aditiva.
+- Los tres quedan **consultables desde `docWorkflowEvents` y `docAuditEvents` sin cambios**: esas consultas resuelven el permiso desde el catálogo y el alcance desde el derivador.
 
 ### Pruebas
 
-**130 pruebas**, de 72: **101 puras**, 13 contra base y 16 de integración. `npm run test:block03` corre las suites sin base, `test:block03-db` agrega las de base y `test:block03-all` la integración.
+**141 pruebas**, de 72: **101 puras**, 24 contra base y 16 de integración. `npm run test:block03` corre las suites sin base, `test:block03-db` agrega las de base y `test:block03-all` la integración.
+
+Entre las de base, `test:object-context-db` verifica que **los trece tipos de objeto** deriven su proyecto y su módulo correctamente, y que un objeto inexistente devuelva nulo en lugar de contexto vacío —la distinción de la que depende la autorización—.
 
 ---
