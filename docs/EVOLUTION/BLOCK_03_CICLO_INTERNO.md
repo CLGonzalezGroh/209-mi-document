@@ -912,7 +912,13 @@ Un `finished_at` nulo habría delatado una migración a medio aplicar, que es el
 - **`201-mi-webapp`** — los nueve usos, incluidos los artefactos de `codegen`, que llevan la consulta literal.
 - **`210-mi-deploy`** — supergrafo regenerado.
 
-**Lo que deja como aprendizaje para `BLOCK_04`**: al renombrar un campo del contrato no alcanza con `rover` y `tsc`. Hay que **buscar el nombre viejo en la webapp**, que es el consumidor real y no está registrado en Studio.
+**Verificado tras corregir**: la webapp funciona en local y en los tres clientes de testing.
+
+**Un tercer eslabón, que explica por qué el defecto no apareció antes.** La webapp local y el router local resuelven el esquema del **uplink de `Maria-Ingenieria@current`**, que nunca se había publicado: hasta correr `rover subgraph publish`, el desarrollo local seguía viendo el esquema viejo y el defecto era invisible. Publicar es seguro para los ambientes desplegados —los dos scripts usan `--routing-url http://localhost:4209` y testing y producción leen el supergrafo de un archivo montado—, pero mueve la línea base de los `rover subgraph check` siguientes.
+
+Con el router local al día se pudo correr `npm run codegen` de verdad y contrastarlo con la corrección: **coincide exactamente**. La regeneración destapó, de paso, que los artefactos generados de la webapp estaban **desactualizados desde antes de `BLOCK_02`** —no tenían `projectId` ni el contexto de los eventos—, lo que ayuda a explicar por qué el renombre pasó inadvertido.
+
+**Lo que deja como aprendizaje para `BLOCK_04`**: al renombrar un campo del contrato no alcanza con `rover` y `tsc`. Hay que **buscar el nombre viejo en la webapp** —incluidos sus artefactos de `codegen`, que llevan la consulta literal—, renombrar también los **inputs**, y correr `codegen` como parte del cierre del bloque y no solo cuando algo se rompe.
 
 #### Evaluación de la promoción a la SFS
 
