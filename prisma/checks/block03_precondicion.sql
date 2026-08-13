@@ -106,7 +106,13 @@ ORDER BY count(*) DESC, code;
 \echo ''
 \echo '--- Veredicto ---'
 
-WITH documental AS (
+WITH migrada AS (
+    SELECT not exists (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'documents' and column_name = 'revisionScheme'
+    ) AS aplicada
+),
+documental AS (
     SELECT
         (SELECT count(*) FROM documents)
       + (SELECT count(*) FROM document_revisions)
@@ -129,13 +135,15 @@ SELECT
     documental.filas   AS filas_subsistema,
     duplicados.grupos  AS grupos_duplicados,
     CASE
+        WHEN migrada.aplicada
+        THEN 'YA MIGRADO — el BLOQUE 03 está aplicado en esta base. Nada que hacer.'
         WHEN documental.filas > 0
         THEN 'NO MIGRAR — el subsistema documental tiene datos. Escalar antes de continuar.'
         WHEN duplicados.grupos > 0
         THEN 'LIMPIAR PRIMERO — hay duplicados en los catálogos; la creación del índice de B15 fallaría.'
         ELSE 'APTO PARA MIGRAR'
     END AS veredicto
-FROM documental, duplicados;
+FROM documental, duplicados, migrada;
 
 \echo ''
 \echo '--- Versiones sin checksum: B4 lo vuelve obligatorio ---'
