@@ -875,10 +875,20 @@ Verificado además que las asignaciones cayeron donde corresponde, que es lo que
 
 | Cliente | Legado antes | Legado después | `revisionScheme` |
 | ------- | ------------ | -------------- | ---------------- |
-| `proion` | `1 / 0 / 1` | `1 / 0 / 1` | Retirado |
+| `rbb` | `0 / 0 / 0` | `0 / 0 / 0` | Retirado |
 | `optimal` | `9 / 3 / 32` | `9 / 3 / 32` | Retirado |
+| `proion` | `1 / 0 / 1` | `1 / 0 / 1` | Retirado |
 
 **El `diff` de `proion` tiene una sola diferencia en toda la salida**: la desaparición de `revisionScheme`. Nada más cambió. En `optimal` —el único cliente de testing con archivos escaneados reales— el legado se repite sin una sola diferencia.
+
+**En `rbb` se verificó además contra `_prisma_migrations`, que es evidencia más fuerte que la ausencia de la columna**: **11 migraciones** con `finished_at` informado, y las dos del bloque aplicadas con **30 milisegundos de diferencia** entre sí. Ese intervalo confirma de paso el mecanismo: las dos corren en el mismo arranque del contenedor, no como pasos separados.
+
+| Migración | Aplicada |
+| --------- | -------- |
+| `20260812120000_add_internal_review_cycle` | `2026-08-13 13:59:53.618` |
+| `20260812140000_add_internal_cycle_object_types` | `2026-08-13 13:59:53.648` |
+
+Un `finished_at` nulo habría delatado una migración a medio aplicar, que es el único modo en que esto podía salir mal sin que el contenedor fallara al arrancar.
 
 **Al script se le corrigió el veredicto**, que después de migrar seguía diciendo `APTO PARA MIGRAR`: solo miraba filas documentales y duplicados, y los dos siguen en cero. El bloque de estado lo resolvía, pero el titular invitaba a leer lo contrario. Ahora informa `YA MIGRADO` cuando `documents` ya no tiene `revisionScheme`.
 
@@ -886,7 +896,7 @@ Verificado además que las asignaciones cayeron donde corresponde, que es lo que
 
 #### Evaluación de la promoción a la SFS
 
-**Los 21 criterios verificables están cumplidos, y el bloque está aplicado y verificado en testing.** Lo que resta es el despliegue en los dos clientes productivos.
+**Los 21 criterios verificables están cumplidos, y el bloque está aplicado y verificado en los tres clientes de testing.** Lo que resta es el despliegue en los dos clientes productivos.
 
 **El criterio 22 queda habilitado pero no ejecutado, y es deliberado.** La SFS describe «comportamiento implementado y validado», y `BLOCK_02` fijó el precedente de promover **después** de aplicar y verificar en los ambientes reales, no antes. Escribirla ahora afirmaría como vigente algo que ningún despliegue ejecuta todavía.
 
