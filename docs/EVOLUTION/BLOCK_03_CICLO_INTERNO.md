@@ -773,7 +773,7 @@ Once casos más cubren los criterios que los recorridos no tocan: el **circuito 
 
 ### Fase H — cierre documental
 
-**Criterios de aceptación: 19 de 22 verificados, 2 pendientes de despliegue y 1 en consecuencia.**
+**Criterios de aceptación: 21 de 22 verificados; el restante es una decisión, no una brecha.**
 
 Al revisarlos uno por uno aparecieron **tres criterios implementados pero sin prueba que los cubriera**. Se cerraron antes de evaluar, con tres casos de integración más: la delegación con permiso y motivo, el rechazo de pendientes ajenos sin el permiso, y la plantilla propuesta por alcance en el alta. **177 pruebas** en total.
 
@@ -795,12 +795,12 @@ Al revisarlos uno por uno aparecieron **tres criterios implementados pero sin pr
 | 14 | `pendingReviewSteps` propios; ajenos solo con el permiso especial — **H-07** | Verificado — **las dos direcciones**, con un contexto de rol `doc-basic` |
 | 15 | Códigos según el esquema; orden de revisiones independiente del código — **H-09, H-10** | Verificado |
 | 16 | Ninguna operación modifica ni elimina una versión — **H-34** | Verificado — por recorrido del contrato |
-| 17 | Las cuatro restricciones de catálogo, **tras verificar y limpiar duplicados en cada cliente** — H-19 | **Parcial**: verificado en local y en los **tres clientes de testing**, sin duplicados en ninguno. Falta producción |
+| 17 | Las cuatro restricciones de catálogo, **tras verificar y limpiar duplicados en cada cliente** — H-19 | Verificado — **los cinco clientes desplegados**, sin duplicados en ninguno: no hay nada que limpiar |
 | 18 | Ninguna regla de circulación cambió | Verificado — ver abajo |
 | 19 | `prisma validate`, `migrate`, `tsc`, `build`; las 72 pruebas previas aprobadas | Verificado — ver abajo |
-| 20 | Tablas documentales vacías **en cada cliente** antes de migrar | **Parcial**: verificado en los **tres clientes de testing**. Falta producción |
+| 20 | Tablas documentales vacías **en cada cliente** antes de migrar | Verificado — **los cinco clientes desplegados**, en cero |
 | 21 | `rover subgraph check` con los retiros y el cambio de `currentRevision` declarados | Verificado |
-| 22 | La SFS se actualiza solo después de reunir estas evidencias | **En consecuencia: no corresponde todavía** |
+| 22 | La SFS se actualiza solo después de reunir estas evidencias | **Habilitado**: la evidencia está reunida. Queda la decisión de cuándo escribirla |
 
 **Criterio 18, verificado por diferencia y no por declaración.** Entre el commit que abrió el bloque y este, `transmittals.ts`, `attachments.ts`, `scannedFiles.ts`, `areas.ts` y `dependencies.ts` **no registran una sola línea de cambio**, y el modelo no toca `Transmittal`, `TransmittalItem`, `PurposeCode` ni `ClientStatus`. `mi-quality` compila sin cambios. `BLOCK_04` parte exactamente del estado que dejó `BLOCK_02`, con lo que `B16` deja habilitado.
 
@@ -830,20 +830,43 @@ Ejecutada con `210-mi-deploy/check-document-precondition.sh` sobre los tres clie
 
 Los tres coinciden **exactamente** con los que `BLOCK_02` registró en su cierre: testing no se movió desde entonces.
 
-**Testing no predice producción, y conviene no leerlo así.** La precondición que puede fallar es la de `B15`, y depende de cuántas entradas tenga el catálogo de cada cliente: `optimal` en producción tiene tres órdenes de magnitud más de datos en el subsistema legado, y sus catálogos pueden estar poblados de otra forma. La verificación de producción es independiente y sigue pendiente.
+**Al script se le agregó la población de los catálogos** —cuántas clases y tipos hay, y cuántos con módulo o clase nulos—, que es justamente el conjunto que la restricción nueva pasa a cubrir. Sin ese número, «cero duplicados» puede significar que la restricción protege algo real o que el catálogo está vacío.
 
-**Al script se le agregó la población de los catálogos** —cuántas clases y tipos hay, y cuántos con módulo o clase nulos—, que es justamente el conjunto que la restricción nueva pasa a cubrir. En testing la ausencia de duplicados podría deberse a que los catálogos están poco poblados; en producción ese número cambia la lectura del resultado.
+#### Precondición verificada en producción
+
+**Veredicto `APTO PARA MIGRAR` en los dos clientes productivos**, con PostgreSQL 16.14 y el subsistema documental en cero. **Es la segunda vez que el supuesto central del plan se contrasta con una base productiva, y vuelve a confirmarse**: ningún cliente utiliza hoy el subsistema de Gestión Documental.
+
+| Cliente | Subsistema | Clases | Tipos | Grupos duplicados | Veredicto |
+| ------- | ---------- | ------ | ----- | ----------------- | --------- |
+| `proion` | 0 | 0 | 0 | 0 | `APTO PARA MIGRAR` |
+| `optimal` | 0 | **7** | **57** | 0 | `APTO PARA MIGRAR` |
+
+**El dato que cambia la lectura de `B15`: en producción no hay una sola entrada con módulo o clase nulos.** Los 7 clases y 57 tipos de `optimal` tienen todos su módulo informado, y los 57 tipos su clase. La restricción anterior ya era plenamente efectiva sobre esos datos.
+
+Es un matiz que conviene registrar y que **no debilita la decisión, la reubica**: `B15` no corrige un agujero activo sino uno **latente**. El módulo y la clase son opcionales por diseño —nulo significa «disponible para todos»—, de modo que la primera entrada que se cree sin módulo entraría hoy sin control de duplicados. Lo que la migración cierra es esa puerta, sobre un catálogo que en `optimal` ya es real: 57 tipos de documento en uso.
+
+También significa que **la migración no tiene nada que limpiar en ningún cliente**, que era el único desenlace capaz de frenarla.
+
+**Línea base del subsistema legado en producción:**
+
+| Cliente | `scanned_files` | `areas` | `document_sys_logs` |
+| ------- | --------------- | ------- | ------------------- |
+| `proion` | 0 | 0 | 0 |
+| `optimal` | **3.260** | **52** | **5.093** |
+
+`optimal` sumó 12 archivos y 12 registros de log desde el cierre de `BLOCK_02` —3.248 y 5.081—, con `areas` sin cambios: la firma de altas normales en un sistema en uso.
+
+**Esta línea base no es la que sirve para la comparación posterior.** El sistema sigue operando, de modo que hay que **volver a tomarla inmediatamente antes de migrar** y comparar contra esa. El criterio no es la igualdad sino que **no disminuya**: una pérdida de datos se manifiesta como una baja, no como la ausencia de crecimiento.
 
 #### Evaluación de la promoción a la SFS
 
-**El bloque no se promueve todavía, y el motivo no es el código.**
+**Los 21 criterios verificables están cumplidos y la precondición está levantada en los cinco clientes.** Lo que resta no es evidencia sino ejecución: el bloque **no está desplegado en ningún ambiente**.
 
-La implementación está completa y validada: las 17 operaciones del mapa, las 11 migraciones, el contrato con `rover` aprobado y 177 pruebas en las tres capas. Lo que falta es de otra naturaleza —**los criterios 17 y 20 solo pueden verificarse contra las bases de cada cliente**, y este bloque se desarrolló íntegramente en local por decisión explícita:
+**El criterio 22 queda habilitado pero no ejecutado, y es deliberado.** La SFS describe «comportamiento implementado y validado», y `BLOCK_02` fijó el precedente de promover **después** de aplicar y verificar en los ambientes reales, no antes. Escribirla ahora afirmaría como vigente algo que ningún despliegue ejecuta todavía.
 
-- **La verificación hay que rehacerla el día del despliegue de todos modos.** Los catálogos tienen datos productivos y se mueven; la corrida de testing es un aviso temprano, no un sustituto.
-- **La migración es incompatible con el código desplegado hoy.** `assignedOrganizerId` es `NOT NULL` y el `createDocument` en producción no lo informa, de modo que migrar antes de desplegar el subgraph rompería el alta de documentos. Modelo, operaciones y contrato tienen que viajar juntos.
+**La restricción que gobierna el despliegue**: la migración es incompatible con el código desplegado hoy —`assignedOrganizerId` es `NOT NULL` y el `createDocument` vigente no lo informa—, de modo que migrar antes de desplegar el subgraph rompería el alta de documentos. **Modelo, operaciones y contrato viajan en la misma ventana.**
 
-Promover a la SFS ahora afirmaría como comportamiento vigente algo que ningún despliegue ejecuta. **Estado del bloque: `LISTO_PARA_PROMOVER`.**
+**Estado del bloque: `LISTO_PARA_PROMOVER`.** Implementación y validación completas; resta desplegar, verificar y escribir la SFS.
 
 #### Condiciones de despliegue, por cliente
 
