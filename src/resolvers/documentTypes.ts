@@ -272,7 +272,7 @@ export const documentTypeResolvers = {
           module?: ModuleType
           classId?: number
           description?: string
-          requiresWorkflow?: boolean
+          requiresFormalReview?: boolean
         }
       },
       context: ResolverContext,
@@ -292,7 +292,7 @@ export const documentTypeResolvers = {
               module: input.module,
               classId: input.classId,
               description: input.description,
-              requiresWorkflow: input.requiresWorkflow ?? false,
+              requiresFormalReview: input.requiresFormalReview ?? false,
               updatedById: userId,
             },
             include: { class: true },
@@ -338,7 +338,7 @@ export const documentTypeResolvers = {
           module?: ModuleType
           classId?: number
           description?: string
-          requiresWorkflow?: boolean
+          requiresFormalReview?: boolean
         }
       },
       context: ResolverContext,

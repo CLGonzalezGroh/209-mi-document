@@ -1771,8 +1771,8 @@ input CreateDocumentTypeInput {
   classId: Int
   "Descripción del tipo"
   description: String
-  "Indica si requiere workflow de aprobación"
-  requiresWorkflow: Boolean
+  "Propone el circuito formal frente al mínimo. Es sugerencia y no invariante"
+  requiresFormalReview: Boolean
 }
 
 "Input para actualizar un tipo de documento"
@@ -1787,8 +1787,8 @@ input UpdateDocumentTypeInput {
   classId: Int
   "Nueva descripción"
   description: String
-  "Indica si requiere workflow"
-  requiresWorkflow: Boolean
+  "Propone el circuito formal frente al mínimo. Es sugerencia y no invariante"
+  requiresFormalReview: Boolean
 }
 
 "Input para crear una clase de documento"

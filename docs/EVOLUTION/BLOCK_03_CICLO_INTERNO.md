@@ -894,6 +894,26 @@ Un `finished_at` nulo habría delatado una migración a medio aplicar, que es el
 
 **Observación ajena al bloque, anotada para no descubrirla dos veces**: los seis roles `digi-*` faltan en los tres clientes de testing. Si alguna vez se habilita digitalización allí, hay que crearlos **antes** de correr `seed:permissions`, o sus permisos van a seguir salteándose en silencio.
 
+#### Un consumidor que ni `rover` ni `tsc` vieron
+
+**El despliegue en testing rompió la pantalla de archivos escaneados**, que este bloque declara fuera de alcance. Vale la pena registrar el defecto y, sobre todo, **por qué las dos verificaciones lo dejaron pasar**.
+
+**Qué pasó.** `DocumentType.requiresWorkflow` se renombró a `requiresFormalReview` (`B1`). La webapp consulta ese campo en **nueve lugares**, y dos de ellos cuelgan de `ScannedFile.documentType`: al pedir la lista de escaneados, el router rechazó la consulta con `400`. Ninguna pantalla del ciclo estaba involucrada.
+
+**Por qué `rover subgraph check` no lo detectó.** Compara los cambios contra las **operaciones registradas** en Apollo Studio —49 en la corrida de la fase F—, y **las operaciones de la webapp no están registradas**. `rover` respondió con precisión a la pregunta que se le hizo; la pregunta no cubría a este consumidor. La línea base del bloque afirmaba «ningún consumidor», y era cierta **para las operaciones del ciclo**: `requiresWorkflow` no es del ciclo, es un atributo del catálogo que se arrastra en consultas ajenas.
+
+**Por qué `tsc` no lo detectó, que es lo más importante.** El resolver `createDocumentType` seguía escribiendo `requiresWorkflow` sobre una columna que ya no existe, y `updateDocumentType` la propagaba con un *spread*. Comprobado con un experimento: **agregar un campo inventado a un `data` de Prisma dentro de `$transaction` no produce ningún error de compilación**. El cliente transaccional sí está tipado —un modelo inexistente sí falla—, pero el objeto `data` no rechaza claves de más.
+
+**Consecuencia sobre la evidencia de este bloque, declarada sin atenuantes**: donde se afirmó «`tsc --noEmit` sin errores» como respaldo de las operaciones, **esa garantía no cubre los payloads de escritura de Prisma**. Lo que sí los cubre son las pruebas contra base y de integración, que es donde el resto de los renombres quedó verificado. `requiresWorkflow` cayó justo en el hueco: pertenece a un resolver de catálogo, que este bloque no reescribió y cuyas pruebas no lo ejercitan.
+
+**Corregido en los tres frentes**, con `rover subgraph check` aprobado de nuevo:
+
+- **`209-mi-document`** — el resolver escribe `requiresFormalReview`, y los inputs `CreateDocumentTypeInput` y `UpdateDocumentTypeInput` se renombran para no dejar el contrato a medio camino.
+- **`201-mi-webapp`** — los nueve usos, incluidos los artefactos de `codegen`, que llevan la consulta literal.
+- **`210-mi-deploy`** — supergrafo regenerado.
+
+**Lo que deja como aprendizaje para `BLOCK_04`**: al renombrar un campo del contrato no alcanza con `rover` y `tsc`. Hay que **buscar el nombre viejo en la webapp**, que es el consumidor real y no está registrado en Studio.
+
 #### Evaluación de la promoción a la SFS
 
 **Los 21 criterios verificables están cumplidos, y el bloque está aplicado y verificado en los tres clientes de testing.** Lo que resta es el despliegue en los dos clientes productivos.
