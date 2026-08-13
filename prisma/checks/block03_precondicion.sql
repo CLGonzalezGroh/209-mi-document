@@ -59,6 +59,15 @@ SELECT
     (SELECT count(*) FROM attachments)               AS attachments;
 
 \echo ''
+\echo '--- Poblacion de los catalogos: es lo que la restriccion de B15 va a cubrir ---'
+SELECT
+    (SELECT count(*) FROM document_classes)                        as clases,
+    (SELECT count(*) FROM document_classes WHERE module IS NULL)   as clases_sin_modulo,
+    (SELECT count(*) FROM document_types)                          as tipos,
+    (SELECT count(*) FROM document_types WHERE module IS NULL)     as tipos_sin_modulo,
+    (SELECT count(*) FROM document_types WHERE "classId" IS NULL)  as tipos_sin_clase;
+
+\echo ''
 \echo '--- 2. Catálogos: duplicados que impedirían crear los índices de B15 ---'
 \echo '    GROUP BY trata los nulos como iguales, que es la semántica de NULLS NOT DISTINCT.'
 

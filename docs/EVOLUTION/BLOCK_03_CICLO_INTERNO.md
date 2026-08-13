@@ -795,10 +795,10 @@ Al revisarlos uno por uno aparecieron **tres criterios implementados pero sin pr
 | 14 | `pendingReviewSteps` propios; ajenos solo con el permiso especial — **H-07** | Verificado — **las dos direcciones**, con un contexto de rol `doc-basic` |
 | 15 | Códigos según el esquema; orden de revisiones independiente del código — **H-09, H-10** | Verificado |
 | 16 | Ninguna operación modifica ni elimina una versión — **H-34** | Verificado — por recorrido del contrato |
-| 17 | Las cuatro restricciones de catálogo, **tras verificar y limpiar duplicados en cada cliente** — H-19 | **Parcial**: verificado en local, donde no había duplicados. Falta por cliente |
+| 17 | Las cuatro restricciones de catálogo, **tras verificar y limpiar duplicados en cada cliente** — H-19 | **Parcial**: verificado en local y en los **tres clientes de testing**, sin duplicados en ninguno. Falta producción |
 | 18 | Ninguna regla de circulación cambió | Verificado — ver abajo |
 | 19 | `prisma validate`, `migrate`, `tsc`, `build`; las 72 pruebas previas aprobadas | Verificado — ver abajo |
-| 20 | Tablas documentales vacías **en cada cliente** antes de migrar | **Pendiente** — solo local |
+| 20 | Tablas documentales vacías **en cada cliente** antes de migrar | **Parcial**: verificado en los **tres clientes de testing**. Falta producción |
 | 21 | `rover subgraph check` con los retiros y el cambio de `currentRevision` declarados | Verificado |
 | 22 | La SFS se actualiza solo después de reunir estas evidencias | **En consecuencia: no corresponde todavía** |
 
@@ -808,11 +808,39 @@ Al revisarlos uno por uno aparecieron **tres criterios implementados pero sin pr
 
 #### Evaluación de la promoción a la SFS
 
+#### Precondición verificada en testing
+
+Ejecutada con `210-mi-deploy/check-document-precondition.sh` sobre los tres clientes desplegados. **Veredicto `APTO PARA MIGRAR` en los tres**, con PostgreSQL **16.14** —`NULLS NOT DISTINCT` disponible— y las nueve tablas del subsistema documental en cero.
+
+| Cliente | Subsistema documental | Grupos duplicados | Veredicto |
+| ------- | --------------------- | ----------------- | --------- |
+| `rbb` | 0 | 0 | `APTO PARA MIGRAR` |
+| `optimal` | 0 | 0 | `APTO PARA MIGRAR` |
+| `proion` | 0 | 0 | `APTO PARA MIGRAR` |
+
+**Ninguna de las cuatro restricciones de `B15` encuentra duplicados**, de modo que los índices con `NULLS NOT DISTINCT` pueden crearse sin limpiar nada. Los tres confirman además que la migración **no fue aplicada**: `documents` conserva `revisionScheme` junto a `projectId`, que es el estado que dejó `BLOCK_02`.
+
+**Línea base del subsistema legado**, que la migración no toca y que se registra para poder demostrarlo después en lugar de suponerlo:
+
+| Cliente | `scanned_files` | `areas` | `document_sys_logs` |
+| ------- | --------------- | ------- | ------------------- |
+| `rbb` | 0 | 0 | 0 |
+| `optimal` | **9** | **3** | **32** |
+| `proion` | 1 | 0 | 1 |
+
+Los tres coinciden **exactamente** con los que `BLOCK_02` registró en su cierre: testing no se movió desde entonces.
+
+**Testing no predice producción, y conviene no leerlo así.** La precondición que puede fallar es la de `B15`, y depende de cuántas entradas tenga el catálogo de cada cliente: `optimal` en producción tiene tres órdenes de magnitud más de datos en el subsistema legado, y sus catálogos pueden estar poblados de otra forma. La verificación de producción es independiente y sigue pendiente.
+
+**Al script se le agregó la población de los catálogos** —cuántas clases y tipos hay, y cuántos con módulo o clase nulos—, que es justamente el conjunto que la restricción nueva pasa a cubrir. En testing la ausencia de duplicados podría deberse a que los catálogos están poco poblados; en producción ese número cambia la lectura del resultado.
+
+#### Evaluación de la promoción a la SFS
+
 **El bloque no se promueve todavía, y el motivo no es el código.**
 
 La implementación está completa y validada: las 17 operaciones del mapa, las 11 migraciones, el contrato con `rover` aprobado y 177 pruebas en las tres capas. Lo que falta es de otra naturaleza —**los criterios 17 y 20 solo pueden verificarse contra las bases de cada cliente**, y este bloque se desarrolló íntegramente en local por decisión explícita:
 
-- **La verificación hay que rehacerla el día del despliegue de todos modos.** Los catálogos tienen datos productivos y se mueven; una comprobación adelantada sería un aviso temprano, no un sustituto.
+- **La verificación hay que rehacerla el día del despliegue de todos modos.** Los catálogos tienen datos productivos y se mueven; la corrida de testing es un aviso temprano, no un sustituto.
 - **La migración es incompatible con el código desplegado hoy.** `assignedOrganizerId` es `NOT NULL` y el `createDocument` en producción no lo informa, de modo que migrar antes de desplegar el subgraph rompería el alta de documentos. Modelo, operaciones y contrato tienen que viajar juntos.
 
 Promover a la SFS ahora afirmaría como comportamiento vigente algo que ningún despliegue ejecuta. **Estado del bloque: `LISTO_PARA_PROMOVER`.**
@@ -821,7 +849,7 @@ Promover a la SFS ahora afirmaría como comportamiento vigente algo que ningún 
 
 Lo que resta ejecutar, en este orden. Los clientes desplegados son `rbb`, `optimal` y `proion` en testing, y `optimal` y `proion` en producción.
 
-1. **Precondición**, con `prisma/checks/block03_precondicion.sql`: veredicto `APTO PARA MIGRAR`. Un resultado con duplicados **no cancela la migración: obliga a limpiarlos antes**, que es lo contrario del veredicto de `BLOCK_02`.
+1. **Precondición**, con `210-mi-deploy/check-document-precondition.sh <cliente> <ambiente>`: veredicto `APTO PARA MIGRAR`. Un resultado con duplicados **no cancela la migración: obliga a limpiarlos antes**, que es lo contrario del veredicto de `BLOCK_02`. Ya verificado en los tres clientes de testing.
 2. **Línea base del subsistema legado** —`scanned_files`, `areas`, `document_sys_logs`—, para poder demostrar después que quedó intacto. `optimal` en producción es el único con uso real.
 3. **Permisos**: `npm run seed:permissions` en `mi-admin`. 404 → 407 permisos, 790 → 794 asignaciones.
 4. **Migración**: las dos del bloque, con el subgraph nuevo en la misma ventana.
