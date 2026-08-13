@@ -456,7 +456,7 @@ Dos, a aplicar en la BD `mi_document` de cada cliente:
 
 Tercer bloque de la evolución documentada en `docs/EVOLUTION/BLOCK_03_CICLO_INTERNO.md`. **Es el primer bloque que cambia reglas funcionales**: el circuito abarca ahora el ciclo completo, desde el armado hasta la toma de conocimiento.
 
-**En curso.** Fases A a F aplicadas; G y H pendientes.
+**En curso.** Fases A a G aplicadas; queda el cierre documental.
 
 ### Permisos (fase A)
 
@@ -518,8 +518,10 @@ Tipos nuevos: `DocStepSignature`, `DocWorkflowTemplate`, `DocWorkflowTemplateSte
 
 ### Pruebas
 
-**141 pruebas**, de 72: **101 puras**, 24 contra base y 16 de integración. `npm run test:block03` corre las suites sin base, `test:block03-db` agrega las de base y `test:block03-all` la integración.
+**174 pruebas**, de 72: **101 puras**, **42 contra base** y **31 de integración**. `npm run test:block03` corre las suites sin base, `test:block03-db` agrega las de base y `test:block03-all` la integración completa.
 
-Entre las de base, `test:object-context-db` verifica que **los trece tipos de objeto** deriven su proyecto y su módulo correctamente, y que un objeto inexistente devuelva nulo en lugar de contexto vacío —la distinción de la que depende la autorización—.
+- **Cuatro recorridos de punta a punta**: documento nuevo, documento preexistente con archivo adjunto, rechazo con circuito nuevo sobre la misma revisión, y abandono a mitad de circuito con recuperación del código.
+- **Restricciones del modelo contra base**: los dos índices parciales, las cuatro restricciones de catálogo con nulos, el alcance de la plantilla, la firma única por paso y la continuidad de la secuencia de versiones entre circuitos.
+- **Derivación de contexto de los trece tipos de objeto**, incluido que un objeto inexistente devuelva nulo en lugar de contexto vacío —la distinción de la que depende la autorización—.
 
 ---

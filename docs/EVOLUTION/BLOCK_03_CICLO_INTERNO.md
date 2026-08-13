@@ -734,6 +734,43 @@ El último caso es el que la autorización necesita: distinguir «no pertenece a
 
 **Verificación posterior**: `tsc --noEmit`, `npm run build` y **las 141 pruebas** siguen sin error.
 
+### Fase G — pruebas de las tres capas
+
+**174 pruebas en total**, de 72 al abrir el bloque: **101 puras**, **42 contra base** y **31 de integración**. `npm run test:block03-all` corre las trece suites.
+
+| Capa | Antes del bloque | Ahora |
+| ---- | ---------------- | ----- |
+| Puras | 43 | **101** |
+| Contra base | 13 | **42** |
+| Integración | 16 | **31** |
+
+**Contra base**, `src/utils/modelConstraintsPersistence.test.ts` con **18 casos**. Automatiza lo que la fase B verificó a mano, y la razón de que vivan acá y no en una prueba pura está declarada en el archivo: **son invariantes que la aplicación no puede garantizar sola**, porque dos peticiones concurrentes pueden pasar la misma precondición y escribir las dos. Por eso viven en índices.
+
+- **`B12`** — varias abandonadas comparten código; una viva convive con ellas; una segunda viva se rechaza; y abandonar no libera el código de una aprobada.
+- **`B2`** — una revisión acumula circuitos cancelado, rechazado y completado más **uno solo abierto**; el segundo abierto se rechaza; cerrar el abierto habilita el siguiente. Es H-01 sostenido por la base y no por el resolver.
+- **`B15`** — las cuatro restricciones de catálogo rechazan el duplicado con módulo o clase nulos, y siguen admitiendo la misma entrada en otro módulo.
+- **`B3`** — el alcance de la plantilla rechaza el repetido con nulos y admite el refinamiento por clase.
+- **`B7`** — un paso admite una sola firma.
+- **`B5`** — la secuencia de versiones es de la **revisión** y no del circuito: no se reinicia con el circuito nuevo del rechazo, porque lo que se corrige es el mismo entregable.
+- **`B4`** — toda versión exige `checksum`, verificado con SQL directo para saltear la capa de la aplicación.
+
+**Una prueba de forma distinta, y conviene explicar por qué.** El criterio 16 —ninguna operación modifica ni elimina una versión— **no tiene restricción de base que lo sostenga**: una columna no impide un `UPDATE`. El invariante vive en que la operación *no exista*, de modo que la prueba **recorre el contrato** y verifica que no haya ninguna mutación de actualización o borrado sobre versiones ni firmas, y que `registerVersion` siga siendo la única. Impide que aparezca sin que nadie lo note.
+
+**Integración**, `src/resolvers/cycle.integration.test.ts` con **15 casos** sobre el arnés de `BLOCK_02`. Los cuatro recorridos que el bloque exige:
+
+| Recorrido | Qué demuestra |
+| --------- | ------------- |
+| **1. Documento nuevo** | Alta sin archivo con armador y circuito en armado ▸ armado que materializa los cinco pasos ▸ elaboración ▸ someter ▸ revisión ▸ aprobación ▸ **acuse cerrado después**, con el circuito ya completado |
+| **2. Documento preexistente** | Alta **con** archivo adjunto ▸ el elaborador incorpora el cambio ▸ aprobación. El payload firmado acredita la **versión 2** y el código del documento |
+| **3. Rechazo** | Versión marcada ▸ rechazo ▸ circuito nuevo desde `PREPARE` **con el elenco copiado** ▸ reasignar en el nuevo **no altera** el paso del anterior ▸ corrección y aprobación **sobre la misma revisión `A`**. La firma del rechazo se verifica y declara `REJECTED` |
+| **4. Abandono** | `A` aprobada ▸ `B` sometida **con un paso ya firmado** ▸ abandono con motivo ▸ el circuito abierto se cancela con ella y **la firma sobrevive** ▸ la siguiente vuelve a proponerse **`B`** ▸ `currentRevision` sigue siendo `A` |
+
+Once casos más cubren los criterios que los recorridos no tocan: el **circuito mínimo de un solo paso de aprobación** que cierra H-02; el armado sin paso que decida; la **inmutabilidad de la estructura** una vez armada; el paso resuelto que no se reasigna; la revisión aprobada que no admite versiones nuevas; la **metadata congelada y rehabilitada** por la revisión siguiente; la validación del código bajo los tres esquemas —incluido que **el esquema no se persiste**, porque un `FREE_TEXT` no revela esquema a la revisión siguiente—; someter sin versión; la **cancelación del circuito** que conserva la revisión, la rearma desde el armado y emite `WorkflowCancelled` **y no** `WorkflowRejected`; los pendientes propios y ajenos; y que la traza registre las once acciones nuevas del ciclo.
+
+**El humo de la fase D se retira**: la prueba de integración lo absorbe y lo supera, y mantener dos recorridos paralelos habría dejado uno desactualizado.
+
+**Sobre la estrategia de pruebas del bloque**: las precondiciones —metadata congelada, cancelación, abandono, registro de versión— figuraban entre las puras. Se implementaron **como integración**, porque ninguna es pura: todas dependen del estado de la revisión en la base. Lo puro de cada una —la partición de `B8`, el sucesor, el payload— ya está cubierto en sus utilidades.
+
 ## Referencias
 
 - `README.md`

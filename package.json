@@ -31,8 +31,10 @@
     "test:workflow-template": "node --import tsx --test src/utils/workflowTemplate.test.ts",
     "test:block03": "npm run test:block02 && npm run test:revision-scheme && npm run test:step-signature && npm run test:workflow-template",
     "test:object-context-db": "node --import tsx --test src/utils/objectContextPersistence.test.ts",
-    "test:block03-db": "npm run test:block03 && npm run test:events-db && npm run test:project-scope-db && npm run test:object-context-db",
-    "test:block03-all": "npm run test:block03-db && npm run test:block02-integration"
+    "test:model-constraints-db": "node --import tsx --test src/utils/modelConstraintsPersistence.test.ts",
+    "test:block03-integration": "node --import tsx --test src/resolvers/cycle.integration.test.ts",
+    "test:block03-db": "npm run test:block03 && npm run test:events-db && npm run test:project-scope-db && npm run test:object-context-db && npm run test:model-constraints-db",
+    "test:block03-all": "npm run test:block03-db && npm run test:block02-integration && npm run test:block03-integration"
   },
   "keywords": [],
   "author": "César González Groh",
