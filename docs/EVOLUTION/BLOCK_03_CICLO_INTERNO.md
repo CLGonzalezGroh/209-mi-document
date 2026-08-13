@@ -920,6 +920,27 @@ Con el router local al día se pudo correr `npm run codegen` de verdad y contras
 
 **Lo que deja como aprendizaje para `BLOCK_04`**: al renombrar un campo del contrato no alcanza con `rover` y `tsc`. Hay que **buscar el nombre viejo en la webapp** —incluidos sus artefactos de `codegen`, que llevan la consulta literal—, renombrar también los **inputs**, y correr `codegen` como parte del cierre del bloque y no solo cuando algo se rompe.
 
+#### Aplicado en producción
+
+**`optimal`, el cliente con uso productivo real, migrado sin una sola diferencia en el subsistema legado.**
+
+Respaldo tomado antes de tocar nada. Precondición reconfirmada en el momento —`APTO PARA MIGRAR`, con los catálogos en 7 clases y 57 tipos y ninguna entrada con módulo o clase nulos—. Permisos: **407 upsertados**, con las mismas advertencias de roles `digi-*` inexistentes que en testing.
+
+Migración aplicada al arrancar el contenedor, sobre la base gestionada `mi_document_optimal`: **11 migraciones**, con las dos del bloque aplicadas en ese arranque.
+
+| Señal | Antes | Después |
+| ----- | ----- | ------- |
+| Subsistema documental | 0 | 0 |
+| Catálogos | 7 clases / 57 tipos | Sin cambios |
+| **Legado** `scanned_files` / `areas` / `sys_logs` | **3.277 / 52 / 5.112** | **3.277 / 52 / 5.112** |
+| `revisionScheme` en `documents` | Presente | Retirado |
+
+**El `diff` de la salida completa tiene exactamente dos bloques de cambio**, y uno solo es de datos: la desaparición de `revisionScheme`. El otro es el texto del veredicto, que pasó a `YA MIGRADO`.
+
+**Sobre el criterio del legado.** En el cierre de `BLOCK_02` los números eran `3.248 / 52 / 5.081` y en la verificación previa de este bloque `3.260 / 52 / 5.093`: el sistema venía sumando archivos y registros, que es la firma de uso normal. Entre la medición inmediatamente anterior a migrar y la posterior **no hubo ni crecimiento ni pérdida**, porque la ventana fue de minutos y sin actividad. El criterio se cumple en su forma más fuerte: no solo no disminuyó, se repitió exacto.
+
+**Los 3.277 archivos escaneados de `optimal` son la razón por la que este bloque tomó línea base antes de tocar nada.** Una migración que retira una columna de `documents` los dejó intactos, y eso queda **demostrado y no supuesto**.
+
 #### Evaluación de la promoción a la SFS
 
 **Los 21 criterios verificables están cumplidos, y el bloque está aplicado y verificado en los tres clientes de testing.** Lo que resta es el despliegue en los dos clientes productivos.

@@ -1,0 +1,500 @@
+# Bloque 03B — Qué le pertenece a cada nivel
+
+**Estado:** `APROBADO_PENDIENTE`
+**Versión:** 1.0
+**Depende de:** `BLOCK_02` y `BLOCK_03`, cuyo modelo revisa. Precede a `BLOCK_04`.
+**Decisiones que ejecuta:** D-23, D-24, D-25, D-26, D-27.
+**Revisa:** `B4`, `B5`, `B6` y `B11` de `BLOCK_03`, y la unicidad del código de `BLOCK_02`.
+
+## Objetivo
+
+Corregir la titularidad de tres datos que hoy están en el nivel equivocado o con la cardinalidad equivocada:
+
+| Dato | Hoy | Objetivo |
+| ---- | --- | -------- |
+| Metadata de identificación | Del documento, congelada por regla de comportamiento | De la revisión, congelada por estructura |
+| Código | Del documento, editable como cualquier campo | Del documento, **inmutable** salvo ventana de corrección |
+| Archivo | La versión **es** un archivo | La versión es un **conjunto** de archivos entregados en un mismo acto |
+
+Los tres son la misma pregunta —a qué nivel pertenece cada dato— y por eso se resuelven juntos.
+
+## Por qué es un bloque propio y no una corrección dentro de otro
+
+`BLOCK_03` está `PROMOVIDO_A_SFS`: su comportamiento ya está implementado, validado y publicado en la especificación vigente. Reabrirlo confundiría lo que se relevó con lo que se decide ahora.
+
+Y estos cambios no pertenecen a `BLOCK_04`. La emisión al cliente da por sentado qué acredita una firma y qué compone un entregable; si esas dos cosas se mueven durante `BLOCK_04`, la puerta de emisión se especifica sobre un piso inestable. Por eso el bloque va **antes**.
+
+Conserva el sufijo por el mismo criterio que `BLOCK_02B` y `BLOCK_02C`: no renumerar bloques ya referenciados.
+
+### Y por qué no se parte en dos
+
+Se evaluó separar la titularidad de la metadata y del código, por un lado, de la composición de la versión, por el otro. **Se descarta**, por dos razones.
+
+**La firma es el punto donde ambas mitades se juntan.** `B8` cambia el payload por las dos causas a la vez: el snapshot de identificación pasa a leerse de la revisión (`B1`) y la versión pasa a ser un conjunto (`B6`). Partido, el formato del payload se rompería **dos veces**, con dos valores sucesivos de `payloadVersion` y dos formas históricas que verificar para siempre. Es exactamente el costo que el módulo se negó a pagar cuando reservó un valor de enumeración *"para no pagar dos migraciones"*.
+
+**Y el tamaño no lo justifica.** `BLOCK_03` cerró con dieciséis decisiones y ocho fases; doce decisiones no es un bloque grande para este plan. Lo que hace falta no es partirlo sino secuenciarlo, que es lo que resuelven las fases.
+
+## Línea base confirmada
+
+Verificada sobre el código después de `BLOCK_03`.
+
+- **La metadata vive en `Document`**: `code`, `title`, `description`, `documentTypeId`, `documentClassId` en `documents`. El congelamiento de `B6` es una precondición de la operación de actualización, no una propiedad del modelo.
+- **El código tiene dos índices únicos parciales** creados en SQL: `documents_code_projectId_key` para la documentación en circulación y `documents_code_module_key` para la publicada. No existe ninguna restricción sobre su modificación.
+- **La versión es un archivo**: `document_versions` lleva `fileKey`, `fileName`, `fileSize`, `mimeType` y `checksum` en línea, con `@@unique([revisionId, versionNumber])`. `registerVersion` recibe esos cinco datos como un objeto plano.
+- **La firma ya prevé el cambio de forma.** `SIGNATURE_PAYLOAD_VERSION` existe en `src/utils/stepSignature.ts` exactamente para esto: *"sin ella, un cambio futuro en la forma del payload dejaría las firmas viejas indistinguibles de las nuevas"*. Hoy vale `1`.
+- **El payload firma un solo archivo**: `version: { id, versionNumber, fileKey, checksum }`, más el snapshot de metadata `document: { id, code, title, documentClassId, documentTypeId }`.
+- **`canonicalize` ordena claves pero no arreglos** (`value.map(canonicalize)`). Un payload con una lista de archivos exige que la lista se construya en orden determinístico antes de serializar.
+- **El subsistema documental no tiene uso productivo**, según la línea base del plan. Los cambios incompatibles de modelo y de contrato no rompen consumidores.
+
+## Decisiones ya aprobadas que aplican
+
+- **D-05** — la firma acredita quién y qué, sobre datos verificables y persistidos.
+- **D-10** — la revisión es la unidad externa y la versión la iteración interna.
+- **B4 de `BLOCK_03`** — la versión no se modifica ni se elimina. **Se conserva**; cambia su cardinalidad, no su inmutabilidad.
+- **B6 de `BLOCK_03`** — la metadata se congela con la revisión aprobada. **Se conserva el efecto** y cambia su fundamento.
+- **B12 de `BLOCK_03`** — la revisión abandonada no consume código.
+- **B14 de `BLOCK_03`** — revisión vigente y revisión en curso, resueltas en un solo lugar. Este bloque las reutiliza para la metadata.
+
+## Alcance incluido
+
+1. La metadata de identificación como atributo de la revisión.
+2. La metadata efectiva del documento como copia de la revisión en curso.
+3. El código como identificador inmutable, con ventana de corrección acotada.
+4. El reemplazo entre documentos del mismo ámbito, como acto N:M con motivo.
+5. La obsolescencia del documento, por reemplazo o por salir del alcance.
+6. El vocabulario de los estados terminales, una palabra por nivel.
+7. La versión como conjunto de archivos, con rol por archivo.
+8. La copia de trabajo, y la versión producida al confirmarla.
+9. La firma acreditando el conjunto completo, con `payloadVersion` 2.
+10. Migración de datos y de contrato, y pruebas de las tres capas.
+
+## Fuera de alcance
+
+- **Qué roles de archivo son obligatorios y cuándo.** Depende del propósito de la emisión, que el modelo todavía no tiene. Corresponde a `BLOCK_04` (B9).
+- **La recodificación masiva** por cambio del esquema de codificación del cliente. Se resolvió no implementarla: la posibilidad queda abierta, ninguna operación la ofrece.
+- **El destino de `Attachment`**, diferido por D-08. Los roles de archivo de este bloque viven dentro de la versión y no lo reemplazan, aunque `B7` le retire el caso de uso que más lo apuraba.
+- **La promoción de documentos al activo al cierre del proyecto**, que es linaje entre revisiones y no reemplazo (`B10`). Pertenece al módulo de activos.
+- **La obsolescencia por decomisionamiento** de una parte de la planta. Es una causa que este módulo no conoce, y vive donde vive el activo.
+- La interfaz de usuario, que corresponde a `BLOCK_05`.
+
+---
+
+## Decisiones del bloque
+
+### B1 — La metadata de identificación pertenece a la revisión
+
+El §6 de los principios justifica el congelamiento por un motivo **material**: parte de la metadata está impresa dentro del archivo. El rótulo lleva el código, el título y a menudo la clase y el tipo.
+
+Si el dato está impreso en el archivo, pertenece a la emisión que produjo ese archivo. Ubicarlo en el documento obliga a sostener por regla de comportamiento —"editable mientras no esté aprobada"— algo que la estructura puede sostener sola: **una revisión aprobada no se modifica, y con eso el congelamiento deja de necesitar enunciado.**
+
+Pasan a la revisión: **título, clase y tipo**. Se copian de la revisión anterior al crearse la nueva, y se editan libremente mientras esté abierta.
+
+Quedan en el documento, editables siempre: **descripción, ámbito y vínculos**. Ninguno aparece en el rótulo, y hoy el congelamiento los alcanza sin causa: corregir una descripción no debe exigir abrir una revisión.
+
+El código no pasa a la revisión. Ver `B3`.
+
+**Qué resuelve además.** DOM-005 admite hoy una anomalía en sus Observaciones: *"Abandonar una revisión no revierte la metadata que se cambió mientras estaba abierta. El documento queda declarando algo que ninguna revisión aprobada reproduce"*. Con la metadata en la revisión, la anomalía desaparece sin regla compensatoria: lo que se editó en la revisión abandonada se abandona con ella.
+
+**Y habilita comparar.** Qué cambió entre la revisión B y la C —el título, la clase— pasa a ser información consultable. Hoy no existe.
+
+### B2 — El documento conserva la metadata efectiva como copia de la revisión en curso
+
+Mover el dato no significa vaciarlo del documento. `Document` conserva el título, la clase y el tipo, pero **como copia y no como dato propio**: su único escritor es la transición de la revisión.
+
+| Acto | Efecto sobre la copia |
+| ---- | --------------------- |
+| Editar la metadata con la revisión abierta | Escribe en la revisión y se replica |
+| Aprobar | Ninguno: ya estaba replicada |
+| Abandonar la revisión | Se recalcula desde la nueva revisión en curso —que es la aprobada— y **la metadata vuelve sola** |
+
+La alternativa —quitarla del documento y resolverla por join— se descarta: obligaría a todo listado, filtro y búsqueda a consultar la revisión efectiva, sin comprar nada que la copia no dé.
+
+**Aparecen dos lecturas, y son las que `B14` ya definió.** Metadata **vigente** es la de la última aprobada, lo que dice el rótulo que salió; metadata **en curso** es la de la revisión abierta. No es una regla nueva: es la misma regla aplicada a otro atributo.
+
+Con una revisión `A` aprobada y una `B` en borrador donde el título se corrigió, hay dos respuestas correctas a la misma pregunta:
+
+| Lectura | Qué devuelve | Para qué sirve |
+| ------- | ------------ | -------------- |
+| En curso | El título de `B` | Qué es el documento hoy, y qué se está por emitir |
+| Vigente | El título de `A` | **Qué dice el rótulo que efectivamente salió** |
+
+**La copia se nombra por la lectura que sirve.** `Document.title` pasa a `currentTitle`, y con él `currentDocumentClass` y `currentDocumentType`. Conservar el nombre desnudo dejaría un campo que significa *"el de la revisión en curso"* sin decirlo, y el consumidor que buscaba el rótulo aprobado se llevaría otro valor sin enterarse — que es el defecto contra el que advierte el §13 cuando pide que las dos lecturas *"se expongan y no se deriven en cada consumidor"*.
+
+El prefijo marca la copia. **En la revisión los nombres quedan desnudos** —`title`, `documentClassId`, `documentTypeId`—, porque ahí el valor no es copia de nada: es el dato. La asimetría es deliberada y se lee de un vistazo.
+
+La otra lectura no necesita campo propio: después de `B1` la revisión vigente lleva su título, de modo que el rótulo aprobado queda a un salto sin agregar nada al modelo.
+
+El renombre alcanza al modelo y no solo al contrato. Un campo llamado `title` en la tabla y `currentTitle` en la API obligaría a recordar la traducción justamente donde la confusión es cara. Se paga una vez, sin consumidores y sin datos productivos.
+
+**Tensión declarada con el §3 de los principios.** Allí se rechaza almacenar un dato derivado porque puede desincronizarse de su origen. Acá el origen es inmutable una vez aprobado y el único escritor es la transición de revisión. La excepción se declara en el principio y no se resuelve en la implementación.
+
+**Consecuencia sobre la plantilla.** El circuito se resuelve por la tupla clase/tipo al materializarse (§12), y los valores se copian. Cambiar la clase o el tipo dentro de una revisión ya armada **no rearma el circuito**, coherente con el criterio de copia. Se enuncia para que no quede decidido implícitamente.
+
+### B3 — El código es el identificador y no cambia
+
+El código no es metadata: es **la referencia**. Está en los transmittals emitidos, en el payload de cada firma, en las referencias cruzadas de otros documentos, en el sistema de la contraparte y en el rótulo de cada archivo que salió. Cambiarlo no renombra un registro: rompe la correspondencia con todo lo que ya lo nombra y que el sistema no controla.
+
+Es lo que DOM-005 ya afirma sin extraer la consecuencia: *"esa identificación no es descripción sino identidad"*. Si es identidad, no se edita.
+
+La distinción con `B1` es a qué apunta cada dato. El título y la clase **describen**, y pueden corregirse entre revisiones porque nadie referencia un documento por su título. El código **identifica**.
+
+La restricción técnica coincide con la funcional: los dos índices únicos parciales de la línea base solo son expresables con el código en `documents`. Si viviera en la revisión, la unicidad recaería sobre un conjunto derivado —la revisión en curso de cada documento— que ningún índice expresa, y dos borradores podrían reclamar el mismo código y chocar recién al aprobar.
+
+### B4 — El código se corrige mientras el documento no tenga revisión aprobada
+
+Un error de tipeo en el alta debe poder corregirse. La condición habilitante es **que no exista revisión vigente**, y no "antes de cerrar la primera revisión":
+
+1. Es la condición material de que **nada salió**: ningún transmittal lo nombra, ninguna firma lo lleva en su payload, ningún rótulo emitido lo imprime.
+2. Es más precisa. Si la primera revisión se abandona y se abre una segunda, sigue sin haberse aprobado nada, y la formulación por "primera revisión" bloquearía el código sin causa.
+3. No requiere indicador nuevo: es la lectura de revisión vigente nula que `B14` ya resuelve.
+
+Dos condiciones de la operación:
+
+- **Emite evento propio.** Es la identidad cambiando, y sin evento sería inexplicable en una auditoría posterior. `DocumentCodeChanged`, con el código anterior y el nuevo.
+- **Advierte sobre las versiones cargadas.** Si ya existe una versión con el rótulo impreso, cambiar el código obliga a volver a cargarla. El sistema no puede verificar el interior del archivo; la advertencia sí corresponde.
+
+### B5 — El reemplazo supera al documento anterior, dentro del mismo ámbito
+
+Aprobada una revisión, el código no se edita. Lo que corresponde es **dar de alta un documento nuevo que reemplace y supere al anterior**.
+
+**Reemplazar es superar, y el documento reemplazado queda obsoleto.** No son dos actos: es el sentido de la fórmula con que el control documental lo enuncia —*reemplaza y supera a*—, y el documento superado deja de representar nada vigente en el mismo instante en que otro lo hace.
+
+Es exactamente lo que ya ocurre un nivel más abajo: aprobar una revisión supersede a la anterior. Acá el mismo hecho ocurre entre documentos.
+
+**El reemplazo no es la única causa.** Un documento también queda obsoleto **por salir del alcance del proyecto**: dejó de tener sentido y nada lo reemplaza. Son dos caminos al mismo estado, y por eso la obsolescencia **se registra en el documento** —fecha, actor y motivo obligatorio— en lugar de derivarse de la existencia de un reemplazo. Es el precedente de `B11` de `BLOCK_03` para el abandono de la revisión: *el motivo vive en el modelo y no en el meta de un evento*.
+
+Lo que sí **se deriva es la causa**: el documento obsoleto que figura como reemplazado en un acto lo está por reemplazo, y el que no figura en ninguno, por fuera de alcance. Un indicador de causa sería un dato calculable capaz de contradecir a los que lo originan, que es lo que el §7 rechaza.
+
+Qué implica estar obsoleto, por cualquiera de las dos causas:
+
+- **no admite revisiones nuevas**, porque sería contradictorio emitir sobre lo que ya fue superado;
+- **conserva todo lo demás**: su código, su historia de revisiones, sus versiones firmadas y sus transmittals siguen enteros y consultables;
+- **no libera su código**, que permanece tomado dentro del ámbito. Es lo que impide que el reemplazo se convierta en una vía indirecta de reutilizar un identificador, y refuerza `B3`.
+
+**Obsoleto no es dado de baja.** `terminatedAt` es baja lógica: corrige un alta que no debió existir. La obsolescencia es un hecho del ciclo de vida — el documento existió, sirvió y dejó de servir. Confundirlas borraría de la historia lo que la obsolescencia justamente conserva.
+
+**Se modela N:M desde el principio**, y no 1:1 con generalización posterior. Con la misma relación quedan expresados tres hechos que hoy no tienen forma de registrarse:
+
+| Cardinalidad | Hecho |
+| ------------ | ----- |
+| 1:1 | Recodificación: el mismo documento con otro código |
+| N:1 | Unificación: dos documentos pasan a ser uno |
+| 1:N | División: un documento se separa en dos |
+
+**El reemplazo es un acto, y no un par de referencias.** Un acto declara su fecha, su actor y su motivo, y agrupa los documentos que salen y los que entran. Sin esa agrupación, una unificación de dos documentos en dos nuevos es indistinguible de dos reemplazos separados, y la reorganización pierde el sentido que la explica.
+
+**El motivo vive en el acto y no se tipifica.** Qué clase de reemplazo es —recodificación, unificación, división— **se deriva de la cardinalidad** del propio acto. Es el criterio de D-04 sobre la delegación: no se guarda un indicador que puede contradecir a los datos que lo originan.
+
+**Los documentos de un acto comparten ámbito.** Reemplazar es un hecho interno a un proyecto, o interno al régimen de publicación. Cruzar de uno a otro no es reemplazar sino promover, que es otra cosa y no pertenece a este bloque — ver `B10`.
+
+Lo que el reemplazo conserva es justamente lo que la edición del código destruiría: el documento anterior sigue existiendo con su identidad y su historia, y el acto declara qué lo reemplazó y por qué.
+
+### B6 — Una versión es un conjunto de archivos entregados en un mismo acto
+
+Un documento se entrega habitualmente como más de un archivo. El caso corriente de ingeniería es el **PDF junto con su editable**: se revisa y se marca el PDF, y el DWG viaja como respaldo de la fuente. También existe el documento compuesto por varios entregables —memoria y planillas—, de modo que la restricción no es "un principal", sino "al menos un revisable".
+
+**El principio del §4 no se debilita: se corrige su cardinalidad.** Lo que sostiene es que la versión no existe sin contenido nuevo y que nunca cambia. Ambas cosas se conservan enunciadas sobre el conjunto:
+
+> La versión es el conjunto de archivos registrado en un mismo acto. No existe sin contenido nuevo, y ni el conjunto ni sus archivos se modifican ni se eliminan.
+
+**Agregar un archivo a una versión existente se descarta.** Rompería la inmutabilidad y dejaría a una firma acreditando un conjunto distinto del que su autor tuvo delante. Si el editable llega después, se registra una versión nueva con ambos archivos — que es lo correcto, porque las versiones son iteración interna y no consumen numeración externa.
+
+**El costo práctico se acota reutilizando la referencia.** Un archivo que no cambió conserva su `fileKey` y su `checksum` en la versión nueva: lo que se crea es el registro del conjunto, no el objeto almacenado. Cómo se opera eso lo resuelve `B12`.
+
+**Que el editable viaje solo al final es un caso, no una excepción.** En las revisiones tempranas el conjunto tiene un archivo; en la emisión final tiene dos. Nada en el modelo lo impide y nada lo exige — ver `B9`.
+
+### B7 — El rol del archivo lo interpreta el sistema
+
+Cada archivo del conjunto declara su rol. Se modela como enumeración y no como catálogo configurable, por el criterio de D-22: **es un catálogo cuando el usuario elige el rótulo, y una enumeración cuando el sistema interpreta el efecto.** Acá el sistema lo interpreta —qué se abre para revisar, qué se marca, qué se exige al emitir—, de modo que un valor libre no tendría comportamiento asociado.
+
+| Rol | Qué es | Comportamiento |
+| --- | ------ | -------------- |
+| `DELIVERABLE` | El entregable, típicamente PDF | Es lo que se revisa y se marca. Al menos uno por versión |
+| `SOURCE` | La fuente editable, típicamente DWG | Acompaña en custodia. No se revisa. Opcional |
+| `SUPPORT` | La evidencia que formó parte de producir el documento: memoria de cálculo, ensayos, planillas, relevamientos | Acompaña como respaldo. No se revisa ni se marca. Opcional, y admite varios |
+
+**`SUPPORT` no invade a `Attachment`, y su frontera es limpia.** Lo que distingue a los tres roles de un adjunto no es la naturaleza del archivo sino a qué se ata: el archivo de una versión **integra la entrega**, es inmutable y queda acreditado por la firma; un adjunto cuelga del documento, es mutable y no acredita nada. Que la evidencia que sustenta un cálculo quede firmada junto con el entregable que la usa es precisamente lo que hoy no se puede afirmar.
+
+La distinción además **descarga a D-08** en lugar de anticiparlo: retira del destino pendiente de `Attachment` el caso de uso que más presión le ponía.
+
+**Invariantes del conjunto:** al menos un archivo; al menos uno con rol `DELIVERABLE`; `checksum` obligatorio en cada archivo, con el mismo fundamento que hoy lo vuelve obligatorio en la versión; y ningún `fileKey` repetido dentro de la versión.
+
+### B8 — La firma acredita el conjunto completo
+
+El payload pasa a llevar la lista de archivos de la versión vigente, cada uno con su rol, su nombre, su `fileKey` y su `checksum`.
+
+**Firma también lo que nadie revisó**, y esa es la razón de la decisión. La custodia del editable importa precisamente porque es la fuente del PDF: si pudiera sustituirse sin producir versión nueva, la correspondencia entre uno y otro sería una afirmación sin evidencia. Que hayan sido firmados juntos es lo que la sostiene.
+
+**No se agrega un hash del conjunto.** Sería un derivado del payload, que ya se persiste íntegro y sobre el cual se recalcula al verificar. El §7 rechaza guardar derivados y acá no hace falta ninguno.
+
+Tres consecuencias de implementación:
+
+- `SIGNATURE_PAYLOAD_VERSION` pasa a `2`. El mecanismo ya está previsto y las firmas anteriores siguen verificándose con su propia forma.
+- **La lista se construye en orden determinístico** —por rol y después por `fileKey`— antes de serializar. `canonicalize` ordena las claves de los objetos pero conserva el orden de los arreglos, de modo que el orden no puede quedar librado al de la consulta.
+- El snapshot de metadata del payload se toma de la revisión para título, clase y tipo, y del documento para el código.
+
+### B9 — Qué roles se exigen depende del propósito de la emisión, y se difiere
+
+Que el editable se exija recién en la emisión final —apto para construcción, conforme a obra— es una regla real, y **este bloque no la implementa**, porque depende de un concepto que el modelo todavía no tiene: el **propósito de la emisión**.
+
+Expresarla sin ese concepto obligaría a elegir mal:
+
+- exigir el rol por tipo de documento la volvería obligatoria en **toda** revisión, que es justo lo contrario de lo que la práctica pide;
+- exigirla por estado de la revisión confundiría el avance interno con el destino externo.
+
+`BLOCK_04` es donde viven la puerta de emisión y la respuesta de la contraparte, y es donde el propósito tiene lugar propio. Este bloque **habilita la capacidad y no la obligación**, y le deja el conjunto de archivos con sus roles ya modelado. Es el mismo tratamiento que `BLOCK_03` le dio a D-22.
+
+### B10 — La promoción al activo es linaje entre revisiones, y no reemplazo
+
+Al cerrarse un proyecto, parte de su documentación pasa al activo de planta. Es tentador leerlo como un reemplazo que cruza de ámbito, y no lo es. Cuatro diferencias lo separan de `B5`, y cualquiera alcanza:
+
+| | Reemplazo (`B5`) | Promoción |
+| --- | --- | --- |
+| Nivel | Entre documentos | Entre **revisiones** |
+| Efecto | El anterior queda obsoleto | El de proyecto **no queda obsoleto**: quedó terminado |
+| Qué produce | Un documento nuevo | Una **revisión** en el activo |
+| Ámbito | El mismo | Cruza del proyecto al régimen de publicación |
+
+**Lo que se promueve es la revisión aprobada**, y no el documento. Del lado del activo produce una de dos cosas, y la unidad de origen es la misma en ambos casos:
+
+| En el activo | Resultado |
+| ------------ | --------- |
+| El documento ya existe | Una **revisión nueva** de ese documento |
+| El documento no existe | Su **primera revisión**, con el documento creado en el acto |
+
+Dicho de otro modo: **un proyecto aporta al activo una revisión nueva o un documento nuevo**, y qué de las dos ocurra no cambia la forma del vínculo. El linaje siempre une revisión con revisión: informativo, N:M, sin correspondencia individual, con el precedente de `CatalogedFileSource` en Digitalization — que también es linaje a nivel de lo publicado y no de la identidad.
+
+Cuando el documento del activo se crea, **su código es propio del régimen de publicación** y no hereda el del proyecto. Son dos identidades en dos ámbitos, cada una con su índice de unicidad, y por eso pueden coincidir sin conflicto. Nada de esto contradice `B3`: ningún código cambia.
+
+Y no alcanza a todo: **hay documentación que vive solo en el proyecto** y no representa nada de la planta. La promoción es selectiva por naturaleza, otra razón por la que no puede ser un efecto automático del cierre.
+
+**No se modela en este bloque.** Pertenece al módulo de activos, junto con la obsolescencia por decomisionamiento, que es una causa que este módulo no conoce. Lo que corresponde acá es no impedirla — y `B1` y `B6` la favorecen sin proponérselo:
+
+- con la identificación en la revisión, promover es **copiar una revisión** con su título, su clase y su tipo, en lugar de reconstruirla desde el documento;
+- con la versión como conjunto de archivos, el entregable viaja con su fuente y su respaldo, que es lo que la biblioteca de planta necesita conservar.
+
+### B11 — Cada nivel tiene su palabra para terminar mal
+
+El vocabulario de los estados terminales hoy se superpone. El estado de la revisión abandonada se llama `CANCELLED`, y *cancelación* es además el nombre del acto que retira el circuito **sin** abandonar la revisión: la misma palabra para dos actos de efecto opuesto. Y `BLOCK_03` alterna tres términos para lo mismo — la SFS dice *abandonar*, sus decisiones dicen *abortar*, y el modelo dice `cancelled`.
+
+Se fija una palabra por nivel, y no se usa en ningún otro:
+
+| Nivel | Palabra | Qué nombra |
+| ----- | ------- | ---------- |
+| Circuito | **Cancelado** | Se retiró sin que nadie emitiera juicio. La revisión sobrevive y se rearma |
+| Revisión | **Abandonada** | Dejó de tener sentido antes de aprobarse. No consume código |
+| Documento | **Obsoleto** | Fue superado por otro, o salió del alcance. Ya no representa nada vigente |
+
+Los tres son terminales, y cada uno pertenece a un nivel distinto: retirar un armado, desistir de una emisión y dar por concluida una identidad son hechos que no se confunden en el trabajo real, y no deben confundirse en el nombre.
+
+**`RevisionStatus.OBSOLETE` se elimina.** Está declarado sin uso y reservado a los estados terminales por respuesta de la contraparte que definiría `BLOCK_04`. No hace falta, y tenerlo hace daño:
+
+- una revisión **se aprueba o se rechaza**; si el trabajo deja de tener sentido antes, se abandona, y si deja de tenerlo después, lo que caduca es el documento, no la emisión que efectivamente salió;
+- lo que la contraparte responde ya tiene forma propia en D-22 —la calificación, con sus dos efectos— y **no es un estado de la revisión**. Meterlo ahí sería exactamente el defecto contra el que advierte el §1: dos máquinas de estados describiendo lo mismo, una interna y otra externa;
+- `SUPERSEDED` ya cubre el único caso de caducidad interna, que es la revisión desplazada por una posterior aprobada.
+
+El valor se reservó *"para no pagar dos migraciones de enumeración"*. **Confirmado al cerrar el bloque que `BLOCK_04` no lo necesita**, la eliminación no deja deuda: la segunda migración que la reserva quería evitar no va a hacer falta.
+
+### B12 — La versión nace al confirmar, y antes hay una copia de trabajo
+
+`B6` deja una pregunta abierta que con un solo archivo no existía: **cómo se modifica**. Mientras la versión era un archivo, subirlo era producirla. Con un conjunto, corregir el PDF obligaría a rearmar el conjunto entero en un solo acto, y subir cada archivo por separado produciría una versión por archivo — una secuencia de iteraciones que no son iteraciones.
+
+**La inmutabilidad de la versión y la comodidad de editar no están en conflicto: ocurren en momentos distintos.** La versión debe ser inmutable *una vez que existe*; lo que hay que decidir es **cuándo existe**. Y la respuesta es: **al confirmar**, no al abrir ni al subir cada archivo.
+
+Antes de eso hay una **copia de trabajo**: el conjunto en preparación, mutable por naturaleza, que todavía no es una versión y por lo tanto no acredita nada.
+
+| Operación | Qué hace |
+| --------- | -------- |
+| **Abrir** | Crea la copia de trabajo **precargada con los archivos de la versión vigente** |
+| **Reemplazar** | Sustituye un archivo del conjunto por el editado |
+| **Adjuntar** | Suma un archivo al conjunto, con su rol |
+| **Quitar** | Retira un archivo del conjunto |
+| **Confirmar** | El conjunto se convierte en la versión siguiente, completa e inmutable |
+| **Descartar** | La copia se abandona sin producir versión |
+
+**Precargar es lo que vuelve barata la edición.** El que corrige el PDF abre, reemplaza ese archivo y confirma: el DWG y el respaldo viajan solos, conservando su `fileKey` y su `checksum` sin volver a subirse. Se sube un archivo y se produce una versión que referencia tres.
+
+**A lo sumo hay una copia de trabajo abierta por revisión.** Es el mismo invariante que el módulo ya aplica dos veces —a lo sumo una revisión en curso por documento, a lo sumo un circuito abierto por revisión— apareciendo en un tercer nivel. Vive en la revisión y no en el paso, de modo que sobrevive a una reasignación y a la apertura de un circuito nuevo tras un rechazo: lo que se está corrigiendo es el mismo entregable.
+
+**Confirmar exige al menos un cambio.** Sin archivo agregado, reemplazado o quitado no hay nada que confirmar, porque *la versión solo existe con contenido nuevo*. El principio se hace cumplir solo.
+
+**Resolver un paso exige no tener copia de trabajo abierta.** Declarar que se terminó mientras una iteración sigue abierta es una contradicción, y evita además que una revisión llegue a aprobarse con trabajo colgando.
+
+#### Qué no significa acá el *check-out*
+
+En un gestor documental genérico, el *check-out* baja el archivo y lo bloquea. Ninguna de las dos cosas corresponde:
+
+- **No descarga.** El archivo se lee cuando se quiere, por presigned URL, y leerlo nunca fue un acto del ciclo. Abrir la copia declara que hay una iteración en curso, no que alguien obtuvo el archivo.
+- **No bloquea, porque el bloqueo ya existe.** `B5` de `BLOCK_03` establece que la versión la produce quien tiene el paso vigente: la exclusividad la da el circuito, no un candado. Agregar uno duplicaría la regla, y el permiso especial que habilita actuar sobre el trabajo ajeno seguiría atravesándolo igual.
+
+Los nombres *check-out* y *check-in* son los que el usuario de gestión documental espera, y la interfaz puede usarlos. El modelo los nombra por lo que hacen.
+
+#### Alternativas descartadas
+
+**Una versión por cada archivo subido.** Es lo que hay hoy, y solo se sostiene con un archivo por versión. Con un conjunto, convierte la secuencia de versiones en un registro de subidas: se pierde la noción de iteración, que es lo único que la numeración interna quiere expresar.
+
+**Que abrir cree la versión y confirmar la sobrescriba.** Es la alternativa más tentadora y la peor: vuelve mutable a la entidad cuya razón de ser es no serlo, y obliga a la invariante condicional que `DOM-007` evita en el `checksum` —*no se modifica, salvo mientras esté abierta*—. Peor todavía, una apertura abandonada dejaría una versión consumiendo un número en la secuencia, que es exactamente lo que el módulo evitó un nivel más arriba al decidir que la revisión abandonada no consume código.
+
+**Que la copia de trabajo sea el único camino.** Se conserva el atajo: **confirmar admite recibir el conjunto completo de una vez**, creando y cerrando la copia en un solo acto. No son dos modelos sino la misma transición con y sin acumulación previa, y es lo que necesita un cliente automático —el sistema del contratista de la orientación de federación— para no depender de una secuencia de llamadas.
+
+#### Vocabulario
+
+Por el criterio de `B11`, la copia de trabajo termina **descartada**: palabra propia, distinta de cancelado, abandonada y obsoleto.
+
+---
+
+## Cambios de modelo
+
+**`documents`**
+
+- Conserva `code`, ahora inmutable fuera de la ventana de `B4`, con sus dos índices únicos parciales sin cambios.
+- `title`, `documentClassId` y `documentTypeId` se renombran a `currentTitle`, `currentDocumentClassId` y `currentDocumentTypeId`, y pasan a ser **copia** de la revisión en curso, con su único escritor en la transición de revisión (`B2`).
+- Conserva `description`, `module`, `projectId` y `projectTaskId` como datos propios editables.
+- Incorpora `obsoletedAt`, `obsoletedById` y `obsoleteReason`, con el motivo obligatorio. La **causa** —reemplazo o fuera de alcance— no se guarda: se deriva de si algún acto de reemplazo lo nombra (`B5`).
+- Conserva `terminatedAt`, que es baja lógica y no obsolescencia.
+
+**`doc_replacements`** — modelo nuevo, el acto de reemplazo
+
+- Fecha, actor y **motivo obligatorio**, con el criterio del §9 para todo acto consecuente.
+- No declara de qué clase de reemplazo se trata: se deriva de su cardinalidad.
+- Los documentos que agrupa comparten ámbito, verificado al registrarlo.
+
+**`doc_replacement_items`** — modelo nuevo, los documentos del acto
+
+- `replacementId`, `documentId`, `role` con valores `REPLACED` y `REPLACING`.
+- Único por (`replacementId`, `documentId`, `role`). Un mismo documento no aparece dos veces con el mismo papel dentro de un acto.
+- Una tabla de pares `reemplazante ← reemplazado` se consideró y se descartó: resuelve N:M pero pierde el acto, y sin el acto una reorganización de dos documentos en dos es indistinguible de dos reemplazos separados.
+- El vínculo admite corregirse. Lo que **sí bloquea** es emitir sobre un documento reemplazado, por `B5`.
+
+**`document_revisions`**
+
+- Incorpora `title`, `documentClassId` y `documentTypeId`, copiados de la revisión anterior al crearse.
+- `RevisionStatus.CANCELLED` pasa a `ABANDONED`, y `cancelledAt`, `cancelledById` y `cancelReason` a `abandonedAt`, `abandonedById` y `abandonReason` (`B11`).
+- `RevisionStatus.OBSOLETE` se elimina.
+- El índice único parcial `document_revisions_code_key` se recrea sobre `WHERE status <> 'ABANDONED'`.
+
+**`review_workflows`**
+
+- Sin cambios. `WorkflowStatus.CANCELLED` conserva su nombre, que pasa a ser exclusivo del circuito.
+
+**`document_versions`**
+
+- Pierde `fileKey`, `fileName`, `fileSize`, `mimeType` y `checksum`, que pasan al conjunto.
+- Conserva `versionNumber`, `comment` y la autoría.
+
+**`doc_version_files`** — modelo nuevo
+
+- `versionId`, `role`, `fileKey`, `fileName`, `fileSize`, `mimeType`, `checksum`.
+- Único por (`versionId`, `fileKey`). Nombre según `B1` de `BLOCK_01`, con prefijo `Doc` en los nombres genéricos.
+
+**`doc_working_copies`** — modelo nuevo, la copia de trabajo (`B12`)
+
+- `revisionId`, quién la abrió y cuándo, y el motivo al descartarla.
+- **A lo sumo una abierta por revisión**, con índice único parcial, del mismo modo que `BLOCK_03` resolvió el circuito abierto.
+- Sus archivos comparten la forma de `doc_version_files` y se copian a la versión al confirmar.
+
+**Enumeración nueva** `DocFileRole`, con los valores de `B7`.
+
+**Contrato GraphQL**
+
+- `DocumentVersion` deja de exponer los campos de archivo en línea y expone `files`.
+- `registerVersion` se reemplaza por las operaciones de `B12` —abrir, reemplazar, adjuntar, quitar, confirmar y descartar—, con el atajo de confirmar recibiendo el conjunto completo.
+- `Document` expone `currentTitle`, `currentDocumentClass` y `currentDocumentType`; los filtros de los listados se renombran igual. La lectura vigente se obtiene de la revisión.
+- La actualización del documento deja de aceptar título, clase y tipo; se editan sobre la revisión, que los expone con el nombre desnudo.
+- Operación propia para corregir el código bajo la condición de `B4`.
+
+Son cambios incompatibles, sin consumidores según la línea base.
+
+**Migración**
+
+0. `RevisionStatus.CANCELLED` se renombra a `ABANDONED` y `OBSOLETE` se elimina. Sin datos que convertir: el módulo no tiene uso productivo según la línea base del plan, y `OBSOLETE` además nunca se usó. Los identificadores afectados aparecen en 12 archivos entre modelo, resolvers, contrato y pruebas, **parte de ellos por el `CANCELLED` del circuito, que no se toca**: la separación hay que hacerla caso por caso y no con un reemplazo global.
+1. Cada `document_versions` existente produce un `doc_version_files` con rol `DELIVERABLE`.
+2. `documents.title`, `documentClassId` y `documentTypeId` se copian a la revisión en curso de cada documento, y a las aprobadas como mejor aproximación disponible — no existe historia de la que reconstruir el valor real de cada revisión pasada. Se registra como limitación conocida de la migración.
+3. Las firmas existentes conservan su `payloadVersion` 1 y se verifican con su forma original.
+
+## Impacto sobre la SFS vigente
+
+| Documento | Cambio |
+| --------- | ------ |
+| `10_DOM-005_Document.md` | Atributos, invariante de congelamiento, inmutabilidad del código, obsolescencia derivada del reemplazo, y la Observación sobre la metadata no revertida, que se elimina por quedar sin objeto |
+| `20_DOM-006_DocumentRevision.md` | Atributos de identificación incorporados, estado `ABANDONED`, baja de `OBSOLETE` y su Observación, y el diagrama de estados |
+| `40_DOM-008_ReviewWorkflow.md` | Vocabulario: `CANCELLED` queda reservado al circuito |
+| `30_DOM-007_DocumentVersion.md` | Propósito, descripción e invariantes reformulados sobre el conjunto, y el momento en que la versión nace |
+| `60_DOM-010_DocStepSignature.md` | Contenido del payload |
+| `80_Principios_del_Modelo.md` | §4 en su cardinalidad, §5 en lo firmado, §6 en su fundamento, y §13 extendido a la metadata |
+
+Se agregan tres documentos de entidad: el archivo de la versión, el acto de reemplazo y la copia de trabajo. Y dos principios nuevos: la superación entre documentos con su frontera con la promoción, y el momento en que la versión nace.
+
+## Cuestiones resueltas
+
+No queda ninguna abierta. Ninguna se resolvió implícitamente durante la implementación.
+
+- **El tercer rol de archivo** se incorpora como `SUPPORT`, para la evidencia que formó parte de producir el documento (`B7`).
+- **El reemplazo se modela N:M desde el principio**, como acto y no como par de referencias (`B5`).
+- **El acto exige ámbito compartido** (`B5`). Lo que cruza de ámbito no es reemplazo sino promoción, y es linaje entre revisiones (`B10`).
+- **Una palabra por nivel** —cancelado, abandonada, obsoleto— y `RevisionStatus.OBSOLETE` eliminado (`B11`).
+- **La obsolescencia se registra y no se deriva**, porque tiene dos causas. Lo que se deriva es cuál de las dos (`B5`).
+- **`description` es administrativa** y queda en el documento, editable siempre (`B1`). No se imprime en el rótulo, y su uso es poco frecuente.
+- **`BLOCK_04` no necesita un estado terminal de la revisión** por respuesta de la contraparte, de modo que retirar `RevisionStatus.OBSOLETE` no le deja deuda (`B11`).
+- **La recodificación masiva no se implementa.** Se evalúa como un caso muy especial que no se espera que ocurra. La decisión conserva la posibilidad —el código anterior queda en la traza y el acto sería de proyecto, explícito y auditado— pero **ninguna operación la ofrece**, y no se construye nada para sostenerla.
+- **La copia de metadata se nombra por su lectura**: `currentTitle`, `currentDocumentClass` y `currentDocumentType`, en el modelo y en el contrato. En la revisión los nombres quedan desnudos, porque ahí el valor no es copia (`B2`).
+
+## Criterios de aceptación
+
+1. Editar el título de una revisión abierta no altera la revisión aprobada anterior, y ambos valores son consultables.
+2. Abandonar una revisión con la metadata editada devuelve al documento la metadata de la última aprobada.
+3. Una revisión aprobada rechaza toda edición de metadata, por estructura y no por precondición.
+4. El código se corrige mientras no exista revisión vigente, con su evento, y se rechaza después.
+5. Registrar una versión con PDF y DWG produce un conjunto de dos archivos, y la firma del aprobador contiene ambos `checksum`.
+6. Registrar una versión sin ningún archivo `DELIVERABLE` se rechaza.
+7. Una firma con `payloadVersion` 1 sigue verificando correctamente.
+8. La verificación de una firma `payloadVersion` 2 es estable ante el orden en que la consulta devuelve los archivos.
+9. Los listados y filtros por clase y tipo siguen resolviéndose sobre `documents`, sin join a la revisión.
+10. Con `A` aprobada y `B` en borrador con otro título, `currentTitle` devuelve el de `B` y la revisión vigente el de `A`. Ningún campo desnudo devuelve ninguno de los dos.
+11. Un acto de reemplazo con dos documentos reemplazados y uno reemplazante se registra y se consulta desde cualquiera de los tres.
+12. Un documento reemplazado se lee entero —revisiones, versiones y transmittals— y rechaza abrir una revisión nueva.
+13. El código de un documento reemplazado sigue tomado dentro de su ámbito.
+14. Un acto que mezcla documentos de proyectos distintos, o uno de proyecto con uno publicado, se rechaza.
+15. Un documento se declara obsoleto por fuera de alcance, con motivo y sin reemplazo, y su causa se lee como tal.
+16. Un archivo `SUPPORT` queda en el payload firmado y no cuenta para el mínimo de `DELIVERABLE`.
+17. Abandonar una revisión la deja en `ABANDONED`, cancelar su circuito lo deja en `CANCELLED`, y ninguna operación produce el otro valor.
+18. El código de una revisión abandonada sigue disponible para una revisión posterior, con el índice recreado.
+19. Abrir la copia de trabajo la precarga con los archivos de la versión vigente, y reemplazar uno solo produce, al confirmar, una versión con el conjunto completo.
+20. Abrir una segunda copia de trabajo sobre la misma revisión se rechaza.
+21. Descartar la copia de trabajo no produce versión, y la numeración interna no salta.
+22. Confirmar sin ningún cambio se rechaza.
+23. Resolver un paso con una copia de trabajo abierta se rechaza.
+24. Confirmar con el conjunto completo en una sola llamada produce la misma versión que la secuencia incremental.
+
+## Fases de implementación
+
+Mismo orden que `BLOCK_02` y `BLOCK_03`, con una fase de vocabulario adelante para que todo lo que se escriba después ya use los nombres definitivos.
+
+| Fase | Contenido |
+| ---- | --------- |
+| A | **Permisos**: los actos nuevos que no encajan en los existentes, en `202-mi-common`; alta en el seed de `205-mi-admin`, asignación a roles, republicación y actualización de la dependencia. |
+| B | **Vocabulario** (`B11`): `RevisionStatus.CANCELLED` a `ABANDONED`, baja de `OBSOLETE`, renombre de los campos de abandono y recreación del índice único parcial. Caso por caso: el `CANCELLED` del circuito no se toca. |
+| C | **Modelo y migración**: metadata en la revisión; renombre a `currentTitle` y familia; obsolescencia en el documento; `doc_version_files`, `doc_working_copies`, `doc_replacements` y sus ítems; enumeración `DocFileRole`; índices únicos parciales de la copia de trabajo y del acto. |
+| D | **Utilidades puras**: payload firmado `v2` con la lista de archivos en orden determinístico; réplica de metadata a la copia del documento; derivación de la causa de obsolescencia; diferencia de la copia de trabajo, que responde si hay algo que confirmar. |
+| E | **Operaciones**, resolver por resolver: edición de metadata sobre la revisión, corrección del código, acto de reemplazo, declaración de obsolescencia, y las seis de la copia de trabajo con la precondición sobre la resolución del paso. |
+| F | **Trazabilidad**: tipos, acciones y transiciones de los hechos nuevos — código corregido, documento reemplazado, documento obsoleto, copia abierta, confirmada y descartada. |
+| G | **Contrato GraphQL**, con los retiros declarados y el reemplazo de `registerVersion`. |
+| H | **Pruebas** de las tres capas, contra los veinticuatro criterios de aceptación. |
+| I | **Cierre documental**: SFS, `WhatIsNew.md`, y recién entonces la evaluación de promoción. |
+
+**La fase A precede a todas**, como en los bloques anteriores: sin permisos publicados no hay con qué autorizar lo nuevo. Y arrastra una fricción conocida del entorno — publicar `202-mi-common` exige resolver el token desde `~/.npmrc` y correr el build a mano, porque el `.npmrc` del proyecto ignora los scripts.
+
+**Qué decide la fase A**, y no debe resolverse por omisión: si corregir el código, reemplazar y declarar obsoleto se autorizan con `DOCUMENTS_DOCUMENT_UPDATE` —que ya existe— o exigen acciones propias. El criterio del módulo empuja a lo primero: `B9` de `BLOCK_03` gobierna todo acto sobre el trabajo ajeno con **un solo** permiso especial, y multiplicar permisos por acto contradice esa economía. Pero reemplazar y declarar obsoleto no son una edición más, y la ventana de corrección del código ya está acotada por estado. Se decide al abrir la fase.
+
+**La fase B va antes del modelo** porque es un renombre transversal: hacerla después obligaría a escribir el modelo nuevo con los nombres viejos y corregirlo enseguida.
+
+**Las fases D y E son donde el bloque se puede detener sin romper nada**, si hiciera falta pausarlo: hasta ahí el modelo está migrado y las utilidades probadas, pero ninguna operación cambió de comportamiento.
+
+## Referencias
+
+- `DOCUMENT_EVOLUTION_PLAN.md` — D-23, D-24, D-25 y la nota prospectiva de promoción al activo
+- `BLOCK_03_CICLO_INTERNO.md` — B4, B6, B12, B14
+- `BLOCK_02_CONTEXTO_DE_PROYECTO.md` — unicidad del código
+- `../SFS/domain/10_cycle/80_Principios_del_Modelo.md` — §3, §4, §5, §6, §12, §13
+- `../../prisma/schema.prisma`
+- `../../src/utils/stepSignature.ts`

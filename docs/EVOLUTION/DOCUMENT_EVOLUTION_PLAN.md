@@ -784,6 +784,106 @@ Pendientes de definición al abrir el bloque:
 - dónde se registra la calificación —en el paso que la produce, en la revisión que cierra, o en el ítem del transmittal— y a cuáles de los tres se propaga;
 - cómo se ordena y se presenta la lista, y si admite baja lógica cuando ya fue usada.
 
+### D-23 — La metadata de identificación pertenece a la revisión
+
+**Estado:** `APROBADO_PENDIENTE`. Su forma se define en `BLOCK_03B`.
+
+El congelamiento que estableció D-05 y ejecutó `B6` de `BLOCK_03` tiene un fundamento material: parte de la metadata está **impresa dentro del archivo**. El rótulo lleva el código, el título y a menudo la clase y el tipo.
+
+Si el dato está impreso en el archivo, pertenece a la emisión que lo produjo. Ubicarlo en el documento obliga a sostener por regla de comportamiento —editable mientras no esté aprobada— algo que la estructura sostiene sola: una revisión aprobada no se modifica.
+
+**Título, clase y tipo pasan a la revisión.** Descripción, ámbito y vínculos quedan en el documento y se editan siempre: no aparecen en ningún rótulo, y hoy el congelamiento los alcanza sin causa.
+
+El documento conserva la metadata efectiva **como copia de su revisión en curso**, de modo que los índices, los listados y los filtros no cambian. Aparecen las dos lecturas que `B14` ya definió, aplicadas a otro atributo: metadata vigente y metadata en curso.
+
+**La copia se nombra por la lectura que sirve** —`currentTitle`, `currentDocumentClass`, `currentDocumentType`—, en el modelo y en el contrato. Un campo desnudo significaría *"el de la revisión en curso"* sin decirlo, y quien buscara el rótulo aprobado se llevaría otro valor sin enterarse: es lo que el §13 previene al pedir que las dos lecturas se expongan y no se deriven en cada consumidor. En la revisión, en cambio, los nombres quedan desnudos, porque ahí el valor no es copia sino el dato.
+
+Resuelve además una anomalía que DOM-005 hoy admite: abandonar una revisión no revierte la metadata, y el documento queda declarando algo que ninguna revisión aprobada reproduce. Con el dato en la revisión, se abandona con ella. Y habilita comparar qué cambió entre una revisión y la siguiente, que hoy no existe.
+
+### D-24 — El código es el identificador, y no cambia
+
+**Estado:** `APROBADO_PENDIENTE`. Su forma se define en `BLOCK_03B`.
+
+El código no es metadata: es la referencia. Está en los transmittals emitidos, en el payload de cada firma, en las referencias cruzadas de otros documentos, en el sistema de la contraparte y en el rótulo de cada archivo que salió. Cambiarlo no renombra un registro: rompe la correspondencia con todo lo que ya lo nombra y que el sistema no controla. Es lo que DOM-005 afirma sin extraer la consecuencia — *la identificación no es descripción sino identidad*.
+
+Por eso queda fuera de D-23, aunque también se imprima en el rótulo. El título describe y puede corregirse entre revisiones porque nadie referencia un documento por su título; el código identifica.
+
+**Se corrige mientras el documento no tenga revisión aprobada**, que es la condición material de que nada salió. Es más precisa que "antes de la primera revisión": si la primera se abandona, sigue sin haberse aprobado nada.
+
+**Un cambio posterior es un documento nuevo que reemplaza y supera al anterior.** Conserva lo que la edición destruiría — el documento anterior mantiene su código, su historia y sus transmittals, y el acto declara qué lo reemplazó y por qué.
+
+**Reemplazar es superar, y el reemplazado queda obsoleto.** Es el sentido de la fórmula con que el control documental lo enuncia, y el mismo hecho que un nivel más abajo ocurre al aprobar una revisión, que supersede a la anterior. El documento obsoleto no admite revisiones nuevas, conserva todo lo demás intacto y **no libera su código**, que sigue tomado dentro de su ámbito.
+
+**El reemplazo no es la única causa de obsolescencia.** Un documento también caduca **por salir del alcance del proyecto**, sin que nada lo reemplace. Por eso la obsolescencia se registra en el documento —fecha, actor y motivo—, con el precedente del abandono de la revisión, y no se deriva de la existencia de un reemplazo. Lo que **sí se deriva es la causa**: el obsoleto que figura en un acto de reemplazo lo está por reemplazo, y el que no figura en ninguno, por fuera de alcance.
+
+**Obsoleto no es dado de baja.** `terminatedAt` corrige un alta que no debió existir; la obsolescencia es un hecho del ciclo de vida — el documento existió, sirvió y dejó de servir.
+
+**Se modela N:M desde el principio.** Con la misma relación quedan expresados tres hechos que hoy no tienen forma de registrarse: la recodificación (1:1), la unificación de dos documentos en uno (N:1) y la división de uno en dos (1:N).
+
+**El reemplazo es un acto y no un par de referencias**: declara fecha, actor y motivo, y agrupa los documentos que salen y los que entran. Sin el acto, una reorganización de dos documentos en dos es indistinguible de dos reemplazos separados. Qué clase de reemplazo es **se deriva de su cardinalidad** y no se tipifica, por el criterio de D-04.
+
+**Los documentos de un acto comparten ámbito.** Reemplazar es interno a un proyecto, o interno al régimen de publicación. Lo que cruza de uno a otro no es reemplazo sino promoción, que es otra cosa — ver la nota prospectiva sobre la promoción al cierre del proyecto.
+
+Queda registrado un escenario no cubierto: que la contraparte cambie su esquema de codificación a mitad de proyecto y renumere en masa. Si aparece, es una operación de proyecto explícita y auditada con el código anterior conservado, nunca una edición ordinaria. La decisión no debe impedirlo.
+
+### D-25 — Una versión es un conjunto de archivos, no un archivo
+
+**Estado:** `APROBADO_PENDIENTE`. Su forma se define en `BLOCK_03B`.
+
+Un documento se entrega habitualmente como más de un archivo. El caso corriente de ingeniería es el **PDF junto con su editable**: se revisa y se marca el PDF, y el DWG viaja como respaldo de la fuente. También existe el documento compuesto por varios entregables, de modo que la restricción es "al menos uno revisable" y no "exactamente uno".
+
+**El principio de D-10 y `B4` no se debilita: se corrige su cardinalidad.** Lo que sostiene es que la versión no existe sin contenido nuevo y que nunca cambia, y ambas cosas se conservan enunciadas sobre el conjunto. Agregar un archivo a una versión existente se descarta: dejaría a una firma acreditando un conjunto distinto del que su autor tuvo delante.
+
+Cada archivo declara su **rol**, modelado como enumeración y no como catálogo, por el criterio de D-22: es catálogo cuando el usuario elige el rótulo, y enumeración cuando el sistema interpreta el efecto.
+
+| Rol | Qué es |
+| --- | ------ |
+| Entregable | Lo que se revisa y se marca. Al menos uno por versión |
+| Fuente | El editable, en custodia junto al entregable |
+| Respaldo | La evidencia que formó parte de producir el documento: memoria de cálculo, ensayos, planillas |
+
+El respaldo **no invade a `Attachment`**, y la frontera no es la naturaleza del archivo sino a qué se ata: el archivo de una versión integra la entrega, es inmutable y queda acreditado por la firma; un adjunto cuelga del documento, es mutable y no acredita nada. Que la evidencia que sustenta un cálculo quede firmada junto con el entregable que la usa es lo que hoy no se puede afirmar. Antes que anticipar D-08, lo descarga: le retira el caso de uso que más lo apuraba.
+
+**La firma acredita el conjunto completo**, incluido lo que nadie revisó. Es el punto: la custodia del editable importa porque es la fuente del PDF, y que hayan sido firmados juntos es lo que sostiene su correspondencia.
+
+Que el editable se exija recién en la emisión final —apto para construcción, conforme a obra— es una regla real que **no se implementa acá**: depende del propósito de la emisión, concepto que corresponde a `BLOCK_04`. Este bloque habilita la capacidad y no la obligación.
+
+### D-26 — Cada nivel tiene su palabra para terminar mal
+
+**Estado:** `APROBADO_PENDIENTE`. Su forma se define en `BLOCK_03B`.
+
+El vocabulario de los estados terminales se superpone. El estado de la revisión abandonada se llama `CANCELLED`, y *cancelación* nombra además el acto que retira el circuito **sin** abandonar la revisión: la misma palabra para dos actos de efecto opuesto. Y `BLOCK_03` alterna tres términos para el mismo hecho — la SFS dice *abandonar*, sus decisiones dicen *abortar*, el modelo dice `cancelled`.
+
+Se fija una palabra por nivel, exclusiva de ese nivel:
+
+| Nivel | Palabra | Qué nombra |
+| ----- | ------- | ---------- |
+| Circuito | **Cancelado** | Se retiró sin que nadie emitiera juicio. La revisión sobrevive |
+| Revisión | **Abandonada** | Dejó de tener sentido antes de aprobarse. No consume código |
+| Documento | **Obsoleto** | Fue superado por otro, o salió del alcance |
+
+Retirar un armado, desistir de una emisión y dar por concluida una identidad son hechos que no se confunden en el trabajo real, y no deben confundirse en el nombre.
+
+**`RevisionStatus.OBSOLETE` se elimina.** Está declarado sin uso, reservado a los estados terminales por respuesta de la contraparte que definiría `BLOCK_04`. Una revisión se aprueba o se rechaza; si el trabajo deja de tener sentido antes, se abandona, y si deja de tenerlo después, lo que caduca es el documento y no la emisión que salió. Lo que la contraparte responde ya tiene forma propia en D-22 —la calificación, con sus dos efectos— y no es un estado de la revisión: meterlo ahí sería el defecto contra el que advierte el §1, dos máquinas de estados describiendo lo mismo. `SUPERSEDED` cubre el único caso de caducidad interna.
+
+**Confirmado al cerrar el bloque: `BLOCK_04` no lo necesita**, de modo que la eliminación no le deja deuda. La reserva quería evitar una segunda migración de enumeración que ya no va a hacer falta.
+
+### D-27 — La versión nace al confirmar, y antes hay una copia de trabajo
+
+**Estado:** `APROBADO_PENDIENTE`. Su forma se define en `BLOCK_03B`.
+
+D-25 deja abierta una pregunta que con un solo archivo no existía: **cómo se modifica**. Mientras la versión era un archivo, subirlo era producirla. Con un conjunto, corregir el PDF obligaría a rearmar el conjunto entero en un acto, y subir cada archivo por separado produciría una versión por archivo — una secuencia de iteraciones que no son iteraciones.
+
+**La inmutabilidad de la versión y la comodidad de editar no están en conflicto: ocurren en momentos distintos.** La versión debe ser inmutable *una vez que existe*; lo que hay que decidir es **cuándo existe**. Y es al confirmar, no al abrir ni al subir cada archivo.
+
+Antes hay una **copia de trabajo**: el conjunto en preparación, mutable por naturaleza, que todavía no es una versión y no acredita nada. Se abre precargada con los archivos de la versión vigente, admite reemplazar, adjuntar y quitar, y al confirmarse se convierte en la versión siguiente, completa e inmutable. Un archivo que no cambió viaja con su `fileKey` y su `checksum` sin volver a subirse.
+
+Es la práctica de *check-out / check-in* de la gestión documental, con dos diferencias que conviene enunciar: acá **no descarga** —leer un archivo nunca fue un acto del ciclo— y **no bloquea**, porque la exclusividad ya la da el circuito, donde la versión la produce quien tiene el paso vigente. Los nombres del oficio sirven para la interfaz; el modelo los nombra por lo que hacen.
+
+**A lo sumo una copia de trabajo abierta por revisión**, que es el mismo invariante que el módulo ya aplica a la revisión en curso y al circuito abierto, en un tercer nivel. **Confirmar exige al menos un cambio**, porque la versión solo existe con contenido nuevo. **Resolver un paso exige no tener copia abierta**, porque declarar que se terminó con una iteración en curso es una contradicción.
+
+Se descartó que abrir cree la versión y confirmar la sobrescriba: volvería mutable a la entidad cuya razón de ser es no serlo, y una apertura abandonada dejaría una versión consumiendo un número en la secuencia — lo mismo que el módulo evitó un nivel más arriba al decidir que la revisión abandonada no consume código.
+
 ## Cuestión de fondo pendiente
 
 Una definición atraviesa varias decisiones de este plan y conviene enunciarla por separado, porque no se resuelve dentro de ningún bloque:
@@ -889,6 +989,25 @@ Existe precedente resuelto en OperMask Digitalization, que enfrentó el mismo pr
 
 Consecuencia a tener presente mientras tanto: **no asumir correspondencia uno a uno entre el documento de proyecto y el documento del activo**, ni modelar la promoción como un cambio de estado del propio documento.
 
+**La promoción no es un reemplazo, y la distinción se precisó al abrir `BLOCK_03B`.** El acto de reemplazo que D-24 incorpora resuelve otra cosa, y confundirlos habría mezclado dos mecanismos con efectos opuestos:
+
+| | Reemplazo (D-24) | Promoción |
+| --- | --- | --- |
+| Nivel | Entre documentos | Entre **revisiones** |
+| Efecto | El anterior queda obsoleto | El de proyecto **no queda obsoleto**: quedó terminado |
+| Qué produce | Un documento nuevo | Una **revisión** en el activo |
+| Ámbito | El mismo | Cruza del proyecto al régimen de publicación |
+
+**Lo que se promueve es la revisión aprobada**, y no el documento. Del lado del activo produce una revisión nueva del documento que ya existe, o su primera revisión con el documento creado en el acto: **un proyecto aporta al activo una revisión nueva o un documento nuevo**. La unidad de origen es la misma en ambos casos, y el vínculo siempre une revisión con revisión, como linaje informativo. El precedente de `CatalogedFileSource` sigue siendo el correcto, y por la misma razón: es linaje a nivel de lo publicado, y no identidad.
+
+Cuando el documento del activo se crea, su código es propio del régimen de publicación y no hereda el del proyecto: son dos identidades en dos ámbitos con índices de unicidad separados, de modo que pueden coincidir sin conflicto y sin contradecir D-24.
+
+Y no alcanza a todo: **hay documentación que vive solo en el proyecto** y no representa nada de la planta. La promoción es selectiva por naturaleza, otra razón por la que no puede ser un efecto automático del cierre.
+
+**La obsolescencia del activo tiene una causa propia** que este módulo no conoce: el decomisionamiento de una parte de la planta deja obsoleto su documento sin que nada lo reemplace. Es por lo que la derivación de obsolescencia que D-24 establece vale dentro de este módulo y no puede exportarse al de activos, que necesitará un acto propio.
+
+Lo que `BLOCK_03B` sí le deja resuelto es el terreno: con la identificación en la revisión (D-23), promover es **copiar una revisión** en lugar de reconstruirla; y con la versión como conjunto (D-25), el entregable viaja con su fuente y su respaldo, que es lo que la biblioteca de planta necesita conservar.
+
 ## Bloques previstos
 
 Orden propuesto. Cada bloque se abre con su propio documento, con línea base confirmada, alcance incluido, fuera de alcance, decisiones y criterios de aceptación.
@@ -898,12 +1017,15 @@ Orden propuesto. Cada bloque se abre con su propio documento, con línea base co
 | `BLOCK_01` | Trazabilidad funcional: eventos de workflow y auditoría (D-01) | — |
 | `BLOCK_02` | Contexto de proyecto y rol documental: `projectId`, modo Emisor / Receptor, membresía y alcance de acceso, unicidad del código, retiro de `entityType`/`entityId`, contexto de los eventos (D-06, D-09, D-15; H-17, H-24, H-28, H-32; cierra H-19 para `Document`) | `BLOCK_01` |
 | `BLOCK_03` | Ciclo interno: revisión externa y versión interna, versiones durante el circuito, circuito instanciado con la revisión —con armado y elaboración—, circuitos sucesivos por revisión, esquema de revisión configurable, delegación y reasignación, abandono de la revisión y cancelación con identidad propia, y firma verificable (D-03, D-04, D-05, D-10, D-11, D-13, D-17; H-01 a H-10, H-27, H-34) | `BLOCK_02` |
-| `BLOCK_04` | Emisión y respuesta: circulación asimétrica por modo, **circuito del rol Receptor y catálogo de calificaciones**, puerta de emisión, respuesta parcial con archivos y autoría diferenciada, matriz de responsabilidad, documentos esperados, paquete de información de entrada y su promoción (D-12, D-16, D-18, D-20, D-22; H-11 a H-16, H-29 a H-31, H-33, H-36) | `BLOCK_03` |
+| `BLOCK_03B` | Titularidad por nivel: metadata de identificación en la revisión, código inmutable con acto de reemplazo N:M entre documentos, la versión como conjunto de archivos con rol producido por copia de trabajo, y una palabra por nivel para los estados terminales (D-23 a D-27). Revisa `B4` y `B6` de `BLOCK_03` | `BLOCK_03` |
+| `BLOCK_04` | Emisión y respuesta: circulación asimétrica por modo, **circuito del rol Receptor y catálogo de calificaciones**, puerta de emisión, respuesta parcial con archivos y autoría diferenciada, matriz de responsabilidad, documentos esperados, paquete de información de entrada y su promoción (D-12, D-16, D-18, D-20, D-22; H-11 a H-16, H-29 a H-31, H-33, H-36) | `BLOCK_03B` |
 | `BLOCK_02B` | Ubicación física jerárquica del documento (D-14) | `BLOCK_02` |
 | `BLOCK_02C` | Alcance por proyecto de los catálogos documentales, con herencia del catálogo del módulo (D-21) | `BLOCK_02`, `BLOCK_03` por la unicidad |
 | `BLOCK_05` | Interfaz de usuario del subsistema (H-25) | `BLOCK_03`, `BLOCK_04`, `BLOCK_02B` |
 
 El rol documental (D-09) gobierna el ciclo completo, por lo que el contexto de proyecto pasa a ser el primer bloque funcional: ya no puede quedar detrás del ciclo de revisión.
+
+`BLOCK_03B` se abrió al cerrarse `BLOCK_03`, y **se interpone antes de `BLOCK_04`**. Revisa decisiones de bloques ya promovidos, que no se reabren: lo relevado e implementado no se confunde con lo que se decide después. Y no puede ir detrás de la emisión, porque `BLOCK_04` da por sentados qué acredita una firma y qué compone un entregable — si esas dos cosas se mueven durante la emisión, la puerta se especifica sobre un piso inestable. Conserva el sufijo por el mismo criterio que `BLOCK_02B` y `BLOCK_02C`: no renumerar bloques ya referenciados.
 
 El alcance por proyecto de los catálogos (D-21) se registró al abrir `BLOCK_03` y también se separó, con el identificador `BLOCK_02C`. No pertenece al ciclo interno y **es el primer bloque que altera un objeto con interfaz y datos en producción**, de modo que su ejecución tiene condiciones propias. `BLOCK_03` le deja resuelto el mecanismo de unicidad con nulos.
 
