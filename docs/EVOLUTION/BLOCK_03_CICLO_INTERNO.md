@@ -806,8 +806,6 @@ Al revisarlos uno por uno aparecieron **tres criterios implementados pero sin pr
 
 **Criterio 19, con una precisión.** De las **72 pruebas previas**, 71 siguen intactas palabra por palabra y **una sola cambió**: la que fija el número de acciones del catálogo, que pasó de 28 a 35 explicando el saldo —dos retiros y nueve altas—. Es el cambio que el propio bloque prescribe. Ninguna prueba previa fue retirada.
 
-#### Evaluación de la promoción a la SFS
-
 #### Precondición verificada en testing
 
 Ejecutada con `210-mi-deploy/check-document-precondition.sh` sobre los tres clientes desplegados. **Veredicto `APTO PARA MIGRAR` en los tres**, con PostgreSQL **16.14** —`NULLS NOT DISTINCT` disponible— y las nueve tablas del subsistema documental en cero.
@@ -858,15 +856,43 @@ También significa que **la migración no tiene nada que limpiar en ningún clie
 
 **Esta línea base no es la que sirve para la comparación posterior.** El sistema sigue operando, de modo que hay que **volver a tomarla inmediatamente antes de migrar** y comparar contra esa. El criterio no es la igualdad sino que **no disminuya**: una pérdida de datos se manifiesta como una baja, no como la ausencia de crecimiento.
 
+#### Aplicado en testing
+
+Desplegado en los tres clientes con el orden que la restricción impone: **permisos primero, subgraph después, router al final**.
+
+**Corrección sobre el procedimiento, verificada en los Dockerfile y en el compose: las migraciones SÍ son automáticas.** El `CMD` de `205-mi-admin` y `209-mi-document` es `npx prisma migrate deploy && node ./dist/src/index.js` y ningún compose lo sobreescribe, de modo que actualizar la imagen migra y arranca en el mismo acto. **La ventana de incompatibilidad que la evaluación anticipaba no llega a abrirse**, y si la migración falla el contenedor no arranca, que es el comportamiento deseado. Los seeds, en cambio, siguen siendo explícitos.
+
+**Permisos** — `seed:permissions` en los tres: **407 permisos** upsertados, coincidiendo con el catálogo publicado, y **577 `rolePermissions` sobre 22 roles**. El número difiere de los 794 de local y el motivo está en la propia salida: **los seis roles `digi-*` no existen en testing** y sus asignaciones se saltean. Es correcto —digitalización no corre en estos clientes— y el seed de permisos no crea roles.
+
+Verificado además que las asignaciones cayeron donde corresponde, que es lo que el total por sí solo no demuestra. **Las cuatro, en los tres clientes:**
+
+| Rol | Permisos |
+| --- | -------- |
+| `doc-basic` | `documents:documentsSettings:read` |
+| `doc-full` | `documents:documentsSettings:read`, `:update`, y `documents:workflow:admin:update` |
+
+**Migración** — aplicada al actualizar la imagen. Comparación de la precondición antes y después, por `diff` de la salida completa:
+
+| Cliente | Legado antes | Legado después | `revisionScheme` |
+| ------- | ------------ | -------------- | ---------------- |
+| `proion` | `1 / 0 / 1` | `1 / 0 / 1` | Retirado |
+| `optimal` | `9 / 3 / 32` | `9 / 3 / 32` | Retirado |
+
+**El `diff` de `proion` tiene una sola diferencia en toda la salida**: la desaparición de `revisionScheme`. Nada más cambió. En `optimal` —el único cliente de testing con archivos escaneados reales— el legado se repite sin una sola diferencia.
+
+**Al script se le corrigió el veredicto**, que después de migrar seguía diciendo `APTO PARA MIGRAR`: solo miraba filas documentales y duplicados, y los dos siguen en cero. El bloque de estado lo resolvía, pero el titular invitaba a leer lo contrario. Ahora informa `YA MIGRADO` cuando `documents` ya no tiene `revisionScheme`.
+
+**Observación ajena al bloque, anotada para no descubrirla dos veces**: los seis roles `digi-*` faltan en los tres clientes de testing. Si alguna vez se habilita digitalización allí, hay que crearlos **antes** de correr `seed:permissions`, o sus permisos van a seguir salteándose en silencio.
+
 #### Evaluación de la promoción a la SFS
 
-**Los 21 criterios verificables están cumplidos y la precondición está levantada en los cinco clientes.** Lo que resta no es evidencia sino ejecución: el bloque **no está desplegado en ningún ambiente**.
+**Los 21 criterios verificables están cumplidos, y el bloque está aplicado y verificado en testing.** Lo que resta es el despliegue en los dos clientes productivos.
 
 **El criterio 22 queda habilitado pero no ejecutado, y es deliberado.** La SFS describe «comportamiento implementado y validado», y `BLOCK_02` fijó el precedente de promover **después** de aplicar y verificar en los ambientes reales, no antes. Escribirla ahora afirmaría como vigente algo que ningún despliegue ejecuta todavía.
 
 **La restricción que gobierna el despliegue**: la migración es incompatible con el código desplegado hoy —`assignedOrganizerId` es `NOT NULL` y el `createDocument` vigente no lo informa—, de modo que migrar antes de desplegar el subgraph rompería el alta de documentos. **Modelo, operaciones y contrato viajan en la misma ventana.**
 
-**Estado del bloque: `LISTO_PARA_PROMOVER`.** Implementación y validación completas; resta desplegar, verificar y escribir la SFS.
+**Estado del bloque: `LISTO_PARA_PROMOVER`.** Implementación y validación completas, aplicado en testing; resta producción y escribir la SFS.
 
 #### Condiciones de despliegue, por cliente
 
