@@ -1,13 +1,20 @@
 import { GraphQLError } from "graphql"
 import { ResolverContext } from "../types.js"
 import { PERMISSIONS } from "@CLGonzalezGroh/mi-common"
-import { userAuthorization } from "../utils/userAuthorization.js"
+import {
+  holdsPermission,
+  userAuthorization,
+} from "../utils/userAuthorization.js"
 import { assertObjectAccess } from "../utils/projectAuthorization.js"
-import { DocObjectType } from "../generated/prisma/enums.js"
+import {
+  DocObjectType,
+  RevisionStatus,
+  WorkflowStatus,
+} from "../generated/prisma/enums.js"
 import { handleError } from "../utils/handleError.js"
-import { RevisionStatus } from "../generated/prisma/enums.js"
 import { AuditAction } from "../events/catalog.js"
 import { emitAuditEvent } from "../events/emit.js"
+import { currentStep } from "../utils/reviewWorkflow.js"
 
 const versionIncludes = {
   revision: {
@@ -23,6 +30,18 @@ const logger = createLogger("versions")
 
 export const versionResolvers = {
   Mutation: {
+    /**
+     * Registra una versión (BLOQUE 03, B4 y B5).
+     *
+     * **Una versión es un archivo**: no existe sin archivo nuevo, y una vez
+     * registrada no se modifica ni se elimina —tampoco su comentario—. Es la
+     * única operación sobre versiones que el módulo tiene, y ahora eso es regla
+     * y no omisión (H-34).
+     *
+     * **La produce quien tiene el paso vigente.** No es una restricción de
+     * identidad sino de momento: la elabora el elaborador, la marca el revisor,
+     * la marca el aprobador. El permiso especial habilita hacerlo por otro.
+     */
     registerVersion: async (
       _: any,
       {
@@ -35,7 +54,9 @@ export const versionResolvers = {
           fileName: string
           fileSize: number
           mimeType: string
-          checksum?: string
+          // Obligatorio en toda versión (B4, H-27). Hoy lo calcula quien invoca
+          // la API: mi-fileserver no ve los bytes por diseño.
+          checksum: string
           comment?: string
         }
       },
@@ -56,14 +77,21 @@ export const versionResolvers = {
         notFoundMessage: "Revisión no encontrada",
       })
 
+      if (!input.checksum?.trim()) {
+        throw new GraphQLError(
+          "Toda versión exige checksum: es lo que la firma acredita como contenido.",
+          { extensions: { code: "BAD_USER_INPUT" } },
+        )
+      }
+
       try {
-        // Verificar que la revisión existe y está en DRAFT
         const revision = await context.orm.documentRevision.findFirst({
           where: { id: revisionId },
           include: {
-            versions: {
-              orderBy: { versionNumber: "desc" },
-              take: 1,
+            versions: { orderBy: { versionNumber: "desc" }, take: 1 },
+            workflows: {
+              where: { status: WorkflowStatus.IN_PROGRESS },
+              include: { steps: true },
             },
           },
         })
@@ -74,20 +102,46 @@ export const versionResolvers = {
           })
         }
 
-        if (revision.status !== RevisionStatus.DRAFT) {
+        // DRAFT e IN_REVIEW: registrar una versión durante el circuito es el
+        // caso normal —el revisor marca el archivo—, y no cambia el estado de
+        // la revisión. Solo el rechazo la devuelve a DRAFT (B5).
+        if (
+          revision.status !== RevisionStatus.DRAFT &&
+          revision.status !== RevisionStatus.IN_REVIEW
+        ) {
           throw new GraphQLError(
-            "Solo se pueden agregar versiones a revisiones en estado DRAFT.",
+            "Solo se registran versiones mientras la revisión está en curso.",
             { extensions: { code: "BAD_REQUEST" } },
           )
         }
 
-        // Determinar el próximo versionNumber
-        const lastVersion = revision.versions[0]
-        const nextVersionNumber = lastVersion
-          ? lastVersion.versionNumber + 1
-          : 1
+        // Una revisión aprobada no tiene paso vigente, y es lo que impide que la
+        // firma quede acreditando una versión que dejó de ser la última.
+        const abierto = revision.workflows[0]
+        const vigente = abierto ? currentStep(abierto.steps) : null
 
-        // Crear la versión
+        if (!vigente) {
+          throw new GraphQLError(
+            "La revisión no tiene un paso en curso que produzca la versión.",
+            { extensions: { code: "BAD_REQUEST" } },
+          )
+        }
+
+        if (vigente.assignedToId !== userId) {
+          const esAdmin = await holdsPermission({
+            permission: PERMISSIONS.DOCUMENTS_WORKFLOW_ADMIN_UPDATE,
+            context,
+          })
+          if (!esAdmin) {
+            throw new GraphQLError(
+              "La versión la registra quien tiene asignado el paso en curso.",
+              { extensions: { code: "FORBIDDEN" } },
+            )
+          }
+        }
+
+        const nextVersionNumber = (revision.versions[0]?.versionNumber ?? 0) + 1
+
         const version = await context.orm.$transaction(async (tx) => {
           const created = await tx.documentVersion.create({
             data: {
@@ -108,7 +162,14 @@ export const versionResolvers = {
             action: AuditAction.RegisterVersion,
             objectId: created.id,
             actorId: userId,
-            meta: { revisionId, versionNumber: nextVersionNumber },
+            meta: {
+              revisionId,
+              versionNumber: nextVersionNumber,
+              stepId: vigente.id,
+              stepType: vigente.stepType,
+              onBehalfOf:
+                vigente.assignedToId === userId ? null : vigente.assignedToId,
+            },
           })
 
           return created

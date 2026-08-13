@@ -20,6 +20,39 @@ type UserAuthorizationProps = {
  * @throws GraphQLError si no está autenticado o no tiene permisos
  */
 
+/**
+ * Si el usuario cuenta con un permiso, sin rechazar cuando no lo tiene.
+ *
+ * Es lo que necesita el permiso especial de BLOQUE 03, B9: `admin:update` sobre
+ * el circuito no condiciona el acceso a la operación sino **qué se admite dentro
+ * de ella** —firmar por otro, reasignar, registrar una versión sobre un paso
+ * ajeno o consultar pendientes ajenos—, de modo que su ausencia no puede cortar.
+ *
+ * Solo el rechazo por permiso se traduce en `false`. Un token inválido o un
+ * error del servicio de administración siguen propagándose: confundirlos
+ * convertiría una caída en una denegación silenciosa.
+ */
+export const holdsPermission = async ({
+  permission,
+  context,
+}: {
+  permission: string
+  context: ResolverContext
+}): Promise<boolean> => {
+  try {
+    await userAuthorization({ requiredPermissions: [permission], context })
+    return true
+  } catch (error) {
+    if (
+      error instanceof GraphQLError &&
+      error.extensions?.code === "FORBIDDEN"
+    ) {
+      return false
+    }
+    throw error
+  }
+}
+
 export const userAuthorization = async ({
   requiredPermissions,
   context,

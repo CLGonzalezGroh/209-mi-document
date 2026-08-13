@@ -3,7 +3,7 @@ import { ResolverContext } from "../types.js"
 import { PERMISSIONS } from "@CLGonzalezGroh/mi-common"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
-import { DocumentRole } from "../generated/prisma/enums.js"
+import { DocumentRole, RevisionScheme } from "../generated/prisma/enums.js"
 import { AuditAction } from "../events/catalog.js"
 import { emitAuditEvent } from "../events/emit.js"
 import { assertCounterparty, assertRoleIsSettled } from "../utils/projectSettings.js"
@@ -63,6 +63,12 @@ export const projectSettingsResolvers = {
           projectId: number
           documentRole: DocumentRole
           counterpartyName?: string
+          // Esquema con que el proyecto propone el código de la PRIMERA revisión
+          // de sus documentos (BLOQUE 03, B13). Nulo = rige el del despliegue.
+          revisionScheme?: RevisionScheme | null
+          // Armador por defecto —habitualmente el jefe de proyecto—, con el que
+          // el alta llega con el campo lleno (B3).
+          defaultOrganizerId?: number | null
         }
       },
       context: ResolverContext,
@@ -87,12 +93,16 @@ export const projectSettingsResolvers = {
             update: {
               documentRole: input.documentRole,
               counterpartyName: input.counterpartyName ?? null,
+              revisionScheme: input.revisionScheme ?? null,
+              defaultOrganizerId: input.defaultOrganizerId ?? null,
               updatedById: userId,
             },
             create: {
               projectId: input.projectId,
               documentRole: input.documentRole,
               counterpartyName: input.counterpartyName ?? null,
+              revisionScheme: input.revisionScheme ?? null,
+              defaultOrganizerId: input.defaultOrganizerId ?? null,
               createdById: userId,
               updatedById: userId,
             },
@@ -106,6 +116,8 @@ export const projectSettingsResolvers = {
               projectId: input.projectId,
               documentRole: input.documentRole,
               counterpartyName: input.counterpartyName ?? null,
+              revisionScheme: input.revisionScheme ?? null,
+              defaultOrganizerId: input.defaultOrganizerId ?? null,
             },
           })
 

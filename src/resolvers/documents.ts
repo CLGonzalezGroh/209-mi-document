@@ -23,9 +23,21 @@ import {
   ModuleType,
   RevisionStatus,
   RevisionScheme,
+  StepStatus,
+  WorkflowStatus,
 } from "../generated/prisma/enums.js"
 import { AuditAction, WorkflowEvent } from "../events/catalog.js"
-import { emitAuditEvent, emitWorkflowEvent } from "../events/emit.js"
+import {
+  emitAuditEvent,
+  emitWorkflowEvent,
+  emitWorkflowEvents,
+} from "../events/emit.js"
+import { lastLiveRevision } from "../utils/revisionScheme.js"
+import {
+  planRevision,
+  REVISION_PLAN_MESSAGE,
+} from "../utils/revisionSetup.js"
+import { initialSteps } from "../utils/workflowTemplate.js"
 import { Document } from "../generated/prisma/client.js"
 
 export interface DocumentOrderByInput extends OrderByInput {
@@ -41,16 +53,19 @@ interface DocumentFilterInput {
   terminatedFilter?: TerminatedFilter
 }
 
+// Las revisiones se ordenan por CREACIÓN y nunca por código (BLOQUE 03, B12 y
+// H-10): con el cambio de esquema la secuencia puede quedar A, B, C, 0, 1.
 const documentIncludes = {
   documentType: true,
   documentClass: true,
   revisions: {
     include: {
       versions: true,
-      workflow: {
+      workflows: {
         include: {
-          steps: true,
+          steps: { orderBy: { stepOrder: "asc" as const } },
         },
+        orderBy: { createdAt: "asc" as const },
       },
     },
     orderBy: { createdAt: "desc" as const },
@@ -363,13 +378,24 @@ export const documentResolvers = {
           projectId?: number
           documentTypeId: number
           documentClassId?: number
+          // El armador del primer circuito (B3). Obligatorio, con el valor por
+          // defecto del proyecto cuando no se informa.
+          assignedOrganizerId?: number
+          // Esquema con que se propone el código de la primera revisión. No se
+          // persiste: gobierna la propuesta y nada más (B13).
           revisionScheme?: RevisionScheme
           initialRevisionCode?: string
-          fileKey: string
-          fileName: string
-          fileSize: number
-          mimeType: string
-          checksum?: string
+          // El archivo DEJA DE SER OBLIGATORIO (H-20): el paso de elaboración
+          // existe justamente para producirlo. Sigue siendo admisible, porque el
+          // proyecto que parte de un documento preexistente lo adjunta en el alta.
+          initialVersion?: {
+            fileKey: string
+            fileName: string
+            fileSize: number
+            mimeType: string
+            checksum: string
+            comment?: string
+          }
         }
       },
       context: ResolverContext,
@@ -388,15 +414,31 @@ export const documentResolvers = {
       logger.info("createDocument", { userId })
 
       try {
-        // Determinar esquema de revisión y código inicial
-        const revisionScheme =
-          input.revisionScheme || RevisionScheme.ALPHABETICAL
-        const initialRevisionCode =
-          input.initialRevisionCode ||
-          (revisionScheme === RevisionScheme.NUMERIC ? "0" : "A")
-
-        // Crear documento con primera revisión y primera versión en una transacción
         const document = await context.orm.$transaction(async (tx) => {
+          // Código, armador y plantilla propuesta, con la misma resolución que
+          // usa createRevision. Ver utils/revisionSetup.
+          const planned = await planRevision(tx, {
+            documentId: null,
+            scope: {
+              projectId: input.projectId ?? null,
+              documentClassId: input.documentClassId ?? null,
+              documentTypeId: input.documentTypeId,
+            },
+            chosenScheme: input.revisionScheme ?? null,
+            informedCode: input.initialRevisionCode ?? null,
+            informedOrganizerId: input.assignedOrganizerId ?? null,
+          })
+
+          if (!planned.ok) {
+            throw new GraphQLError(REVISION_PLAN_MESSAGE[planned.reason], {
+              extensions: { code: "BAD_USER_INPUT" },
+            })
+          }
+          const { revisionCode, organizerId, templateId } = planned.plan
+
+          // No existe documento sin circuito: existe circuito en armado (B3).
+          // Los pasos siguientes se materializan al completarse el armado, y no
+          // antes, porque hasta entonces no tienen actor.
           const created = await tx.document.create({
             data: {
               code: input.code,
@@ -406,24 +448,35 @@ export const documentResolvers = {
               projectId: input.projectId,
               documentTypeId: input.documentTypeId,
               documentClassId: input.documentClassId,
-              revisionScheme,
               createdById: userId,
               updatedById: userId,
               revisions: {
                 create: {
-                  revisionCode: initialRevisionCode,
-                  status: "DRAFT",
+                  revisionCode,
+                  status: RevisionStatus.DRAFT,
+                  assignedOrganizerId: organizerId,
                   createdById: userId,
                   updatedById: userId,
-                  versions: {
+                  ...(input.initialVersion && {
+                    versions: {
+                      create: {
+                        versionNumber: 1,
+                        ...input.initialVersion,
+                        createdById: userId,
+                      },
+                    },
+                  }),
+                  workflows: {
                     create: {
-                      versionNumber: 1,
-                      fileKey: input.fileKey,
-                      fileName: input.fileName,
-                      fileSize: input.fileSize,
-                      mimeType: input.mimeType,
-                      checksum: input.checksum,
-                      createdById: userId,
+                      status: WorkflowStatus.IN_PROGRESS,
+                      initiatedById: userId,
+                      templateId,
+                      steps: {
+                        create: initialSteps(organizerId).map((s) => ({
+                          ...s,
+                          status: StepStatus.PENDING,
+                        })),
+                      },
                     },
                   },
                 },
@@ -432,18 +485,37 @@ export const documentResolvers = {
             include: documentIncludes,
           })
 
+          const revision = created.revisions[0]
+          const workflow = revision.workflows[0]
+
           await emitAuditEvent(tx, {
             action: AuditAction.CreateDocument,
             objectId: created.id,
             actorId: userId,
-            meta: { code: created.code, title: created.title, module: created.module },
+            meta: {
+              code: created.code,
+              title: created.title,
+              module: created.module,
+              revisionCode,
+              assignedOrganizerId: organizerId,
+              templateId,
+              withInitialVersion: Boolean(input.initialVersion),
+            },
           })
-          await emitWorkflowEvent(tx, {
-            name: WorkflowEvent.RevisionCreated,
-            objectId: created.revisions[0].id,
-            toState: RevisionStatus.DRAFT,
-            actorId: userId,
-          })
+          await emitWorkflowEvents(tx, [
+            {
+              name: WorkflowEvent.RevisionCreated,
+              objectId: revision.id,
+              toState: RevisionStatus.DRAFT,
+              actorId: userId,
+            },
+            {
+              name: WorkflowEvent.WorkflowStarted,
+              objectId: workflow.id,
+              toState: WorkflowStatus.IN_PROGRESS,
+              actorId: userId,
+            },
+          ])
 
           return created
         })
@@ -496,6 +568,34 @@ export const documentResolvers = {
       })
 
       try {
+        // La metadata se CONGELA con la revisión aprobada (BLOQUE 03, B6).
+        //
+        // El motivo es material: parte de la metadata está impresa dentro del
+        // archivo —el rótulo lleva código, título y a menudo clase y tipo—, de
+        // modo que cambiarla después de aprobar produciría una divergencia
+        // silenciosa entre lo que el sistema afirma y lo que el entregable dice.
+        //
+        // Se mira la ÚLTIMA revisión viva y no "si existe alguna aprobada":
+        // abrir la revisión siguiente vuelve a habilitar la edición, y el
+        // archivo que se elabore llevará el rótulo nuevo.
+        const revisions = await context.orm.documentRevision.findMany({
+          where: { documentId: id },
+          select: {
+            id: true,
+            revisionCode: true,
+            status: true,
+            createdAt: true,
+          },
+        })
+        const last = lastLiveRevision(revisions)
+
+        if (last?.status === RevisionStatus.APPROVED) {
+          throw new GraphQLError(
+            "La revisión vigente está aprobada y su identificación no se edita. Para corregirla, abra una revisión nueva.",
+            { extensions: { code: "CONFLICT" } },
+          )
+        }
+
         const { documentTypeId, documentClassId, ...rest } = input
 
         const document = await context.orm.$transaction(async (tx) => {
@@ -660,78 +760,6 @@ export const documentResolvers = {
           messages: {
             notFound: "El documento no existe.",
             default: "Error al reactivar el documento.",
-          },
-        })
-      }
-    },
-
-    switchRevisionScheme: async (
-      _: any,
-      { id, scheme }: { id: number; scheme: RevisionScheme },
-      context: ResolverContext,
-    ) => {
-      const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_UPDATE],
-        context,
-      })
-      logger.info("switchRevisionScheme", { userId })
-
-      await assertObjectAccess({
-        userId,
-        objectType: DocObjectType.DOCUMENT,
-        objectId: id,
-        context,
-        notFoundMessage: "Documento no encontrado",
-      })
-
-      try {
-        const existing = await context.orm.document.findFirst({
-          where: { id },
-        })
-
-        if (!existing) {
-          throw new GraphQLError("Documento no encontrado", {
-            extensions: { code: "NOT_FOUND" },
-          })
-        }
-
-        if (existing.revisionScheme === scheme) {
-          throw new GraphQLError(
-            `El documento ya tiene el esquema de revisión ${scheme}.`,
-            { extensions: { code: "BAD_USER_INPUT" } },
-          )
-        }
-
-        const document = await context.orm.$transaction(async (tx) => {
-          const updated = await tx.document.update({
-            where: { id },
-            data: {
-              revisionScheme: scheme,
-              updatedById: userId,
-            },
-            include: documentIncludes,
-          })
-
-          await emitAuditEvent(tx, {
-            action: AuditAction.SwitchRevisionScheme,
-            objectId: id,
-            actorId: userId,
-            meta: { from: existing.revisionScheme, to: scheme },
-          })
-
-          return updated
-        })
-
-        return document
-      } catch (error) {
-        return handleError({
-          error,
-          userId,
-          context,
-          logName: "SWITCH_REVISION_SCHEME",
-          messages: {
-            notFound: "El documento no existe.",
-            default: "Error al cambiar el esquema de revisión.",
           },
         })
       }

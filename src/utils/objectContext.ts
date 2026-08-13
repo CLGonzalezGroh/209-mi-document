@@ -168,6 +168,56 @@ const derivadores: Record<
     })
     return member && { projectId: member.projectId, module: null }
   },
+
+  // La firma cuelga del paso, de modo que su contexto es el del circuito: un
+  // nivel más que REVIEW_STEP en la misma cadena hasta el documento.
+  [DocObjectType.DOC_STEP_SIGNATURE]: async (client, id) => {
+    const signature = await client.docStepSignature.findUnique({
+      where: { id },
+      select: {
+        step: {
+          select: {
+            workflow: {
+              select: {
+                revision: {
+                  select: {
+                    document: { select: { projectId: true, module: true } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+    return (
+      signature && {
+        projectId: signature.step.workflow.revision.document.projectId,
+        module: signature.step.workflow.revision.document.module,
+      }
+    )
+  },
+
+  // La plantilla lleva su proyecto en el alcance, y puede no tener ninguno: la
+  // de alcance nulo alcanza a los documentos del régimen de publicación. El
+  // módulo no lo declara —la plantilla no es documentación— y por eso es nulo.
+  [DocObjectType.DOC_WORKFLOW_TEMPLATE]: async (client, id) => {
+    const template = await client.docWorkflowTemplate.findUnique({
+      where: { id },
+      select: { projectId: true },
+    })
+    return template && { projectId: template.projectId, module: null }
+  },
+
+  // La configuración del despliegue no pertenece a ningún proyecto ni a ningún
+  // módulo: es exactamente lo que la vuelve el último escalón de la precedencia.
+  [DocObjectType.DOC_SETTINGS]: async (client, id) => {
+    const settings = await client.docSettings.findUnique({
+      where: { id },
+      select: { id: true },
+    })
+    return settings && { projectId: null, module: null }
+  },
 }
 
 /**

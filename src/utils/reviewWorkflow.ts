@@ -94,6 +94,21 @@ export const completesWorkflow = (
 }
 
 /**
+ * Paso vigente: el primero pendiente por orden.
+ *
+ * Es el que gobierna quién puede registrar una versión (B5) y cuál es el turno
+ * del circuito. Nulo cuando no queda ninguno pendiente, que es lo que impide
+ * agregar versiones a una revisión aprobada: sin paso vigente no hay quien las
+ * produzca, y la firma dejaría de acreditar la última versión.
+ */
+export const currentStep = <T extends ReviewStepSnapshot>(
+  steps: T[],
+): T | null =>
+  [...steps]
+    .sort((a, b) => a.stepOrder - b.stepOrder)
+    .find((s) => s.status === StepStatus.PENDING) ?? null
+
+/**
  * Pasos de toma de conocimiento todavía pendientes.
  *
  * Viven precisamente en circuitos ya cerrados, que es el conjunto que

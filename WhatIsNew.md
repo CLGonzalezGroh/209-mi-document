@@ -456,7 +456,7 @@ Dos, a aplicar en la BD `mi_document` de cada cliente:
 
 Tercer bloque de la evolución documentada en `docs/EVOLUTION/BLOCK_03_CICLO_INTERNO.md`. **Es el primer bloque que cambia reglas funcionales**: el circuito abarca ahora el ciclo completo, desde el armado hasta la toma de conocimiento.
 
-**En curso.** Fases A, B y C aplicadas; D a H pendientes. El servicio **todavía no compila**: los resolvers se reescriben en la fase D.
+**En curso.** Fases A, B, C y D aplicadas; E a H pendientes. El servicio compila y construye, pero **las operaciones nuevas todavía no están declaradas en el contrato GraphQL**: se exponen en la fase F.
 
 ### Permisos (fase A)
 
@@ -486,8 +486,25 @@ Migración `add_internal_review_cycle`, a aplicar en la BD `mi_document` de cada
 - **`stepSignature`**: construcción del payload canónico y verificación posterior sobre lo persistido. La firma pasa a acreditar la versión con su `checksum` y la metadata del documento vigente al firmar, además de quién estaba asignado y quién resolvió.
 - **`reviewWorkflow`**: la partición entre pasos que **deciden** —`REVIEW` y `APPROVE`— y pasos que **se cumplen** —`ASSIGN`, `PREPARE` y `ACKNOWLEDGE`— deja de estar implícita.
 
+### Operaciones (fase D)
+
+- **`initiateReview` se retira** y se reparte en dos: **`defineWorkflow`** completa el armado y materializa los pasos, y **`submitRevision`** completa la elaboración, exige al menos una versión y pasa la revisión a revisión. **`switchRevisionScheme` se retira**: el esquema ya no se persiste.
+- **Operaciones nuevas**: `acknowledgeStep` cierra la toma de conocimiento, que hasta ahora quedaba pendiente para siempre; `reassignStep` cambia el actor de un paso pendiente con motivo; `cancelRevision` abandona una revisión en curso; y la administración de plantillas y de la configuración del despliegue.
+- **`createDocument` y `createRevision`** dejan de exigir archivo, designan armador, instancian el circuito y proponen código y plantilla. El archivo sigue siendo admisible, para el documento preexistente.
+- **`registerVersion`** admite registrar durante la revisión, exige `checksum` y que exista un paso en curso: la versión la produce quien lo tiene asignado, o quien cuente con el permiso de administración del circuito.
+- **`updateDocument`** rechaza editar la identificación cuando la revisión vigente está aprobada. Corregirla exige abrir una revisión nueva.
+- **`approveStep` y `rejectStep`** verifican que el actor sea el asignado —o exigen permiso y motivo—, y **firman con payload verificable**. El rechazo abre un circuito nuevo desde la elaboración con el mismo elenco: **un documento rechazado ya no queda sin salida**.
+- **`pendingReviewSteps`** devuelve los del usuario autenticado; consultar los de otro exige el permiso de administración. Ya no oculta los acuses de circuitos cerrados.
+- **`Document.currentRevision`** pasa a devolver **solo la revisión aprobada**, o nada. La revisión en curso se lee en **`lastRevision`**. Es un cambio de significado sin cambio de forma: antes devolvía un borrador cuando no había ninguna aprobada.
+
+### Trazabilidad
+
+- El catálogo pasa de **28 a 35 acciones** de auditoría: retira `InitiateReview` y `SwitchRevisionScheme`, y suma `DefineWorkflow`, `SubmitRevision`, `AcknowledgeStep`, `ReassignStep`, `CancelRevision`, las tres de plantilla y `DeclareDocSettings`.
+- Transiciones nuevas: `WorkflowCancelled` —que separa la cancelación del rechazo, hasta ahora indistinguibles en la traza—, `RevisionCancelled` y `StepCompleted`.
+- Tipos de objeto nuevos: `DOC_STEP_SIGNATURE`, `DOC_WORKFLOW_TEMPLATE` y `DOC_SETTINGS`, con su derivador de contexto. Migración `add_internal_cycle_object_types`, puramente aditiva.
+
 ### Pruebas
 
-**82 pruebas puras**, de 43. `npm run test:block03` corre las seis suites sin base.
+**130 pruebas**, de 72: **101 puras**, 13 contra base y 16 de integración. `npm run test:block03` corre las suites sin base, `test:block03-db` agrega las de base y `test:block03-all` la integración.
 
 ---

@@ -91,7 +91,7 @@ test("cada tipo de objeto declara el permiso que exige leer su traza", () => {
   )
 })
 
-test("el catálogo cubre las escrituras relevadas más lo que agregó el Bloque 02", () => {
+test("el catálogo cubre las escrituras relevadas más lo que agregaron los bloques 02 y 03", () => {
   // Línea base del Bloque 01: 25 escrituras a DocumentSysLog en el subsistema
   // de Gestión Documental, que aquel bloque sustituyó por eventos.
   //
@@ -99,5 +99,15 @@ test("el catálogo cubre las escrituras relevadas más lo que agregó el Bloque 
   // DeclareProjectSettings, AssignProjectMember y RevokeProjectMember. No son
   // escrituras que se hayan dejado de registrar en otro lado, sino trazabilidad
   // nueva del contexto de proyecto.
-  assert.equal(AUDIT_ACTIONS.length, 28)
+  //
+  // El Bloque 03 retira 2 y suma 9, de 28 a 35:
+  //
+  //   − InitiateReview       la operación desaparece: someter pasó a ser
+  //                          completar el paso de elaboración (B1)
+  //   − SwitchRevisionScheme el esquema dejó de persistirse (B13)
+  //   + DefineWorkflow, SubmitRevision, AcknowledgeStep, ReassignStep
+  //   + CancelRevision
+  //   + CreateWorkflowTemplate, UpdateWorkflowTemplate, DeleteWorkflowTemplate
+  //   + DeclareDocSettings
+  assert.equal(AUDIT_ACTIONS.length, 35)
 })

@@ -704,6 +704,11 @@ enum DocObjectType {
   DOCUMENT_TYPE
   DOC_PROJECT_SETTINGS
   DOC_PROJECT_MEMBER
+
+  // Ciclo interno (BLOQUE 03)
+  DOC_STEP_SIGNATURE
+  DOC_WORKFLOW_TEMPLATE
+  DOC_SETTINGS
 }
 
 // Transición de estado de un objeto del dominio documental.

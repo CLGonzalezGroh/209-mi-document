@@ -211,10 +211,9 @@ test("un documento de proyecto sin proyecto se rechaza antes de autorizar", asyn
             title: "Inválido",
             module: ModuleType.PROJECTS,
             documentTypeId: 1,
-            fileKey: "k",
-            fileName: "f",
-            fileSize: 1,
-            mimeType: "application/pdf",
+            // El archivo dejó de ser obligatorio (BLOQUE 03, H-20): el alta ya
+            // no lo lleva, y el armador lo aporta DocProjectSettings.
+            assignedOrganizerId: USER_ID,
           },
         },
         context,
@@ -236,10 +235,9 @@ test("crear en un proyecto ajeno se rechaza con FORBIDDEN", async () => {
             module: ModuleType.PROJECTS,
             projectId: PROYECTO_SIN_MEMBRESIA,
             documentTypeId: 1,
-            fileKey: "k",
-            fileName: "f",
-            fileSize: 1,
-            mimeType: "application/pdf",
+            // El archivo dejó de ser obligatorio (BLOQUE 03, H-20): el alta ya
+            // no lo lleva, y el armador lo aporta DocProjectSettings.
+            assignedOrganizerId: USER_ID,
           },
         },
         context,

@@ -22,10 +22,8 @@ export const AuditAction = {
   UpdateDocument: "UpdateDocument",
   TerminateDocument: "TerminateDocument",
   ActivateDocument: "ActivateDocument",
-  SwitchRevisionScheme: "SwitchRevisionScheme",
   CreateRevision: "CreateRevision",
   RegisterVersion: "RegisterVersion",
-  InitiateReview: "InitiateReview",
   ApproveStep: "ApproveStep",
   RejectStep: "RejectStep",
   CancelWorkflow: "CancelWorkflow",
@@ -48,6 +46,25 @@ export const AuditAction = {
   DeclareProjectSettings: "DeclareProjectSettings",
   AssignProjectMember: "AssignProjectMember",
   RevokeProjectMember: "RevokeProjectMember",
+
+  // Ciclo interno (BLOQUE 03).
+  //
+  // `InitiateReview` se retira con la operación que la emitía: someter dejó de
+  // ser "crear el circuito" y pasó a ser "completar el paso de elaboración",
+  // que es lo que efectivamente ocurre (B1). La reemplazan `DefineWorkflow` y
+  // `SubmitRevision`.
+  //
+  // `SwitchRevisionScheme` se retira porque el esquema dejó de persistirse: no
+  // hay nada que cambiar, el esquema se elige al crear cada revisión (B13).
+  DefineWorkflow: "DefineWorkflow",
+  SubmitRevision: "SubmitRevision",
+  AcknowledgeStep: "AcknowledgeStep",
+  ReassignStep: "ReassignStep",
+  CancelRevision: "CancelRevision",
+  CreateWorkflowTemplate: "CreateWorkflowTemplate",
+  UpdateWorkflowTemplate: "UpdateWorkflowTemplate",
+  DeleteWorkflowTemplate: "DeleteWorkflowTemplate",
+  DeclareDocSettings: "DeclareDocSettings",
 } as const
 
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
@@ -59,10 +76,8 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   [AuditAction.UpdateDocument]: DocObjectType.DOCUMENT,
   [AuditAction.TerminateDocument]: DocObjectType.DOCUMENT,
   [AuditAction.ActivateDocument]: DocObjectType.DOCUMENT,
-  [AuditAction.SwitchRevisionScheme]: DocObjectType.DOCUMENT,
   [AuditAction.CreateRevision]: DocObjectType.DOCUMENT_REVISION,
   [AuditAction.RegisterVersion]: DocObjectType.DOCUMENT_VERSION,
-  [AuditAction.InitiateReview]: DocObjectType.REVIEW_WORKFLOW,
   [AuditAction.ApproveStep]: DocObjectType.REVIEW_STEP,
   [AuditAction.RejectStep]: DocObjectType.REVIEW_STEP,
   [AuditAction.CancelWorkflow]: DocObjectType.REVIEW_WORKFLOW,
@@ -83,6 +98,20 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   [AuditAction.DeclareProjectSettings]: DocObjectType.DOC_PROJECT_SETTINGS,
   [AuditAction.AssignProjectMember]: DocObjectType.DOC_PROJECT_MEMBER,
   [AuditAction.RevokeProjectMember]: DocObjectType.DOC_PROJECT_MEMBER,
+
+  // Ciclo interno (BLOQUE 03). Definir el circuito, someter, acusar y reasignar
+  // son actos sobre un PASO, que es el objeto que cambia: el armado se completa,
+  // la elaboración se completa, el acuse se cierra y la reasignación cambia su
+  // actor sin alterar su estado.
+  [AuditAction.DefineWorkflow]: DocObjectType.REVIEW_STEP,
+  [AuditAction.SubmitRevision]: DocObjectType.REVIEW_STEP,
+  [AuditAction.AcknowledgeStep]: DocObjectType.REVIEW_STEP,
+  [AuditAction.ReassignStep]: DocObjectType.REVIEW_STEP,
+  [AuditAction.CancelRevision]: DocObjectType.DOCUMENT_REVISION,
+  [AuditAction.CreateWorkflowTemplate]: DocObjectType.DOC_WORKFLOW_TEMPLATE,
+  [AuditAction.UpdateWorkflowTemplate]: DocObjectType.DOC_WORKFLOW_TEMPLATE,
+  [AuditAction.DeleteWorkflowTemplate]: DocObjectType.DOC_WORKFLOW_TEMPLATE,
+  [AuditAction.DeclareDocSettings]: DocObjectType.DOC_SETTINGS,
 }
 
 // ================================
@@ -111,6 +140,16 @@ export const WorkflowEvent = {
   DocumentClassActivated: "DocumentClassActivated",
   DocumentTypeTerminated: "DocumentTypeTerminated",
   DocumentTypeActivated: "DocumentTypeActivated",
+
+  // Ciclo interno (BLOQUE 03)
+  //
+  // `WorkflowCancelled` separa la cancelación del rechazo, que hasta ahora
+  // compartían transición: era la confusión de H-05 trasladada a la traza.
+  // `StepCompleted` acompaña al estado terminal de los pasos que se cumplen sin
+  // juzgar (B8), que no pueden emitir `StepApproved`.
+  WorkflowCancelled: "WorkflowCancelled",
+  RevisionCancelled: "RevisionCancelled",
+  StepCompleted: "StepCompleted",
 } as const
 
 export type WorkflowEvent = (typeof WorkflowEvent)[keyof typeof WorkflowEvent]
@@ -139,6 +178,9 @@ export const WORKFLOW_EVENT_OBJECT: Record<WorkflowEvent, DocObjectType> = {
   [WorkflowEvent.DocumentClassActivated]: DocObjectType.DOCUMENT_CLASS,
   [WorkflowEvent.DocumentTypeTerminated]: DocObjectType.DOCUMENT_TYPE,
   [WorkflowEvent.DocumentTypeActivated]: DocObjectType.DOCUMENT_TYPE,
+  [WorkflowEvent.WorkflowCancelled]: DocObjectType.REVIEW_WORKFLOW,
+  [WorkflowEvent.RevisionCancelled]: DocObjectType.DOCUMENT_REVISION,
+  [WorkflowEvent.StepCompleted]: DocObjectType.REVIEW_STEP,
 }
 
 // ================================
@@ -163,4 +205,10 @@ export const DOC_OBJECT_READ_PERMISSION: Record<DocObjectType, string> = {
   [DocObjectType.DOCUMENT_TYPE]: PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_READ,
   [DocObjectType.DOC_PROJECT_SETTINGS]: PERMISSIONS.DOCUMENTS_PROJECT_SETTINGS_READ,
   [DocObjectType.DOC_PROJECT_MEMBER]: PERMISSIONS.DOCUMENTS_PROJECT_MEMBER_READ,
+  // La firma es parte del circuito y se lee con él; la plantilla también, porque
+  // es la propuesta del armado. La configuración del despliegue tiene su recurso
+  // propio desde BLOQUE 03.
+  [DocObjectType.DOC_STEP_SIGNATURE]: PERMISSIONS.DOCUMENTS_WORKFLOW_LIST,
+  [DocObjectType.DOC_WORKFLOW_TEMPLATE]: PERMISSIONS.DOCUMENTS_WORKFLOW_LIST,
+  [DocObjectType.DOC_SETTINGS]: PERMISSIONS.DOCUMENTS_SETTINGS_READ,
 }

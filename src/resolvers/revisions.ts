@@ -8,10 +8,25 @@ import {
   DocObjectType,
   RevisionStatus,
   RevisionScheme,
+  StepStatus,
+  WorkflowStatus,
 } from "../generated/prisma/enums.js"
 import { AuditAction, WorkflowEvent } from "../events/catalog.js"
-import { emitAuditEvent, emitWorkflowEvent } from "../events/emit.js"
+import {
+  emitAuditEvent,
+  emitWorkflowEvent,
+  emitWorkflowEvents,
+  type WorkflowEventInput,
+} from "../events/emit.js"
+import { planRevision, REVISION_PLAN_MESSAGE } from "../utils/revisionSetup.js"
+import {
+  initialSteps,
+  stepsForRejectionRetry,
+} from "../utils/workflowTemplate.js"
+import { stepsSkippedByCancellation } from "../utils/reviewWorkflow.js"
 
+// Una revisión tiene VARIOS circuitos sucesivos (D-11, B2), ordenados por
+// creación: el vigente es el que está IN_PROGRESS y se deriva, no se almacena.
 const revisionIncludes = {
   document: {
     include: {
@@ -21,74 +36,25 @@ const revisionIncludes = {
   versions: {
     orderBy: { versionNumber: "desc" as const },
   },
-  workflow: {
+  workflows: {
     include: {
       steps: {
         orderBy: { stepOrder: "asc" as const },
       },
     },
+    orderBy: { createdAt: "asc" as const },
   },
-}
-
-/**
- * Genera el siguiente revisionCode alfabético.
- * Secuencia: A, B, C, ..., Z, AA, AB, ...
- */
-function getNextAlphabeticCode(currentCode: string): string {
-  if (!currentCode) return "A"
-
-  const chars = currentCode.split("")
-  let carry = true
-
-  for (let i = chars.length - 1; i >= 0 && carry; i--) {
-    if (chars[i] === "Z") {
-      chars[i] = "A"
-    } else {
-      chars[i] = String.fromCharCode(chars[i].charCodeAt(0) + 1)
-      carry = false
-    }
-  }
-
-  if (carry) {
-    chars.unshift("A")
-  }
-
-  return chars.join("")
-}
-
-/**
- * Genera el siguiente revisionCode numérico.
- * Secuencia: 0, 1, 2, 3, ...
- */
-function getNextNumericCode(currentCode: string): string {
-  const num = parseInt(currentCode, 10)
-  if (isNaN(num)) return "0"
-  return String(num + 1)
-}
-
-/**
- * Genera el siguiente revisionCode según el esquema del documento.
- */
-function getNextRevisionCode(
-  currentCode: string,
-  scheme: RevisionScheme,
-): string {
-  if (scheme === RevisionScheme.NUMERIC) {
-    return getNextNumericCode(currentCode)
-  }
-  return getNextAlphabeticCode(currentCode)
-}
-
-/**
- * Obtiene el código de revisión por defecto según el esquema.
- */
-function getDefaultRevisionCode(scheme: RevisionScheme): string {
-  return scheme === RevisionScheme.NUMERIC ? "0" : "A"
 }
 
 import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
 
 const logger = createLogger("revisions")
+
+/** Estados en que la revisión sigue viva y no admite otra en paralelo. */
+const REVISION_ABIERTA: RevisionStatus[] = [
+  RevisionStatus.DRAFT,
+  RevisionStatus.IN_REVIEW,
+]
 
 export const revisionResolvers = {
   Query: {
@@ -149,13 +115,19 @@ export const revisionResolvers = {
       }: {
         documentId: number
         input: {
+          // Esquema con que se propone el código. No se persiste (B13).
+          revisionScheme?: RevisionScheme
           revisionCode?: string
-          comment?: string
-          fileKey: string
-          fileName: string
-          fileSize: number
-          mimeType: string
-          checksum?: string
+          assignedOrganizerId?: number
+          // El archivo dejó de ser obligatorio (H-20). Sigue siendo admisible.
+          initialVersion?: {
+            fileKey: string
+            fileName: string
+            fileSize: number
+            mimeType: string
+            checksum: string
+            comment?: string
+          }
         }
       },
       context: ResolverContext,
@@ -176,69 +148,87 @@ export const revisionResolvers = {
       })
 
       try {
-        // Verificar que el documento existe
-        const document = await context.orm.document.findFirst({
-          where: { id: documentId },
-          include: {
-            revisions: {
-              orderBy: { createdAt: "desc" },
-              take: 1,
-            },
-          },
-        })
-
-        if (!document) {
-          throw new GraphQLError("Documento no encontrado", {
-            extensions: { code: "NOT_FOUND" },
-          })
-        }
-
-        // Verificar que no hay una revisión en DRAFT o IN_REVIEW
-        const activeRevision = await context.orm.documentRevision.findFirst({
-          where: {
-            documentId,
-            status: { in: [RevisionStatus.DRAFT, RevisionStatus.IN_REVIEW] },
-          },
-        })
-
-        if (activeRevision) {
-          throw new GraphQLError(
-            "Ya existe una revisión en borrador o en revisión para este documento. Debe completarla antes de crear una nueva.",
-            { extensions: { code: "CONFLICT" } },
-          )
-        }
-
-        // Determinar el revisionCode según el esquema del documento
-        let revisionCode = input.revisionCode
-        if (!revisionCode) {
-          const lastRevision = document.revisions[0]
-          revisionCode = lastRevision
-            ? getNextRevisionCode(
-                lastRevision.revisionCode,
-                document.revisionScheme,
-              )
-            : getDefaultRevisionCode(document.revisionScheme)
-        }
-
-        // Crear la revisión con su primera versión
         const revision = await context.orm.$transaction(async (tx) => {
+          const document = await tx.document.findFirst({
+            where: { id: documentId },
+            select: {
+              id: true,
+              code: true,
+              projectId: true,
+              documentClassId: true,
+              documentTypeId: true,
+            },
+          })
+
+          if (!document) {
+            throw new GraphQLError("Documento no encontrado", {
+              extensions: { code: "NOT_FOUND" },
+            })
+          }
+
+          // Una revisión abierta por documento. La abortada no cuenta: dejó de
+          // estar en curso y su código volvió a quedar disponible (B12).
+          const abierta = await tx.documentRevision.findFirst({
+            where: { documentId, status: { in: REVISION_ABIERTA } },
+            select: { id: true, revisionCode: true },
+          })
+
+          if (abierta) {
+            throw new GraphQLError(
+              `Ya existe una revisión en curso (${abierta.revisionCode}). Debe completarla o abandonarla antes de abrir otra.`,
+              { extensions: { code: "CONFLICT" } },
+            )
+          }
+
+          const planned = await planRevision(tx, {
+            documentId,
+            scope: {
+              projectId: document.projectId,
+              documentClassId: document.documentClassId,
+              documentTypeId: document.documentTypeId,
+            },
+            chosenScheme: input.revisionScheme ?? null,
+            informedCode: input.revisionCode ?? null,
+            informedOrganizerId: input.assignedOrganizerId ?? null,
+          })
+
+          if (!planned.ok) {
+            throw new GraphQLError(REVISION_PLAN_MESSAGE[planned.reason], {
+              extensions: { code: "BAD_USER_INPUT" },
+            })
+          }
+          const { revisionCode, organizerId, templateId } = planned.plan
+
+          // La revisión nace con su circuito en armado, igual que en el alta:
+          // no hay revisión sin circuito (B3).
           const created = await tx.documentRevision.create({
             data: {
               documentId,
               revisionCode,
               status: RevisionStatus.DRAFT,
+              assignedOrganizerId: organizerId,
               createdById: userId,
               updatedById: userId,
-              versions: {
+              ...(input.initialVersion && {
+                versions: {
+                  create: {
+                    versionNumber: 1,
+                    ...input.initialVersion,
+                    createdById: userId,
+                  },
+                },
+              }),
+              workflows: {
                 create: {
-                  versionNumber: 1,
-                  fileKey: input.fileKey,
-                  fileName: input.fileName,
-                  fileSize: input.fileSize,
-                  mimeType: input.mimeType,
-                  checksum: input.checksum,
-                  comment: input.comment,
-                  createdById: userId,
+                  status: WorkflowStatus.IN_PROGRESS,
+                  initiatedById: userId,
+                  templateId,
+                  steps: {
+                    create: initialSteps(organizerId).map((s) => ({
+                      ...s,
+                      status: StepStatus.PENDING,
+                    })),
+                  },
                 },
               },
             },
@@ -249,14 +239,28 @@ export const revisionResolvers = {
             action: AuditAction.CreateRevision,
             objectId: created.id,
             actorId: userId,
-            meta: { documentId, documentCode: document.code, revisionCode },
+            meta: {
+              documentId,
+              documentCode: document.code,
+              revisionCode,
+              assignedOrganizerId: organizerId,
+              templateId,
+            },
           })
-          await emitWorkflowEvent(tx, {
-            name: WorkflowEvent.RevisionCreated,
-            objectId: created.id,
-            toState: RevisionStatus.DRAFT,
-            actorId: userId,
-          })
+          await emitWorkflowEvents(tx, [
+            {
+              name: WorkflowEvent.RevisionCreated,
+              objectId: created.id,
+              toState: RevisionStatus.DRAFT,
+              actorId: userId,
+            },
+            {
+              name: WorkflowEvent.WorkflowStarted,
+              objectId: created.workflows[0].id,
+              toState: WorkflowStatus.IN_PROGRESS,
+              actorId: userId,
+            },
+          ])
 
           return created
         })
@@ -273,6 +277,164 @@ export const revisionResolvers = {
               "Ya existe una revisión con ese código para este documento.",
             notFound: "El documento no existe.",
             default: "Error al crear la revisión.",
+          },
+        })
+      }
+    },
+
+    /**
+     * Abandona la revisión (BLOQUE 03, B11).
+     *
+     * Es un acto distinto de cancelar el circuito: acá la revisión deja de tener
+     * sentido y no va a emitirse, de modo que **no sobrevive**. Si tiene un
+     * circuito abierto, se cancela con ella.
+     *
+     * Solo se aborta una revisión NO aprobada: aprobada, es el documento vigente
+     * y lo que corresponde es abrir la siguiente. Como la emisión exige
+     * aprobación (D-18), una revisión abortada nunca fue emitida.
+     *
+     * No hace falta restituir la revisión anterior: la supersesión ocurre al
+     * aprobarse la sucesora, y una abortada nunca se aprueba. La anterior nunca
+     * dejó de estar vigente.
+     */
+    cancelRevision: async (
+      _: any,
+      { revisionId, reason }: { revisionId: number; reason: string },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_UPDATE],
+        context,
+      })
+      logger.info("cancelRevision", { userId })
+
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT_REVISION,
+        objectId: revisionId,
+        context,
+        notFoundMessage: "Revisión no encontrada",
+      })
+
+      if (!reason?.trim()) {
+        throw new GraphQLError("Debe indicarse el motivo del abandono.", {
+          extensions: { code: "BAD_USER_INPUT" },
+        })
+      }
+
+      try {
+        const result = await context.orm.$transaction(async (tx) => {
+          const revision = await tx.documentRevision.findFirst({
+            where: { id: revisionId },
+            include: {
+              workflows: { include: { steps: true } },
+            },
+          })
+
+          if (!revision) {
+            throw new GraphQLError("Revisión no encontrada", {
+              extensions: { code: "NOT_FOUND" },
+            })
+          }
+
+          if (!REVISION_ABIERTA.includes(revision.status)) {
+            throw new GraphQLError(
+              "Solo se abandona una revisión en curso. Una revisión aprobada es el documento vigente: lo que corresponde es abrir la siguiente.",
+              { extensions: { code: "BAD_REQUEST" } },
+            )
+          }
+
+          const now = new Date()
+          const transitions: WorkflowEventInput[] = []
+
+          // El circuito abierto se cancela con la revisión. Los pasos ya
+          // resueltos conservan su estado y su firma: nada se elimina, que es
+          // lo que permite abandonar en cualquier punto.
+          const abierto = revision.workflows.find(
+            (w) => w.status === WorkflowStatus.IN_PROGRESS,
+          )
+
+          if (abierto) {
+            const skipped = stepsSkippedByCancellation(abierto.steps)
+
+            await tx.reviewStep.updateMany({
+              where: { workflowId: abierto.id, status: StepStatus.PENDING },
+              data: { status: StepStatus.SKIPPED },
+            })
+            await tx.reviewWorkflow.update({
+              where: { id: abierto.id },
+              data: {
+                status: WorkflowStatus.CANCELLED,
+                completedAt: now,
+                cancelledAt: now,
+                cancelledById: userId,
+                cancelReason: reason,
+              },
+            })
+
+            transitions.push(
+              ...skipped.map((s) => ({
+                name: WorkflowEvent.StepSkipped,
+                objectId: s.id,
+                fromState: StepStatus.PENDING,
+                toState: StepStatus.SKIPPED,
+                actorId: userId,
+              })),
+              {
+                name: WorkflowEvent.WorkflowCancelled,
+                objectId: abierto.id,
+                fromState: abierto.status,
+                toState: WorkflowStatus.CANCELLED,
+                actorId: userId,
+              },
+            )
+          }
+
+          const updated = await tx.documentRevision.update({
+            where: { id: revisionId },
+            data: {
+              status: RevisionStatus.CANCELLED,
+              cancelledAt: now,
+              cancelledById: userId,
+              cancelReason: reason,
+              updatedById: userId,
+            },
+            include: revisionIncludes,
+          })
+
+          transitions.push({
+            name: WorkflowEvent.RevisionCancelled,
+            objectId: revisionId,
+            fromState: revision.status,
+            toState: RevisionStatus.CANCELLED,
+            actorId: userId,
+          })
+
+          await emitAuditEvent(tx, {
+            action: AuditAction.CancelRevision,
+            objectId: revisionId,
+            actorId: userId,
+            meta: {
+              revisionCode: revision.revisionCode,
+              reason,
+              cancelledWorkflowId: abierto?.id ?? null,
+            },
+          })
+          await emitWorkflowEvents(tx, transitions)
+
+          return updated
+        })
+
+        return result
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "CANCEL_REVISION",
+          messages: {
+            notFound: "La revisión no existe.",
+            default: "Error al abandonar la revisión.",
           },
         })
       }

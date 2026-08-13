@@ -3,6 +3,7 @@ import test from "node:test"
 import { StepStatus, StepType } from "../generated/prisma/enums.js"
 import {
   completesWorkflow,
+  currentStep,
   favorableStatusFor,
   isDecidingStep,
   isReassignable,
@@ -112,6 +113,29 @@ test("los acuses pendientes se identifican para poder resolverlos después", () 
     pendingAcknowledgeSteps(steps).map((s) => s.id),
     [2],
   )
+})
+
+// --- Paso vigente (B5) ---
+
+test("el paso vigente es el primero pendiente por orden", () => {
+  const steps = [
+    step(3, 3, StepStatus.PENDING, StepType.APPROVE),
+    step(1, 1, StepStatus.COMPLETED, StepType.ASSIGN),
+    step(2, 2, StepStatus.PENDING, StepType.PREPARE),
+  ]
+
+  assert.equal(currentStep(steps)?.id, 2)
+})
+
+test("un circuito sin pasos pendientes no tiene paso vigente", () => {
+  // Es lo que impide agregar versiones a una revisión aprobada: sin paso
+  // vigente no hay quien las produzca.
+  const steps = [
+    step(1, 1, StepStatus.COMPLETED, StepType.PREPARE),
+    step(2, 2, StepStatus.APPROVED, StepType.APPROVE),
+  ]
+
+  assert.equal(currentStep(steps), null)
 })
 
 // --- Reasignación (B9) ---

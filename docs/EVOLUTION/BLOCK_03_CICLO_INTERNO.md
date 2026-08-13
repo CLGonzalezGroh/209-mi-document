@@ -625,6 +625,47 @@ Tres utilidades, sin dependencias nuevas y sin tocar la base.
 
 `npm run test:block03` corre las seis suites puras. `tsc --noEmit` conserva **los mismos 12 errores** de la fase B y ninguno nuevo: las utilidades compilan limpias.
 
+### Fase D — operaciones
+
+Las 17 operaciones del mapa, resolver por resolver. **`tsc --noEmit` y `npm run build` vuelven a pasar sin error**, por primera vez desde la fase B.
+
+**Tres cosas se adelantaron de la fase E, porque sin ellas las operaciones no podían emitir**: el catálogo de acciones y transiciones, los tres tipos de objeto nuevos y sus derivadores de contexto. Una operación que no puede registrar lo que hizo no está terminada.
+
+- Migración `20260812140000_add_internal_cycle_object_types`, puramente aditiva. Son **11 migraciones**.
+- **`DOC_SETTINGS` es un tercer tipo de objeto que el bloque no enumera.** Se incorpora porque el bloque **sí** exige acciones de auditoría sobre la configuración del despliegue, y toda acción declara el tipo del objeto que afecta: sin él, esas acciones no tendrían dónde apuntar.
+- El catálogo pasa de **28 a 35 acciones**: retira `InitiateReview` y `SwitchRevisionScheme` —cuyas operaciones desaparecen— y suma nueve. Tres transiciones nuevas: `WorkflowCancelled`, `RevisionCancelled` y `StepCompleted`. La prueba que fija el número se actualizó explicando el saldo, como en `BLOCK_02`.
+
+**Decisiones de implementación que el bloque no fijaba**, declaradas acá para que no pasen inadvertidas:
+
+- **`defineWorkflow` exige `DOCUMENTS_WORKFLOW_CREATE`**, que es el permiso que tenía `initiateReview`: materializar los pasos es crear el circuito. `submitRevision`, `acknowledgeStep` y `cancelWorkflow` exigen `WORKFLOW_UPDATE`, porque resuelven un paso o el circuito.
+- **`holdsPermission`** es un verificador nuevo que devuelve booleano en lugar de rechazar. Lo necesita el permiso especial de `B9`: `admin:update` no condiciona el acceso a la operación sino **qué se admite dentro de ella**, de modo que su ausencia no puede cortar. Solo el rechazo por permiso se traduce en `false`; un token inválido o una caída del servicio de administración siguen propagándose.
+- **`cancelWorkflow` abre el circuito siguiente desde el armado**, con el armador que la revisión designó. Es lo que `B11` describe —«la revisión sobrevive, vuelve a `DRAFT` y se rearma desde `ASSIGN`»— y sin ello la revisión quedaría viva sin circuito, contra el invariante de `B2`.
+- **`pendingReviewSteps` deja de filtrar por estado del circuito**, en lugar de ampliar el filtro. El rechazo y la cancelación dejan sus pasos en `SKIPPED`, de modo que el estado del **paso** ya alcanza: filtrar por circuito abierto era justamente lo que ocultaba los acuses.
+- **El armado exige al menos un paso que decida.** Cierra el borde que la fase C dejó declarado: `completesWorkflow` no completa un circuito sin `REVIEW` ni `APPROVE`, y ahora la operación que lo arma lo impide en origen.
+- **Se agrega `proposedWorkflowTemplate`**, que no está en el mapa: resuelve la plantilla por alcance sin crear nada, para que la interfaz pueda mostrar el circuito propuesto **antes** de dar de alta. Es la misma resolución que hace el alta, expuesta.
+- **`updateDocWorkflowTemplate` reemplaza los pasos en bloque.** Una plantilla es una propuesta completa, y editarla paso por paso invitaría a dejarla a medias. Dar de baja **no elimina**: los circuitos que la referencian conservan de dónde salió su propuesta.
+
+**Utilidad nueva, `src/utils/workflowTemplate.ts`**, con la resolución de la plantilla por alcance, la materialización del armado y el elenco que hereda el circuito por rechazo. **17 pruebas puras**; la resolución por alcance figuraba en la estrategia de pruebas del bloque y no tenía dónde vivir. `src/utils/revisionSetup.ts` reúne lo que `createDocument` y `createRevision` resuelven igual —código, armador y plantilla—, con acceso a base y por eso fuera de las puras.
+
+**Humo del ciclo completo** (`src/resolvers/cycle.smoke.ts`), ejecutado contra la base local y `mi-admin`. No reemplaza a los cuatro recorridos de la fase G; es la verificación de que las operaciones funcionan de punta a punta, porque compilar no prueba nada sobre el comportamiento:
+
+| Verificado | Resultado |
+| ---------- | --------- |
+| Alta **sin archivo**, con código `A` propuesto y circuito en armado | Correcto — H-20 |
+| Armado que completa en `COMPLETED` y materializa los cuatro pasos | Correcto — `B1`, `B8` |
+| Someter **sin versión** | Rechazado |
+| Rechazo que abre circuito nuevo desde `PREPARE` con el mismo elenco | Correcto — **H-01 cerrado en ejecución** |
+| Aprobación que cierra el circuito con el acuse pendiente | Correcto — `B10` |
+| Acuse **visible en circuito cerrado** y resuelto con operación propia | Correcto — H-04 |
+| **6 firmas** persistidas, todas verificables sobre su payload | Correcto — **H-06 cerrado** |
+| Metadata con la revisión aprobada | Rechazada — `B6` |
+| `B` abandonada y `B` propuesta otra vez | Correcto — `B12` |
+| `currentRevision` = `A` aprobada, `lastRevision` = `B` viva | Correcto — `B14` |
+
+**Pruebas**: **130 en total**, de 111. Las puras pasan de 82 a **101** con las 17 de plantilla y 2 de paso vigente; 13 contra base y 16 de integración, **todas aprobadas**. Las de integración de `BLOCK_02` se adaptaron al alta sin archivo, que es un cambio mecánico de su fixture.
+
+**Lo que queda para la fase F, declarado**: `schema.graphql` todavía declara `initiateReview` y `switchRevisionScheme` —que ya no tienen resolver— y no declara ninguna de las siete operaciones nuevas, de modo que son inalcanzables por GraphQL. El subgrafo **sí arma** —se verificó con `buildSubgraphSchema`—, pero esas dos operaciones fallarían en ejecución si alguien las invocara. No hay consumidores.
+
 ## Referencias
 
 - `README.md`

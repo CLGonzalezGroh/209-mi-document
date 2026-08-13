@@ -18,6 +18,8 @@ import { taskDocumentReferenceResolvers } from "./taskDocumentReferences.js"
 import { eventResolvers } from "./events.js"
 import { projectSettingsResolvers } from "./projectSettings.js"
 import { projectMemberResolvers } from "./projectMembers.js"
+import { docSettingsResolvers } from "./docSettings.js"
+import { workflowTemplateResolvers } from "./workflowTemplates.js"
 
 export const resolvers: GraphQLResolverMap<ResolverContext> = {
   ...scalars,
@@ -36,6 +38,8 @@ export const resolvers: GraphQLResolverMap<ResolverContext> = {
     ...eventResolvers.Query,
     ...projectSettingsResolvers.Query,
     ...projectMemberResolvers.Query,
+    ...docSettingsResolvers.Query,
+    ...workflowTemplateResolvers.Query,
   },
   Mutation: {
     ...projectSettingsResolvers.Mutation,
@@ -52,6 +56,8 @@ export const resolvers: GraphQLResolverMap<ResolverContext> = {
     ...attachmentResolvers.Mutation,
     ...scannedFileResolvers.Mutation,
     ...taskDocumentReferenceResolvers.Mutation,
+    ...docSettingsResolvers.Mutation,
+    ...workflowTemplateResolvers.Mutation,
   },
   ...resolverTypes,
 }

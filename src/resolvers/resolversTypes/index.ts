@@ -16,6 +16,27 @@ import {
   DocumentSysLogArchive,
   TaskDocumentReference,
 } from "../../generated/prisma/client.js"
+import { RevisionStatus, WorkflowStatus } from "../../generated/prisma/enums.js"
+import { lastLiveRevision } from "../../utils/revisionScheme.js"
+
+/** Detalle que ambas lecturas devuelven cuando tienen que ir a la base. */
+const revisionDetail = {
+  versions: true,
+  workflows: {
+    include: { steps: { orderBy: { stepOrder: "asc" as const } } },
+    orderBy: { createdAt: "asc" as const },
+  },
+}
+
+/**
+ * Revisiones que el padre ya trae, si las trae.
+ *
+ * Devuelve `null` —y no un arreglo vacío— cuando el padre no las incluyó, para
+ * distinguir "no vinieron" de "no hay ninguna": confundirlos haría que un
+ * documento sin revisiones cargadas se leyera como un documento sin revisiones.
+ */
+const revisionsOf = (parent: any): any[] | null =>
+  Array.isArray(parent?.revisions) ? parent.revisions : null
 
 export const resolverTypes = {
   Document: {
@@ -26,14 +47,7 @@ export const resolverTypes = {
           documentType: true,
           documentClass: true,
           revisions: {
-            include: {
-              versions: true,
-              workflow: {
-                include: {
-                  steps: true,
-                },
-              },
-            },
+            include: revisionDetail,
             orderBy: { createdAt: "desc" },
           },
         },
@@ -57,37 +71,57 @@ export const resolverTypes = {
         orderBy: { createdAt: "asc" },
       })
     },
+    /**
+     * La revisión VIGENTE: la última aprobada, y **solo la aprobada**
+     * (BLOQUE 03, B14). Nulo mientras el documento no haya aprobado ninguna.
+     *
+     * Cambia de significado sin cambiar de forma: antes caía en `DRAFT` o
+     * `IN_REVIEW` cuando no había aprobada, de modo que la lectura corriente
+     * devolvía un borrador como si fuera el documento del proyecto. Y tenía dos
+     * implementaciones divergentes en el mismo resolver, que podían devolver
+     * revisiones distintas para el mismo documento: resolverlas en un solo lugar
+     * es la corrección.
+     *
+     * A lo sumo hay una revisión en `APPROVED` por documento, porque aprobar una
+     * supersede a las anteriores.
+     */
     currentRevision: async (parent: any) => {
-      // Si ya viene con revisions incluidas
-      if (parent.revisions && parent.revisions.length > 0) {
-        // Buscar primero APPROVED, luego DRAFT/IN_REVIEW
-        const approved = parent.revisions.find(
-          (r: any) => r.status === "APPROVED",
+      const desdeElPadre = revisionsOf(parent)
+      if (desdeElPadre) {
+        return (
+          desdeElPadre.find((r: any) => r.status === RevisionStatus.APPROVED) ??
+          null
         )
-        if (approved) return approved
-
-        const active = parent.revisions.find(
-          (r: any) => r.status === "DRAFT" || r.status === "IN_REVIEW",
-        )
-        if (active) return active
-
-        return parent.revisions[0]
       }
 
-      // Si no, hacer query
-      const revision = await prisma.documentRevision.findFirst({
-        where: { documentId: parent.id },
-        orderBy: { createdAt: "desc" },
-        include: {
-          versions: true,
-          workflow: {
-            include: {
-              steps: true,
-            },
-          },
-        },
+      return prisma.documentRevision.findFirst({
+        where: { documentId: parent.id, status: RevisionStatus.APPROVED },
+        include: revisionDetail,
       })
-      return revision
+    },
+
+    /**
+     * La revisión EN CURSO: la última no abortada por secuencia de creación, en
+     * cualquier estado (B14).
+     *
+     * Con `A` aprobada y `B` en circuito, `currentRevision` es `A` y
+     * `lastRevision` es `B`. Ninguna de las dos considera las abortadas.
+     *
+     * Es la misma revisión de la que se deriva el código sucesor: una sola regla
+     * con dos usos, y por eso comparte la implementación de `lastLiveRevision`.
+     */
+    lastRevision: async (parent: any) => {
+      const desdeElPadre = revisionsOf(parent)
+      if (desdeElPadre) return lastLiveRevision(desdeElPadre)
+
+      const revisions = await prisma.documentRevision.findMany({
+        where: {
+          documentId: parent.id,
+          status: { not: RevisionStatus.CANCELLED },
+        },
+        include: revisionDetail,
+      })
+      return lastLiveRevision(revisions)
     },
   },
 
@@ -126,12 +160,7 @@ export const resolverTypes = {
         where: { id: ref.id },
         include: {
           document: true,
-          versions: true,
-          workflow: {
-            include: {
-              steps: true,
-            },
-          },
+          ...revisionDetail,
         },
       })
     },
@@ -142,6 +171,33 @@ export const resolverTypes = {
       return parent.approvedById
         ? { __typename: "UserName", id: parent.approvedById }
         : null
+    },
+    assignedOrganizer: (parent: DocumentRevision) => {
+      return { __typename: "UserName", id: parent.assignedOrganizerId }
+    },
+    cancelledBy: (parent: DocumentRevision) => {
+      return parent.cancelledById
+        ? { __typename: "UserName", id: parent.cancelledById }
+        : null
+    },
+    /**
+     * El circuito vigente se DERIVA (BLOQUE 03, B2): no se almacena un
+     * `currentWorkflowId`, que sería un dato derivado con riesgo de
+     * desincronizarse. El índice único parcial garantiza que haya a lo sumo uno.
+     */
+    currentWorkflow: async (parent: any) => {
+      if (Array.isArray(parent?.workflows)) {
+        return (
+          parent.workflows.find(
+            (w: any) => w.status === WorkflowStatus.IN_PROGRESS,
+          ) ?? null
+        )
+      }
+
+      return prisma.reviewWorkflow.findFirst({
+        where: { revisionId: parent.id, status: WorkflowStatus.IN_PROGRESS },
+        include: { steps: { orderBy: { stepOrder: "asc" } } },
+      })
     },
     currentVersion: async (parent: any) => {
       // Si ya viene con versions incluidas
@@ -193,11 +249,75 @@ export const resolverTypes = {
     initiatedAt: (parent: ReviewWorkflow) => {
       return parent.initiatedAt || parent.createdAt
     },
+    cancelledBy: (parent: ReviewWorkflow) => {
+      return parent.cancelledById
+        ? { __typename: "UserName", id: parent.cancelledById }
+        : null
+    },
+    template: async (parent: ReviewWorkflow) => {
+      if (parent.templateId === null) return null
+      return prisma.docWorkflowTemplate.findUnique({
+        where: { id: parent.templateId },
+        include: { steps: { orderBy: { stepOrder: "asc" } } },
+      })
+    },
   },
 
   ReviewStep: {
     assignedTo: (parent: ReviewStep) => {
       return { __typename: "UserName", id: parent.assignedToId }
+    },
+    /**
+     * Quién resolvió efectivamente el paso (B9). Nulo mientras está pendiente.
+     * La delegación se DERIVA de su divergencia con `assignedTo`: un indicador
+     * booleano sería un dato calculable que puede contradecir a los dos campos
+     * que lo originan.
+     */
+    resolvedBy: (parent: ReviewStep) => {
+      return parent.resolvedById
+        ? { __typename: "UserName", id: parent.resolvedById }
+        : null
+    },
+    signature: async (parent: any) => {
+      if (parent.signature !== undefined) return parent.signature
+      return prisma.docStepSignature.findUnique({
+        where: { stepId: parent.id },
+      })
+    },
+  },
+
+  DocStepSignature: {
+    createdBy: (parent: { createdById: number }) => {
+      return { __typename: "UserName", id: parent.createdById }
+    },
+  },
+
+  DocWorkflowTemplate: {
+    createdBy: (parent: { createdById: number }) => {
+      return { __typename: "UserName", id: parent.createdById }
+    },
+    updatedBy: (parent: { updatedById: number }) => {
+      return { __typename: "UserName", id: parent.updatedById }
+    },
+  },
+
+  DocWorkflowTemplateStep: {
+    assignedTo: (parent: { assignedToId: number | null }) => {
+      if (parent.assignedToId === null) return null
+      return { __typename: "UserName", id: parent.assignedToId }
+    },
+  },
+
+  DocSettings: {
+    updatedBy: (parent: { updatedById: number }) => {
+      return { __typename: "UserName", id: parent.updatedById }
+    },
+  },
+
+  DocProjectSettings: {
+    defaultOrganizer: (parent: { defaultOrganizerId: number | null }) => {
+      if (parent.defaultOrganizerId === null) return null
+      return { __typename: "UserName", id: parent.defaultOrganizerId }
     },
   },
 
