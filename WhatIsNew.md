@@ -456,7 +456,7 @@ Dos, a aplicar en la BD `mi_document` de cada cliente:
 
 Tercer bloque de la evolución documentada en `docs/EVOLUTION/BLOCK_03_CICLO_INTERNO.md`. **Es el primer bloque que cambia reglas funcionales**: el circuito abarca ahora el ciclo completo, desde el armado hasta la toma de conocimiento.
 
-**En curso.** Fases A a E aplicadas; F a H pendientes. El servicio compila y construye, pero **las operaciones nuevas todavía no están declaradas en el contrato GraphQL**: se exponen en la fase F.
+**En curso.** Fases A a F aplicadas; G y H pendientes.
 
 ### Permisos (fase A)
 
@@ -503,6 +503,18 @@ Migración `add_internal_review_cycle`, a aplicar en la BD `mi_document` de cada
 - Transiciones nuevas: `WorkflowCancelled` —que separa la cancelación del rechazo, hasta ahora indistinguibles en la traza—, `RevisionCancelled` y `StepCompleted`.
 - Tipos de objeto nuevos: `DOC_STEP_SIGNATURE`, `DOC_WORKFLOW_TEMPLATE` y `DOC_SETTINGS`, con su derivador de contexto. Migración `add_internal_cycle_object_types`, puramente aditiva.
 - Los tres quedan **consultables desde `docWorkflowEvents` y `docAuditEvents` sin cambios**: esas consultas resuelven el permiso desde el catálogo y el alcance desde el derivador.
+
+### Contrato GraphQL
+
+`rover subgraph check` ejecutado contra `Maria-Ingenieria@current`: **Operation Check y Linter Check aprobados**, con 179 cambios comparados contra 49 operaciones registradas y **ninguna afectada**.
+
+**Cambios incompatibles aceptados**, ninguno con consumidor: se retiran `Document.revisionScheme`, `DocumentRevision.workflow`, `DocumentType.requiresWorkflow`, `ReviewStep.signatureHash`, las mutaciones `initiateReview` y `switchRevisionScheme`, el archivo obligatorio de los inputs de alta, el valor `ALPHABETICAL` y el valor `PENDING`; `checksum` pasa a obligatorio y `pendingReviewSteps.userId` a opcional.
+
+> **Atención al migrar**: `Document.currentRevision` **cambia de significado sin cambiar de forma**, de modo que ninguna herramienta lo señala. Antes devolvía la revisión aprobada o, en su defecto, la que estuviera en curso; ahora devuelve **solo la aprobada**, y es nula hasta la primera aprobación. La revisión en curso se lee en el campo nuevo **`lastRevision`**.
+
+Tipos nuevos: `DocStepSignature`, `DocWorkflowTemplate`, `DocWorkflowTemplateStep` y `DocSettings`.
+
+**Corrección fuera del bloque**: el resolver de `DocumentSysLogArchive.user` estaba registrado con el nombre de tipo en plural y por lo tanto nunca corría —el usuario del log archivado devolvía nulo—. Apareció al cruzar el contrato contra los resolvers.
 
 ### Pruebas
 

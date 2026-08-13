@@ -396,7 +396,11 @@ export const resolverTypes = {
     },
   },
 
-  DocumentSysLogsArchive: {
+  // El tipo del contrato es DocumentSysLogArchive, en singular. El resolver
+  // estaba registrado como DocumentSysLogsArchive y por lo tanto NUNCA corría:
+  // `user` caía en el resolver por defecto y devolvía nulo. Es anterior a este
+  // bloque y se corrige acá porque el cruce contra el contrato lo hizo visible.
+  DocumentSysLogArchive: {
     user: (parent: DocumentSysLogArchive) => {
       return { __typename: "UserName", id: parent.userId }
     },

@@ -697,6 +697,43 @@ El último caso es el que la autorización necesita: distinguir «no pertenece a
 
 **Pruebas**: **141 en total**, de 130. 101 puras, **24 contra base** —11 nuevas— y 16 de integración, todas aprobadas.
 
+### Fase F — contrato GraphQL
+
+`schema.graphql` al día con las operaciones y el modelo. **`rover subgraph check` ejecutado contra `Maria-Ingenieria@current`, con los dos controles aprobados** y salida `0`.
+
+| Control | Resultado |
+| ------- | --------- |
+| Operation Check | **PASSED** — 179 cambios comparados contra 49 operaciones registradas, **ninguna afectada** |
+| Linter Check | **PASSED** — sin advertencias |
+
+**Los 26 cambios incompatibles, aceptados con evidencia.** Ninguna operación registrada los toca, que es lo que la línea base ya anticipaba al declarar que el ciclo no tiene consumidores:
+
+| Clase | Qué se retira o cambia |
+| ----- | ---------------------- |
+| `FIELD_REMOVED` (6) | `Document.revisionScheme`, `DocumentRevision.workflow`, `DocumentType.requiresWorkflow`, `ReviewStep.signatureHash`, y las mutaciones `initiateReview` y `switchRevisionScheme` |
+| `FIELD_REMOVED_FROM_INPUT_OBJECT` (12) | El archivo obligatorio de `CreateDocumentInput` y `CreateRevisionInput`, y los pasos de `InitiateReviewInput` |
+| `VALUE_REMOVED_FROM_ENUM` (4) | `ALPHABETICAL` en `RevisionScheme` y su input; `PENDING` en `WorkflowStatus` y su input |
+| `TYPE_REMOVED` (1) | `InitiateReviewInput` |
+| `FIELD_CHANGED_TYPE` (2) | `DocumentVersion.checksum` y `RegisterVersionInput.checksum`, de `String` a `String!` |
+| `ARG_CHANGED_TYPE` (1) | `pendingReviewSteps.userId`, de `Int!` a `Int` |
+
+> **DECLARADO POR ESCRITO — `currentRevision` cambia de significado sin cambiar de forma.**
+>
+> Sigue siendo `currentRevision: DocumentRevision`, de modo que **`rover` no lo señala y no lo va a señalar nunca**. Lo que cambia es qué devuelve:
+>
+> - **antes**: la aprobada si existía y, si no, la que estuviera en `DRAFT` o `IN_REVIEW` —una lectura corriente podía recibir un borrador como si fuera el documento del proyecto—;
+> - **ahora**: **la última aprobada, y solo la aprobada.** Nula mientras el documento no haya aprobado ninguna.
+>
+> La revisión en curso pasa a leerse en **`lastRevision`**, que es campo nuevo. Un consumidor que use `currentRevision` para mostrar «en qué anda el documento» dejará de ver nada hasta la primera aprobación, y debe migrar a `lastRevision`. Es el único cambio del bloque que ninguna herramienta detecta.
+
+**Tipos nuevos en el contrato**: `DocStepSignature`, `DocWorkflowTemplate`, `DocWorkflowTemplateStep` y `DocSettings`. **Inputs nuevos**: `InitialVersionInput`, `DefineWorkflowInput`, `WorkflowTemplateStepInput`, los dos de plantilla y `DeclareDocSettingsInput`. `DocObjectType` y su input suman los tres valores.
+
+**Cruce contrato ↔ resolvers, en las dos direcciones.** Se verificó con `buildSubgraphSchema` que **las 59 mutaciones y las 36 consultas declaradas tienen resolver, y que ningún resolver quedó sin declarar**. El mismo cruce sobre los resolvers de tipo encontró un defecto **anterior a este bloque**:
+
+- **`DocumentSysLogArchive.user` nunca se resolvía.** El resolver estaba registrado como `DocumentSysLogsArchive` —en plural— y el contrato declara el tipo en singular, de modo que el campo caía en el resolver por defecto y devolvía nulo. Se corrigió acá porque el cruce lo hizo visible; está fuera del alcance del bloque y no afecta a ninguna de sus reglas.
+
+**Verificación posterior**: `tsc --noEmit`, `npm run build` y **las 141 pruebas** siguen sin error.
+
 ## Referencias
 
 - `README.md`

@@ -42,40 +42,48 @@ enum ModuleType {
 
 "Esquema de revisión del documento"
 enum RevisionScheme {
-  "Alfabético: A, B, C, ..., Z, AA, AB, ..."
-  ALPHABETICAL
-  "Numérico: 0, 1, 2, 3, ..."
+  "Alfabético: A, B, C, ..., Z, AA, AB, ... El sistema calcula el código."
+  ALPHA
+  "Numérico: 0, 1, 2, 3, ... El sistema calcula el código."
   NUMERIC
+  "Texto libre: lo ingresa el usuario y solo se valida que no se repita."
+  FREE_TEXT
 }
 
 "Estado de las revisiones de un documento"
 enum RevisionStatus {
-  "En borrador, se pueden subir nuevas versiones"
+  "En elaboración: el circuito está en armado o en elaboración"
   DRAFT
-  "Enviado a workflow de revisión"
+  "Sometida: el circuito avanza por revisión y aprobación"
   IN_REVIEW
-  "Aprobado, no se puede modificar"
+  "Aprobada: metadata congelada, no admite versiones nuevas"
   APPROVED
-  "Reemplazado por una nueva revisión"
+  "Reemplazada por una revisión posterior aprobada"
   SUPERSEDED
-  "Obsoleto, ya no aplica"
+  "Abandonada antes de aprobarse. No consume código de revisión"
+  CANCELLED
+  "SIN USO: reservado para los estados terminales por respuesta de la contraparte"
   OBSOLETE
 }
 
 "Estado del workflow de revisión"
 enum WorkflowStatus {
-  "Creado pero no iniciado"
-  PENDING
-  "Al menos un step en proceso"
+  "Circuito abierto. El circuito nace iniciado"
   IN_PROGRESS
-  "Todos los steps aprobados"
+  "Los pasos que deciden se resolvieron favorablemente"
   COMPLETED
-  "Al menos un step rechazado"
+  "Un paso que decide rechazó"
   REJECTED
+  "Retirado sin juicio, con su motivo"
+  CANCELLED
 }
 
 "Tipo de paso en el workflow de revisión"
 enum StepType {
+  "Armado: designa elaborador y revisores, y materializa los pasos siguientes"
+  ASSIGN
+  "Elaboración: el documento está hecho y se somete a revisión"
+  PREPARE
   "Revisión técnica"
   REVIEW
   "Aprobación formal"
@@ -86,13 +94,15 @@ enum StepType {
 
 "Estado de un paso del workflow"
 enum StepStatus {
-  "No evaluado aún"
+  "No resuelto aún"
   PENDING
-  "Aprobado por el asignado"
+  "Cumplido, sin emitir juicio: armado, elaboración y toma de conocimiento"
+  COMPLETED
+  "Aprobado por quien resolvió: solo revisión y aprobación"
   APPROVED
-  "Rechazado por el asignado"
+  "Rechazado por quien resolvió: solo revisión y aprobación"
   REJECTED
-  "Saltado"
+  "Saltado por rechazo o por cancelación del circuito"
   SKIPPED
 }
 
@@ -155,39 +165,47 @@ enum ModuleTypeInput {
 "Esquema de revisión para inputs"
 enum RevisionSchemeInput {
   "Alfabético: A, B, C, ..., Z, AA, AB, ..."
-  ALPHABETICAL
+  ALPHA
   "Numérico: 0, 1, 2, 3, ..."
   NUMERIC
+  "Texto libre"
+  FREE_TEXT
 }
 
 "Estado de las revisiones para inputs"
 enum RevisionStatusInput {
-  "En borrador"
+  "En elaboración"
   DRAFT
   "En revisión"
   IN_REVIEW
-  "Aprobado"
+  "Aprobada"
   APPROVED
-  "Reemplazado"
+  "Reemplazada"
   SUPERSEDED
-  "Obsoleto"
+  "Abandonada"
+  CANCELLED
+  "Obsoleta (sin uso)"
   OBSOLETE
 }
 
 "Estado del workflow para inputs"
 enum WorkflowStatusInput {
-  "Pendiente"
-  PENDING
-  "En progreso"
+  "Abierto"
   IN_PROGRESS
   "Completado"
   COMPLETED
   "Rechazado"
   REJECTED
+  "Cancelado"
+  CANCELLED
 }
 
 "Tipo de paso del workflow para inputs"
 enum StepTypeInput {
+  "Armado"
+  ASSIGN
+  "Elaboración"
+  PREPARE
   "Revisión técnica"
   REVIEW
   "Aprobación formal"
@@ -446,6 +464,12 @@ enum DocObjectType {
   DOC_PROJECT_SETTINGS
   "Membresía documental de un proyecto"
   DOC_PROJECT_MEMBER
+  "Firma de un paso del circuito"
+  DOC_STEP_SIGNATURE
+  "Plantilla del circuito"
+  DOC_WORKFLOW_TEMPLATE
+  "Configuración documental del despliegue"
+  DOC_SETTINGS
 }
 
 "Objeto del dominio documental para inputs"
@@ -470,6 +494,12 @@ enum DocObjectTypeInput {
   DOC_PROJECT_SETTINGS
   "Membresía documental de un proyecto"
   DOC_PROJECT_MEMBER
+  "Firma de un paso del circuito"
+  DOC_STEP_SIGNATURE
+  "Plantilla del circuito"
+  DOC_WORKFLOW_TEMPLATE
+  "Configuración documental del despliegue"
+  DOC_SETTINGS
 }
 
 "Nivel del log para inputs"
@@ -550,8 +580,8 @@ type DocumentType @key(fields: "id") {
   class: DocumentClass
   "Descripción del tipo de documento"
   description: String
-  "Indica si requiere workflow de aprobación"
-  requiresWorkflow: Boolean!
+  "Propone el circuito formal frente al mínimo. Es SUGERENCIA y no invariante: bajo D-03 toda revisión tiene circuito"
+  requiresFormalReview: Boolean!
 }
 
 "Documento maestro"
@@ -584,11 +614,18 @@ type Document @key(fields: "id") {
   documentType: DocumentType!
   "Clase de documento"
   documentClass: DocumentClass
-  "Esquema de revisión actual (ALPHABETICAL o NUMERIC)"
-  revisionScheme: RevisionScheme!
-  "Revisión vigente del documento"
+  """
+  Revisión VIGENTE: la última aprobada, y solo la aprobada. Nula mientras el
+  documento no haya aprobado ninguna. No considera las revisiones abandonadas.
+  """
   currentRevision: DocumentRevision
-  "Historial de revisiones del documento"
+  """
+  Revisión EN CURSO: la última no abandonada por secuencia de creación, en
+  cualquier estado. Con A aprobada y B en circuito, currentRevision es A y
+  lastRevision es B.
+  """
+  lastRevision: DocumentRevision
+  "Historial de revisiones del documento, por secuencia de creación"
   revisions: [DocumentRevision!]!
   "Tarea de proyecto a la que pertenece este documento como entregable principal (capa 1 de la federación A.5)"
   projectTask: ProjectTask
@@ -664,12 +701,29 @@ type DocumentRevision @key(fields: "id") {
   versions: [DocumentVersion!]!
   "Versión actual (la más reciente)"
   currentVersion: DocumentVersion
-  "Workflow de revisión asociado"
-  workflow: ReviewWorkflow
+  """
+  Circuitos de la revisión, por secuencia de creación. Una revisión admite
+  VARIOS circuitos sucesivos: cada rechazo abre uno nuevo desde la elaboración,
+  y cada cancelación uno desde el armado.
+  """
+  workflows: [ReviewWorkflow!]!
+  """
+  Circuito abierto, si lo hay. Se DERIVA de los circuitos: no se almacena, para
+  que no pueda desincronizarse. Toda revisión viva tiene exactamente uno.
+  """
+  currentWorkflow: ReviewWorkflow
+  "Armador designado al crear la revisión. Es el único actor que debe conocerse en el alta"
+  assignedOrganizer: UserName!
   "Fecha de aprobación"
   approvedAt: DateTime
   "Usuario que aprobó la revisión"
   approvedBy: UserName
+  "Fecha en que se abandonó la revisión"
+  cancelledAt: DateTime
+  "Usuario que abandonó la revisión"
+  cancelledBy: UserName
+  "Motivo del abandono"
+  cancelReason: String
 }
 
 "Versión de archivo dentro de una revisión"
@@ -692,9 +746,9 @@ type DocumentVersion @key(fields: "id") {
   fileSize: Int!
   "Tipo MIME del archivo"
   mimeType: String!
-  "Hash SHA-256 para verificación de integridad"
-  checksum: String
-  "Comentario sobre los cambios de esta versión"
+  "Hash SHA-256, OBLIGATORIO: es lo que la firma acredita como contenido"
+  checksum: String!
+  "Comentario sobre los cambios. Opcional: la observación viaja dentro del archivo"
   comment: String
 }
 
@@ -720,6 +774,14 @@ type ReviewWorkflow @key(fields: "id") {
   initiatedBy: UserName!
   "Fecha de finalización del workflow"
   completedAt: DateTime
+  "Plantilla de la que salió la propuesta. Solo procedencia: los valores se copiaron al materializarse"
+  template: DocWorkflowTemplate
+  "Fecha de cancelación del circuito"
+  cancelledAt: DateTime
+  "Usuario que canceló el circuito"
+  cancelledBy: UserName
+  "Motivo de la cancelación"
+  cancelReason: String
 }
 
 "Paso individual del workflow de revisión"
@@ -740,10 +802,47 @@ type ReviewStep {
   status: StepStatus!
   "Comentarios del evaluador"
   comments: String
-  "Fecha de completación del paso"
+  "Fecha de resolución del paso"
   completedAt: DateTime
-  "Hash de firma para trazabilidad ISO 9001"
-  signatureHash: String
+  """
+  Quién resolvió efectivamente el paso. Nulo mientras está pendiente. La
+  delegación se DERIVA de su divergencia con assignedTo.
+  """
+  resolvedBy: UserName
+  "Motivo, obligatorio cuando quien resuelve no es el asignado"
+  delegationReason: String
+  """
+  Firma del paso. Nula en el armado, que no firma: al completarse puede no
+  existir todavía ninguna versión que acreditar.
+  """
+  signature: DocStepSignature
+}
+
+"""
+Firma de un paso del circuito. Inmutable.
+
+Persiste el payload canónico serializado junto con el hash y el algoritmo: un
+hash sin sus insumos no es verificable. Verificar es recalcular el hash sobre el
+payload guardado, y no sobre entidades que pudieron cambiar después.
+"""
+type DocStepSignature {
+  "Identificador único"
+  id: Int!
+  "Momento en que se firmó"
+  createdAt: DateTime!
+  "Quién firmó. Coincide con el resolvedBy del paso"
+  createdBy: UserName!
+  "Algoritmo del hash"
+  algorithm: String!
+  """
+  Payload canónico serializado. Contiene el paso, su circuito y su revisión; la
+  versión vigente al firmar con su número, fileKey y checksum; la metadata del
+  documento vigente al firmar; el usuario asignado y el que resolvió; y la
+  acción con su momento.
+  """
+  payload: String!
+  "Hash del payload"
+  hash: String!
 }
 
 # ═══════════════════════════════════════════════════════
@@ -1003,6 +1102,13 @@ type DocProjectSettings {
   documentRole: DocumentRole!
   "Nombre de la contraparte. Nulo en proyectos internos, que no la tienen"
   counterpartyName: String
+  """
+  Esquema con que el proyecto propone el código de la PRIMERA revisión de sus
+  documentos. Nulo = rige el valor por defecto del despliegue.
+  """
+  revisionScheme: RevisionScheme
+  "Armador por defecto, con el que el alta llega con el campo lleno"
+  defaultOrganizer: UserName
 }
 
 "Declaración de la configuración documental de un proyecto"
@@ -1013,6 +1119,85 @@ input DeclareDocProjectSettingsInput {
   documentRole: DocumentRoleInput!
   "Nombre de la contraparte. Obligatorio en Emisor y Receptor, prohibido en Interno"
   counterpartyName: String
+  "Esquema de revisión del proyecto. Nulo = rige el del despliegue"
+  revisionScheme: RevisionSchemeInput
+  "Armador por defecto de los documentos del proyecto"
+  defaultOrganizerId: Int
+}
+
+"""
+Configuración documental del despliegue. Registro único.
+
+Es el último escalón de la precedencia documento ▸ proyecto ▸ despliegue:
+permite fijar la convención del cliente sin desplegar y sin configurar proyecto
+por proyecto.
+"""
+type DocSettings {
+  "Identificador único. Siempre 1"
+  id: Int!
+  "Fecha de creación"
+  createdAt: DateTime!
+  "Fecha de última modificación"
+  updatedAt: DateTime
+  "Usuario que la declaró"
+  updatedBy: UserName!
+  "Esquema con que se propone el código de una primera revisión"
+  revisionScheme: RevisionScheme!
+}
+
+"""
+Plantilla del circuito. PROPONE el circuito; el armado lo define.
+
+Se resuelve contra la tupla del propio documento y gana la MÁS ESPECÍFICA
+—tipo, después clase, después proyecto—. La plantilla del proyecto con clase y
+tipo nulos ES su default, sin necesidad de una marca aparte.
+"""
+type DocWorkflowTemplate {
+  "Identificador único"
+  id: Int!
+  "Fecha de creación"
+  createdAt: DateTime!
+  "Usuario que la creó"
+  createdBy: UserName!
+  "Fecha de última modificación"
+  updatedAt: DateTime
+  "Usuario que la modificó"
+  updatedBy: UserName!
+  "Fecha de baja. Una plantilla dada de baja deja de proponerse"
+  terminatedAt: DateTime
+  "Indica si es un registro del sistema"
+  isSys: Boolean!
+  "Nombre de la plantilla"
+  name: String!
+  "Descripción"
+  description: String
+  "Proyecto del alcance. Nulo alcanza a los documentos sin proyecto"
+  projectId: Int
+  "Clase del alcance. Nula = todas las clases"
+  documentClass: DocumentClass
+  "Tipo del alcance. Nulo = todos los tipos"
+  documentType: DocumentType
+  "Pasos que propone, en orden"
+  steps: [DocWorkflowTemplateStep!]!
+}
+
+"""
+Paso de una plantilla de circuito.
+
+No incluye el armado ni la elaboración: esos los pone el sistema según el rol
+documental del proyecto. El elaborador nunca se preasigna.
+"""
+type DocWorkflowTemplateStep {
+  "Identificador único"
+  id: Int!
+  "Fecha de creación"
+  createdAt: DateTime!
+  "Orden de ejecución"
+  stepOrder: Int!
+  "Tipo de paso"
+  stepType: StepType!
+  "Actor preasignado. Nulo = lo designa el armado"
+  assignedTo: UserName
 }
 
 """
@@ -1401,10 +1586,32 @@ input CreateDocumentInput {
   documentTypeId: Int!
   "ID de la clase de documento"
   documentClassId: Int
-  "Esquema de revisión inicial (por defecto ALPHABETICAL)"
+  """
+  Armador del primer circuito. Si se omite lo aporta el proyecto, de modo que en
+  la práctica el campo llega lleno. Sin ninguno de los dos, el alta se rechaza.
+  """
+  assignedOrganizerId: Int
+  """
+  Esquema con que se propone el código de la primera revisión. NO se persiste:
+  gobierna la propuesta y nada más. Si se omite, rige el del proyecto y, en su
+  defecto, el del despliegue.
+  """
   revisionScheme: RevisionSchemeInput
-  "Código de revisión inicial (por defecto 'A' para ALPHABETICAL o '0' para NUMERIC)"
+  """
+  Código de la primera revisión. Bajo ALPHA y NUMERIC el sistema lo calcula y
+  rechaza uno distinto; bajo FREE_TEXT es obligatorio.
+  """
   initialRevisionCode: String
+  """
+  Archivo inicial, OPCIONAL. El documento nace sin archivo porque el paso de
+  elaboración existe para producirlo. Sigue siendo admisible para el proyecto
+  que parte de un documento preexistente.
+  """
+  initialVersion: InitialVersionInput
+}
+
+"Archivo con que se da de alta un documento o una revisión preexistente"
+input InitialVersionInput {
   "Key del archivo en DO Spaces"
   fileKey: String!
   "Nombre original del archivo"
@@ -1413,8 +1620,10 @@ input CreateDocumentInput {
   fileSize: Int!
   "Tipo MIME del archivo"
   mimeType: String!
-  "Hash SHA-256 para verificación de integridad"
-  checksum: String
+  "Hash SHA-256. Obligatorio en toda versión"
+  checksum: String!
+  "Comentario sobre el archivo"
+  comment: String
 }
 
 "Input para actualizar un documento"
@@ -1441,20 +1650,20 @@ input TaskDocumentReferenceCreateInput {
 
 "Input para crear una revisión"
 input CreateRevisionInput {
-  "Código de revisión (auto-generado si no se provee)"
+  """
+  Esquema con que se propone el código. NO se persiste. Si se omite, se infiere
+  de la última revisión no abandonada; elegir otro reinicia la secuencia.
+  """
+  revisionScheme: RevisionSchemeInput
+  """
+  Código de la revisión. Bajo ALPHA y NUMERIC el sistema lo calcula y rechaza
+  uno distinto; bajo FREE_TEXT es obligatorio.
+  """
   revisionCode: String
-  "Comentario sobre la revisión"
-  comment: String
-  "Key del archivo en DO Spaces"
-  fileKey: String!
-  "Nombre original del archivo"
-  fileName: String!
-  "Tamaño del archivo en bytes"
-  fileSize: Int!
-  "Tipo MIME del archivo"
-  mimeType: String!
-  "Hash SHA-256 para verificación de integridad"
-  checksum: String
+  "Armador del circuito. Si se omite lo aporta el proyecto"
+  assignedOrganizerId: Int
+  "Archivo inicial, OPCIONAL: la revisión nace sin versiones"
+  initialVersion: InitialVersionInput
 }
 
 "Input para registrar una nueva versión de archivo"
@@ -1467,26 +1676,87 @@ input RegisterVersionInput {
   fileSize: Int!
   "Tipo MIME del archivo"
   mimeType: String!
-  "Hash SHA-256 para verificación de integridad"
-  checksum: String
+  "Hash SHA-256. OBLIGATORIO en toda versión"
+  checksum: String!
   "Comentario sobre los cambios de esta versión"
   comment: String
 }
 
-"Input para iniciar un workflow de revisión"
-input InitiateReviewInput {
-  "Pasos del workflow a crear"
+"""
+Input para completar el armado del circuito.
+
+Designa al elaborador y al elenco, y materializa los pasos siguientes. El armado
+y la elaboración los pone el sistema: no se declaran acá.
+"""
+input DefineWorkflowInput {
+  """
+  Elaborador. Obligatorio salvo en el rol Receptor, donde el documento llega ya
+  elaborado desde afuera y el circuito no tiene paso de elaboración.
+  """
+  preparerId: Int
+  "Revisores, aprobadores y acuses, en el orden en que se recorren"
   steps: [ReviewStepInput!]!
+  "Motivo, obligatorio cuando quien arma no es el armador designado"
+  delegationReason: String
 }
 
-"Input para un paso del workflow"
+"Input para un paso del circuito"
 input ReviewStepInput {
   "Orden de ejecución del paso"
   stepOrder: Int!
-  "Tipo de paso"
+  "Tipo de paso. Solo revisión, aprobación y toma de conocimiento"
   stepType: StepTypeInput!
   "ID del usuario asignado"
   assignedToId: Int!
+}
+
+"Input para un paso de una plantilla de circuito"
+input WorkflowTemplateStepInput {
+  "Orden de ejecución del paso"
+  stepOrder: Int!
+  "Tipo de paso. Solo revisión, aprobación y toma de conocimiento"
+  stepType: StepTypeInput!
+  """
+  Actor preasignado, opcional. El elaborador NUNCA se preasigna: designarlo es
+  distribuir carga de trabajo y se decide documento por documento.
+  """
+  assignedToId: Int
+}
+
+"Input para crear una plantilla de circuito"
+input CreateDocWorkflowTemplateInput {
+  "Nombre de la plantilla"
+  name: String!
+  "Descripción"
+  description: String
+  "Proyecto del alcance. Nulo alcanza a los documentos sin proyecto"
+  projectId: Int
+  "Clase del alcance. Nulo = todas las clases"
+  documentClassId: Int
+  "Tipo del alcance. Nulo = todos los tipos"
+  documentTypeId: Int
+  "Pasos que propone"
+  steps: [WorkflowTemplateStepInput!]!
+}
+
+"Input para actualizar una plantilla de circuito"
+input UpdateDocWorkflowTemplateInput {
+  "Nuevo nombre"
+  name: String
+  "Nueva descripción"
+  description: String
+  """
+  Pasos, que se REEMPLAZAN en bloque. Una plantilla es una propuesta completa, y
+  editarla paso por paso invitaría a dejarla a medias. No altera circuitos en
+  curso: los valores se copian al materializarse.
+  """
+  steps: [WorkflowTemplateStepInput!]
+}
+
+"Input para declarar la configuración documental del despliegue"
+input DeclareDocSettingsInput {
+  "Esquema con que se propone el código de una primera revisión"
+  revisionScheme: RevisionSchemeInput!
 }
 
 "Input para crear un tipo de documento"
@@ -1853,11 +2123,33 @@ type Query {
   ): TransmittalConnection!
 
   # ─── Workflows ───
-  "Steps de revisión pendientes para un usuario"
-  pendingReviewSteps(userId: Int!): [ReviewStep!]!
+  """
+  Pasos pendientes del usuario autenticado.
 
-  "Workflows filtrados por estado"
+  El argumento es OPCIONAL: omitido devuelve los propios; informado y distinto,
+  exige el permiso de administración del circuito. Sigue acotado por membresía:
+  ese permiso habilita ver pendientes ajenos, no proyectos ajenos.
+
+  Incluye los acuses de circuitos ya cerrados, que es donde viven.
+  """
+  pendingReviewSteps(userId: Int): [ReviewStep!]!
+
+  "Circuitos filtrados por estado"
   workflowsByStatus(status: WorkflowStatusInput!): [ReviewWorkflow!]!
+
+  "Plantillas de circuito. Con proyecto, devuelve las suyas y las de alcance general"
+  docWorkflowTemplates(projectId: Int): [DocWorkflowTemplate!]!
+
+  """
+  Plantilla que regiría para un documento con ese alcance, con la más específica
+  ganando. Es la misma resolución que hace el alta, expuesta para poder mostrar
+  el circuito propuesto ANTES de crear el documento.
+  """
+  proposedWorkflowTemplate(
+    projectId: Int
+    documentClassId: Int
+    documentTypeId: Int
+  ): DocWorkflowTemplate
 
   # ─── Adjuntos ───
   "Obtener un adjunto por ID"
@@ -1940,6 +2232,9 @@ type Query {
   "Configuración documental de un proyecto. Nula si todavía no declaró su rol"
   docProjectSettings(projectId: Int!): DocProjectSettings
 
+  "Configuración documental del despliegue. Registro único"
+  docSettings: DocSettings!
+
   "Miembros de un proyecto documental"
   docProjectMembers(
     projectId: Int!
@@ -2019,20 +2314,25 @@ type Mutation {
   "Reactivar un documento"
   activateDocument(id: Int!): Document!
 
-  "Cambiar el esquema de revisión de un documento (ej: de ALPHABETICAL a NUMERIC)"
-  switchRevisionScheme(
-    "ID del documento"
-    id: Int!
-    "Nuevo esquema de revisión"
-    scheme: RevisionSchemeInput!
-  ): Document!
-
   # ─── Revisiones ───
-  "Crear una nueva revisión para un documento"
+  """
+  Crear una revisión. Nace con su circuito en armado y, opcionalmente, con el
+  archivo de un documento preexistente.
+  """
   createRevision(
     documentId: Int!
     input: CreateRevisionInput!
   ): DocumentRevision!
+
+  """
+  Abandonar una revisión en curso, con motivo.
+
+  Distinto de cancelar el circuito: acá la revisión NO sobrevive. Si tiene un
+  circuito abierto, se cancela con ella. Solo se abandona una revisión no
+  aprobada: aprobada, es el documento vigente y corresponde abrir la siguiente.
+  La revisión abandonada no consume código.
+  """
+  cancelRevision(revisionId: Int!, reason: String!): DocumentRevision!
 
   # ─── Versiones ───
   "Registrar una nueva versión de archivo en una revisión"
@@ -2041,18 +2341,97 @@ type Mutation {
     input: RegisterVersionInput!
   ): DocumentVersion!
 
-  # ─── Workflow de revisión ───
-  "Iniciar un workflow de revisión para una revisión"
-  initiateReview(revisionId: Int!, input: InitiateReviewInput!): ReviewWorkflow!
+  # ─── Circuito de revisión ───
+  """
+  Completar el armado: designa elaborador y elenco, y materializa los pasos.
 
-  "Aprobar un paso del workflow"
-  approveStep(stepId: Int!, comments: String): ReviewStep!
+  Desde que se completa, la estructura del circuito es inmutable: no se agregan,
+  quitan ni reordenan pasos. Corregirla exige cancelar el circuito y rearmar.
+  """
+  defineWorkflow(workflowId: Int!, input: DefineWorkflowInput!): ReviewWorkflow!
 
-  "Rechazar un paso del workflow"
-  rejectStep(stepId: Int!, comments: String!): ReviewStep!
+  """
+  Completar la elaboración y someter la revisión.
 
-  "Cancelar un workflow de revisión"
+  Exige al menos una versión con checksum: es la precondición que reemplaza a la
+  del alta, ahora que el documento nace sin archivo.
+  """
+  submitRevision(
+    revisionId: Int!
+    comments: String
+    delegationReason: String
+  ): ReviewStep!
+
+  """
+  Aprobar un paso que decide —revisión o aprobación—, con firma.
+
+  Los pasos que se cumplen tienen operación propia: aprobar un armado no es lo
+  que ocurre.
+  """
+  approveStep(
+    stepId: Int!
+    comments: String
+    "Obligatorio cuando quien resuelve no es el asignado. Exige el permiso de administración"
+    delegationReason: String
+  ): ReviewStep!
+
+  """
+  Rechazar un paso, con firma, y reinstanciar el circuito desde la elaboración
+  con el mismo elenco copiado. El documento rechazado no queda sin salida ni
+  consume una revisión nueva.
+  """
+  rejectStep(
+    stepId: Int!
+    comments: String!
+    delegationReason: String
+  ): ReviewStep!
+
+  """
+  Cerrar un paso de toma de conocimiento.
+
+  Se resuelve DESPUÉS de que el circuito cerró: el acuse comunica un documento
+  ya aprobado, de modo que bloquear la aprobación invertiría su función.
+  """
+  acknowledgeStep(
+    stepId: Int!
+    comments: String
+    delegationReason: String
+  ): ReviewStep!
+
+  """
+  Reasignar un paso pendiente, con motivo.
+
+  Cambia el actor y nada más: ni el tipo del paso, ni su orden, ni cuántos son.
+  Un paso resuelto no se reasigna, porque su firma acredita quién lo resolvió.
+  """
+  reassignStep(stepId: Int!, assignedToId: Int!, reason: String!): ReviewStep!
+
+  """
+  Cancelar el circuito, con motivo, y rearmarlo desde el armado.
+
+  La revisión SOBREVIVE y vuelve a borrador. Se cancela en cualquier punto, aun
+  con pasos ya firmados: nada se elimina, y los pasos resueltos conservan su
+  estado y su firma.
+  """
   cancelWorkflow(workflowId: Int!, reason: String!): ReviewWorkflow!
+
+  # ─── Plantillas y configuración del despliegue ───
+  "Crear una plantilla de circuito"
+  createDocWorkflowTemplate(
+    input: CreateDocWorkflowTemplateInput!
+  ): DocWorkflowTemplate!
+
+  "Actualizar una plantilla. No altera circuitos en curso"
+  updateDocWorkflowTemplate(
+    id: Int!
+    input: UpdateDocWorkflowTemplateInput!
+  ): DocWorkflowTemplate!
+
+  "Dar de baja una plantilla. No se elimina: los circuitos conservan su procedencia"
+  terminateDocWorkflowTemplate(id: Int!): DocWorkflowTemplate!
+
+  "Declarar la configuración documental del despliegue"
+  declareDocSettings(input: DeclareDocSettingsInput!): DocSettings!
 
   # ─── Transmittals ───
   "Crear un nuevo transmittal"
