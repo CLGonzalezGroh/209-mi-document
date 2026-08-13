@@ -25,7 +25,10 @@
     "test:block02-db": "npm run test:block02 && npm run test:events-db && npm run test:project-scope-db",
     "test:block02-integration": "node --import tsx --test src/resolvers/authorization.integration.test.ts",
     "test:block02-all": "npm run test:block02-db && npm run test:block02-integration",
-    "test:project-settings": "node --import tsx --test src/utils/projectSettings.test.ts src/utils/documentContext.test.ts"
+    "test:project-settings": "node --import tsx --test src/utils/projectSettings.test.ts src/utils/documentContext.test.ts",
+    "test:revision-scheme": "node --import tsx --test src/utils/revisionScheme.test.ts",
+    "test:step-signature": "node --import tsx --test src/utils/stepSignature.test.ts",
+    "test:block03": "npm run test:block02 && npm run test:revision-scheme && npm run test:step-signature"
   },
   "keywords": [],
   "author": "César González Groh",

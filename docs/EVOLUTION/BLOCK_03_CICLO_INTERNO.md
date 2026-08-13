@@ -586,6 +586,45 @@ Las cuatro restricciones de catálogo y el alcance de la plantilla se declaran i
 
 **Estado declarado al cerrar la fase**: `tsc --noEmit` reporta **12 errores**, todos en resolvers —`documents`, `revisions`, `versions` y `workflows`—, y **4 de las 16 pruebas de integración fallan** por la misma causa. Son exactamente las operaciones que la fase D reescribe: `revisionScheme` retirado, `checksum` obligatorio, `WorkflowStatus.PENDING` retirado y `revision.workflow` ahora plural. Las **56 pruebas restantes siguen aprobadas**, incluidas las 43 puras.
 
+### Fase C — utilidades puras
+
+Tres utilidades, sin dependencias nuevas y sin tocar la base.
+
+**`src/utils/revisionScheme.ts`** — sucesor, inferencia y validación del código.
+
+- `firstRevisionCode`, `nextRevisionCode` e `inferRevisionScheme`. Se porta de digitalización la **generación y no la lista**: `revisionListSize` responde a validar contra un conjunto cerrado, que es el problema de allá.
+- `proposeRevisionCode` reúne los tres casos de `B13` — primera revisión por precedencia, siguiente por inferencia, y **reinicio de la secuencia al cambiar de esquema**, que es el `C` ▸ `0` que H-10 describía como el comportamiento buscado.
+- `decideRevisionCode` cierra H-09 devolviendo una decisión y no lanzando: bajo `ALPHA` y `NUMERIC` **rechaza el código informado** cuando difiere del calculado; bajo `FREE_TEXT` lo exige y verifica que no se repita entre las revisiones vivas.
+- `lastLiveRevision` ordena **por creación y nunca por código** (`B12`, H-10), con desempate por alta. Es una sola regla con dos usos: de esa revisión se deriva el código sucesor y es la que `lastRevision` expondrá (`B14`).
+
+**`src/utils/stepSignature.ts`** — construcción y verificación del payload firmado.
+
+- `buildSignature` produce payload canónico, algoritmo y hash. La serialización **ordena las claves en todos los niveles**: `JSON.stringify` conserva el orden de inserción, de modo que el mismo contenido construido de otra forma produciría otro hash y la verificación posterior dejaría de ser concluyente.
+- El payload lleva un **`payloadVersion`** que se firma junto con el resto. Sin él, un cambio futuro en la forma del payload dejaría las firmas viejas indistinguibles de las nuevas y no se sabría con qué reglas recalcularlas.
+- `verifySignature` recalcula el hash **sobre el payload guardado** y no reconstruyéndolo desde las entidades, que pudieron cambiar. Es lo que cierra H-06: la verificación responde si la evidencia fue alterada.
+- `signsStep` declara la partición de `B7`: `ASSIGN` no firma.
+
+**`src/utils/reviewWorkflow.ts`** — la partición de `B8`, que hasta ahora vivía escondida dentro de `completesWorkflow`.
+
+- `DECIDING_STEP_TYPES` y `FULFILLING_STEP_TYPES`, con `isDecidingStep` y `favorableStatusFor`.
+- `completesWorkflow` cuenta **por tipo y no por excepción**. Para `ACKNOWLEDGE` el resultado no cambia; lo que cambia es que la regla está declarada y alcanza también a `ASSIGN` y `PREPARE`.
+- `pendingAcknowledgeSteps` e `isReassignable`, que las operaciones de `B9` y `B10` consumen.
+
+**Las dos particiones no coinciden, y quedan como dos funciones distintas**: `ACKNOWLEDGE` se cumple pero firma. Cumplir y juzgar son cosas distintas, pero ambas se acreditan.
+
+**Un borde declarado**: `completesWorkflow` devuelve `false` cuando el circuito no tiene ningún paso que decida. No debería existir —el armado designa al menos un paso de aprobación (`B1`)— y la operación de la fase D debe exigirlo; queda probado que, de construirse uno así, el circuito no cierra solo.
+
+**Pruebas**: se adelantó la parte pura de la fase G, porque la evidencia de una utilidad pura **es** su prueba. Las de base e integración siguen en G.
+
+| Suite | Antes | Ahora |
+| ----- | ----- | ----- |
+| `reviewWorkflow` | 7 | **13** |
+| `revisionScheme` | — | **22** |
+| `stepSignature` | — | **11** |
+| Puras del módulo | 43 | **82** |
+
+`npm run test:block03` corre las seis suites puras. `tsc --noEmit` conserva **los mismos 12 errores** de la fase B y ninguno nuevo: las utilidades compilan limpias.
+
 ## Referencias
 
 - `README.md`
