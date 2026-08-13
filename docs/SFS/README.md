@@ -63,8 +63,17 @@ Los estados `PROPUESTO`, `APROBADO_PENDIENTE` e `IMPLEMENTADO_CON_BRECHA` perten
 | `domain/05_project/10_DOM-003_DocProjectSettings.md` | Rol documental que el proyecto declara y su contraparte | Approved |
 | `domain/05_project/20_DOM-004_DocProjectMember.md` | Membresía que habilita el acceso a un proyecto | Approved |
 | `domain/05_project/80_Principios_del_Modelo.md` | Principios del contexto de proyecto: regímenes, alcance y autorización | Approved |
+| `domain/10_cycle/10_DOM-005_Document.md` | Identidad de la documentación y su metadata congelada | Approved |
+| `domain/10_cycle/20_DOM-006_DocumentRevision.md` | Unidad de emisión, con sus circuitos sucesivos y su armador | Approved |
+| `domain/10_cycle/30_DOM-007_DocumentVersion.md` | El archivo como iteración interna, inmutable y con hash | Approved |
+| `domain/10_cycle/40_DOM-008_ReviewWorkflow.md` | El circuito como ciclo completo, desde el armado | Approved |
+| `domain/10_cycle/50_DOM-009_ReviewStep.md` | El acto asignado, y cómo se resolvió | Approved |
+| `domain/10_cycle/60_DOM-010_DocStepSignature.md` | La evidencia verificable de una resolución | Approved |
+| `domain/10_cycle/70_DOM-011_DocWorkflowTemplate.md` | La propuesta del circuito, resuelta por alcance | Approved |
+| `domain/10_cycle/75_DOM-012_DocSettings.md` | La convención documental del despliegue | Approved |
+| `domain/10_cycle/80_Principios_del_Modelo.md` | Principios del ciclo interno: circuito, versión, firma y numeración | Approved |
 
-Los dos primeros Objetos del Dominio provienen del bloque de trazabilidad funcional; los dos siguientes, junto con los principios del contexto de proyecto, del bloque de contexto de proyecto y rol documental. La organización conceptual del dominio —modelos, arquitectura y su índice— se incorporará cuando los bloques correspondientes se promuevan; hasta entonces, este índice cumple esa función.
+Los dos primeros Objetos del Dominio provienen del bloque de trazabilidad funcional; los dos siguientes, junto con los principios del contexto de proyecto, del bloque de contexto de proyecto y rol documental. Los ocho del ámbito de ciclo interno, junto con sus principios, provienen del bloque del ciclo interno de revisión. La organización conceptual del dominio —modelos, arquitectura y su índice— se incorporará cuando los bloques correspondientes se promuevan; hasta entonces, este índice cumple esa función.
 
 ## Estructura prevista
 

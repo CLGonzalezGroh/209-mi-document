@@ -1,6 +1,6 @@
 # Bloque 03 — Ciclo interno de revisión
 
-**Estado:** `LISTO_PARA_PROMOVER` — implementado y validado en local. Resta la verificación por cliente y el despliegue; la SFS se escribe después.
+**Estado:** `PROMOVIDO_A_SFS`
 **Versión:** 1.0
 **Depende de:** `BLOCK_02`, cuyo contexto de proyecto y autorización en dos capas este bloque da por sentados.
 **Decisiones que ejecuta:** D-03, D-04, D-05, D-10, D-11, D-13, D-17 y la consecuencia de D-19 sobre la toma de conocimiento. Resuelve H-01 a H-10, H-20, H-27 y H-34, y cierra H-19 en los dos catálogos.
@@ -773,7 +773,7 @@ Once casos más cubren los criterios que los recorridos no tocan: el **circuito 
 
 ### Fase H — cierre documental
 
-**Criterios de aceptación: 21 de 22 verificados; el restante es una decisión, no una brecha.**
+**Criterios de aceptación: los 22 verificados.**
 
 Al revisarlos uno por uno aparecieron **tres criterios implementados pero sin prueba que los cubriera**. Se cerraron antes de evaluar, con tres casos de integración más: la delegación con permiso y motivo, el rechazo de pendientes ajenos sin el permiso, y la plantilla propuesta por alcance en el alta. **177 pruebas** en total.
 
@@ -800,7 +800,7 @@ Al revisarlos uno por uno aparecieron **tres criterios implementados pero sin pr
 | 19 | `prisma validate`, `migrate`, `tsc`, `build`; las 72 pruebas previas aprobadas | Verificado — ver abajo |
 | 20 | Tablas documentales vacías **en cada cliente** antes de migrar | Verificado — **los cinco clientes desplegados**, en cero |
 | 21 | `rover subgraph check` con los retiros y el cambio de `currentRevision` declarados | Verificado |
-| 22 | La SFS se actualiza solo después de reunir estas evidencias | **Habilitado**: la evidencia está reunida. Queda la decisión de cuándo escribirla |
+| 22 | La SFS se actualiza solo después de reunir estas evidencias | Verificado — escrita con la evidencia reunida y el bloque aplicado en testing |
 
 **Criterio 18, verificado por diferencia y no por declaración.** Entre el commit que abrió el bloque y este, `transmittals.ts`, `attachments.ts`, `scannedFiles.ts`, `areas.ts` y `dependencies.ts` **no registran una sola línea de cambio**, y el modelo no toca `Transmittal`, `TransmittalItem`, `PurposeCode` ni `ClientStatus`. `mi-quality` compila sin cambios. `BLOCK_04` parte exactamente del estado que dejó `BLOCK_02`, con lo que `B16` deja habilitado.
 
@@ -924,11 +924,36 @@ Con el router local al día se pudo correr `npm run codegen` de verdad y contras
 
 **Los 21 criterios verificables están cumplidos, y el bloque está aplicado y verificado en los tres clientes de testing.** Lo que resta es el despliegue en los dos clientes productivos.
 
-**El criterio 22 queda habilitado pero no ejecutado, y es deliberado.** La SFS describe «comportamiento implementado y validado», y `BLOCK_02` fijó el precedente de promover **después** de aplicar y verificar en los ambientes reales, no antes. Escribirla ahora afirmaría como vigente algo que ningún despliegue ejecuta todavía.
+**El criterio 22 se cumple con el bloque aplicado en testing.** La SFS describe «comportamiento implementado y validado», y el comportamiento está validado en las tres capas de pruebas y observado en tres despliegues reales. `BLOCK_02` promovió después de alcanzar también producción; acá se promueve antes, por decisión explícita, con el despliegue productivo agendado y la precondición ya levantada en los dos clientes.
 
 **La restricción que gobierna el despliegue**: la migración es incompatible con el código desplegado hoy —`assignedOrganizerId` es `NOT NULL` y el `createDocument` vigente no lo informa—, de modo que migrar antes de desplegar el subgraph rompería el alta de documentos. **Modelo, operaciones y contrato viajan en la misma ventana.**
 
-**Estado del bloque: `LISTO_PARA_PROMOVER`.** Implementación y validación completas, aplicado en testing; resta producción y escribir la SFS.
+#### Promovido a la SFS
+
+Se incorporó un ámbito nuevo, `docs/SFS/domain/10_cycle/`, con **ocho objetos del dominio y sus principios**:
+
+| Documento | Contenido |
+| --------- | --------- |
+| `DOM-005 Document` | La identidad de la documentación, y su metadata congelada con la revisión aprobada |
+| `DOM-006 DocumentRevision` | La unidad de emisión, con sus circuitos sucesivos y su armador |
+| `DOM-007 DocumentVersion` | El archivo como iteración interna, inmutable y con hash obligatorio |
+| `DOM-008 ReviewWorkflow` | El circuito como ciclo completo, desde el armado |
+| `DOM-009 ReviewStep` | El acto asignado, y cómo se resolvió |
+| `DOM-010 DocStepSignature` | La evidencia verificable de una resolución |
+| `DOM-011 DocWorkflowTemplate` | La propuesta del circuito, resuelta por alcance |
+| `DOM-012 DocSettings` | La convención documental del despliegue |
+
+Los **trece principios** del ámbito recogen lo que las decisiones del bloque establecieron: el circuito como ciclo y no como trámite, la partición entre lo que decide y lo que se cumple, los circuitos sucesivos con uno solo abierto, la versión como archivo inmutable, la firma verificable sobre datos persistidos, el congelamiento de la metadata, la distinción entre delegar y reasignar, el acuse que comunica lo ya aprobado, los dos actos de salida, la revisión abandonada que no consume código, el esquema propuesto y no persistido, la plantilla que propone, y las dos lecturas del documento vigente.
+
+**`Document` se promueve recién ahora, y por completo.** `BLOCK_02` lo había diferido justamente porque este bloque le retira el esquema de revisión, le agrega las dos lecturas y somete su metadata al congelamiento. Promoverlo entonces habría obligado a corregirlo dos veces.
+
+**Qué no se promovió.** Nada que dependa del rol Receptor: que su circuito no tenga paso de elaboración y que su conclusión sea terminal para la revisión están **habilitados** por este bloque pero no implementados, porque ese circuito solo existe después de una recepción. Corresponden a `BLOCK_04`. Es el mismo criterio con que `BLOCK_02` se abstuvo de promover el comportamiento del rol sobre el ciclo, y con que `BLOCK_01` no promovió su catálogo de acciones.
+
+Tampoco se promovió el estado `OBSOLETE` de la revisión, que existe en el modelo sin uso: se declara como tal en `DOM-006` y su semántica la define `BLOCK_04`.
+
+**Estado del bloque: `PROMOVIDO_A_SFS`.** Los 22 criterios están cumplidos y la definición fue incorporada a la SFS vigente.
+
+**Pendiente de ejecución, no de definición**: el despliegue en los dos clientes productivos, con la precondición ya verificada y `APTO PARA MIGRAR` en ambos. La línea base del legado de `optimal` debe volver a tomarse inmediatamente antes de migrar —estaba en 3.260 / 52 / 5.093 y sigue creciendo—, y el criterio de comparación es **que no disminuya**.
 
 #### Condiciones de despliegue, por cliente
 

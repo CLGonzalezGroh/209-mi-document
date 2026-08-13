@@ -456,9 +456,13 @@ Dos, a aplicar en la BD `mi_document` de cada cliente:
 
 Tercer bloque de la evolución documentada en `docs/EVOLUTION/BLOCK_03_CICLO_INTERNO.md`. **Es el primer bloque que cambia reglas funcionales**: el circuito abarca ahora el ciclo completo, desde el armado hasta la toma de conocimiento.
 
-**Implementado y validado en local; sin desplegar.** Las ocho fases del bloque están ejecutadas. **La migración es incompatible con el código en producción** —`assignedOrganizerId` es obligatorio y el alta desplegada no lo informa—, de modo que modelo, operaciones y contrato tienen que desplegarse en la misma ventana.
+**Aplicado en testing. Especificación promovida a la SFS.**
 
-Antes de migrar cada cliente hay que correr `prisma/checks/block03_precondicion.sql`: exige el subsistema documental vacío **y** los catálogos sin duplicados con módulo o clase nulos. Un duplicado no cancela la migración, obliga a limpiarlo antes.
+Antes de migrar cada cliente hay que correr `210-mi-deploy/check-document-precondition.sh <cliente> <ambiente>`: exige el subsistema documental vacío **y** los catálogos sin duplicados con módulo o clase nulos. Un duplicado no cancela la migración, obliga a limpiarlo antes. Verificado con veredicto `APTO PARA MIGRAR` en los cinco clientes desplegados.
+
+**Modelo, operaciones y contrato se despliegan en la misma ventana.** La migración corre automáticamente al arrancar el contenedor, de modo que actualizar la imagen migra y sirve el código nuevo en el mismo acto.
+
+**Al actualizar la webapp**: `DocumentType.requiresWorkflow` pasa a `requiresFormalReview`. Es el único campo retirado con consumidor real, y afecta también a las pantallas de archivos escaneados, que lo arrastran a través de `ScannedFile.documentType`.
 
 ### Permisos (fase A)
 
