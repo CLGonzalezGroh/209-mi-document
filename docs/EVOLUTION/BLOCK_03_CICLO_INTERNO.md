@@ -941,6 +941,14 @@ Migración aplicada al arrancar el contenedor, sobre la base gestionada `mi_docu
 
 **Los 3.277 archivos escaneados de `optimal` son la razón por la que este bloque tomó línea base antes de tocar nada.** Una migración que retira una columna de `documents` los dejó intactos, y eso queda **demostrado y no supuesto**.
 
+**`proion` migrado a continuación**, con el mismo procedimiento y el mismo resultado: subsistema en cero antes y después, catálogos vacíos, legado en `0 / 0 / 0` y `revisionScheme` retirado. Su `diff` tiene los mismos dos bloques de cambio, uno solo de datos.
+
+**Con esto el bloque queda aplicado en los cinco clientes desplegados**: `rbb`, `optimal` y `proion` en testing, y `optimal` y `proion` en producción.
+
+**Un hallazgo operativo ajeno al bloque, anotado porque apareció acá.** El respaldo previo de `proion` informó éxito **sin respaldar nada** —`Resumen: 0/0 OK`—. La causa es que `backup.sh` recorre los servicios declarados en `BACKUP_SERVICES_<CLIENTE>` del `.env` del cliente y filtra por el pedido: **`MI_DOCUMENT` no figura en la lista de `proion`**, de modo que el filtro descartó todo. No comprometió esta migración, porque el subsistema documental de ese cliente estaba y sigue vacío, pero **su base `mi_document` está fuera de la rotación de respaldos** justo cuando el módulo empieza a usarse. Conviene resolverlo antes de que el ciclo tenga datos.
+
+El defecto de fondo es que **el script informa éxito cuando no respaldó nada**: un resumen `0/0 OK` debería ser una advertencia y no un visto bueno.
+
 #### Evaluación de la promoción a la SFS
 
 **Los 21 criterios verificables están cumplidos, y el bloque está aplicado y verificado en los tres clientes de testing.** Lo que resta es el despliegue en los dos clientes productivos.

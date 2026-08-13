@@ -456,7 +456,7 @@ Dos, a aplicar en la BD `mi_document` de cada cliente:
 
 Tercer bloque de la evolución documentada en `docs/EVOLUTION/BLOCK_03_CICLO_INTERNO.md`. **Es el primer bloque que cambia reglas funcionales**: el circuito abarca ahora el ciclo completo, desde el armado hasta la toma de conocimiento.
 
-**Aplicado en testing. Especificación promovida a la SFS.**
+**Aplicado en los cinco clientes desplegados —testing y producción— y promovido a la SFS.**
 
 Antes de migrar cada cliente hay que correr `210-mi-deploy/check-document-precondition.sh <cliente> <ambiente>`: exige el subsistema documental vacío **y** los catálogos sin duplicados con módulo o clase nulos. Un duplicado no cancela la migración, obliga a limpiarlo antes. Verificado con veredicto `APTO PARA MIGRAR` en los cinco clientes desplegados.
 
