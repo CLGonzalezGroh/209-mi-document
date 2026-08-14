@@ -786,7 +786,7 @@ Pendientes de definición al abrir el bloque:
 
 ### D-23 — La metadata de identificación pertenece a la revisión
 
-**Estado:** `APROBADO_PENDIENTE`. Su forma se define en `BLOCK_03B`.
+**Estado:** `PROMOVIDO_A_SFS`.
 
 El congelamiento que estableció D-05 y ejecutó `B6` de `BLOCK_03` tiene un fundamento material: parte de la metadata está **impresa dentro del archivo**. El rótulo lleva el código, el título y a menudo la clase y el tipo.
 
@@ -802,7 +802,7 @@ Resuelve además una anomalía que DOM-005 hoy admite: abandonar una revisión n
 
 ### D-24 — El código es el identificador, y no cambia
 
-**Estado:** `APROBADO_PENDIENTE`. Su forma se define en `BLOCK_03B`.
+**Estado:** `PROMOVIDO_A_SFS`.
 
 El código no es metadata: es la referencia. Está en los transmittals emitidos, en el payload de cada firma, en las referencias cruzadas de otros documentos, en el sistema de la contraparte y en el rótulo de cada archivo que salió. Cambiarlo no renombra un registro: rompe la correspondencia con todo lo que ya lo nombra y que el sistema no controla. Es lo que DOM-005 afirma sin extraer la consecuencia — *la identificación no es descripción sino identidad*.
 
@@ -828,7 +828,7 @@ Queda registrado un escenario no cubierto: que la contraparte cambie su esquema 
 
 ### D-25 — Una versión es un conjunto de archivos, no un archivo
 
-**Estado:** `APROBADO_PENDIENTE`. Su forma se define en `BLOCK_03B`.
+**Estado:** `PROMOVIDO_A_SFS`.
 
 Un documento se entrega habitualmente como más de un archivo. El caso corriente de ingeniería es el **PDF junto con su editable**: se revisa y se marca el PDF, y el DWG viaja como respaldo de la fuente. También existe el documento compuesto por varios entregables, de modo que la restricción es "al menos uno revisable" y no "exactamente uno".
 
@@ -850,7 +850,7 @@ Que el editable se exija recién en la emisión final —apto para construcción
 
 ### D-26 — Cada nivel tiene su palabra para terminar mal
 
-**Estado:** `APROBADO_PENDIENTE`. Su forma se define en `BLOCK_03B`.
+**Estado:** `PROMOVIDO_A_SFS`.
 
 El vocabulario de los estados terminales se superpone. El estado de la revisión abandonada se llama `CANCELLED`, y *cancelación* nombra además el acto que retira el circuito **sin** abandonar la revisión: la misma palabra para dos actos de efecto opuesto. Y `BLOCK_03` alterna tres términos para el mismo hecho — la SFS dice *abandonar*, sus decisiones dicen *abortar*, el modelo dice `cancelled`.
 
@@ -870,7 +870,7 @@ Retirar un armado, desistir de una emisión y dar por concluida una identidad so
 
 ### D-27 — La versión nace al confirmar, y antes hay una copia de trabajo
 
-**Estado:** `APROBADO_PENDIENTE`. Su forma se define en `BLOCK_03B`.
+**Estado:** `PROMOVIDO_A_SFS`.
 
 D-25 deja abierta una pregunta que con un solo archivo no existía: **cómo se modifica**. Mientras la versión era un archivo, subirlo era producirla. Con un conjunto, corregir el PDF obligaría a rearmar el conjunto entero en un acto, y subir cada archivo por separado produciría una versión por archivo — una secuencia de iteraciones que no son iteraciones.
 

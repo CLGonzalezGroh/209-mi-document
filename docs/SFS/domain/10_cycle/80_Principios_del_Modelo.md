@@ -2,7 +2,7 @@
 
 **Ámbito:** Ciclo interno
 **Estado:** Approved
-**Versión:** 1.0
+**Versión:** 2.0
 
 ---
 
@@ -52,19 +52,21 @@ De ahí que un rechazo **no consuma una revisión**. El trabajo vuelve a quien e
 
 ---
 
-# 4. Una versión es un archivo, y es inmutable
+# 4. Una versión es un conjunto de archivos, y es inmutable
 
 Los tres niveles guardan cosas distintas, y cambiarlos produce cosas distintas:
 
 | Nivel | Qué cambia al cambiar |
 | ----- | --------------------- |
-| Documento | Una actualización auditada, que vale para todas sus revisiones |
-| Revisión | Una transición de la revisión |
-| Versión | **Nada: la versión solo existe con archivo nuevo** |
+| Documento | Una actualización auditada de lo administrativo |
+| Revisión | Una transición, o un cambio de la identificación que emitirá |
+| Versión | **Nada: la versión solo existe con contenido nuevo** |
 
-Lo que la versión guarda no es metadata del documento sino **descripción del archivo**: nombre, tamaño, tipo y hash no pueden cambiar sin que cambie el archivo. Es lo que da sentido a que una firma acredite una versión.
+Un documento se entrega habitualmente como más de un archivo: el PDF que se revisa y se marca, con su editable en custodia y la evidencia que lo sustenta. La versión es **el conjunto registrado en un mismo acto**, con al menos un entregable.
 
-**La versión no se modifica ni se elimina**, y eso incluye su comentario: si quedó mal, la corrección va en la traza y no editando la evidencia.
+Lo que cada archivo guarda no es metadata del documento sino **descripción del contenido**: nombre, tamaño, tipo y hash no pueden cambiar sin que cambie el archivo. Es lo que da sentido a que una firma acredite una versión.
+
+**La versión no se modifica ni se elimina**, y eso incluye su comentario y su conjunto: si quedó mal, la corrección va en la traza y no editando la evidencia. Agregar un archivo a una versión existente dejaría a una firma acreditando un conjunto distinto del que su autor tuvo delante.
 
 **La produce quien tiene el paso vigente.** No es una restricción de identidad sino de momento: la elabora el elaborador, la marca el revisor, la marca el aprobador. Comentar no genera versión; marcar el archivo sí.
 
@@ -74,7 +76,11 @@ Lo que la versión guarda no es metadata del documento sino **descripción del a
 
 Una firma persiste el **payload canónico** que se usó para calcularla, además del hash y el algoritmo. Un hash sin sus insumos no es verificable: verificar es recalcular sobre lo guardado, y no reconstruirlo desde entidades que pudieron cambiar después.
 
-Lo firmado incluye el paso y su revisión, la **versión vigente al firmar con su hash de contenido**, la **identificación del documento** en ese momento, quién estaba asignado y quién resolvió, y la acción con su momento.
+Lo firmado incluye el paso y su circuito, la **revisión con su identificación** en ese momento, la **versión vigente con todos los archivos de su conjunto y sus hashes**, el **código del documento**, quién estaba asignado y quién resolvió, la acción con su momento, y la **versión del formato del payload**.
+
+**Se firma el conjunto entero, incluidos los archivos que nadie revisó.** La custodia del editable importa porque es la fuente del entregable: si pudiera sustituirse sin producir versión nueva, la correspondencia entre uno y otro sería una afirmación sin evidencia. Que hayan sido firmados juntos es lo que la sostiene.
+
+**La identificación viaja con la revisión** y no con el documento, porque es donde vive. El documento aporta su código, que no necesita snapshot precisamente porque no cambia.
 
 **El rechazo firma igual que la aprobación** — de hecho su evidencia importa más, porque documenta qué se objetó.
 
@@ -82,13 +88,21 @@ Lo firmado incluye el paso y su revisión, la **versión vigente al firmar con s
 
 ---
 
-# 6. La metadata se congela con la revisión aprobada
-
-Mientras la revisión vigente no esté aprobada, la metadata del documento se edita libremente. **Aprobada, se congela**, y corregirla exige abrir una revisión nueva. Abrir la revisión siguiente la vuelve a habilitar.
+# 6. La identificación pertenece a la revisión, y por eso se congela sola
 
 El motivo es material y no formal: parte de la metadata está **impresa dentro del archivo**. El rótulo lleva el código y el título, y a menudo la clase y el tipo — de hecho el código habitualmente se compone de clase y tipo. La clasificación no es descripción sino **identidad**, y un rótulo distinto es un documento distinto.
 
+De ahí se sigue dónde vive el dato: **si está impreso en el archivo, pertenece a la emisión que lo produjo**. El título, la clase y el tipo son atributos de la revisión.
+
+Y de ahí se sigue el congelamiento, **sin necesidad de enunciarlo**: una revisión aprobada no se modifica. No hay una regla que prohíba editar la metadata después de aprobar; hay una estructura en la que esa edición no tiene dónde ocurrir. Abrir la revisión siguiente la vuelve a habilitar, y la nueva nace con la identificación copiada de la anterior.
+
 Cambiarla después de aprobar no invalidaría la firma, que acredita bytes que no cambiaron: produciría algo peor, una divergencia silenciosa entre lo que el sistema afirma y lo que el entregable dice.
+
+**El documento conserva una copia**, para que los listados y los filtros no paguen un join. Es copia y no dato: su único escritor es la transición de la revisión, y se nombra por la lectura que sirve —la de la revisión en curso— para que nadie la confunda con lo que dice el rótulo aprobado.
+
+**Lo administrativo no se congela.** La descripción no aparece en ningún rótulo, y corregirla no debe exigir abrir una revisión.
+
+**El código queda fuera de todo esto**, y tiene su propio principio.
 
 ---
 
@@ -183,6 +197,75 @@ Con `A` aprobada y `B` en circuito, la vigente es `A` y la que está en curso es
 
 Dos hechos las sostienen: a lo sumo hay una revisión aprobada por documento, porque aprobar supersede a las anteriores; y la revisión en curso es la misma de la que se deriva el código sucesor — una sola regla con dos usos.
 
+**Las dos lecturas alcanzan también a la identificación.** Con `A` aprobada y `B` en borrador con otro título, la metadata vigente es la de `A` —lo que dice el rótulo que salió— y la metadata en curso es la de `B`. Un campo que callara cuál de las dos es se derivaría mal en cada consumidor, que es el defecto que este principio previene: por eso la copia del documento lleva el nombre de su lectura.
+
+**De ahí sale sola una propiedad que no hubo que construir**: abandonar una revisión devuelve la identificación anterior. La abandonada deja de ser la última viva, y la copia se recalcula sobre la que estaba antes. No hay nada que revertir porque el origen nunca se sobrescribió — la misma regla, con un tercer uso.
+
+---
+
+# 14. El código es el identificador, y no cambia
+
+El código no es metadata: es **la referencia**. Está en los transmittals emitidos, en el payload de cada firma, en las referencias cruzadas de otros documentos, en el sistema de la contraparte y en el rótulo de cada archivo que salió. Cambiarlo no renombra un registro: rompe la correspondencia con todo lo que ya lo nombra **y que el sistema no controla**.
+
+Es la diferencia con el título y la clase, que también se imprimen. Aquellos **describen**, y pueden corregirse de una revisión a la otra porque nadie referencia un documento por su título. El código **identifica**.
+
+**Se corrige mientras el documento no tenga ninguna revisión aprobada**, que es la condición material de que nada salió: ningún transmittal lo nombra, ninguna firma lo lleva, ningún rótulo emitido lo imprime. Es más preciso que «antes de la primera revisión» —si la primera se abandona, sigue sin haberse aprobado nada— y no requiere ningún dato nuevo, porque es la lectura de revisión vigente nula.
+
+La corrección **emite un evento propio**. Es la identidad cambiando, y sin él sería inexplicable en una auditoría posterior.
+
+**Después, lo que corresponde es un documento nuevo que lo reemplace.**
+
+---
+
+# 15. Reemplazar es superar, y promover es otra cosa
+
+Un documento nuevo que declara a cuál reemplaza conserva lo que la edición del código destruiría: el anterior mantiene su código —que sigue tomado—, su historia, sus versiones firmadas y sus transmittals.
+
+**El reemplazado queda obsoleto en el mismo acto.** No son dos decisiones: el documento superado deja de representar nada vigente en el instante en que otro lo hace. Es el mismo hecho que un nivel más abajo ocurre al aprobar una revisión, que supersede a la anterior.
+
+**Es un acto y no un par de referencias.** Agrupa los que salen y los que entran, con su motivo; sin esa agrupación, una reorganización de dos documentos en otros dos sería indistinguible de dos reemplazos separados. La relación es N:M, y con una sola quedan expresadas la recodificación, la unificación y la división. Qué clase de reemplazo es **se deriva de la cardinalidad** y no se declara.
+
+**La obsolescencia tiene dos causas**, y por eso el hecho se registra en lugar de derivarse: un documento también caduca **por salir del alcance**, sin que nada lo reemplace. Lo que sí se deriva es cuál de las dos, según figure o no en un acto.
+
+**Obsoleto no es dado de baja.** La baja lógica corrige un alta que no debió existir; la obsolescencia es un hecho del ciclo de vida. Lo único que el documento obsoleto pierde es la posibilidad de emitir de nuevo.
+
+**Los documentos de un acto comparten ámbito.** Lo que cruza del proyecto al régimen de publicación no es reemplazar sino **promover**, y son cosas distintas en los cuatro rasgos que importan: ocurre entre revisiones y no entre documentos, el de origen no queda obsoleto —quedó terminado—, produce una revisión y no un documento, y cambia de ámbito. La promoción pertenece al módulo de activos y no se registra acá.
+
+---
+
+# 16. La versión nace al confirmar
+
+La inmutabilidad de la versión y la comodidad de editar **no están en conflicto: ocurren en momentos distintos**. La versión debe ser inmutable *una vez que existe*; lo que hay que decidir es **cuándo existe**.
+
+Antes de eso hay una **copia de trabajo**: el conjunto en preparación, mutable por naturaleza, que todavía no acredita nada. Se abre precargada con los archivos de la versión vigente, admite incorporar y retirar, y al confirmarse se convierte en la versión siguiente, completa e inmutable.
+
+**Precargar es lo que vuelve barata la edición.** Quien corrige el entregable abre, lo reemplaza y confirma: la fuente y el respaldo viajan solos conservando su referencia y su hash, sin volver a subirse. Lo que se crea al confirmar es el registro del conjunto, no el objeto almacenado.
+
+Tres reglas caen solas:
+
+- **a lo sumo una copia abierta por revisión**, que es el mismo invariante del documento sobre su revisión en curso y de la revisión sobre su circuito, en un tercer nivel;
+- **confirmar exige al menos un cambio**, porque la versión solo existe con contenido nuevo;
+- **resolver un paso exige no tener copia abierta** —y someter también—, porque declarar que se terminó con una iteración en curso es una contradicción.
+
+**No es un check-out en el sentido habitual.** No descarga —leer un archivo nunca fue un acto del ciclo— y no bloquea, porque la exclusividad ya la da el circuito: la versión la produce quien tiene el paso vigente. Agregar un candado duplicaría la regla.
+
+**Se descartó que abrir cree la versión y confirmar la sobrescriba.** Volvería mutable a la entidad cuya razón de ser es no serlo, y una apertura abandonada dejaría una versión consumiendo un número en la secuencia — lo mismo que el ciclo evita al decidir que la revisión abandonada no consume código.
+
+---
+
+# 17. Cada nivel tiene su palabra para terminar mal
+
+| Nivel | Palabra | Qué nombra |
+| ----- | ------- | ---------- |
+| Circuito | **Cancelado** | Se retiró sin que nadie emitiera juicio. La revisión sobrevive |
+| Revisión | **Abandonada** | Se desistió antes de aprobarla. No consume código |
+| Documento | **Obsoleto** | Fue superado por otro, o salió del alcance |
+| Copia de trabajo | **Descartada** | Se abandonó sin producir versión |
+
+Cada término pertenece a un solo nivel y no se usa en ningún otro. Retirar un armado, desistir de una emisión, dar por concluida una identidad y tirar un borrador son hechos que no se confunden en el trabajo real, y no deben confundirse en el nombre.
+
+Importa donde más cuesta: en la traza. Un registro de auditoría que dijera «cancelado» sin decir de qué obligaría a mirar el objeto para saber qué ocurrió.
+
 ---
 
 # Referencias
@@ -190,5 +273,6 @@ Dos hechos las sostienen: a lo sumo hay una revisión aprobada por documento, po
 - `10_DOM-005_Document.md`, `20_DOM-006_DocumentRevision.md`, `30_DOM-007_DocumentVersion.md`
 - `40_DOM-008_ReviewWorkflow.md`, `50_DOM-009_ReviewStep.md`, `60_DOM-010_DocStepSignature.md`
 - `70_DOM-011_DocWorkflowTemplate.md`, `75_DOM-012_DocSettings.md`
+- `90_DOM-013_DocReplacement.md`, `95_DOM-014_DocWorkingCopy.md`
 - `../05_project/80_Principios_del_Modelo.md`
 - `../../00_Convenciones.md`

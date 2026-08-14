@@ -1,7 +1,7 @@
 # Bloque 03B — Qué le pertenece a cada nivel
 
-**Estado:** `APROBADO_PENDIENTE`
-**Versión:** 1.0
+**Estado:** `PROMOVIDO_A_SFS`
+**Versión:** 1.1
 **Depende de:** `BLOCK_02` y `BLOCK_03`, cuyo modelo revisa. Precede a `BLOCK_04`.
 **Decisiones que ejecuta:** D-23, D-24, D-25, D-26, D-27.
 **Revisa:** `B4`, `B5`, `B6` y `B11` de `BLOCK_03`, y la unicidad del código de `BLOCK_02`.
@@ -713,6 +713,36 @@ El criterio 17 quedó como una comprobación sobre el conjunto y no sobre un cas
 | `tsc --noEmit` | Sin errores |
 | `npm run test:block03b-all` | 238 pruebas, 0 fallos |
 | Los 24 criterios | Cubiertos, con la implementación del 12 incorporada en esta fase |
+
+### Fase I — cierre documental
+
+**Completada.** El bloque queda `PROMOVIDO_A_SFS`.
+
+| Documento de la SFS | Cambio |
+| ------------------- | ------ |
+| `10_DOM-005_Document` | Reescrito. El código como único dato de identificación propio, la copia nombrada por su lectura, la obsolescencia con su causa derivada, y la Observación sobre la metadata no revertida **eliminada por quedar sin objeto** |
+| `20_DOM-006_DocumentRevision` | La identificación entre sus atributos, `ABANDONED` en el diagrama de estados, baja de `OBSOLETE` con su fundamento, y la copia de trabajo entre sus invariantes |
+| `30_DOM-007_DocumentVersion` | Reescrito sobre el conjunto, y el momento en que nace |
+| `40_DOM-008_ReviewWorkflow` | «Cancelado» declarado exclusivo del circuito |
+| `60_DOM-010_DocStepSignature` | El payload con la identificación en la revisión y el conjunto completo, el orden determinístico, y la compatibilidad de los formatos anteriores |
+| `80_Principios_del_Modelo` | §4 en su cardinalidad, §5 en lo firmado, §6 reescrito en su fundamento, §13 extendido a la identificación, y **cuatro principios nuevos** |
+| `90_DOM-013_DocReplacement` | Nuevo |
+| `95_DOM-014_DocWorkingCopy` | Nuevo |
+
+**El §6 cambió de tesis, no de redacción.** Antes decía *"la metadata se congela con la revisión aprobada"* y explicaba por qué. Ahora dice **dónde vive el dato**, y el congelamiento aparece como consecuencia: si lo impreso pertenece a la emisión que lo produjo, entonces vive en la revisión; y como una revisión aprobada no se modifica, no hay una regla que prohíba editarla sino una estructura donde esa edición no tiene dónde ocurrir.
+
+**Cuatro principios nuevos** —el código como identificador, reemplazar y promover, la versión que nace al confirmar, y una palabra por nivel— llevan los principios de trece a diecisiete.
+
+**La publicación dio la verificación que faltaba.** El `rover subgraph check` no podía decidir nada con cero operaciones registradas, pero `rover subgraph publish` **compuso el supergrafo sin errores**, que es la prueba de que el esquema es válido y compone. Después, el `codegen` de la webapp regeneró sus artefactos y **`tsc` compiló limpio**: ningún consumidor quedó apuntando a lo retirado.
+
+| Verificación | Resultado |
+| ------------ | --------- |
+| `rover subgraph publish` | Subgrafo actualizado y **supergrafo compuesto** |
+| `npm run codegen` en la webapp | Artefactos regenerados, sin rastro de `registerVersion` ni `cancelRevision` |
+| `tsc --noEmit` en la webapp | Sin errores |
+| SFS | Ocho documentos, dos de ellos nuevos |
+
+**Alcance de la publicación**: los guiones publican con `--routing-url http://localhost:4209`, de modo que solo afectan al desarrollo local. Testing y producción leen el supergrafo de un archivo montado.
 
 ## Referencias
 

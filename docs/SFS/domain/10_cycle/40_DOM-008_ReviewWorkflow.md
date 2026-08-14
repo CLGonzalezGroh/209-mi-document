@@ -3,7 +3,7 @@
 **Ámbito:** Ciclo interno
 **Categoría:** Entity
 **Estado:** Approved
-**Versión:** 1.0
+**Versión:** 1.1
 
 ---
 
@@ -73,6 +73,8 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 **El circuito exige al menos un paso que decida.** Sin revisión ni aprobación no tendría con qué completarse y la revisión quedaría trabada. El circuito mínimo es precisamente el caso límite: un único paso de aprobación.
 
 **La estructura es inmutable una vez armada.** No se agregan, quitan ni reordenan pasos. La excepción aparente no lo es: el armado **crea** los pasos siguientes, y la inmutabilidad rige desde que se completa.
+
+**«Cancelado» es la palabra de este nivel, y no se usa en ningún otro.** El circuito se cancela, la revisión se abandona y el documento queda obsoleto. Retirar un armado, desistir de una emisión y dar por concluida una identidad son hechos que no se confunden en el trabajo real, y no deben confundirse en el nombre.
 
 **Se cancela en cualquier punto, aun con pasos ya firmados.** Los pendientes quedan salteados y **los resueltos conservan su estado y su firma**: nada se elimina.
 

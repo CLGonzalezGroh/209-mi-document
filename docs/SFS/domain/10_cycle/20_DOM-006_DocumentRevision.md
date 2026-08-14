@@ -3,7 +3,7 @@
 **Ámbito:** Ciclo interno
 **Categoría:** Entity
 **Estado:** Approved
-**Versión:** 1.0
+**Versión:** 2.0
 
 ---
 
@@ -17,6 +17,8 @@ Representar **una emisión del documento**: la unidad que el mundo exterior reco
 
 Una `DocumentRevision` es lo que se somete, se aprueba y eventualmente se emite. Es la **unidad externa** del ciclo: lo que ocurre dentro de ella —cuántas versiones se produjeron, cuántas veces se rechazó— es historia interna que no consume numeración.
 
+**Lleva su propia identificación**: el título, la clase y el tipo con que se emitió. Viven acá y no en el documento porque están impresos en el rótulo del archivo, y lo impreso pertenece a la emisión que lo produjo. Se copian de la revisión anterior al crearla, y quedan congelados al aprobarla.
+
 La revisión **nace con su circuito**, con el armado pendiente y el armador ya designado. Puede nacer sin archivo, o con el archivo de un documento preexistente adjunto en el alta.
 
 Su ciclo de vida:
@@ -28,8 +30,8 @@ stateDiagram-v2
     IN_REVIEW --> DRAFT: rechazo, o cancelación del circuito
     IN_REVIEW --> APPROVED: el circuito cierra favorablemente
     APPROVED --> SUPERSEDED: se aprueba una revisión posterior
-    DRAFT --> CANCELLED: se abandona
-    IN_REVIEW --> CANCELLED: se abandona
+    DRAFT --> ABANDONED: se abandona
+    IN_REVIEW --> ABANDONED: se abandona
 ```
 
 Está en borrador mientras el trabajo se arma o se elabora, y en revisión desde que se somete. **No hay un estado por cada paso**: dónde está el trabajo lo dice el paso vigente del circuito.
@@ -58,6 +60,7 @@ Entre los atributos propios de la `DocumentRevision` podrán encontrarse:
 
 - código de revisión;
 - estado;
+- **identificación con que se emite**: título, clase y tipo;
 - armador designado;
 - fecha y actor de aprobación;
 - fecha, actor y motivo del abandono;
@@ -76,6 +79,10 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 **El código es único entre las revisiones no abandonadas del documento.** Las abandonadas **no consumen código**, y un documento puede tener varias con el mismo, distinguidas por su fecha y su motivo.
 
 **Toda revisión viva tiene exactamente un circuito abierto.**
+
+**A lo sumo una copia de trabajo abierta.** Es el mismo invariante que el documento aplica a su revisión en curso y la revisión a su circuito, en un tercer nivel.
+
+**La identificación se edita mientras la revisión está en curso, y no después.** No hace falta una precondición que lo diga: una revisión aprobada no se modifica.
 
 **A lo sumo hay una revisión aprobada por documento**, porque aprobar supersede a las anteriores.
 
@@ -108,14 +115,19 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **Registrar una versión no cambia su estado**: durante el circuito permanece en revisión. Solo el rechazo y la cancelación la devuelven a borrador.
 
+**Resolver un paso exige no tener copia de trabajo abierta**, y someter también. Declarar que se terminó mientras una iteración sigue abierta es una contradicción, y evita que la revisión llegue a aprobarse con trabajo colgando.
+
 **No hace falta restituir la revisión anterior al abandonar una.** La supersesión ocurre al aprobarse la sucesora, y una abandonada nunca se aprueba: la anterior nunca dejó de estar vigente.
 
-El estado `OBSOLETE` existe en el modelo **sin uso**: queda reservado para los estados terminales por respuesta de la contraparte, que pertenecen al bloque de circulación.
+**La palabra del nivel es «abandonada».** El circuito se cancela, la revisión se abandona y el documento queda obsoleto: cada término pertenece a un solo nivel y no se usa en ningún otro. Retirar un armado, desistir de una emisión y dar por concluida una identidad son hechos que no se confunden en el trabajo real, y no deben confundirse en el nombre.
+
+**El estado `OBSOLETE` se retiró.** Estaba declarado sin uso, reservado a los estados terminales por respuesta de la contraparte. No hace falta: una revisión se aprueba o se rechaza, y si el trabajo deja de tener sentido antes se abandona; si deja de tenerlo después, lo que caduca es el documento y no la emisión que efectivamente salió. Lo que la contraparte responde es el resultado del paso y no un estado de la revisión, y dejarlo disponible invitaba a que lo ocupara — dos máquinas de estados describiendo lo mismo.
 
 ---
 
 # Referencias
 
 - `10_DOM-005_Document.md`, `30_DOM-007_DocumentVersion.md`, `40_DOM-008_ReviewWorkflow.md`
+- `95_DOM-014_DocWorkingCopy.md`
 - `80_Principios_del_Modelo.md`
 - `../../00_Convenciones.md`

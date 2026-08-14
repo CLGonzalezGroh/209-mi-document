@@ -634,4 +634,13 @@ Primera fase que cambia comportamiento.
 - **Un documento obsoleto ya no admite revisiones nuevas.** El invariante estaba especificado y **no implementado**: `createRevision` no miraba la obsolescencia. Lo encontró la auditoría de los criterios de aceptación, no la compilación ni las pruebas acumuladas. Emitir sobre lo que fue superado, o sobre lo que salió del alcance, es contradictorio; todo lo demás del documento se conserva.
 - Ocho criterios cubiertos a medias quedaron completos: la firma con los tres archivos y sus checksum, el filtro resolviendo sobre el documento, las dos lecturas del título a la vez, el acto alcanzable desde los tres documentos, el código de un obsoleto que sigue tomado, la causa derivada distinguiendo las dos, la ausencia de `CANCELLED` en toda revisión, y la equivalencia entre el atajo de confirmación y la secuencia incremental.
 
+### Fase I — Cierre
+
+El bloque queda **promovido a la SFS**. Ocho documentos de dominio actualizados, dos de ellos nuevos —`DocReplacement` y `DocWorkingCopy`—, y los principios pasan de trece a diecisiete.
+
+- El contrato se publicó en `Maria-Ingenieria@current` y **el supergrafo compuso sin errores**, que es la verificación que el `rover check` no podía dar con cero operaciones registradas.
+- La webapp regeneró sus artefactos con `npm run codegen` y **compila limpio**: ningún consumidor quedó apuntando a lo retirado.
+
+> Los guiones de publicación usan `--routing-url http://localhost:4209`, de modo que solo afectan al desarrollo local. Testing y producción leen el supergrafo de un archivo montado.
+
 ---
