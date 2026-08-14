@@ -896,7 +896,9 @@ De esa respuesta dependen:
 - la permanencia de `Attachment` en este módulo o su traslado a `mi-quality` (D-08);
 - el destino de las páginas `/quality/documents` y `/tags/documents`.
 
-La orientación actual es **concentrarse en proyectos sin cerrar la puerta transversal**: se conserva `module` como discriminador y no se retira nada que la habilite. La definición se toma cuando exista una necesidad concreta de otro módulo, con el circuito de proyectos ya consolidado.
+La orientación era **concentrarse en proyectos sin cerrar la puerta transversal**: conservar `module` como discriminador y no retirar nada que la habilitara, hasta que existiera una necesidad concreta de otro módulo con el circuito de proyectos ya consolidado.
+
+**Esa condición se cumplió, y la cuestión quedó resuelta**: ver más abajo. Activos, calidad y comercial van a usar el ciclo, los tres con el comportamiento del rol Interno.
 
 `BLOCK_02` sostuvo esa orientación de forma deliberada. `projectId` admite nulo justamente para no obligar a un documento no perteneciente a un proyecto a colgar de uno artificial, y el nulo quedó nombrado como el régimen de publicación descrito más abajo. Lo que sí se retiró fue `entityType`/`entityId`: no expresaban pertenencia con integridad referencial, y el criterio de D-06 es que cualquier módulo que se incorpore la exprese con una referencia propia, como se hizo con el proyecto.
 
@@ -928,6 +930,43 @@ De ahí se desprende una distinción que ordena el módulo completo:
 Un documento de proyecto puede pasar del primer régimen al segundo al cerrarse el proyecto. Ese es el traspaso a la biblioteca de planta.
 
 Bajo esta lectura, la membresía por proyecto no es una restricción que haya que generalizar más adelante: es la forma correcta, porque solo la circulación necesita acotarse.
+
+### La cuestión de fondo queda resuelta: el módulo es transversal
+
+**Confirmado.** Cuatro subsistemas van a usar el ciclo de revisión, y tres de ellos con el mismo comportamiento:
+
+| Origen del documento | Circuito |
+| -------------------- | -------- |
+| Proyecto con contraparte | Emisor o Receptor, según D-09 |
+| Proyecto sin contraparte | Interno |
+| **Activo de planta**, dado de alta directamente en el módulo | Como el interno |
+| **Calidad** | Como el interno |
+| **Comercial** | Como el interno |
+
+Con eso, la orientación que el plan mantenía —concentrarse en proyectos sin cerrar la puerta transversal— deja de ser una apuesta y pasa a ser el hecho. **El circuito interno es el caso general, y Emisor y Receptor son la especialización**: lo que los distingue es tener contraparte, no ser de proyecto.
+
+Y confirma la lectura de la membresía: existe por la **participación externa**, que solo ocurre en proyectos. Calidad, comercial y activos no tienen contraparte, de modo que su acceso se gobierna por permiso global y clasificación. **La expansión transversal no obliga a generalizar la membresía**, que era el riesgo que esa decisión cargaba.
+
+**El activo se alimenta por dos vías, y no solo por promoción.** Puede dar de alta un documento directamente, con su propio circuito. La promoción sigue siendo lo que D-24 describe —linaje entre revisiones—, pero no es el único modo en que un documento del activo adquiere revisiones.
+
+### Orientación — falta un escalón de módulo en la precedencia
+
+Planteada al confirmarse lo anterior, sin decidir.
+
+La precedencia de la configuración tiene hoy tres escalones —documento, proyecto, despliegue— y **un documento de calidad no tiene proyecto**: cae directo al despliegue. Verificado en el modelo:
+
+- `DocProjectSettings.projectId` es **obligatorio y único**, de modo que no hay dónde declarar el armador por defecto ni el esquema de revisión de calidad o de comercial;
+- `DocWorkflowTemplate` resuelve su alcance por **proyecto, clase y tipo**, sin módulo. Un procedimiento de calidad y un documento comercial con la misma clase y tipo resolverían **la misma plantilla**, que es la del despliegue.
+
+Con un solo subsistema sin proyecto el hueco no se nota; con tres, cada uno necesita sus propios valores por defecto y su propio circuito propuesto.
+
+Lo que se anticipa es **un escalón de módulo entre el proyecto y el despliegue**, con el mecanismo que el alcance ya tiene: documento → proyecto **o módulo** → despliegue. No hace falta decidirlo ahora, pero conviene no construir nada que lo impida — en particular, no tratar la ausencia de proyecto como equivalente al despliegue.
+
+**El rol documental probablemente no necesite declararse en esos casos.** Sin proyecto no hay contraparte, y sin contraparte el rol es Interno necesariamente: es derivable en lugar de configurable, con el mismo criterio que el módulo aplica en otros lados. Queda por confirmar al abrirlo.
+
+**La unicidad del código no se toca**: `(code, module)` para los documentos sin proyecto es exactamente lo que calidad, comercial y activos necesitan.
+
+**Riesgo de vocabulario.** «Régimen de publicación» nombra hoy todo lo que no tiene proyecto, y va a agrupar cuatro cosas distintas —el manual de calidad, la documentación comercial, la biblioteca de planta y lo promovido desde proyectos—. El modelo las distingue por módulo y no hace falta cambiarlo, pero el nombre va a describir cada vez menos lo que nombra. Es la misma clase de deriva que el bloque `BLOCK_03B` corrigió con una palabra por nivel.
 
 ### Orientación — el repositorio documental puede ser externo
 
