@@ -18,6 +18,7 @@ import {
 } from "../../generated/prisma/client.js"
 import { RevisionStatus, WorkflowStatus } from "../../generated/prisma/enums.js"
 import { lastLiveRevision } from "../../utils/revisionScheme.js"
+import { obsolescenceCause } from "../../utils/documentMetadata.js"
 
 /** Detalle que ambas lecturas devuelven cuando tienen que ir a la base. */
 const revisionDetail = {
@@ -66,6 +67,35 @@ export const resolverTypes = {
       return parent.projectTaskId
         ? { __typename: "ProjectTask", id: parent.projectTaskId }
         : null
+    },
+    obsoletedBy: (parent: Document) => {
+      return parent.obsoletedById
+        ? { __typename: "UserName", id: parent.obsoletedById }
+        : null
+    },
+    /**
+     * La causa se DERIVA y no se almacena (BLOQUE 03B, B5): un indicador sería
+     * un dato calculable capaz de contradecir a los que lo originan. El hecho sí
+     * se registra, porque dos causas llegan al mismo estado y ninguna se deduce
+     * de la otra.
+     */
+    obsolescenceCause: async (parent: any) => {
+      if (!parent.obsoletedAt) return null
+
+      const items =
+        parent.replacementItems ??
+        (await prisma.docReplacementItem.findMany({
+          where: { documentId: parent.id },
+          select: { role: true },
+        }))
+      return obsolescenceCause({ obsoletedAt: parent.obsoletedAt, replacementItems: items })
+    },
+    replacementItems: async (parent: any) => {
+      if (Array.isArray(parent.replacementItems)) return parent.replacementItems
+      return prisma.docReplacementItem.findMany({
+        where: { documentId: parent.id },
+        orderBy: { id: "asc" },
+      })
     },
     taskDocumentReferences: async (parent: Document) => {
       return prisma.taskDocumentReference.findMany({
@@ -218,6 +248,54 @@ export const resolverTypes = {
       })
       return version
     },
+  },
+
+  DocWorkingCopy: {
+    createdBy: (parent: any) => ({ __typename: "UserName", id: parent.createdById }),
+    confirmedBy: (parent: any) =>
+      parent.confirmedById
+        ? { __typename: "UserName", id: parent.confirmedById }
+        : null,
+    discardedBy: (parent: any) =>
+      parent.discardedById
+        ? { __typename: "UserName", id: parent.discardedById }
+        : null,
+    revision: async (parent: any) =>
+      parent.revision ??
+      prisma.documentRevision.findUnique({ where: { id: parent.revisionId } }),
+    files: async (parent: any) =>
+      parent.files ??
+      prisma.docWorkingCopyFile.findMany({
+        where: { workingCopyId: parent.id },
+        orderBy: { fileKey: "asc" },
+      }),
+    version: async (parent: any) =>
+      parent.versionId
+        ? (parent.version ??
+          prisma.documentVersion.findUnique({
+            where: { id: parent.versionId },
+            include: { files: true },
+          }))
+        : null,
+  },
+
+  DocReplacement: {
+    createdBy: (parent: any) => ({ __typename: "UserName", id: parent.createdById }),
+    items: async (parent: any) =>
+      parent.items ??
+      prisma.docReplacementItem.findMany({
+        where: { replacementId: parent.id },
+        orderBy: { id: "asc" },
+      }),
+  },
+
+  DocReplacementItem: {
+    document: async (parent: any) =>
+      parent.document ??
+      prisma.document.findUnique({ where: { id: parent.documentId } }),
+    replacement: async (parent: any) =>
+      parent.replacement ??
+      prisma.docReplacement.findUnique({ where: { id: parent.replacementId } }),
   },
 
   DocumentVersion: {

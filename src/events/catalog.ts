@@ -23,7 +23,9 @@ export const AuditAction = {
   TerminateDocument: "TerminateDocument",
   ActivateDocument: "ActivateDocument",
   CreateRevision: "CreateRevision",
-  RegisterVersion: "RegisterVersion",
+  // `RegisterVersion` se retira con su operación (BLOQUE 03B, B12): la versión
+  // dejó de ser un archivo y pasó a ser un conjunto, de modo que registrarla
+  // dejó de ser un acto único. La reemplazan las cuatro de la copia de trabajo.
   ApproveStep: "ApproveStep",
   RejectStep: "RejectStep",
   CancelWorkflow: "CancelWorkflow",
@@ -95,7 +97,6 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   [AuditAction.TerminateDocument]: DocObjectType.DOCUMENT,
   [AuditAction.ActivateDocument]: DocObjectType.DOCUMENT,
   [AuditAction.CreateRevision]: DocObjectType.DOCUMENT_REVISION,
-  [AuditAction.RegisterVersion]: DocObjectType.DOCUMENT_VERSION,
   [AuditAction.ApproveStep]: DocObjectType.REVIEW_STEP,
   [AuditAction.RejectStep]: DocObjectType.REVIEW_STEP,
   [AuditAction.CancelWorkflow]: DocObjectType.REVIEW_WORKFLOW,

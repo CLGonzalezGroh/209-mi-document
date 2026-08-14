@@ -345,7 +345,24 @@ test("el contrato no expone ninguna operación que modifique una versión o una 
   )
 
   assert.deepEqual(prohibidas, [])
-  assert.ok(mutaciones.includes("registerVersion"))
+
+  // La versión la produce `confirmWorkingCopy` (BLOQUE 03B, B12). `registerVersion`
+  // se retiró: la versión dejó de ser un archivo y pasó a ser un CONJUNTO, de modo
+  // que "registrar la versión" dejó de ser un acto único.
+  assert.ok(mutaciones.includes("confirmWorkingCopy"))
+  assert.ok(!mutaciones.includes("registerVersion"))
+
+  // Y las operaciones de la copia de trabajo NO son excepciones a la
+  // inmutabilidad: operan sobre el conjunto en preparación, que todavía no es
+  // una versión. Por eso ninguna se llama `updateVersion`.
+  for (const esperada of [
+    "openWorkingCopy",
+    "putWorkingCopyFile",
+    "removeWorkingCopyFile",
+    "discardWorkingCopy",
+  ]) {
+    assert.ok(mutaciones.includes(esperada), `falta ${esperada}`)
+  }
 })
 
 // --- B5: la secuencia de versiones es de la revisión, no del circuito ---

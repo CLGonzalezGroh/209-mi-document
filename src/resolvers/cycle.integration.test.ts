@@ -127,6 +127,23 @@ const crear = (sufijo: string, initialVersion?: any) =>
     context,
   ) as Promise<any>
 
+/**
+ * Registra una versión por el atajo de `confirmWorkingCopy`: el conjunto completo
+ * en un solo acto, sin copia abierta previa (BLOQUE 03B, B12).
+ */
+const registrar = (revisionId: number, n: number, comment?: string) =>
+  workingCopyResolvers.Mutation.confirmWorkingCopy(
+    null,
+    {
+      revisionId,
+      input: {
+        ...(comment && { comment }),
+        files: [{ ...archivo(n), role: DocFileRole.DELIVERABLE }],
+      },
+    },
+    context,
+  ) as Promise<any>
+
 const archivo = (n: number) => ({
   fileKey: `k${n}`,
   fileName: `plano-v${n}.pdf`,
@@ -206,11 +223,7 @@ test("recorrido 1: documento nuevo, de alta a toma de conocimiento", async () =>
   assert.equal(armado.steps[0].status, StepStatus.COMPLETED)
 
   // Elaboración: la primera versión la registra el elaborador en su paso (B5)
-  await versionResolvers.Mutation.registerVersion(
-    null,
-    { revisionId: revision.id, input: archivo(1) },
-    context,
-  )
+  await registrar(revision.id, 1)
   await workflowResolvers.Mutation.submitRevision(
     null,
     { revisionId: revision.id },
@@ -280,11 +293,7 @@ test("recorrido 2: documento preexistente, con el archivo adjunto en el alta", a
   ])
 
   // El elaborador incorpora el cambio del proyecto sobre el archivo que ya estaba
-  await versionResolvers.Mutation.registerVersion(
-    null,
-    { revisionId: revision.id, input: archivo(2) },
-    context,
-  )
+  await registrar(revision.id, 2)
   await workflowResolvers.Mutation.submitRevision(
     null,
     { revisionId: revision.id },
@@ -327,11 +336,7 @@ test("recorrido 3: el rechazo devuelve el trabajo sin consumir revisión", async
     StepType.APPROVE,
   ])
 
-  await versionResolvers.Mutation.registerVersion(
-    null,
-    { revisionId: revision.id, input: archivo(1) },
-    context,
-  )
+  await registrar(revision.id, 1)
   await workflowResolvers.Mutation.submitRevision(
     null,
     { revisionId: revision.id },
@@ -339,11 +344,7 @@ test("recorrido 3: el rechazo devuelve el trabajo sin consumir revisión", async
   )
 
   // El revisor marca el archivo y rechaza: la versión es su marca (B5)
-  await versionResolvers.Mutation.registerVersion(
-    null,
-    { revisionId: revision.id, input: archivo(2) },
-    context,
-  )
+  await registrar(revision.id, 2)
   const revisor = await pasoDe(primero.id, StepType.REVIEW)
   await workflowResolvers.Mutation.rejectStep(
     null,
@@ -386,11 +387,7 @@ test("recorrido 3: el rechazo devuelve el trabajo sin consumir revisión", async
   assert.equal(viejoRevisor.assignedToId, USER_ID)
 
   // Corrección y aprobación: la revisión sigue siendo A
-  await versionResolvers.Mutation.registerVersion(
-    null,
-    { revisionId: revision.id, input: archivo(3) },
-    context,
-  )
+  await registrar(revision.id, 3)
   await workflowResolvers.Mutation.submitRevision(
     null,
     { revisionId: revision.id },
@@ -430,11 +427,7 @@ test("recorrido 4: abandonar a mitad de circuito y recuperar el código", async 
 
   // A aprobada, para tener historia
   const wfA = await armar(revA.workflows[0].id, [StepType.APPROVE])
-  await versionResolvers.Mutation.registerVersion(
-    null,
-    { revisionId: revA.id, input: archivo(1) },
-    context,
-  )
+  await registrar(revA.id, 1)
   await workflowResolvers.Mutation.submitRevision(
     null,
     { revisionId: revA.id },
@@ -458,11 +451,7 @@ test("recorrido 4: abandonar a mitad de circuito y recuperar el código", async 
     StepType.REVIEW,
     StepType.APPROVE,
   ])
-  await versionResolvers.Mutation.registerVersion(
-    null,
-    { revisionId: revB.id, input: archivo(2) },
-    context,
-  )
+  await registrar(revB.id, 2)
   await workflowResolvers.Mutation.submitRevision(
     null,
     { revisionId: revB.id },
@@ -507,11 +496,7 @@ test("recorrido 4: abandonar a mitad de circuito y recuperar el código", async 
 
   // Y se completa: el ciclo A ▸ B abandonada ▸ B nueva termina aprobado
   const wfB2 = await armar(revB2.workflows[0].id, [StepType.APPROVE])
-  await versionResolvers.Mutation.registerVersion(
-    null,
-    { revisionId: revB2.id, input: archivo(3) },
-    context,
-  )
+  await registrar(revB2.id, 3)
   await workflowResolvers.Mutation.submitRevision(
     null,
     { revisionId: revB2.id },
@@ -558,11 +543,7 @@ test("un documento sin revisión formal llega a aprobado con un solo paso (H-02)
   // El workflow mínimo de D-03 deja de ser un objeto: es un armado que designa
   // un único paso de aprobación.
   const wf = await armar(revision.workflows[0].id, [StepType.APPROVE])
-  await versionResolvers.Mutation.registerVersion(
-    null,
-    { revisionId: revision.id, input: archivo(1) },
-    context,
-  )
+  await registrar(revision.id, 1)
   await workflowResolvers.Mutation.submitRevision(
     null,
     { revisionId: revision.id },
@@ -638,11 +619,7 @@ test("una revisión aprobada no admite versiones nuevas", async () => {
 
   assert.equal(
     await codigoDeError(() =>
-      versionResolvers.Mutation.registerVersion(
-        null,
-        { revisionId: aprobada.id, input: archivo(9) },
-        context,
-      ),
+      registrar(aprobada.id, 9),
     ),
     "BAD_REQUEST",
   )
@@ -790,11 +767,7 @@ test("cancelar el circuito conserva la revisión y la rearma desde el armado", a
   const revision = doc.revisions[0]
   const wf = await armar(revision.workflows[0].id, [StepType.APPROVE])
 
-  await versionResolvers.Mutation.registerVersion(
-    null,
-    { revisionId: revision.id, input: archivo(1) },
-    context,
-  )
+  await registrar(revision.id, 1)
   await workflowResolvers.Mutation.submitRevision(
     null,
     { revisionId: revision.id },
@@ -865,7 +838,7 @@ test("la traza registra las acciones nuevas del ciclo", async () => {
     AuditAction.CreateRevision,
     AuditAction.DefineWorkflow,
     AuditAction.SubmitRevision,
-    AuditAction.RegisterVersion,
+    AuditAction.ConfirmWorkingCopy,
     AuditAction.ApproveStep,
     AuditAction.RejectStep,
     AuditAction.AcknowledgeStep,
@@ -885,11 +858,7 @@ test("la delegación exige permiso y motivo, y queda dentro de lo firmado (H-03)
   const revision = doc.revisions[0]
   const wf = await armar(revision.workflows[0].id, [StepType.APPROVE])
 
-  await versionResolvers.Mutation.registerVersion(
-    null,
-    { revisionId: revision.id, input: archivo(1) },
-    context,
-  )
+  await registrar(revision.id, 1)
   await workflowResolvers.Mutation.submitRevision(
     null,
     { revisionId: revision.id },
@@ -1055,11 +1024,7 @@ test("el código se corrige mientras nada salió, y después ya no", async () =>
 
   // Aprobar cierra la ventana para siempre
   const armado = await armar(segunda.workflows[0].id, [StepType.APPROVE])
-  await versionResolvers.Mutation.registerVersion(
-    null,
-    { revisionId: segunda.id, input: archivo(1) },
-    context,
-  )
+  await registrar(segunda.id, 1)
   await workflowResolvers.Mutation.submitRevision(
     null,
     { revisionId: segunda.id },

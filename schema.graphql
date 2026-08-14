@@ -466,6 +466,12 @@ enum DocObjectType {
   DOC_WORKFLOW_TEMPLATE
   "Configuración documental del despliegue"
   DOC_SETTINGS
+  """
+  Acto de reemplazo entre documentos. Tiene tipo propio porque toca varios
+  documentos y ninguno lo representa; la copia de trabajo NO lo tiene, porque su
+  traza cuelga de la revisión en la que se prepara.
+  """
+  DOC_REPLACEMENT
 }
 
 "Objeto del dominio documental para inputs"
@@ -496,6 +502,12 @@ enum DocObjectTypeInput {
   DOC_WORKFLOW_TEMPLATE
   "Configuración documental del despliegue"
   DOC_SETTINGS
+  """
+  Acto de reemplazo entre documentos. Tiene tipo propio porque toca varios
+  documentos y ninguno lo representa; la copia de trabajo NO lo tiene, porque su
+  traza cuelga de la revisión en la que se prepara.
+  """
+  DOC_REPLACEMENT
 }
 
 "Nivel del log para inputs"
@@ -618,6 +630,26 @@ type Document @key(fields: "id") {
   currentDocumentType: DocumentType!
   "Clase de la revisión EN CURSO. Copia, como `currentTitle`"
   currentDocumentClass: DocumentClass
+  """
+  Fecha en que quedó obsoleto, si lo está. Obsoleto NO es dado de baja:
+  `terminatedAt` corrige un alta que no debió existir, y esto es un hecho del
+  ciclo de vida —el documento existió, sirvió y dejó de servir— que conserva su
+  historia entera. Un documento obsoleto no admite revisiones nuevas y su código
+  sigue tomado dentro del ámbito.
+  """
+  obsoletedAt: DateTime
+  "Quién lo declaró obsoleto"
+  obsoletedBy: UserName
+  "Motivo, obligatorio al declararlo"
+  obsoleteReason: String
+  """
+  Por qué quedó obsoleto. Se DERIVA de si el documento figura como reemplazado
+  en algún acto: no se guarda un indicador, que podría contradecir a los datos
+  que lo originan. Nulo cuando el documento no está obsoleto.
+  """
+  obsolescenceCause: ObsolescenceCause
+  "Actos de reemplazo en que participa, con su papel en cada uno"
+  replacementItems: [DocReplacementItem!]!
   """
   Revisión VIGENTE: la última aprobada, y solo la aprobada. Nula mientras el
   documento no haya aprobado ninguna. No considera las revisiones abandonadas.
@@ -799,6 +831,117 @@ enum DocFileRole {
   SOURCE
   "La evidencia que formó parte de producirlo: memoria de cálculo, ensayos, planillas"
   SUPPORT
+}
+
+"Causa por la que un documento quedó obsoleto. Derivada, no almacenada"
+enum ObsolescenceCause {
+  "Fue superado por otro en un acto de reemplazo"
+  REPLACEMENT
+  "Salió del alcance del proyecto, sin que nada lo reemplace"
+  OUT_OF_SCOPE
+}
+
+"""
+Copia de trabajo: el conjunto de archivos EN PREPARACIÓN.
+
+Es lo que en la gestión documental se opera con check-out y check-in, con dos
+diferencias: acá NO descarga —leer un archivo nunca fue un acto del ciclo— y NO
+bloquea, porque la exclusividad ya la da el circuito, donde la versión la produce
+quien tiene el paso vigente.
+
+Mutable por naturaleza, y por eso no es una versión: la versión debe ser
+inmutable una vez que existe, y lo que esta entidad resuelve es cuándo existe.
+A lo sumo hay una abierta por revisión.
+"""
+type DocWorkingCopy {
+  "Identificador único"
+  id: Int!
+  "Fecha en que se abrió"
+  createdAt: DateTime!
+  "Quién la abrió"
+  createdBy: UserName!
+  "Revisión en la que se prepara"
+  revision: DocumentRevision!
+  "Los archivos del conjunto en preparación"
+  files: [DocWorkingCopyFile!]!
+  "Fecha de confirmación, si se confirmó"
+  confirmedAt: DateTime
+  "Quién la confirmó"
+  confirmedBy: UserName
+  "La versión que produjo al confirmarse"
+  version: DocumentVersion
+  "Fecha de descarte, si se descartó"
+  discardedAt: DateTime
+  "Quién la descartó"
+  discardedBy: UserName
+  "Motivo del descarte, obligatorio"
+  discardReason: String
+}
+
+"Un archivo dentro del conjunto en preparación"
+type DocWorkingCopyFile {
+  "Identificador único"
+  id: Int!
+  "Papel del archivo dentro del conjunto"
+  role: DocFileRole!
+  "Key del archivo en DO Spaces"
+  fileKey: String!
+  "Nombre original del archivo"
+  fileName: String!
+  "Tamaño del archivo en bytes"
+  fileSize: Int!
+  "Tipo MIME del archivo"
+  mimeType: String!
+  "Hash SHA-256"
+  checksum: String!
+}
+
+"""
+Acto de reemplazo entre documentos.
+
+Reemplazar es SUPERAR: los reemplazados quedan obsoletos en el mismo acto. Es un
+acto y no un par de referencias —agrupa los que salen y los que entran, con su
+motivo—, porque sin esa agrupación una reorganización de dos documentos en dos
+sería indistinguible de dos reemplazos separados.
+
+La relación es N:M, y con ella quedan expresadas la recodificación (1:1), la
+unificación (N:1) y la división (1:N). Qué clase de reemplazo es se DERIVA de la
+cardinalidad y no se declara.
+
+Los documentos de un acto comparten ámbito: lo que cruza de un proyecto al
+régimen de publicación no es reemplazar sino promover, que es otra cosa.
+"""
+type DocReplacement {
+  "Identificador único"
+  id: Int!
+  "Fecha del acto"
+  createdAt: DateTime!
+  "Quién lo registró"
+  createdBy: UserName!
+  "Motivo, obligatorio"
+  reason: String!
+  "Los documentos del acto, con su papel"
+  items: [DocReplacementItem!]!
+}
+
+"Un documento dentro del acto, con su papel"
+type DocReplacementItem {
+  "Identificador único"
+  id: Int!
+  "El acto al que pertenece"
+  replacement: DocReplacement!
+  "El documento"
+  document: Document!
+  "Su papel en el acto"
+  role: DocReplacementRole!
+}
+
+"Papel del documento dentro del acto de reemplazo"
+enum DocReplacementRole {
+  "Queda obsoleto en el mismo acto"
+  REPLACED
+  "Lo supera"
+  REPLACING
 }
 
 # ═══════════════════════════════════════════════════════
@@ -1685,16 +1828,80 @@ input InitialVersionInput {
   comment: String
 }
 
-"Input para actualizar un documento"
+"""
+Input para actualizar lo ADMINISTRATIVO del documento.
+
+El título, la clase y el tipo NO están acá: se editan sobre la revisión con
+`updateRevisionMetadata`, porque están impresos en el rótulo y lo impreso
+pertenece a la emisión que lo produjo. Lo que queda no aparece en ningún rótulo,
+y por eso se edita siempre, incluso con la revisión vigente aprobada.
+"""
 input UpdateDocumentInput {
-  "Nuevo título del documento"
-  title: String
   "Nueva descripción del documento"
   description: String
+  "Tarea de proyecto de la que el documento es entregable"
+  projectTaskId: Int
+}
+
+"Input para editar la identificación de una revisión"
+input UpdateRevisionMetadataInput {
+  "Nuevo título. Es lo que dirá el rótulo de los archivos de esta revisión"
+  title: String
   "Nuevo tipo de documento"
   documentTypeId: Int
-  "Nueva clase de documento"
+  "Nueva clase de documento. Nulo la deja sin clasificar"
   documentClassId: Int
+}
+
+"Input para registrar un acto de reemplazo entre documentos"
+input ReplaceDocumentsInput {
+  "Los que quedan obsoletos. Al menos uno"
+  replacedIds: [Int!]!
+  "Los que los superan. Al menos uno"
+  replacingIds: [Int!]!
+  "Motivo, obligatorio"
+  reason: String!
+}
+
+"Un archivo del conjunto en preparación"
+input WorkingCopyFileInput {
+  "Papel del archivo dentro del conjunto"
+  role: DocFileRoleInput!
+  "Key del archivo en DO Spaces"
+  fileKey: String!
+  "Nombre original del archivo"
+  fileName: String!
+  "Tamaño del archivo en bytes"
+  fileSize: Int!
+  "Tipo MIME del archivo"
+  mimeType: String!
+  "Hash SHA-256. Obligatorio en cada archivo"
+  checksum: String!
+}
+
+"Papel del archivo, para inputs"
+enum DocFileRoleInput {
+  "El entregable, típicamente PDF. Al menos uno por versión"
+  DELIVERABLE
+  "La fuente editable, típicamente DWG"
+  SOURCE
+  "La evidencia que formó parte de producirlo"
+  SUPPORT
+}
+
+"""
+Input para confirmar la copia de trabajo.
+
+`files` es el ATAJO: informar el conjunto completo crea y cierra la copia en un
+solo acto, sin acumulación previa. No son dos modelos sino la misma transición,
+y es lo que necesita un cliente automático para no depender de una secuencia de
+llamadas. Omitirlo confirma la copia que esté abierta.
+"""
+input ConfirmWorkingCopyInput {
+  "Comentario sobre los cambios. Opcional: la observación viaja dentro del archivo"
+  comment: String
+  "Conjunto completo, para confirmar sin copia abierta"
+  files: [WorkingCopyFileInput!]
 }
 
 "Input para crear una referencia documental tarea ↔ documento (Fase A.5, capa 2)"
@@ -1723,22 +1930,6 @@ input CreateRevisionInput {
   assignedOrganizerId: Int
   "Archivo inicial, OPCIONAL: la revisión nace sin versiones"
   initialVersion: InitialVersionInput
-}
-
-"Input para registrar una nueva versión de archivo"
-input RegisterVersionInput {
-  "Key del archivo en DO Spaces"
-  fileKey: String!
-  "Nombre original del archivo"
-  fileName: String!
-  "Tamaño del archivo en bytes"
-  fileSize: Int!
-  "Tipo MIME del archivo"
-  mimeType: String!
-  "Hash SHA-256. OBLIGATORIO en toda versión"
-  checksum: String!
-  "Comentario sobre los cambios de esta versión"
-  comment: String
 }
 
 """
@@ -2393,12 +2584,99 @@ type Mutation {
   """
   abandonRevision(revisionId: Int!, reason: String!): DocumentRevision!
 
-  # ─── Versiones ───
-  "Registrar una nueva versión de archivo en una revisión"
-  registerVersion(
+  """
+  Editar la identificación de la revisión: título, clase y tipo.
+
+  Vive acá y no en el documento porque está impresa en el rótulo del archivo, y
+  lo impreso pertenece a la emisión que lo produjo. La copia del documento se
+  replica en el mismo acto.
+
+  Aprobada la revisión, la edición se rechaza. No es una precondición añadida:
+  es que una revisión aprobada no se modifica. Abrir la siguiente vuelve a
+  habilitarla, y la nueva nace con la identificación copiada de la anterior.
+  """
+  updateRevisionMetadata(
     revisionId: Int!
-    input: RegisterVersionInput!
+    input: UpdateRevisionMetadataInput!
+  ): DocumentRevision!
+
+  # ─── Identidad y fin de vida útil del documento ───
+
+  """
+  Corregir el código del documento.
+
+  El código es el IDENTIFICADOR y no cambia: está en los transmittals emitidos,
+  en el payload de cada firma, en las referencias cruzadas de otros documentos y
+  en el rótulo de cada archivo que salió.
+
+  La única excepción es el error de carga, y su ventana es **mientras el
+  documento no tenga ninguna revisión aprobada**: la condición material de que
+  nada salió. Después, lo que corresponde es un documento nuevo que lo reemplace.
+
+  Si ya existe una versión cargada con el rótulo impreso, corregir el código
+  obliga a volver a cargarla. El sistema no puede verificar el interior del
+  archivo.
+  """
+  correctDocumentCode(id: Int!, code: String!): Document!
+
+  """
+  Registrar un acto de reemplazo entre documentos, con motivo.
+
+  Reemplazar es superar: los reemplazados quedan obsoletos en el mismo acto.
+  Los documentos del acto comparten ámbito.
+  """
+  replaceDocuments(input: ReplaceDocumentsInput!): DocReplacement!
+
+  """
+  Declarar obsoleto un documento por haber salido del alcance, con motivo.
+
+  Es la segunda causa de obsolescencia, la que nada reemplaza. Para la primera
+  no hay operación propia: la produce `replaceDocuments`.
+  """
+  obsoleteDocument(id: Int!, reason: String!): Document!
+
+  # ─── Versiones ───
+
+  """
+  Abrir la copia de trabajo, precargada con los archivos de la versión vigente.
+
+  Precargar es lo que vuelve barata la edición: quien corrige el entregable
+  abre, lo reemplaza y confirma, y la fuente y el respaldo viajan solos
+  conservando su key y su checksum, sin volver a subirse.
+
+  No descarga ni bloquea. A lo sumo hay una abierta por revisión.
+  """
+  openWorkingCopy(revisionId: Int!): DocWorkingCopy!
+
+  """
+  Incorporar un archivo al conjunto en preparación.
+
+  Sirve tanto para adjuntar —el archivo no estaba— como para reemplazar —estaba
+  y llega corregido—: es la misma operación porque es el mismo hecho, que el
+  conjunto pase a tener este archivo con este contenido.
+  """
+  putWorkingCopyFile(
+    revisionId: Int!
+    input: WorkingCopyFileInput!
+  ): DocWorkingCopy!
+
+  "Retirar un archivo del conjunto en preparación"
+  removeWorkingCopyFile(revisionId: Int!, fileKey: String!): DocWorkingCopy!
+
+  """
+  Confirmar la copia: el conjunto se convierte en la versión siguiente.
+
+  **Acá nace la versión**, completa e inmutable. Exige al menos un cambio: sin
+  archivo agregado, reemplazado o quitado no hay nada que confirmar, porque la
+  versión solo existe con contenido nuevo. Y exige al menos un entregable.
+  """
+  confirmWorkingCopy(
+    revisionId: Int!
+    input: ConfirmWorkingCopyInput
   ): DocumentVersion!
+
+  "Descartar la copia de trabajo sin producir versión, con motivo"
+  discardWorkingCopy(revisionId: Int!, reason: String!): DocWorkingCopy!
 
   # ─── Circuito de revisión ───
   """

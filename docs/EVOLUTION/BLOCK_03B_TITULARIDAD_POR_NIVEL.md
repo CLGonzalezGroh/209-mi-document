@@ -657,6 +657,34 @@ Las acciones y transiciones se habían incorporado en la fase E, porque las oper
 
 Pruebas nuevas: la derivación del acto de reemplazo contra base; que las siete acciones y las dos transiciones del bloque queden registradas; que el evento del reemplazo apunte al acto y no a un documento; y que la traza de la copia de trabajo cuelgue de la revisión con su contexto derivado.
 
+### Fase G — contrato GraphQL
+
+**Completada.**
+
+| Cambio | |
+| ------ | --- |
+| Tipos nuevos | `DocWorkingCopy`, `DocWorkingCopyFile`, `DocReplacement`, `DocReplacementItem`, `DocVersionFile` |
+| Enumeraciones nuevas | `DocFileRole`, `DocReplacementRole`, `ObsolescenceCause`, y `DOC_REPLACEMENT` en `DocObjectType` |
+| Mutaciones nuevas | Nueve: la edición de identificación, la corrección de código, el reemplazo, la obsolescencia y las cinco de la copia |
+| Retiros | `registerVersion` y `RegisterVersionInput`; `title`, `documentType` y `documentClass` de `UpdateDocumentInput` |
+
+**`registerVersion` se retiró de verdad, no se marcó obsoleta.** La fase E la había dejado en pie con el comentario correspondiente; acá se fue con su input, y su archivo quedó **vacío a propósito**: el objeto sigue existiendo y sus lecturas viven en `resolversTypes`, de modo que borrar el módulo diría algo distinto de lo que corresponde. Que no haya operaciones sobre versiones es una decisión, y el archivo vacío la declara — que es lo que `H-34` pedía.
+
+**La causa de la obsolescencia se expone derivada.** `Document.obsolescenceCause` la calcula en el resolver, y aprovecha los `replacementItems` si el padre ya los trajo.
+
+**Se agregó una prueba que ninguna verificación existente cubría:** que el contrato y los resolvers digan lo mismo, **en las dos direcciones**. `tsc` no sabe qué declara el `.graphql`, y `rover subgraph check` compara el esquema contra las operaciones registradas —que hoy son cero—, no contra la implementación. Las dos direcciones fallan distinto: una operación declarada sin resolver devuelve `null` en silencio, y un resolver sin declarar es inalcanzable hasta que alguien lo busca.
+
+El primer intento de esa prueba tenía un defecto propio: contaba los argumentos de las operaciones multilínea como si fueran campos, porque se declaran con la misma forma. Se corrigió llevando la profundidad de paréntesis.
+
+| Verificación | Resultado |
+| ------------ | --------- |
+| `tsc --noEmit` | Sin errores |
+| `npm run test:block03b-all` | **230 pruebas, 0 fallos** |
+| Contrato ↔ resolvers | Sin operaciones declaradas sin resolver, ni resolvers sin declarar |
+| `rover subgraph check` | `Linter Check` aprobado. El `Operation Check` sigue fallando por los 0 operaciones registradas, no por el contenido |
+
+**Pendiente del cierre**: `rover-publish-current` y `npm run codegen` en la webapp. Se difieren a propósito — publicar cambia lo que ve el desarrollo local, y conviene hacerlo cuando el bloque esté cerrado y no entre fases.
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-23, D-24, D-25 y la nota prospectiva de promoción al activo

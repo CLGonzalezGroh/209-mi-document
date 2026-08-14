@@ -614,4 +614,17 @@ Primera fase que cambia comportamiento.
 
 > **Atención al migrar**: la migración `20260814160000_replacement_object_type` agrega un valor a `DocObjectType`. Es puramente aditiva.
 
+### Fase G — Contrato GraphQL
+
+- **Tipos nuevos**: `DocVersionFile`, `DocWorkingCopy`, `DocWorkingCopyFile`, `DocReplacement` y `DocReplacementItem`.
+- **Enumeraciones nuevas**: `DocFileRole`, `DocReplacementRole` y `ObsolescenceCause`, más `DOC_REPLACEMENT` en `DocObjectType`.
+- **Nueve mutaciones nuevas**: `updateRevisionMetadata`, `correctDocumentCode`, `replaceDocuments`, `obsoleteDocument` y las cinco de la copia de trabajo.
+- `Document` expone `obsoletedAt`, `obsoletedBy`, `obsoleteReason`, `obsolescenceCause` —derivada— y `replacementItems`.
+
+> **Cambios incompatibles**, ninguno con consumidor escrito a mano: se retiran `registerVersion` y `RegisterVersionInput`; `Document.title`, `documentType` y `documentClass` —pasan a `currentTitle`, `currentDocumentType` y `currentDocumentClass`—; los campos de archivo de `DocumentVersion`, que ahora viven en `files`; y `title`, `documentTypeId` y `documentClassId` de `UpdateDocumentInput`, que se editan sobre la revisión.
+
+> **Atención al migrar**: quien invocaba `registerVersion` debe usar `confirmWorkingCopy`, que recibe el conjunto completo en un solo acto y hace exactamente lo mismo para un archivo.
+
+**230 pruebas, 0 fallos**, con una suite nueva que verifica que el contrato y los resolvers digan lo mismo en las dos direcciones — el defecto que ni `tsc` ni `rover` detectan.
+
 ---

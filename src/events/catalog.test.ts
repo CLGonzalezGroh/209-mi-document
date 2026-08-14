@@ -119,5 +119,7 @@ test("el catálogo cubre las escrituras relevadas más lo que agregaron los bloq
   //   + ReplaceDocuments, ObsoleteDocument   el fin de la vida útil (B5)
   //   + OpenWorkingCopy, UpdateWorkingCopy, ConfirmWorkingCopy,
   //     DiscardWorkingCopy                   el ciclo de la copia (B12)
-  assert.equal(AUDIT_ACTIONS.length, 43)
+  //   − RegisterVersion         se retira con su operación: la versión dejó de
+  //                             ser un archivo y pasó a ser un conjunto (B6)
+  assert.equal(AUDIT_ACTIONS.length, 42)
 })
