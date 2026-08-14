@@ -60,7 +60,7 @@ export const AuditAction = {
   SubmitRevision: "SubmitRevision",
   AcknowledgeStep: "AcknowledgeStep",
   ReassignStep: "ReassignStep",
-  CancelRevision: "CancelRevision",
+  AbandonRevision: "AbandonRevision",
   CreateWorkflowTemplate: "CreateWorkflowTemplate",
   UpdateWorkflowTemplate: "UpdateWorkflowTemplate",
   DeleteWorkflowTemplate: "DeleteWorkflowTemplate",
@@ -107,7 +107,7 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   [AuditAction.SubmitRevision]: DocObjectType.REVIEW_STEP,
   [AuditAction.AcknowledgeStep]: DocObjectType.REVIEW_STEP,
   [AuditAction.ReassignStep]: DocObjectType.REVIEW_STEP,
-  [AuditAction.CancelRevision]: DocObjectType.DOCUMENT_REVISION,
+  [AuditAction.AbandonRevision]: DocObjectType.DOCUMENT_REVISION,
   [AuditAction.CreateWorkflowTemplate]: DocObjectType.DOC_WORKFLOW_TEMPLATE,
   [AuditAction.UpdateWorkflowTemplate]: DocObjectType.DOC_WORKFLOW_TEMPLATE,
   [AuditAction.DeleteWorkflowTemplate]: DocObjectType.DOC_WORKFLOW_TEMPLATE,
@@ -148,7 +148,7 @@ export const WorkflowEvent = {
   // `StepCompleted` acompaña al estado terminal de los pasos que se cumplen sin
   // juzgar (B8), que no pueden emitir `StepApproved`.
   WorkflowCancelled: "WorkflowCancelled",
-  RevisionCancelled: "RevisionCancelled",
+  RevisionAbandoned: "RevisionAbandoned",
   StepCompleted: "StepCompleted",
 } as const
 
@@ -179,7 +179,7 @@ export const WORKFLOW_EVENT_OBJECT: Record<WorkflowEvent, DocObjectType> = {
   [WorkflowEvent.DocumentTypeTerminated]: DocObjectType.DOCUMENT_TYPE,
   [WorkflowEvent.DocumentTypeActivated]: DocObjectType.DOCUMENT_TYPE,
   [WorkflowEvent.WorkflowCancelled]: DocObjectType.REVIEW_WORKFLOW,
-  [WorkflowEvent.RevisionCancelled]: DocObjectType.DOCUMENT_REVISION,
+  [WorkflowEvent.RevisionAbandoned]: DocObjectType.DOCUMENT_REVISION,
   [WorkflowEvent.StepCompleted]: DocObjectType.REVIEW_STEP,
 }
 

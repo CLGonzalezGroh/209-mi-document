@@ -2247,9 +2247,9 @@ export const DocumentRevisionScalarFieldEnum = {
   approvedById: 'approvedById',
   approvedAt: 'approvedAt',
   assignedOrganizerId: 'assignedOrganizerId',
-  cancelledAt: 'cancelledAt',
-  cancelledById: 'cancelledById',
-  cancelReason: 'cancelReason'
+  abandonedAt: 'abandonedAt',
+  abandonedById: 'abandonedById',
+  abandonReason: 'abandonReason'
 } as const
 
 export type DocumentRevisionScalarFieldEnum = (typeof DocumentRevisionScalarFieldEnum)[keyof typeof DocumentRevisionScalarFieldEnum]

@@ -117,7 +117,7 @@ export const resolverTypes = {
       const revisions = await prisma.documentRevision.findMany({
         where: {
           documentId: parent.id,
-          status: { not: RevisionStatus.CANCELLED },
+          status: { not: RevisionStatus.ABANDONED },
         },
         include: revisionDetail,
       })
@@ -175,9 +175,9 @@ export const resolverTypes = {
     assignedOrganizer: (parent: DocumentRevision) => {
       return { __typename: "UserName", id: parent.assignedOrganizerId }
     },
-    cancelledBy: (parent: DocumentRevision) => {
-      return parent.cancelledById
-        ? { __typename: "UserName", id: parent.cancelledById }
+    abandonedBy: (parent: DocumentRevision) => {
+      return parent.abandonedById
+        ? { __typename: "UserName", id: parent.abandonedById }
         : null
     },
     /**

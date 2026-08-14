@@ -33,7 +33,7 @@ export type DocumentRevisionAvgAggregateOutputType = {
   documentId: number | null
   approvedById: number | null
   assignedOrganizerId: number | null
-  cancelledById: number | null
+  abandonedById: number | null
 }
 
 export type DocumentRevisionSumAggregateOutputType = {
@@ -43,7 +43,7 @@ export type DocumentRevisionSumAggregateOutputType = {
   documentId: number | null
   approvedById: number | null
   assignedOrganizerId: number | null
-  cancelledById: number | null
+  abandonedById: number | null
 }
 
 export type DocumentRevisionMinAggregateOutputType = {
@@ -58,9 +58,9 @@ export type DocumentRevisionMinAggregateOutputType = {
   approvedById: number | null
   approvedAt: Date | null
   assignedOrganizerId: number | null
-  cancelledAt: Date | null
-  cancelledById: number | null
-  cancelReason: string | null
+  abandonedAt: Date | null
+  abandonedById: number | null
+  abandonReason: string | null
 }
 
 export type DocumentRevisionMaxAggregateOutputType = {
@@ -75,9 +75,9 @@ export type DocumentRevisionMaxAggregateOutputType = {
   approvedById: number | null
   approvedAt: Date | null
   assignedOrganizerId: number | null
-  cancelledAt: Date | null
-  cancelledById: number | null
-  cancelReason: string | null
+  abandonedAt: Date | null
+  abandonedById: number | null
+  abandonReason: string | null
 }
 
 export type DocumentRevisionCountAggregateOutputType = {
@@ -92,9 +92,9 @@ export type DocumentRevisionCountAggregateOutputType = {
   approvedById: number
   approvedAt: number
   assignedOrganizerId: number
-  cancelledAt: number
-  cancelledById: number
-  cancelReason: number
+  abandonedAt: number
+  abandonedById: number
+  abandonReason: number
   _all: number
 }
 
@@ -106,7 +106,7 @@ export type DocumentRevisionAvgAggregateInputType = {
   documentId?: true
   approvedById?: true
   assignedOrganizerId?: true
-  cancelledById?: true
+  abandonedById?: true
 }
 
 export type DocumentRevisionSumAggregateInputType = {
@@ -116,7 +116,7 @@ export type DocumentRevisionSumAggregateInputType = {
   documentId?: true
   approvedById?: true
   assignedOrganizerId?: true
-  cancelledById?: true
+  abandonedById?: true
 }
 
 export type DocumentRevisionMinAggregateInputType = {
@@ -131,9 +131,9 @@ export type DocumentRevisionMinAggregateInputType = {
   approvedById?: true
   approvedAt?: true
   assignedOrganizerId?: true
-  cancelledAt?: true
-  cancelledById?: true
-  cancelReason?: true
+  abandonedAt?: true
+  abandonedById?: true
+  abandonReason?: true
 }
 
 export type DocumentRevisionMaxAggregateInputType = {
@@ -148,9 +148,9 @@ export type DocumentRevisionMaxAggregateInputType = {
   approvedById?: true
   approvedAt?: true
   assignedOrganizerId?: true
-  cancelledAt?: true
-  cancelledById?: true
-  cancelReason?: true
+  abandonedAt?: true
+  abandonedById?: true
+  abandonReason?: true
 }
 
 export type DocumentRevisionCountAggregateInputType = {
@@ -165,9 +165,9 @@ export type DocumentRevisionCountAggregateInputType = {
   approvedById?: true
   approvedAt?: true
   assignedOrganizerId?: true
-  cancelledAt?: true
-  cancelledById?: true
-  cancelReason?: true
+  abandonedAt?: true
+  abandonedById?: true
+  abandonReason?: true
   _all?: true
 }
 
@@ -269,9 +269,9 @@ export type DocumentRevisionGroupByOutputType = {
   approvedById: number | null
   approvedAt: Date | null
   assignedOrganizerId: number
-  cancelledAt: Date | null
-  cancelledById: number | null
-  cancelReason: string | null
+  abandonedAt: Date | null
+  abandonedById: number | null
+  abandonReason: string | null
   _count: DocumentRevisionCountAggregateOutputType | null
   _avg: DocumentRevisionAvgAggregateOutputType | null
   _sum: DocumentRevisionSumAggregateOutputType | null
@@ -309,9 +309,9 @@ export type DocumentRevisionWhereInput = {
   approvedById?: Prisma.IntNullableFilter<"DocumentRevision"> | number | null
   approvedAt?: Prisma.DateTimeNullableFilter<"DocumentRevision"> | Date | string | null
   assignedOrganizerId?: Prisma.IntFilter<"DocumentRevision"> | number
-  cancelledAt?: Prisma.DateTimeNullableFilter<"DocumentRevision"> | Date | string | null
-  cancelledById?: Prisma.IntNullableFilter<"DocumentRevision"> | number | null
-  cancelReason?: Prisma.StringNullableFilter<"DocumentRevision"> | string | null
+  abandonedAt?: Prisma.DateTimeNullableFilter<"DocumentRevision"> | Date | string | null
+  abandonedById?: Prisma.IntNullableFilter<"DocumentRevision"> | number | null
+  abandonReason?: Prisma.StringNullableFilter<"DocumentRevision"> | string | null
   document?: Prisma.XOR<Prisma.DocumentScalarRelationFilter, Prisma.DocumentWhereInput>
   versions?: Prisma.DocumentVersionListRelationFilter
   workflows?: Prisma.ReviewWorkflowListRelationFilter
@@ -330,9 +330,9 @@ export type DocumentRevisionOrderByWithRelationInput = {
   approvedById?: Prisma.SortOrderInput | Prisma.SortOrder
   approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   assignedOrganizerId?: Prisma.SortOrder
-  cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  cancelledById?: Prisma.SortOrderInput | Prisma.SortOrder
-  cancelReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  abandonedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  abandonedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  abandonReason?: Prisma.SortOrderInput | Prisma.SortOrder
   document?: Prisma.DocumentOrderByWithRelationInput
   versions?: Prisma.DocumentVersionOrderByRelationAggregateInput
   workflows?: Prisma.ReviewWorkflowOrderByRelationAggregateInput
@@ -354,9 +354,9 @@ export type DocumentRevisionWhereUniqueInput = Prisma.AtLeast<{
   approvedById?: Prisma.IntNullableFilter<"DocumentRevision"> | number | null
   approvedAt?: Prisma.DateTimeNullableFilter<"DocumentRevision"> | Date | string | null
   assignedOrganizerId?: Prisma.IntFilter<"DocumentRevision"> | number
-  cancelledAt?: Prisma.DateTimeNullableFilter<"DocumentRevision"> | Date | string | null
-  cancelledById?: Prisma.IntNullableFilter<"DocumentRevision"> | number | null
-  cancelReason?: Prisma.StringNullableFilter<"DocumentRevision"> | string | null
+  abandonedAt?: Prisma.DateTimeNullableFilter<"DocumentRevision"> | Date | string | null
+  abandonedById?: Prisma.IntNullableFilter<"DocumentRevision"> | number | null
+  abandonReason?: Prisma.StringNullableFilter<"DocumentRevision"> | string | null
   document?: Prisma.XOR<Prisma.DocumentScalarRelationFilter, Prisma.DocumentWhereInput>
   versions?: Prisma.DocumentVersionListRelationFilter
   workflows?: Prisma.ReviewWorkflowListRelationFilter
@@ -375,9 +375,9 @@ export type DocumentRevisionOrderByWithAggregationInput = {
   approvedById?: Prisma.SortOrderInput | Prisma.SortOrder
   approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   assignedOrganizerId?: Prisma.SortOrder
-  cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  cancelledById?: Prisma.SortOrderInput | Prisma.SortOrder
-  cancelReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  abandonedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  abandonedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  abandonReason?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DocumentRevisionCountOrderByAggregateInput
   _avg?: Prisma.DocumentRevisionAvgOrderByAggregateInput
   _max?: Prisma.DocumentRevisionMaxOrderByAggregateInput
@@ -400,9 +400,9 @@ export type DocumentRevisionScalarWhereWithAggregatesInput = {
   approvedById?: Prisma.IntNullableWithAggregatesFilter<"DocumentRevision"> | number | null
   approvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DocumentRevision"> | Date | string | null
   assignedOrganizerId?: Prisma.IntWithAggregatesFilter<"DocumentRevision"> | number
-  cancelledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DocumentRevision"> | Date | string | null
-  cancelledById?: Prisma.IntNullableWithAggregatesFilter<"DocumentRevision"> | number | null
-  cancelReason?: Prisma.StringNullableWithAggregatesFilter<"DocumentRevision"> | string | null
+  abandonedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DocumentRevision"> | Date | string | null
+  abandonedById?: Prisma.IntNullableWithAggregatesFilter<"DocumentRevision"> | number | null
+  abandonReason?: Prisma.StringNullableWithAggregatesFilter<"DocumentRevision"> | string | null
 }
 
 export type DocumentRevisionCreateInput = {
@@ -415,9 +415,9 @@ export type DocumentRevisionCreateInput = {
   approvedById?: number | null
   approvedAt?: Date | string | null
   assignedOrganizerId: number
-  cancelledAt?: Date | string | null
-  cancelledById?: number | null
-  cancelReason?: string | null
+  abandonedAt?: Date | string | null
+  abandonedById?: number | null
+  abandonReason?: string | null
   document: Prisma.DocumentCreateNestedOneWithoutRevisionsInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutRevisionInput
   workflows?: Prisma.ReviewWorkflowCreateNestedManyWithoutRevisionInput
@@ -436,9 +436,9 @@ export type DocumentRevisionUncheckedCreateInput = {
   approvedById?: number | null
   approvedAt?: Date | string | null
   assignedOrganizerId: number
-  cancelledAt?: Date | string | null
-  cancelledById?: number | null
-  cancelReason?: string | null
+  abandonedAt?: Date | string | null
+  abandonedById?: number | null
+  abandonReason?: string | null
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutRevisionInput
   workflows?: Prisma.ReviewWorkflowUncheckedCreateNestedManyWithoutRevisionInput
   transmittalItems?: Prisma.TransmittalItemUncheckedCreateNestedManyWithoutDocumentRevisionInput
@@ -454,9 +454,9 @@ export type DocumentRevisionUpdateInput = {
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedOrganizerId?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  abandonedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  abandonedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  abandonReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   document?: Prisma.DocumentUpdateOneRequiredWithoutRevisionsNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutRevisionNestedInput
   workflows?: Prisma.ReviewWorkflowUpdateManyWithoutRevisionNestedInput
@@ -475,9 +475,9 @@ export type DocumentRevisionUncheckedUpdateInput = {
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedOrganizerId?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  abandonedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  abandonedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  abandonReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutRevisionNestedInput
   workflows?: Prisma.ReviewWorkflowUncheckedUpdateManyWithoutRevisionNestedInput
   transmittalItems?: Prisma.TransmittalItemUncheckedUpdateManyWithoutDocumentRevisionNestedInput
@@ -495,9 +495,9 @@ export type DocumentRevisionCreateManyInput = {
   approvedById?: number | null
   approvedAt?: Date | string | null
   assignedOrganizerId: number
-  cancelledAt?: Date | string | null
-  cancelledById?: number | null
-  cancelReason?: string | null
+  abandonedAt?: Date | string | null
+  abandonedById?: number | null
+  abandonReason?: string | null
 }
 
 export type DocumentRevisionUpdateManyMutationInput = {
@@ -510,9 +510,9 @@ export type DocumentRevisionUpdateManyMutationInput = {
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedOrganizerId?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  abandonedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  abandonedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  abandonReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type DocumentRevisionUncheckedUpdateManyInput = {
@@ -527,9 +527,9 @@ export type DocumentRevisionUncheckedUpdateManyInput = {
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedOrganizerId?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  abandonedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  abandonedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  abandonReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type DocumentRevisionListRelationFilter = {
@@ -554,9 +554,9 @@ export type DocumentRevisionCountOrderByAggregateInput = {
   approvedById?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
   assignedOrganizerId?: Prisma.SortOrder
-  cancelledAt?: Prisma.SortOrder
-  cancelledById?: Prisma.SortOrder
-  cancelReason?: Prisma.SortOrder
+  abandonedAt?: Prisma.SortOrder
+  abandonedById?: Prisma.SortOrder
+  abandonReason?: Prisma.SortOrder
 }
 
 export type DocumentRevisionAvgOrderByAggregateInput = {
@@ -566,7 +566,7 @@ export type DocumentRevisionAvgOrderByAggregateInput = {
   documentId?: Prisma.SortOrder
   approvedById?: Prisma.SortOrder
   assignedOrganizerId?: Prisma.SortOrder
-  cancelledById?: Prisma.SortOrder
+  abandonedById?: Prisma.SortOrder
 }
 
 export type DocumentRevisionMaxOrderByAggregateInput = {
@@ -581,9 +581,9 @@ export type DocumentRevisionMaxOrderByAggregateInput = {
   approvedById?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
   assignedOrganizerId?: Prisma.SortOrder
-  cancelledAt?: Prisma.SortOrder
-  cancelledById?: Prisma.SortOrder
-  cancelReason?: Prisma.SortOrder
+  abandonedAt?: Prisma.SortOrder
+  abandonedById?: Prisma.SortOrder
+  abandonReason?: Prisma.SortOrder
 }
 
 export type DocumentRevisionMinOrderByAggregateInput = {
@@ -598,9 +598,9 @@ export type DocumentRevisionMinOrderByAggregateInput = {
   approvedById?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
   assignedOrganizerId?: Prisma.SortOrder
-  cancelledAt?: Prisma.SortOrder
-  cancelledById?: Prisma.SortOrder
-  cancelReason?: Prisma.SortOrder
+  abandonedAt?: Prisma.SortOrder
+  abandonedById?: Prisma.SortOrder
+  abandonReason?: Prisma.SortOrder
 }
 
 export type DocumentRevisionSumOrderByAggregateInput = {
@@ -610,7 +610,7 @@ export type DocumentRevisionSumOrderByAggregateInput = {
   documentId?: Prisma.SortOrder
   approvedById?: Prisma.SortOrder
   assignedOrganizerId?: Prisma.SortOrder
-  cancelledById?: Prisma.SortOrder
+  abandonedById?: Prisma.SortOrder
 }
 
 export type DocumentRevisionScalarRelationFilter = {
@@ -716,9 +716,9 @@ export type DocumentRevisionCreateWithoutDocumentInput = {
   approvedById?: number | null
   approvedAt?: Date | string | null
   assignedOrganizerId: number
-  cancelledAt?: Date | string | null
-  cancelledById?: number | null
-  cancelReason?: string | null
+  abandonedAt?: Date | string | null
+  abandonedById?: number | null
+  abandonReason?: string | null
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutRevisionInput
   workflows?: Prisma.ReviewWorkflowCreateNestedManyWithoutRevisionInput
   transmittalItems?: Prisma.TransmittalItemCreateNestedManyWithoutDocumentRevisionInput
@@ -735,9 +735,9 @@ export type DocumentRevisionUncheckedCreateWithoutDocumentInput = {
   approvedById?: number | null
   approvedAt?: Date | string | null
   assignedOrganizerId: number
-  cancelledAt?: Date | string | null
-  cancelledById?: number | null
-  cancelReason?: string | null
+  abandonedAt?: Date | string | null
+  abandonedById?: number | null
+  abandonReason?: string | null
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutRevisionInput
   workflows?: Prisma.ReviewWorkflowUncheckedCreateNestedManyWithoutRevisionInput
   transmittalItems?: Prisma.TransmittalItemUncheckedCreateNestedManyWithoutDocumentRevisionInput
@@ -784,9 +784,9 @@ export type DocumentRevisionScalarWhereInput = {
   approvedById?: Prisma.IntNullableFilter<"DocumentRevision"> | number | null
   approvedAt?: Prisma.DateTimeNullableFilter<"DocumentRevision"> | Date | string | null
   assignedOrganizerId?: Prisma.IntFilter<"DocumentRevision"> | number
-  cancelledAt?: Prisma.DateTimeNullableFilter<"DocumentRevision"> | Date | string | null
-  cancelledById?: Prisma.IntNullableFilter<"DocumentRevision"> | number | null
-  cancelReason?: Prisma.StringNullableFilter<"DocumentRevision"> | string | null
+  abandonedAt?: Prisma.DateTimeNullableFilter<"DocumentRevision"> | Date | string | null
+  abandonedById?: Prisma.IntNullableFilter<"DocumentRevision"> | number | null
+  abandonReason?: Prisma.StringNullableFilter<"DocumentRevision"> | string | null
 }
 
 export type DocumentRevisionCreateWithoutVersionsInput = {
@@ -799,9 +799,9 @@ export type DocumentRevisionCreateWithoutVersionsInput = {
   approvedById?: number | null
   approvedAt?: Date | string | null
   assignedOrganizerId: number
-  cancelledAt?: Date | string | null
-  cancelledById?: number | null
-  cancelReason?: string | null
+  abandonedAt?: Date | string | null
+  abandonedById?: number | null
+  abandonReason?: string | null
   document: Prisma.DocumentCreateNestedOneWithoutRevisionsInput
   workflows?: Prisma.ReviewWorkflowCreateNestedManyWithoutRevisionInput
   transmittalItems?: Prisma.TransmittalItemCreateNestedManyWithoutDocumentRevisionInput
@@ -819,9 +819,9 @@ export type DocumentRevisionUncheckedCreateWithoutVersionsInput = {
   approvedById?: number | null
   approvedAt?: Date | string | null
   assignedOrganizerId: number
-  cancelledAt?: Date | string | null
-  cancelledById?: number | null
-  cancelReason?: string | null
+  abandonedAt?: Date | string | null
+  abandonedById?: number | null
+  abandonReason?: string | null
   workflows?: Prisma.ReviewWorkflowUncheckedCreateNestedManyWithoutRevisionInput
   transmittalItems?: Prisma.TransmittalItemUncheckedCreateNestedManyWithoutDocumentRevisionInput
 }
@@ -852,9 +852,9 @@ export type DocumentRevisionUpdateWithoutVersionsInput = {
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedOrganizerId?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  abandonedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  abandonedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  abandonReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   document?: Prisma.DocumentUpdateOneRequiredWithoutRevisionsNestedInput
   workflows?: Prisma.ReviewWorkflowUpdateManyWithoutRevisionNestedInput
   transmittalItems?: Prisma.TransmittalItemUpdateManyWithoutDocumentRevisionNestedInput
@@ -872,9 +872,9 @@ export type DocumentRevisionUncheckedUpdateWithoutVersionsInput = {
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedOrganizerId?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  abandonedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  abandonedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  abandonReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   workflows?: Prisma.ReviewWorkflowUncheckedUpdateManyWithoutRevisionNestedInput
   transmittalItems?: Prisma.TransmittalItemUncheckedUpdateManyWithoutDocumentRevisionNestedInput
 }
@@ -889,9 +889,9 @@ export type DocumentRevisionCreateWithoutWorkflowsInput = {
   approvedById?: number | null
   approvedAt?: Date | string | null
   assignedOrganizerId: number
-  cancelledAt?: Date | string | null
-  cancelledById?: number | null
-  cancelReason?: string | null
+  abandonedAt?: Date | string | null
+  abandonedById?: number | null
+  abandonReason?: string | null
   document: Prisma.DocumentCreateNestedOneWithoutRevisionsInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutRevisionInput
   transmittalItems?: Prisma.TransmittalItemCreateNestedManyWithoutDocumentRevisionInput
@@ -909,9 +909,9 @@ export type DocumentRevisionUncheckedCreateWithoutWorkflowsInput = {
   approvedById?: number | null
   approvedAt?: Date | string | null
   assignedOrganizerId: number
-  cancelledAt?: Date | string | null
-  cancelledById?: number | null
-  cancelReason?: string | null
+  abandonedAt?: Date | string | null
+  abandonedById?: number | null
+  abandonReason?: string | null
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutRevisionInput
   transmittalItems?: Prisma.TransmittalItemUncheckedCreateNestedManyWithoutDocumentRevisionInput
 }
@@ -942,9 +942,9 @@ export type DocumentRevisionUpdateWithoutWorkflowsInput = {
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedOrganizerId?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  abandonedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  abandonedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  abandonReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   document?: Prisma.DocumentUpdateOneRequiredWithoutRevisionsNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutRevisionNestedInput
   transmittalItems?: Prisma.TransmittalItemUpdateManyWithoutDocumentRevisionNestedInput
@@ -962,9 +962,9 @@ export type DocumentRevisionUncheckedUpdateWithoutWorkflowsInput = {
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedOrganizerId?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  abandonedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  abandonedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  abandonReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutRevisionNestedInput
   transmittalItems?: Prisma.TransmittalItemUncheckedUpdateManyWithoutDocumentRevisionNestedInput
 }
@@ -979,9 +979,9 @@ export type DocumentRevisionCreateWithoutTransmittalItemsInput = {
   approvedById?: number | null
   approvedAt?: Date | string | null
   assignedOrganizerId: number
-  cancelledAt?: Date | string | null
-  cancelledById?: number | null
-  cancelReason?: string | null
+  abandonedAt?: Date | string | null
+  abandonedById?: number | null
+  abandonReason?: string | null
   document: Prisma.DocumentCreateNestedOneWithoutRevisionsInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutRevisionInput
   workflows?: Prisma.ReviewWorkflowCreateNestedManyWithoutRevisionInput
@@ -999,9 +999,9 @@ export type DocumentRevisionUncheckedCreateWithoutTransmittalItemsInput = {
   approvedById?: number | null
   approvedAt?: Date | string | null
   assignedOrganizerId: number
-  cancelledAt?: Date | string | null
-  cancelledById?: number | null
-  cancelReason?: string | null
+  abandonedAt?: Date | string | null
+  abandonedById?: number | null
+  abandonReason?: string | null
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutRevisionInput
   workflows?: Prisma.ReviewWorkflowUncheckedCreateNestedManyWithoutRevisionInput
 }
@@ -1032,9 +1032,9 @@ export type DocumentRevisionUpdateWithoutTransmittalItemsInput = {
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedOrganizerId?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  abandonedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  abandonedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  abandonReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   document?: Prisma.DocumentUpdateOneRequiredWithoutRevisionsNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutRevisionNestedInput
   workflows?: Prisma.ReviewWorkflowUpdateManyWithoutRevisionNestedInput
@@ -1052,9 +1052,9 @@ export type DocumentRevisionUncheckedUpdateWithoutTransmittalItemsInput = {
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedOrganizerId?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  abandonedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  abandonedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  abandonReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutRevisionNestedInput
   workflows?: Prisma.ReviewWorkflowUncheckedUpdateManyWithoutRevisionNestedInput
 }
@@ -1070,9 +1070,9 @@ export type DocumentRevisionCreateManyDocumentInput = {
   approvedById?: number | null
   approvedAt?: Date | string | null
   assignedOrganizerId: number
-  cancelledAt?: Date | string | null
-  cancelledById?: number | null
-  cancelReason?: string | null
+  abandonedAt?: Date | string | null
+  abandonedById?: number | null
+  abandonReason?: string | null
 }
 
 export type DocumentRevisionUpdateWithoutDocumentInput = {
@@ -1085,9 +1085,9 @@ export type DocumentRevisionUpdateWithoutDocumentInput = {
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedOrganizerId?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  abandonedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  abandonedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  abandonReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   versions?: Prisma.DocumentVersionUpdateManyWithoutRevisionNestedInput
   workflows?: Prisma.ReviewWorkflowUpdateManyWithoutRevisionNestedInput
   transmittalItems?: Prisma.TransmittalItemUpdateManyWithoutDocumentRevisionNestedInput
@@ -1104,9 +1104,9 @@ export type DocumentRevisionUncheckedUpdateWithoutDocumentInput = {
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedOrganizerId?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  abandonedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  abandonedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  abandonReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutRevisionNestedInput
   workflows?: Prisma.ReviewWorkflowUncheckedUpdateManyWithoutRevisionNestedInput
   transmittalItems?: Prisma.TransmittalItemUncheckedUpdateManyWithoutDocumentRevisionNestedInput
@@ -1123,9 +1123,9 @@ export type DocumentRevisionUncheckedUpdateManyWithoutDocumentInput = {
   approvedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assignedOrganizerId?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cancelledById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  cancelReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  abandonedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  abandonedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  abandonReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1189,9 +1189,9 @@ export type DocumentRevisionSelect<ExtArgs extends runtime.Types.Extensions.Inte
   approvedById?: boolean
   approvedAt?: boolean
   assignedOrganizerId?: boolean
-  cancelledAt?: boolean
-  cancelledById?: boolean
-  cancelReason?: boolean
+  abandonedAt?: boolean
+  abandonedById?: boolean
+  abandonReason?: boolean
   document?: boolean | Prisma.DocumentDefaultArgs<ExtArgs>
   versions?: boolean | Prisma.DocumentRevision$versionsArgs<ExtArgs>
   workflows?: boolean | Prisma.DocumentRevision$workflowsArgs<ExtArgs>
@@ -1211,9 +1211,9 @@ export type DocumentRevisionSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   approvedById?: boolean
   approvedAt?: boolean
   assignedOrganizerId?: boolean
-  cancelledAt?: boolean
-  cancelledById?: boolean
-  cancelReason?: boolean
+  abandonedAt?: boolean
+  abandonedById?: boolean
+  abandonReason?: boolean
   document?: boolean | Prisma.DocumentDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["documentRevision"]>
 
@@ -1229,9 +1229,9 @@ export type DocumentRevisionSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   approvedById?: boolean
   approvedAt?: boolean
   assignedOrganizerId?: boolean
-  cancelledAt?: boolean
-  cancelledById?: boolean
-  cancelReason?: boolean
+  abandonedAt?: boolean
+  abandonedById?: boolean
+  abandonReason?: boolean
   document?: boolean | Prisma.DocumentDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["documentRevision"]>
 
@@ -1247,12 +1247,12 @@ export type DocumentRevisionSelectScalar = {
   approvedById?: boolean
   approvedAt?: boolean
   assignedOrganizerId?: boolean
-  cancelledAt?: boolean
-  cancelledById?: boolean
-  cancelReason?: boolean
+  abandonedAt?: boolean
+  abandonedById?: boolean
+  abandonReason?: boolean
 }
 
-export type DocumentRevisionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "documentId" | "revisionCode" | "status" | "approvedById" | "approvedAt" | "assignedOrganizerId" | "cancelledAt" | "cancelledById" | "cancelReason", ExtArgs["result"]["documentRevision"]>
+export type DocumentRevisionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "documentId" | "revisionCode" | "status" | "approvedById" | "approvedAt" | "assignedOrganizerId" | "abandonedAt" | "abandonedById" | "abandonReason", ExtArgs["result"]["documentRevision"]>
 export type DocumentRevisionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   document?: boolean | Prisma.DocumentDefaultArgs<ExtArgs>
   versions?: boolean | Prisma.DocumentRevision$versionsArgs<ExtArgs>
@@ -1287,9 +1287,9 @@ export type $DocumentRevisionPayload<ExtArgs extends runtime.Types.Extensions.In
     approvedById: number | null
     approvedAt: Date | null
     assignedOrganizerId: number
-    cancelledAt: Date | null
-    cancelledById: number | null
-    cancelReason: string | null
+    abandonedAt: Date | null
+    abandonedById: number | null
+    abandonReason: string | null
   }, ExtArgs["result"]["documentRevision"]>
   composites: {}
 }
@@ -1728,9 +1728,9 @@ export interface DocumentRevisionFieldRefs {
   readonly approvedById: Prisma.FieldRef<"DocumentRevision", 'Int'>
   readonly approvedAt: Prisma.FieldRef<"DocumentRevision", 'DateTime'>
   readonly assignedOrganizerId: Prisma.FieldRef<"DocumentRevision", 'Int'>
-  readonly cancelledAt: Prisma.FieldRef<"DocumentRevision", 'DateTime'>
-  readonly cancelledById: Prisma.FieldRef<"DocumentRevision", 'Int'>
-  readonly cancelReason: Prisma.FieldRef<"DocumentRevision", 'String'>
+  readonly abandonedAt: Prisma.FieldRef<"DocumentRevision", 'DateTime'>
+  readonly abandonedById: Prisma.FieldRef<"DocumentRevision", 'Int'>
+  readonly abandonReason: Prisma.FieldRef<"DocumentRevision", 'String'>
 }
     
 

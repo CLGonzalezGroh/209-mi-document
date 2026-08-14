@@ -465,7 +465,7 @@ test("recorrido 4: abandonar a mitad de circuito y recuperar el código", async 
   })
   assert.equal(firmadas, 1, "la elaboración ya firmó")
 
-  await revisionResolvers.Mutation.cancelRevision(
+  await revisionResolvers.Mutation.abandonRevision(
     null,
     { revisionId: revB.id, reason: "El cliente retiró el requerimiento" },
     context,
@@ -474,9 +474,9 @@ test("recorrido 4: abandonar a mitad de circuito y recuperar el código", async 
   const abandonada = await prisma.documentRevision.findUniqueOrThrow({
     where: { id: revB.id },
   })
-  assert.equal(abandonada.status, RevisionStatus.CANCELLED)
-  assert.equal(abandonada.cancelledById, USER_ID)
-  assert.ok(abandonada.cancelReason)
+  assert.equal(abandonada.status, RevisionStatus.ABANDONED)
+  assert.equal(abandonada.abandonedById, USER_ID)
+  assert.ok(abandonada.abandonReason)
 
   // El circuito abierto se canceló con ella, y la firma sobrevive
   const circuitoB = await prisma.reviewWorkflow.findUniqueOrThrow({
@@ -818,7 +818,7 @@ test("la traza registra las acciones nuevas del ciclo", async () => {
     AuditAction.AcknowledgeStep,
     AuditAction.ReassignStep,
     AuditAction.CancelWorkflow,
-    AuditAction.CancelRevision,
+    AuditAction.AbandonRevision,
   ]) {
     assert.ok(nombres.includes(esperada), `falta la acción ${esperada}`)
   }

@@ -546,4 +546,18 @@ Bloque en curso. Esta sección se extiende con cada fase.
 - **Permiso nuevo** `documents:document:obsolete`, dado de alta en `205-mi-admin` 2.2.6. Habilitará reemplazar un documento por otro que lo supera y declararlo obsoleto por fuera de alcance, cuando la fase E incorpore esas operaciones.
 - Sin cambios de comportamiento todavía: ninguna operación exige el permiso nuevo.
 
+### Fase B — Vocabulario de los estados terminales
+
+Una palabra por nivel, y exclusiva de ese nivel: el circuito se **cancela**, la revisión se **abandona** y el documento queda **obsoleto**. Hasta acá el estado de la revisión abandonada se llamaba `CANCELLED`, la misma palabra del acto que retira el circuito **sin** abandonar la revisión.
+
+- `RevisionStatus.CANCELLED` pasa a `ABANDONED`, y se retira `OBSOLETE`, que estaba declarado sin uso. `BLOCK_04` no lo necesita: la calificación de la contraparte es el resultado del paso y no un estado de la revisión.
+- Los campos del abandono pasan a `abandonedAt`, `abandonedById` y `abandonReason`.
+- La mutación `cancelRevision` pasa a `abandonRevision`.
+- En la traza, `CancelRevision` pasa a `AbandonRevision` y `RevisionCancelled` a `RevisionAbandoned`.
+- **`WorkflowStatus.CANCELLED` y las columnas `cancel*` de `review_workflows` no se tocan**: la palabra queda reservada al circuito.
+
+`rover subgraph check` contra `Maria-Ingenieria@current`: **Operation Check y Linter Check aprobados**, con ocho cambios incompatibles y **ninguna operación registrada afectada**. Ningún consumidor escrito a mano en la webapp usaba los nombres viejos.
+
+> **Atención al migrar**: la migración `20260814120000_terminal_state_vocabulary` recrea el tipo `RevisionStatus` para poder retirar `OBSOLETE`. **Verifica primero que ninguna fila lo use y aborta** en lugar de perder datos. El índice único parcial `document_revisions_code_key` se recrea sobre `status <> 'ABANDONED'`.
+
 ---

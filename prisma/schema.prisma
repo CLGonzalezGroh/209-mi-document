@@ -43,22 +43,27 @@ enum RevisionScheme {
   FREE_TEXT // Texto libre, lo escribe el usuario
 }
 
+// Una palabra por nivel para terminar mal (BLOQUE 03B, B11): el circuito se
+// CANCELA, la revisión se ABANDONA y el documento queda OBSOLETO. Cada término
+// pertenece a un solo nivel y no se usa en ningún otro.
 enum RevisionStatus {
   DRAFT // En elaboración: el circuito está en armado o en elaboración
   IN_REVIEW // Sometida: el circuito avanza por revisión y aprobación
   APPROVED // Aprobada, metadata congelada, no admite versiones nuevas
   SUPERSEDED // Reemplazada por una revisión posterior aprobada
-  CANCELLED // Abandonada antes de aprobarse (BLOQUE 03, B11). No consume código
-  OBSOLETE // SIN USO — reservado para los estados terminales por respuesta de la
-  // contraparte que define BLOCK_04. Declarado sin uso para no
-  // pagar dos migraciones de enumeración (B2).
+  ABANDONED // Se desistió antes de aprobarla (BLOQUE 03B, B11). No consume código
+  // OBSOLETE se retiró: estaba declarado sin uso, reservado a los estados
+  // terminales por respuesta de la contraparte. BLOCK_04 no lo necesita —la
+  // calificación es el resultado del paso y no un estado de la revisión—, y
+  // dejarlo disponible invitaba a que la respuesta externa lo ocupara, que es
+  // el defecto del §1: dos máquinas de estados describiendo lo mismo.
 }
 
 enum WorkflowStatus {
   IN_PROGRESS // Circuito abierto. Nace así: el circuito se instancia iniciado (B2)
   COMPLETED // Los pasos que deciden se resolvieron favorablemente
   REJECTED // Un paso que decide rechazó
-  CANCELLED // Retirado sin juicio, con motivo propio (BLOQUE 03, B11)
+  CANCELLED // Retirado sin juicio, con motivo propio. Exclusivo del circuito
 }
 
 // Pasos del circuito, en el orden en que se recorren (BLOQUE 03, B1).
@@ -298,12 +303,13 @@ model DocumentRevision {
   // en mi-admin. El paso de armado se reasigna después como cualquier otro (B9).
   assignedOrganizerId Int
 
-  // Abandono de la revisión (BLOQUE 03, B11). Solo desde DRAFT o IN_REVIEW:
-  // aprobada, la revisión es el documento vigente y lo que corresponde es abrir
-  // la siguiente. El motivo vive en el modelo y no en el meta de un evento (H-05).
-  cancelledAt   DateTime?
-  cancelledById Int?
-  cancelReason  String?
+  // Abandono de la revisión (BLOQUE 03, B11; renombrado en BLOQUE 03B, B11).
+  // Solo desde DRAFT o IN_REVIEW: aprobada, la revisión es el documento vigente
+  // y lo que corresponde es abrir la siguiente. El motivo vive en el modelo y no
+  // en el meta de un evento (H-05).
+  abandonedAt   DateTime?
+  abandonedById Int?
+  abandonReason String?
 
   // Relaciones
   document         Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
@@ -312,9 +318,9 @@ model DocumentRevision {
   transmittalItems TransmittalItem[]
 
   // Unicidad del código por ÍNDICE ÚNICO PARCIAL, creado en SQL (BLOQUE 03, B12):
-  //   document_revisions_code_key  UNIQUE (documentId, revisionCode) WHERE status <> 'CANCELLED'
-  // La revisión abortada no consume código: sobre A puede abrirse B, abortarse y
-  // volver a abrirse B. Un documento puede tener varias abortadas con el mismo
+  //   document_revisions_code_key  UNIQUE (documentId, revisionCode) WHERE status <> 'ABANDONED'
+  // La revisión abandonada no consume código: sobre A puede abrirse B, abandonarse
+  // y volver a abrirse B. Un documento puede tener varias abandonadas con el mismo
   // código, y cada una se distingue por su fecha y su motivo.
   @@index([documentId])
   @@map("document_revisions")

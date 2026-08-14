@@ -101,8 +101,8 @@ const crearCircuito = (revisionId: number, status: WorkflowStatus) =>
 test("varias revisiones abandonadas comparten código", async () => {
   // Tres intentos de B abandonados es correcto: cada uno se distingue por su
   // fecha y su motivo.
-  const primera = await crearRevision("X", RevisionStatus.CANCELLED)
-  const segunda = await crearRevision("X", RevisionStatus.CANCELLED)
+  const primera = await crearRevision("X", RevisionStatus.ABANDONED)
+  const segunda = await crearRevision("X", RevisionStatus.ABANDONED)
 
   assert.notEqual(primera.id, segunda.id)
   assert.equal(primera.revisionCode, segunda.revisionCode)

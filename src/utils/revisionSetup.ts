@@ -177,7 +177,7 @@ export const planRevision = async (
       fallbackScheme,
     }),
     liveCodes: revisions
-      .filter((r) => r.status !== RevisionStatus.CANCELLED)
+      .filter((r) => r.status !== RevisionStatus.ABANDONED)
       .map((r) => r.revisionCode),
   })
 

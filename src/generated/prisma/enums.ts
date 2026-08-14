@@ -48,8 +48,7 @@ export const RevisionStatus = {
   IN_REVIEW: 'IN_REVIEW',
   APPROVED: 'APPROVED',
   SUPERSEDED: 'SUPERSEDED',
-  CANCELLED: 'CANCELLED',
-  OBSOLETE: 'OBSOLETE'
+  ABANDONED: 'ABANDONED'
 } as const
 
 export type RevisionStatus = (typeof RevisionStatus)[keyof typeof RevisionStatus]

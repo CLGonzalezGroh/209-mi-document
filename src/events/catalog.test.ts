@@ -106,7 +106,7 @@ test("el catálogo cubre las escrituras relevadas más lo que agregaron los bloq
   //                          completar el paso de elaboración (B1)
   //   − SwitchRevisionScheme el esquema dejó de persistirse (B13)
   //   + DefineWorkflow, SubmitRevision, AcknowledgeStep, ReassignStep
-  //   + CancelRevision
+  //   + AbandonRevision
   //   + CreateWorkflowTemplate, UpdateWorkflowTemplate, DeleteWorkflowTemplate
   //   + DeclareDocSettings
   assert.equal(AUDIT_ACTIONS.length, 35)

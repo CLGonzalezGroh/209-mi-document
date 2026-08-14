@@ -510,6 +510,38 @@ Mismo orden que `BLOCK_02` y `BLOCK_03`, con una fase de vocabulario adelante pa
 | `npm run seed:permissions` | 408 permisos, 795 `rolePermissions` en 22 roles |
 | Consulta directa a la base | `documents:document:obsolete`, acción `obsolete`, 1 rol |
 
+### Fase B — vocabulario
+
+**Completada.** Migración `20260814120000_terminal_state_vocabulary`.
+
+El renombre alcanzó más de lo que el enunciado de la fase preveía, y por el mismo motivo que lo justifica: **la palabra estaba en cuatro capas, y dejarla a medias en cualquiera de ellas conserva la colisión donde más cuesta.**
+
+| Capa | Cambio |
+| ---- | ------ |
+| Enumeración | `RevisionStatus.CANCELLED` → `ABANDONED`; baja de `OBSOLETE` |
+| Columnas | `cancelledAt`, `cancelledById`, `cancelReason` → `abandonedAt`, `abandonedById`, `abandonReason` |
+| Traza | `AuditAction.CancelRevision` → `AbandonRevision`; `WorkflowEvent.RevisionCancelled` → `RevisionAbandoned` |
+| Contrato | Mutación `cancelRevision` → `abandonRevision`; campos y valores de `RevisionStatus` y `RevisionStatusInput` |
+
+**La traza no estaba en el enunciado y se incorporó.** Un evento `RevisionCancelled` conviviendo con `WorkflowCancelled` deja la ambigüedad viva justo en el registro de auditoría, que es donde se la consulta cuando importa.
+
+**Nada del circuito se tocó.** `WorkflowStatus.CANCELLED` conserva su nombre, y `review_workflows` conserva sus tres columnas `cancel*`: ahí el acto sí es cancelar. La separación se hizo caso por caso y no con un reemplazo global.
+
+**Retirar `OBSOLETE` exigió recrear el tipo**, porque PostgreSQL no admite quitar un valor. La migración verifica primero que ninguna fila lo use y **falla en lugar de perder datos** si algún despliegue lo hubiera empezado a usar. El índice único parcial se retira antes de tocar el tipo y se recrea sobre `<> 'ABANDONED'`.
+
+| Verificación | Resultado |
+| ------------ | --------- |
+| `prisma migrate deploy` y `generate` | Aplicada, cliente regenerado |
+| `tsc --noEmit` | Sin errores |
+| `npm run test:block03-all` | **177 pruebas, 0 fallos**, sin cambios de expectativa fuera del renombre |
+| `rover subgraph check Maria-Ingenieria@current` | **Operation Check y Linter Check aprobados.** Los ocho cambios incompatibles —tres campos, una mutación y cuatro valores de enumeración— **sin ninguna operación registrada afectada** |
+| Enumeraciones en base | `RevisionStatus`: `DRAFT, IN_REVIEW, APPROVED, SUPERSEDED, ABANDONED`. `WorkflowStatus` intacta |
+| Índice parcial en base | `WHERE (status <> 'ABANDONED')` |
+| Columnas en base | `document_revisions` con las tres `abandon*`; `review_workflows` con las tres `cancel*` |
+| Búsqueda del nombre viejo en `201-mi-webapp` | Ningún consumidor escrito a mano. Solo los artefactos de codegen, que se regeneran al cerrar el bloque |
+
+**Pendiente del cierre del bloque, no de esta fase**: `rover-publish-current` y `npm run codegen` en la webapp. Hasta entonces la webapp local sigue viendo el esquema viejo, que es lo esperado.
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-23, D-24, D-25 y la nota prospectiva de promoción al activo

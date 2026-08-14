@@ -60,10 +60,8 @@ enum RevisionStatus {
   APPROVED
   "Reemplazada por una revisión posterior aprobada"
   SUPERSEDED
-  "Abandonada antes de aprobarse. No consume código de revisión"
-  CANCELLED
-  "SIN USO: reservado para los estados terminales por respuesta de la contraparte"
-  OBSOLETE
+  "Se desistió de ella antes de aprobarla. No consume código de revisión"
+  ABANDONED
 }
 
 "Estado del workflow de revisión"
@@ -183,9 +181,7 @@ enum RevisionStatusInput {
   "Reemplazada"
   SUPERSEDED
   "Abandonada"
-  CANCELLED
-  "Obsoleta (sin uso)"
-  OBSOLETE
+  ABANDONED
 }
 
 "Estado del workflow para inputs"
@@ -719,11 +715,11 @@ type DocumentRevision @key(fields: "id") {
   "Usuario que aprobó la revisión"
   approvedBy: UserName
   "Fecha en que se abandonó la revisión"
-  cancelledAt: DateTime
+  abandonedAt: DateTime
   "Usuario que abandonó la revisión"
-  cancelledBy: UserName
+  abandonedBy: UserName
   "Motivo del abandono"
-  cancelReason: String
+  abandonReason: String
 }
 
 "Versión de archivo dentro de una revisión"
@@ -2332,7 +2328,7 @@ type Mutation {
   aprobada: aprobada, es el documento vigente y corresponde abrir la siguiente.
   La revisión abandonada no consume código.
   """
-  cancelRevision(revisionId: Int!, reason: String!): DocumentRevision!
+  abandonRevision(revisionId: Int!, reason: String!): DocumentRevision!
 
   # ─── Versiones ───
   "Registrar una nueva versión de archivo en una revisión"

@@ -297,7 +297,7 @@ export const revisionResolvers = {
      * aprobarse la sucesora, y una abortada nunca se aprueba. La anterior nunca
      * dejó de estar vigente.
      */
-    cancelRevision: async (
+    abandonRevision: async (
       _: any,
       { revisionId, reason }: { revisionId: number; reason: string },
       context: ResolverContext,
@@ -306,7 +306,7 @@ export const revisionResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_UPDATE],
         context,
       })
-      logger.info("cancelRevision", { userId })
+      logger.info("abandonRevision", { userId })
 
       await assertObjectAccess({
         userId,
@@ -393,25 +393,25 @@ export const revisionResolvers = {
           const updated = await tx.documentRevision.update({
             where: { id: revisionId },
             data: {
-              status: RevisionStatus.CANCELLED,
-              cancelledAt: now,
-              cancelledById: userId,
-              cancelReason: reason,
+              status: RevisionStatus.ABANDONED,
+              abandonedAt: now,
+              abandonedById: userId,
+              abandonReason: reason,
               updatedById: userId,
             },
             include: revisionIncludes,
           })
 
           transitions.push({
-            name: WorkflowEvent.RevisionCancelled,
+            name: WorkflowEvent.RevisionAbandoned,
             objectId: revisionId,
             fromState: revision.status,
-            toState: RevisionStatus.CANCELLED,
+            toState: RevisionStatus.ABANDONED,
             actorId: userId,
           })
 
           await emitAuditEvent(tx, {
-            action: AuditAction.CancelRevision,
+            action: AuditAction.AbandonRevision,
             objectId: revisionId,
             actorId: userId,
             meta: {

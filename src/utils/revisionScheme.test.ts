@@ -82,7 +82,7 @@ test("la última revisión es la última por creación y no por código", () => 
 test("las revisiones abortadas no cuentan como última", () => {
   const revisions = [
     revision(1, "A", RevisionStatus.APPROVED, "2026-01-01"),
-    revision(2, "B", RevisionStatus.CANCELLED, "2026-02-01"),
+    revision(2, "B", RevisionStatus.ABANDONED, "2026-02-01"),
   ]
 
   assert.equal(lastLiveRevision(revisions)?.revisionCode, "A")
@@ -90,8 +90,8 @@ test("las revisiones abortadas no cuentan como última", () => {
 
 test("un documento con todas sus revisiones abortadas no tiene última", () => {
   const revisions = [
-    revision(1, "A", RevisionStatus.CANCELLED, "2026-01-01"),
-    revision(2, "A", RevisionStatus.CANCELLED, "2026-02-01"),
+    revision(1, "A", RevisionStatus.ABANDONED, "2026-01-01"),
+    revision(2, "A", RevisionStatus.ABANDONED, "2026-02-01"),
   ]
 
   assert.equal(lastLiveRevision(revisions), null)

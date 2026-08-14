@@ -110,7 +110,7 @@ export type RevisionSnapshot = {
 export const lastLiveRevision = <T extends RevisionSnapshot>(
   revisions: T[],
 ): T | null => {
-  const live = revisions.filter((r) => r.status !== RevisionStatus.CANCELLED)
+  const live = revisions.filter((r) => r.status !== RevisionStatus.ABANDONED)
   if (live.length === 0) return null
 
   return live.reduce((latest, current) => {
