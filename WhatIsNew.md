@@ -560,4 +560,18 @@ Una palabra por nivel, y exclusiva de ese nivel: el circuito se **cancela**, la 
 
 > **Atención al migrar**: la migración `20260814120000_terminal_state_vocabulary` recrea el tipo `RevisionStatus` para poder retirar `OBSOLETE`. **Verifica primero que ninguna fila lo use y aborta** en lugar de perder datos. El índice único parcial `document_revisions_code_key` se recrea sobre `status <> 'ABANDONED'`.
 
+### Fase C — Modelo y migración
+
+Los tres datos que el bloque mueve de nivel quedan en su lugar. **Sin cambios de comportamiento todavía**: las operaciones hacen lo mismo que antes sobre el modelo nuevo.
+
+- **La metadata de identificación pasa a la revisión.** `DocumentRevision` incorpora `title`, `documentTypeId` y `documentClassId`. Vive ahí porque está impresa en el rótulo, y lo impreso pertenece a la emisión que lo produjo. Se copia de la revisión anterior al crear la siguiente.
+- **El documento la conserva como copia, nombrada por su lectura.** `title`, `documentTypeId` y `documentClassId` pasan a `currentTitle`, `currentDocumentTypeId` y `currentDocumentClassId`: son la lectura de la revisión **en curso**. Lo que dice el rótulo aprobado se lee en `currentRevision.title`.
+- **El documento incorpora su obsolescencia**: `obsoletedAt`, `obsoletedById` y `obsoleteReason`. Distinta de `terminatedAt`, que es baja lógica.
+- **La versión pasa a ser un conjunto de archivos.** `DocumentVersion` deja de llevar el archivo en línea y expone `files`, cada uno con su rol —entregable, fuente o respaldo—. Las versiones existentes se migran con rol `DELIVERABLE`.
+- **Entidades nuevas**: la copia de trabajo con sus archivos, y el acto de reemplazo N:M con sus ítems. Todavía sin operaciones que las produzcan.
+
+`rover subgraph check`: **aprobado**, sin operaciones registradas afectadas. **180 pruebas, 0 fallos**, con tres nuevas sobre las restricciones incorporadas.
+
+> **Atención al migrar**: la migración `20260814140000_ownership_by_level` respalda la metadata del documento a **todas** sus revisiones. Para la revisión en curso el valor es exacto; para las aprobadas es la mejor aproximación disponible, porque no existe historia de la que reconstruir lo que cada una decía. Se ejercitó sobre una base vacía: conviene contrastar los conteos de `document_revisions` y `doc_version_files` antes y después.
+
 ---

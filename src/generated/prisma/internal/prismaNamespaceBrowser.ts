@@ -57,6 +57,11 @@ export const ModelName = {
   TaskDocumentReference: 'TaskDocumentReference',
   DocumentRevision: 'DocumentRevision',
   DocumentVersion: 'DocumentVersion',
+  DocVersionFile: 'DocVersionFile',
+  DocWorkingCopy: 'DocWorkingCopy',
+  DocWorkingCopyFile: 'DocWorkingCopyFile',
+  DocReplacement: 'DocReplacement',
+  DocReplacementItem: 'DocReplacementItem',
   ReviewWorkflow: 'ReviewWorkflow',
   ReviewStep: 'ReviewStep',
   DocStepSignature: 'DocStepSignature',
@@ -136,12 +141,15 @@ export const DocumentScalarFieldEnum = {
   terminatedAt: 'terminatedAt',
   isSys: 'isSys',
   code: 'code',
-  title: 'title',
   description: 'description',
   module: 'module',
   projectId: 'projectId',
-  documentTypeId: 'documentTypeId',
-  documentClassId: 'documentClassId',
+  currentTitle: 'currentTitle',
+  currentDocumentTypeId: 'currentDocumentTypeId',
+  currentDocumentClassId: 'currentDocumentClassId',
+  obsoletedAt: 'obsoletedAt',
+  obsoletedById: 'obsoletedById',
+  obsoleteReason: 'obsoleteReason',
   projectTaskId: 'projectTaskId'
 } as const
 
@@ -171,6 +179,9 @@ export const DocumentRevisionScalarFieldEnum = {
   status: 'status',
   approvedById: 'approvedById',
   approvedAt: 'approvedAt',
+  title: 'title',
+  documentTypeId: 'documentTypeId',
+  documentClassId: 'documentClassId',
   assignedOrganizerId: 'assignedOrganizerId',
   abandonedAt: 'abandonedAt',
   abandonedById: 'abandonedById',
@@ -186,15 +197,77 @@ export const DocumentVersionScalarFieldEnum = {
   createdById: 'createdById',
   revisionId: 'revisionId',
   versionNumber: 'versionNumber',
-  fileKey: 'fileKey',
-  fileName: 'fileName',
-  fileSize: 'fileSize',
-  mimeType: 'mimeType',
-  checksum: 'checksum',
   comment: 'comment'
 } as const
 
 export type DocumentVersionScalarFieldEnum = (typeof DocumentVersionScalarFieldEnum)[keyof typeof DocumentVersionScalarFieldEnum]
+
+
+export const DocVersionFileScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  versionId: 'versionId',
+  role: 'role',
+  fileKey: 'fileKey',
+  fileName: 'fileName',
+  fileSize: 'fileSize',
+  mimeType: 'mimeType',
+  checksum: 'checksum'
+} as const
+
+export type DocVersionFileScalarFieldEnum = (typeof DocVersionFileScalarFieldEnum)[keyof typeof DocVersionFileScalarFieldEnum]
+
+
+export const DocWorkingCopyScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  revisionId: 'revisionId',
+  confirmedAt: 'confirmedAt',
+  confirmedById: 'confirmedById',
+  versionId: 'versionId',
+  discardedAt: 'discardedAt',
+  discardedById: 'discardedById',
+  discardReason: 'discardReason'
+} as const
+
+export type DocWorkingCopyScalarFieldEnum = (typeof DocWorkingCopyScalarFieldEnum)[keyof typeof DocWorkingCopyScalarFieldEnum]
+
+
+export const DocWorkingCopyFileScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  workingCopyId: 'workingCopyId',
+  role: 'role',
+  fileKey: 'fileKey',
+  fileName: 'fileName',
+  fileSize: 'fileSize',
+  mimeType: 'mimeType',
+  checksum: 'checksum'
+} as const
+
+export type DocWorkingCopyFileScalarFieldEnum = (typeof DocWorkingCopyFileScalarFieldEnum)[keyof typeof DocWorkingCopyFileScalarFieldEnum]
+
+
+export const DocReplacementScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  reason: 'reason'
+} as const
+
+export type DocReplacementScalarFieldEnum = (typeof DocReplacementScalarFieldEnum)[keyof typeof DocReplacementScalarFieldEnum]
+
+
+export const DocReplacementItemScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  replacementId: 'replacementId',
+  documentId: 'documentId',
+  role: 'role'
+} as const
+
+export type DocReplacementItemScalarFieldEnum = (typeof DocReplacementItemScalarFieldEnum)[keyof typeof DocReplacementItemScalarFieldEnum]
 
 
 export const ReviewWorkflowScalarFieldEnum = {

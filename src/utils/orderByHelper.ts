@@ -8,7 +8,8 @@ import { ScannedFileOrderByInput } from "../resolvers/scannedFiles.js"
 // Mapeo de campos GraphQL a campos de Prisma para documentos
 const documentFieldMap: Record<string, string> = {
   CODE: "code",
-  TITLE: "title",
+  // Ordena por la COPIA del documento, que es la lectura en curso (BLOQUE 03B, B2)
+  TITLE: "currentTitle",
   CREATED_AT: "createdAt",
   UPDATED_AT: "updatedAt",
   MODULE: "module",

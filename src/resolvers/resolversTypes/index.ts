@@ -21,7 +21,9 @@ import { lastLiveRevision } from "../../utils/revisionScheme.js"
 
 /** Detalle que ambas lecturas devuelven cuando tienen que ir a la base. */
 const revisionDetail = {
-  versions: true,
+  documentType: true,
+  documentClass: true,
+  versions: { include: { files: true } },
   workflows: {
     include: { steps: { orderBy: { stepOrder: "asc" as const } } },
     orderBy: { createdAt: "asc" as const },
@@ -44,8 +46,8 @@ export const resolverTypes = {
       return prisma.document.findFirst({
         where: { id: ref.id },
         include: {
-          documentType: true,
-          documentClass: true,
+          currentDocumentType: true,
+          currentDocumentClass: true,
           revisions: {
             include: revisionDetail,
             orderBy: { createdAt: "desc" },
@@ -211,6 +213,7 @@ export const resolverTypes = {
       // Si no, hacer query
       const version = await prisma.documentVersion.findFirst({
         where: { revisionId: parent.id },
+        include: { files: true },
         orderBy: { versionNumber: "desc" },
       })
       return version
@@ -223,6 +226,7 @@ export const resolverTypes = {
         where: { id: ref.id },
         include: {
           revision: true,
+          files: true,
         },
       })
     },

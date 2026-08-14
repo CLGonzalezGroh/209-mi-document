@@ -48,6 +48,31 @@ export type DocumentRevision = Prisma.DocumentRevisionModel
  */
 export type DocumentVersion = Prisma.DocumentVersionModel
 /**
+ * Model DocVersionFile
+ * 
+ */
+export type DocVersionFile = Prisma.DocVersionFileModel
+/**
+ * Model DocWorkingCopy
+ * 
+ */
+export type DocWorkingCopy = Prisma.DocWorkingCopyModel
+/**
+ * Model DocWorkingCopyFile
+ * 
+ */
+export type DocWorkingCopyFile = Prisma.DocWorkingCopyFileModel
+/**
+ * Model DocReplacement
+ * 
+ */
+export type DocReplacement = Prisma.DocReplacementModel
+/**
+ * Model DocReplacementItem
+ * 
+ */
+export type DocReplacementItem = Prisma.DocReplacementItemModel
+/**
  * Model ReviewWorkflow
  * 
  */

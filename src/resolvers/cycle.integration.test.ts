@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken"
 import { prisma } from "../lib/prisma.js"
 import { ResolverContext } from "../types.js"
 import {
+  DocFileRole,
   DocProjectSide,
   DocumentRole,
   ModuleType,
@@ -264,7 +265,11 @@ test("recorrido 2: documento preexistente, con el archivo adjunto en el alta", a
 
   assert.equal(revision.versions.length, 1)
   assert.equal(revision.versions[0].versionNumber, 1)
-  assert.equal(revision.versions[0].checksum.length, 64)
+  // La versión es un CONJUNTO (BLOQUE 03B, B6): el archivo del alta entra como
+  // entregable, que es lo que era cuando la versión ERA un archivo.
+  assert.equal(revision.versions[0].files.length, 1)
+  assert.equal(revision.versions[0].files[0].role, DocFileRole.DELIVERABLE)
+  assert.equal(revision.versions[0].files[0].checksum.length, 64)
 
   const armado = await armar(revision.workflows[0].id, [
     StepType.REVIEW,
@@ -667,7 +672,9 @@ test("con la revisión aprobada la metadata no se edita, y la siguiente la habil
     { id: doc.id, input: { title: "Título corregido" } },
     context,
   )
-  assert.equal(editado.title, "Título corregido")
+  // El documento conserva la metadata como COPIA, nombrada por su lectura
+  // (BLOQUE 03B, B2): `currentTitle` es la de la revisión en curso.
+  assert.equal(editado.currentTitle, "Título corregido")
 })
 
 test("el código informado se rechaza bajo un esquema calculado, y se exige bajo texto libre", async () => {

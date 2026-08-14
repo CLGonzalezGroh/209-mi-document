@@ -270,6 +270,40 @@ export type EnumRevisionStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumRevisionStatusFilter<$PrismaModel>
 }
 
+export type EnumDocFileRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocFileRole | Prisma.EnumDocFileRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.DocFileRole[] | Prisma.ListEnumDocFileRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocFileRole[] | Prisma.ListEnumDocFileRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocFileRoleFilter<$PrismaModel> | $Enums.DocFileRole
+}
+
+export type EnumDocFileRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocFileRole | Prisma.EnumDocFileRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.DocFileRole[] | Prisma.ListEnumDocFileRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocFileRole[] | Prisma.ListEnumDocFileRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocFileRoleWithAggregatesFilter<$PrismaModel> | $Enums.DocFileRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocFileRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocFileRoleFilter<$PrismaModel>
+}
+
+export type EnumDocReplacementRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocReplacementRole | Prisma.EnumDocReplacementRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.DocReplacementRole[] | Prisma.ListEnumDocReplacementRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocReplacementRole[] | Prisma.ListEnumDocReplacementRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocReplacementRoleFilter<$PrismaModel> | $Enums.DocReplacementRole
+}
+
+export type EnumDocReplacementRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocReplacementRole | Prisma.EnumDocReplacementRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.DocReplacementRole[] | Prisma.ListEnumDocReplacementRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocReplacementRole[] | Prisma.ListEnumDocReplacementRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocReplacementRoleWithAggregatesFilter<$PrismaModel> | $Enums.DocReplacementRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocReplacementRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocReplacementRoleFilter<$PrismaModel>
+}
+
 export type EnumWorkflowStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.WorkflowStatus | Prisma.EnumWorkflowStatusFieldRefInput<$PrismaModel>
   in?: $Enums.WorkflowStatus[] | Prisma.ListEnumWorkflowStatusFieldRefInput<$PrismaModel>
@@ -843,6 +877,40 @@ export type NestedEnumRevisionStatusWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumRevisionStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumRevisionStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumDocFileRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocFileRole | Prisma.EnumDocFileRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.DocFileRole[] | Prisma.ListEnumDocFileRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocFileRole[] | Prisma.ListEnumDocFileRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocFileRoleFilter<$PrismaModel> | $Enums.DocFileRole
+}
+
+export type NestedEnumDocFileRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocFileRole | Prisma.EnumDocFileRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.DocFileRole[] | Prisma.ListEnumDocFileRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocFileRole[] | Prisma.ListEnumDocFileRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocFileRoleWithAggregatesFilter<$PrismaModel> | $Enums.DocFileRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocFileRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocFileRoleFilter<$PrismaModel>
+}
+
+export type NestedEnumDocReplacementRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocReplacementRole | Prisma.EnumDocReplacementRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.DocReplacementRole[] | Prisma.ListEnumDocReplacementRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocReplacementRole[] | Prisma.ListEnumDocReplacementRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocReplacementRoleFilter<$PrismaModel> | $Enums.DocReplacementRole
+}
+
+export type NestedEnumDocReplacementRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocReplacementRole | Prisma.EnumDocReplacementRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.DocReplacementRole[] | Prisma.ListEnumDocReplacementRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocReplacementRole[] | Prisma.ListEnumDocReplacementRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocReplacementRoleWithAggregatesFilter<$PrismaModel> | $Enums.DocReplacementRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocReplacementRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocReplacementRoleFilter<$PrismaModel>
 }
 
 export type NestedEnumWorkflowStatusFilter<$PrismaModel = never> = {

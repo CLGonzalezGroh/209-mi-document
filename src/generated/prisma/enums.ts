@@ -64,6 +64,23 @@ export const WorkflowStatus = {
 export type WorkflowStatus = (typeof WorkflowStatus)[keyof typeof WorkflowStatus]
 
 
+export const DocFileRole = {
+  DELIVERABLE: 'DELIVERABLE',
+  SOURCE: 'SOURCE',
+  SUPPORT: 'SUPPORT'
+} as const
+
+export type DocFileRole = (typeof DocFileRole)[keyof typeof DocFileRole]
+
+
+export const DocReplacementRole = {
+  REPLACED: 'REPLACED',
+  REPLACING: 'REPLACING'
+} as const
+
+export type DocReplacementRole = (typeof DocReplacementRole)[keyof typeof DocReplacementRole]
+
+
 export const StepType = {
   ASSIGN: 'ASSIGN',
   PREPARE: 'PREPARE',

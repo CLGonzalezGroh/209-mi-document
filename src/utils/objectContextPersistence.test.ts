@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import test, { after, before } from "node:test"
 import { prisma } from "../lib/prisma.js"
 import {
+  DocFileRole,
   DocObjectType,
   DocProjectSide,
   DocumentRole,
@@ -75,25 +76,32 @@ before(async () => {
   const documento = await prisma.document.create({
     data: {
       code: `${CODIGO}-1`,
-      title: "Documento de contexto",
+      currentTitle: "Documento de contexto",
       module: ModuleType.PROJECTS,
       projectId: PROYECTO,
-      documentTypeId: tipo.id,
+      currentDocumentTypeId: tipo.id,
       createdById: 1,
       revisions: {
         create: {
           revisionCode: "A",
           assignedOrganizerId: 1,
+          title: "Documento de contexto",
+          documentTypeId: tipo.id,
           createdById: 1,
           versions: {
             create: {
               versionNumber: 1,
-              fileKey: "k",
-              fileName: "f.pdf",
-              fileSize: 1,
-              mimeType: "application/pdf",
-              checksum: "cc".repeat(32),
               createdById: 1,
+              files: {
+                create: {
+                  role: DocFileRole.DELIVERABLE,
+                  fileKey: "k",
+                  fileName: "f.pdf",
+                  fileSize: 1,
+                  mimeType: "application/pdf",
+                  checksum: "cc".repeat(32),
+                },
+              },
             },
           },
           workflows: {
@@ -124,9 +132,9 @@ before(async () => {
   const publicado = await prisma.document.create({
     data: {
       code: `${CODIGO}-PUB`,
-      title: "Documento publicado",
+      currentTitle: "Documento publicado",
       module: ModuleType.QUALITY,
-      documentTypeId: tipo.id,
+      currentDocumentTypeId: tipo.id,
       createdById: 1,
     },
   })

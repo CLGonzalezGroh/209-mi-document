@@ -3,6 +3,8 @@ import test, { after, before } from "node:test"
 import { readFileSync } from "node:fs"
 import { prisma } from "../lib/prisma.js"
 import {
+  DocFileRole,
+  DocReplacementRole,
   ModuleType,
   RevisionStatus,
   StepStatus,
@@ -65,10 +67,10 @@ before(async () => {
   const documento = await prisma.document.create({
     data: {
       code: `${CODIGO}-1`,
-      title: "Documento de restricciones",
+      currentTitle: "Documento de restricciones",
       module: ModuleType.PROJECTS,
       projectId: PROYECTO,
-      documentTypeId,
+      currentDocumentTypeId: documentTypeId,
       createdById: 1,
     },
   })
@@ -87,6 +89,8 @@ const crearRevision = (revisionCode: string, status: RevisionStatus) =>
       revisionCode,
       status,
       assignedOrganizerId: 1,
+      title: "Documento de restricciones",
+      documentTypeId,
       createdById: 1,
     },
   })
@@ -358,12 +362,17 @@ test("la secuencia de versiones no se reinicia con cada circuito", async () => {
       data: {
         revisionId: revision.id,
         versionNumber: n,
-        fileKey: `k${n}`,
-        fileName: `f${n}.pdf`,
-        fileSize: 1,
-        mimeType: "application/pdf",
-        checksum: `${n}`.repeat(64),
         createdById: 1,
+        files: {
+          create: {
+            role: DocFileRole.DELIVERABLE,
+            fileKey: `k${n}`,
+            fileName: `f${n}.pdf`,
+            fileSize: 1,
+            mimeType: "application/pdf",
+            checksum: `${n}`.repeat(64),
+          },
+        },
       },
     })
   }
@@ -374,12 +383,17 @@ test("la secuencia de versiones no se reinicia con cada circuito", async () => {
         data: {
           revisionId: revision.id,
           versionNumber: 3,
-          fileKey: "kx",
-          fileName: "fx.pdf",
-          fileSize: 1,
-          mimeType: "application/pdf",
-          checksum: "x".repeat(64),
           createdById: 1,
+          files: {
+            create: {
+              role: DocFileRole.DELIVERABLE,
+              fileKey: "kx",
+              fileName: "fx.pdf",
+              fileSize: 1,
+              mimeType: "application/pdf",
+              checksum: "x".repeat(64),
+            },
+          },
         },
       }),
     ),
@@ -396,15 +410,90 @@ test("la secuencia de versiones no se reinicia con cada circuito", async () => {
   )
 })
 
-test("toda versión exige checksum", async () => {
-  const revision = await prisma.documentRevision.findFirstOrThrow({
-    where: { documentId, revisionCode: "V1" },
+test("todo archivo de la versión exige checksum", async () => {
+  // El checksum es obligatorio en CADA archivo, con el mismo fundamento que
+  // antes lo volvía obligatorio en la versión (BLOQUE 03B, B7): es lo que la
+  // firma acredita.
+  const version = await prisma.documentVersion.findFirstOrThrow({
+    where: { revision: { documentId, revisionCode: "V1" } },
   })
 
   await assert.rejects(() =>
     prisma.$executeRaw`
-      INSERT INTO document_versions ("revisionId", "versionNumber", "fileKey", "fileName", "fileSize", "mimeType", "createdById")
-      VALUES (${revision.id}, 9, 'k9', 'f9.pdf', 1, 'application/pdf', 1)
+      INSERT INTO doc_version_files ("versionId", "role", "fileKey", "fileName", "fileSize", "mimeType")
+      VALUES (${version.id}, 'DELIVERABLE', 'k9', 'f9.pdf', 1, 'application/pdf')
     `,
   )
+})
+
+test("un archivo no se repite dentro de la misma versión", async () => {
+  const version = await prisma.documentVersion.findFirstOrThrow({
+    where: { revision: { documentId, revisionCode: "V1" } },
+  })
+
+  const archivo = (fileKey: string, role: DocFileRole) =>
+    prisma.docVersionFile.create({
+      data: {
+        versionId: version.id,
+        role,
+        fileKey,
+        fileName: `${fileKey}.dwg`,
+        fileSize: 1,
+        mimeType: "image/vnd.dwg",
+        checksum: "d".repeat(64),
+      },
+    })
+
+  // El mismo archivo con otro rol tampoco: la unicidad es por fileKey
+  await archivo("fuente", DocFileRole.SOURCE)
+  assert.equal(
+    await rechazaPorUnicidad(() => archivo("fuente", DocFileRole.SUPPORT)),
+    true,
+  )
+})
+
+test("a lo sumo una copia de trabajo abierta por revisión", async () => {
+  // El mismo invariante que el módulo ya aplica a la revisión en curso y al
+  // circuito abierto, en un tercer nivel (BLOQUE 03B, B12).
+  const revision = await crearRevision("WC1", RevisionStatus.DRAFT)
+
+  const abrir = () =>
+    prisma.docWorkingCopy.create({
+      data: { revisionId: revision.id, createdById: 1 },
+    })
+
+  const primera = await abrir()
+  assert.equal(await rechazaPorUnicidad(abrir), true)
+
+  // Descartada la primera, se puede abrir otra: el índice es PARCIAL
+  await prisma.docWorkingCopy.update({
+    where: { id: primera.id },
+    data: {
+      discardedAt: new Date(),
+      discardedById: 1,
+      discardReason: "se rehace",
+    },
+  })
+  const segunda = await abrir()
+  assert.ok(segunda.id !== primera.id)
+})
+
+test("un documento no se repite con el mismo papel en un acto de reemplazo", async () => {
+  const acto = await prisma.docReplacement.create({
+    data: { reason: "unificación de planos", createdById: 1 },
+  })
+
+  const item = (role: DocReplacementRole) =>
+    prisma.docReplacementItem.create({
+      data: { replacementId: acto.id, documentId, role },
+    })
+
+  await item(DocReplacementRole.REPLACED)
+  assert.equal(await rechazaPorUnicidad(() => item(DocReplacementRole.REPLACED)), true)
+
+  // Con el otro papel sí entra: la unicidad es por la terna, no por el par
+  const reemplazante = await item(DocReplacementRole.REPLACING)
+  assert.equal(reemplazante.role, DocReplacementRole.REPLACING)
+
+  await prisma.docReplacement.delete({ where: { id: acto.id } })
 })

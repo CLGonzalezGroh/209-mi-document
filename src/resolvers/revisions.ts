@@ -30,10 +30,13 @@ import { stepsSkippedByCancellation } from "../utils/reviewWorkflow.js"
 const revisionIncludes = {
   document: {
     include: {
-      documentType: true,
+      currentDocumentType: true,
     },
   },
+  documentType: true,
+  documentClass: true,
   versions: {
+    include: { files: true },
     orderBy: { versionNumber: "desc" as const },
   },
   workflows: {
@@ -155,8 +158,9 @@ export const revisionResolvers = {
               id: true,
               code: true,
               projectId: true,
-              documentClassId: true,
-              documentTypeId: true,
+              currentTitle: true,
+              currentDocumentClassId: true,
+              currentDocumentTypeId: true,
             },
           })
 
@@ -184,8 +188,8 @@ export const revisionResolvers = {
             documentId,
             scope: {
               projectId: document.projectId,
-              documentClassId: document.documentClassId,
-              documentTypeId: document.documentTypeId,
+              documentClassId: document.currentDocumentClassId,
+              documentTypeId: document.currentDocumentTypeId,
             },
             chosenScheme: input.revisionScheme ?? null,
             informedCode: input.revisionCode ?? null,
@@ -207,6 +211,13 @@ export const revisionResolvers = {
               revisionCode,
               status: RevisionStatus.DRAFT,
               assignedOrganizerId: organizerId,
+              // La identificación se COPIA de la revisión anterior (BLOQUE 03B,
+              // B1). La copia del documento es justamente la de la revisión en
+              // curso, y acá no hay ninguna abierta: refleja la última no
+              // abandonada, que es la fuente correcta y evita una consulta más.
+              title: document.currentTitle,
+              documentTypeId: document.currentDocumentTypeId,
+              documentClassId: document.currentDocumentClassId,
               createdById: userId,
               updatedById: userId,
               ...(input.initialVersion && {

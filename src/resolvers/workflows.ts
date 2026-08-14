@@ -12,6 +12,7 @@ import {
 import { handleError } from "../utils/handleError.js"
 import type { Prisma } from "../generated/prisma/client.js"
 import {
+  DocFileRole,
   DocObjectType,
   RevisionStatus,
   WorkflowStatus,
@@ -81,7 +82,11 @@ const stepContext = {
       revision: {
         include: {
           document: true,
-          versions: { orderBy: { versionNumber: "desc" as const }, take: 1 },
+          versions: {
+            include: { files: { orderBy: { fileKey: "asc" as const } } },
+            orderBy: { versionNumber: "desc" as const },
+            take: 1,
+          },
         },
       },
     },
@@ -200,7 +205,22 @@ const persistSignature = async (
     )
   }
 
-  const document = step.workflow.revision.document
+  // El entregable es lo que se revisa y se marca (BLOQUE 03B, B7). La fase D
+  // lleva el payload a v2 con la LISTA completa de archivos; hasta entonces
+  // acredita el primer entregable, que es exactamente lo que acreditaba cuando
+  // la versión era un archivo.
+  const deliverable =
+    version.files.find((f) => f.role === DocFileRole.DELIVERABLE) ??
+    version.files[0]
+  if (!deliverable) {
+    throw new GraphQLError(
+      "No se puede firmar: la versión vigente no tiene ningún archivo.",
+      { extensions: { code: "BAD_REQUEST" } },
+    )
+  }
+
+  const revision = step.workflow.revision
+  const document = revision.document
   const signature = buildSignature({
     step: {
       id: step.id,
@@ -215,15 +235,18 @@ const persistSignature = async (
     version: {
       id: version.id,
       versionNumber: version.versionNumber,
-      fileKey: version.fileKey,
-      checksum: version.checksum,
+      fileKey: deliverable.fileKey,
+      checksum: deliverable.checksum,
     },
+    // La identificación se lee de la REVISIÓN, que es donde vive (BLOQUE 03B,
+    // B1). El código sigue siendo del documento: es su identificador y no
+    // cambia (B3).
     document: {
       id: document.id,
       code: document.code,
-      title: document.title,
-      documentClassId: document.documentClassId,
-      documentTypeId: document.documentTypeId,
+      title: revision.title,
+      documentClassId: revision.documentClassId,
+      documentTypeId: revision.documentTypeId,
     },
     assignedToId: step.assignedToId,
     resolvedById,

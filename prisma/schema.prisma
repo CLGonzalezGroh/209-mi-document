@@ -66,6 +66,24 @@ enum WorkflowStatus {
   CANCELLED // Retirado sin juicio, con motivo propio. Exclusivo del circuito
 }
 
+// Papel del archivo dentro del conjunto de la versión (BLOQUE 03B, B7).
+//
+// Enumeración y no catálogo configurable, por el criterio de D-22: es catálogo
+// cuando el usuario elige el rótulo, y enumeración cuando el SISTEMA interpreta
+// el efecto. Acá lo interpreta —qué se revisa, qué se marca, qué se exige al
+// emitir—, de modo que un valor libre no tendría comportamiento asociado.
+enum DocFileRole {
+  DELIVERABLE // El entregable, típicamente PDF. Se revisa y se marca. Al menos uno
+  SOURCE // La fuente editable, típicamente DWG. Acompaña en custodia
+  SUPPORT // La evidencia que formó parte de producirlo: memoria de cálculo, ensayos
+}
+
+// Papel del documento dentro del acto de reemplazo (BLOQUE 03B, B5).
+enum DocReplacementRole {
+  REPLACED // Queda obsoleto en el mismo acto
+  REPLACING // Lo supera
+}
+
 // Pasos del circuito, en el orden en que se recorren (BLOQUE 03, B1).
 // Los dos primeros los pone el sistema y no la plantilla; los tres últimos
 // son las casillas del rótulo del plano más el acuse.
@@ -157,7 +175,8 @@ model DocumentClass {
 
   // Relaciones
   documentTypes     DocumentType[]
-  documents         Document[]
+  documents         Document[] // Por la COPIA del documento (BLOQUE 03B, B2)
+  revisions         DocumentRevision[] // Por el dato, que vive en la revisión (B1)
   scannedFiles      ScannedFile[]
   workflowTemplates DocWorkflowTemplate[]
 
@@ -194,7 +213,8 @@ model DocumentType {
 
   // Relaciones
   class             DocumentClass?        @relation(fields: [classId], references: [id])
-  documents         Document[]
+  documents         Document[] // Por la COPIA del documento (BLOQUE 03B, B2)
+  revisions         DocumentRevision[] // Por el dato, que vive en la revisión (B1)
   scannedFiles      ScannedFile[]
   workflowTemplates DocWorkflowTemplate[]
 
@@ -217,8 +237,17 @@ model Document {
   terminatedAt DateTime?
   isSys        Boolean   @default(false)
 
-  code        String // Código del documento (ej: "PR-001")
-  title       String
+  // El código es el IDENTIFICADOR y no cambia (BLOQUE 03B, B3). Está en los
+  // transmittals emitidos, en el payload de cada firma, en las referencias
+  // cruzadas de otros documentos y en el rótulo de cada archivo que salió:
+  // cambiarlo rompe la correspondencia con todo lo que ya lo nombra y que el
+  // sistema no controla. Se corrige solo mientras el documento no tenga ninguna
+  // revisión aprobada (B4); después, lo que corresponde es un documento nuevo
+  // que lo reemplace y lo supere (B5).
+  code String
+
+  // La descripción es ADMINISTRATIVA: no se imprime en el rótulo, de modo que
+  // se edita siempre y no se congela con la revisión aprobada (B1).
   description String?
   module      ModuleType // Quality, Projects, Tags, etc.
 
@@ -229,8 +258,33 @@ model Document {
   // que no circula y se gobierna por permiso global y clasificación.
   projectId Int?
 
-  documentTypeId  Int
-  documentClassId Int? // Clase de documento (null = sin clasificar)
+  // Metadata de identificación: COPIA de la revisión en curso, no dato propio
+  // (BLOQUE 03B, B1 y B2). El dato vive en DocumentRevision, porque está impreso
+  // en el rótulo del archivo y por lo tanto pertenece a la emisión que lo
+  // produjo. Acá se replica para que listados, filtros e índices no paguen un
+  // join, y su ÚNICO ESCRITOR es la transición de la revisión.
+  //
+  // El prefijo `current` nombra la lectura que sirve: la de la revisión EN CURSO.
+  // Un campo desnudo significaría eso mismo sin decirlo, y quien buscara el
+  // rótulo aprobado se llevaría otro valor sin enterarse —lo que el §13 previene
+  // al pedir que las dos lecturas se expongan y no se deriven en cada consumidor.
+  // La metadata VIGENTE se lee de la revisión aprobada, que lleva la suya.
+  currentTitle           String
+  currentDocumentTypeId  Int
+  currentDocumentClassId Int? // Clase de documento (null = sin clasificar)
+
+  // Obsolescencia del documento (BLOQUE 03B, B5). Dos causas llegan al mismo
+  // estado: haber sido reemplazado por otro que lo supera, y haber salido del
+  // alcance del proyecto sin que nada lo reemplace. Por eso el hecho se REGISTRA
+  // acá y no se deriva de la existencia de un reemplazo; lo que sí se deriva es
+  // la CAUSA, según el documento figure o no en un acto de reemplazo.
+  //
+  // Obsoleto NO es dado de baja: `terminatedAt` corrige un alta que no debió
+  // existir, y la obsolescencia es un hecho del ciclo de vida —el documento
+  // existió, sirvió y dejó de servir— que conserva su historia entera.
+  obsoletedAt    DateTime?
+  obsoletedById  Int?
+  obsoleteReason String?
 
   // NO hay revisionScheme: el esquema no se persiste (BLOQUE 03, B13). Se elige
   // al crear cada revisión y se infiere de la última revisión no abortada.
@@ -243,10 +297,11 @@ model Document {
   projectTaskId Int?
 
   // Relaciones
-  documentType     DocumentType            @relation(fields: [documentTypeId], references: [id])
-  documentClass    DocumentClass?          @relation(fields: [documentClassId], references: [id])
-  revisions        DocumentRevision[]
-  taskDocumentRefs TaskDocumentReference[]
+  currentDocumentType  DocumentType            @relation(fields: [currentDocumentTypeId], references: [id])
+  currentDocumentClass DocumentClass?          @relation(fields: [currentDocumentClassId], references: [id])
+  revisions            DocumentRevision[]
+  taskDocumentRefs     TaskDocumentReference[]
+  replacementItems     DocReplacementItem[]
 
   // Unicidad del código por dos índices ÚNICOS PARCIALES, creados en SQL porque
   // Prisma no los expresa (BLOQUE 02, B2):
@@ -257,7 +312,7 @@ model Document {
   // con columnas anulables no impedía duplicados (H-19).
   @@index([projectId])
   @@index([module])
-  @@index([documentClassId])
+  @@index([currentDocumentClassId])
   @@index([projectTaskId])
   @@map("documents")
 }
@@ -296,6 +351,22 @@ model DocumentRevision {
   approvedById Int?
   approvedAt   DateTime?
 
+  // Metadata de IDENTIFICACIÓN de la revisión (BLOQUE 03B, B1). Vive acá y no en
+  // el documento porque está impresa dentro del archivo: el rótulo lleva el
+  // título y a menudo la clase y el tipo, y lo que está impreso en el archivo
+  // pertenece a la emisión que lo produjo.
+  //
+  // Se copian de la revisión anterior al crear la nueva, y se editan libremente
+  // mientras esté abierta. Aprobada, quedan congeladas POR ESTRUCTURA —una
+  // revisión aprobada no se modifica—, sin necesidad de una precondición que lo
+  // enuncie. Abandonar la revisión se lleva con ella lo que se editó.
+  //
+  // Los nombres van desnudos, a diferencia de los `current*` del documento: acá
+  // el valor no es copia de nada, es el dato.
+  title           String
+  documentTypeId  Int
+  documentClassId Int?
+
   // Armador designado al crear la revisión (BLOQUE 03, B3). Obligatorio: es el
   // único actor que debe conocerse en el alta, porque todo lo demás lo trae la
   // plantilla o lo decide el armado. Su valor por defecto lo aporta
@@ -312,10 +383,13 @@ model DocumentRevision {
   abandonReason String?
 
   // Relaciones
-  document         Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  document         Document           @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentType     DocumentType       @relation(fields: [documentTypeId], references: [id])
+  documentClass    DocumentClass?     @relation(fields: [documentClassId], references: [id])
   versions         DocumentVersion[]
   workflows        ReviewWorkflow[] // Varios circuitos sucesivos (D-11, B2)
   transmittalItems TransmittalItem[]
+  workingCopies    DocWorkingCopy[] // A lo sumo una abierta (BLOQUE 03B, B12)
 
   // Unicidad del código por ÍNDICE ÚNICO PARCIAL, creado en SQL (BLOQUE 03, B12):
   //   document_revisions_code_key  UNIQUE (documentId, revisionCode) WHERE status <> 'ABANDONED'
@@ -326,7 +400,14 @@ model DocumentRevision {
   @@map("document_revisions")
 }
 
-// Versiones de archivo dentro de una revisión
+// Versión: el CONJUNTO de archivos registrado en un mismo acto (BLOQUE 03B, B6).
+//
+// Un documento se entrega habitualmente como más de un archivo: el PDF que se
+// revisa y se marca, con su editable en custodia y la evidencia que lo sustenta.
+// El principio de D-10 no se debilita, se corrige su cardinalidad: la versión no
+// existe sin contenido nuevo, y ni el conjunto ni sus archivos se modifican.
+//
+// Nace al CONFIRMAR una copia de trabajo (B12), y no al subir cada archivo.
 model DocumentVersion {
   id          Int      @id @default(autoincrement())
   createdAt   DateTime @default(now())
@@ -334,24 +415,158 @@ model DocumentVersion {
 
   revisionId    Int
   versionNumber Int // 1, 2, 3...
-  fileKey       String // Key en DO Spaces
-  fileName      String // Nombre original del archivo
-  fileSize      Int // Tamaño en bytes
-  mimeType      String // "application/pdf", "image/jpeg"
-
-  // SHA-256, OBLIGATORIO en toda versión (BLOQUE 03, B4 y H-27). Es lo que la
-  // firma acredita, junto con la metadata del documento.
-  // DECLARADO: hoy nadie lo calcula. mi-fileserver no ve los bytes por diseño,
-  // de modo que hasta BLOCK_05 debe enviarlo quien invoca la API.
-  checksum String
 
   comment String? // "Corrección del conexionado en la página 5". Opcional (B4)
 
   // Relaciones
   revision DocumentRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  files    DocVersionFile[]
+  // La copia de trabajo que la produjo, cuando nació de una (B12)
+  workingCopy DocWorkingCopy?
 
   @@unique([revisionId, versionNumber])
   @@map("document_versions")
+}
+
+// Un archivo dentro del conjunto de la versión (BLOQUE 03B, B6 y B7).
+model DocVersionFile {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  versionId Int
+  role      DocFileRole
+
+  fileKey  String // Key en DO Spaces
+  fileName String // Nombre original del archivo
+  fileSize Int // Tamaño en bytes
+  mimeType String // "application/pdf", "image/vnd.dwg"
+
+  // SHA-256, OBLIGATORIO en cada archivo, con el mismo fundamento que antes lo
+  // volvía obligatorio en la versión (BLOQUE 03, B4 y H-27): es lo que la firma
+  // acredita. Una regla condicional obligaría a decidir qué ocurre con el
+  // archivo que entró sin él y después resulta ser el firmado.
+  checksum String
+
+  // Relaciones
+  version DocumentVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  // Ningún archivo repetido dentro de la misma versión.
+  @@unique([versionId, fileKey])
+  @@index([versionId])
+  @@map("doc_version_files")
+}
+
+// Copia de trabajo: el conjunto EN PREPARACIÓN (BLOQUE 03B, B12).
+//
+// Es lo que en la gestión documental se opera con check-out y check-in, con dos
+// diferencias: acá NO descarga —leer un archivo nunca fue un acto del ciclo— y
+// NO bloquea, porque la exclusividad ya la da el circuito, donde la versión la
+// produce quien tiene el paso vigente (BLOQUE 03, B5).
+//
+// Mutable por naturaleza, y por eso NO es una versión: la versión debe ser
+// inmutable una vez que existe, y lo que esta entidad resuelve es cuándo existe.
+model DocWorkingCopy {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  createdById Int // Quien la abrió. Referencia al User del sistema admin
+
+  revisionId Int
+
+  // Confirmación: el conjunto se convierte en la versión siguiente.
+  confirmedAt   DateTime?
+  confirmedById Int?
+  versionId     Int? @unique // La versión que produjo, cuando se confirmó
+
+  // Descarte: se abandona sin producir versión. Palabra propia del nivel (B11).
+  discardedAt   DateTime?
+  discardedById Int?
+  discardReason String?
+
+  // Relaciones
+  revision DocumentRevision     @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  version  DocumentVersion?     @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  files    DocWorkingCopyFile[]
+
+  // A lo sumo UNA abierta por revisión, por ÍNDICE ÚNICO PARCIAL creado en SQL:
+  //   doc_working_copies_open_key  UNIQUE (revisionId)
+  //                                WHERE confirmedAt IS NULL AND discardedAt IS NULL
+  // Es el mismo invariante que el módulo ya aplica dos veces —a lo sumo una
+  // revisión en curso por documento, a lo sumo un circuito abierto por revisión—
+  // apareciendo en un tercer nivel.
+  @@index([revisionId])
+  @@map("doc_working_copies")
+}
+
+// Un archivo dentro de la copia de trabajo. Misma forma que DocVersionFile: al
+// confirmar se copia tal cual, incluidos `fileKey` y `checksum`, de modo que un
+// archivo que no cambió NO se vuelve a subir (BLOQUE 03B, B12).
+model DocWorkingCopyFile {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  workingCopyId Int
+  role          DocFileRole
+
+  fileKey  String
+  fileName String
+  fileSize Int
+  mimeType String
+  checksum String
+
+  // Relaciones
+  workingCopy DocWorkingCopy @relation(fields: [workingCopyId], references: [id], onDelete: Cascade)
+
+  @@unique([workingCopyId, fileKey])
+  @@index([workingCopyId])
+  @@map("doc_working_copy_files")
+}
+
+// Acto de reemplazo entre documentos (BLOQUE 03B, B5).
+//
+// Reemplazar es SUPERAR: el documento reemplazado queda obsoleto en el mismo
+// acto. Es el mismo hecho que un nivel más abajo ocurre al aprobar una revisión,
+// que supersede a la anterior.
+//
+// Es un ACTO y no un par de referencias: sin la agrupación, una reorganización
+// de dos documentos en dos es indistinguible de dos reemplazos separados.
+model DocReplacement {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  createdById Int // Referencia al User del sistema admin
+
+  // Obligatorio, con el criterio del §9 para todo acto consecuente.
+  reason String
+
+  // NO declara de qué clase de reemplazo se trata —recodificación, unificación,
+  // división—: se DERIVA de su cardinalidad. Un indicador sería un dato
+  // calculable capaz de contradecir a los que lo originan (criterio de D-04).
+
+  // Relaciones
+  items DocReplacementItem[]
+
+  @@map("doc_replacements")
+}
+
+// Los documentos que participan del acto, con su papel. La relación es N:M: el
+// mismo acto expresa la recodificación (1:1), la unificación (N:1) y la división
+// (1:N). Los documentos de un acto COMPARTEN ÁMBITO: lo que cruza de proyecto al
+// régimen de publicación no es reemplazo sino promoción, que es otra cosa (B10).
+model DocReplacementItem {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  replacementId Int
+  documentId    Int
+  role          DocReplacementRole
+
+  // Relaciones
+  replacement DocReplacement @relation(fields: [replacementId], references: [id], onDelete: Cascade)
+  document    Document       @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  // Un documento no aparece dos veces con el mismo papel dentro de un acto.
+  @@unique([replacementId, documentId, role])
+  @@index([documentId])
+  @@map("doc_replacement_items")
 }
 
 // Circuito de revisión (ISO 9001). Bajo BLOQUE 03, B1 abarca el ciclo completo:

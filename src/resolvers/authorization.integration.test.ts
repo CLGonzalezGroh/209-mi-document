@@ -59,10 +59,10 @@ const crearDocumento = async (sufijo: string, module: ModuleType, projectId: num
   const doc = await prisma.document.create({
     data: {
       code: `${CODIGO}-${sufijo}`,
-      title: `Documento de prueba ${sufijo}`,
+      currentTitle: `Documento de prueba ${sufijo}`,
       module,
       projectId,
-      documentTypeId: tipo!.id,
+      currentDocumentTypeId: tipo!.id,
       createdById: USER_ID,
       updatedById: USER_ID,
     },

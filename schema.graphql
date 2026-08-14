@@ -596,20 +596,28 @@ type Document @key(fields: "id") {
   terminatedAt: DateTime
   "Indica si es un registro del sistema"
   isSys: Boolean!
-  "Código único del documento (ej: PR-001)"
+  """
+  Código único del documento. Es el IDENTIFICADOR y no cambia: está en los
+  transmittals emitidos, en el payload de cada firma y en el rótulo de cada
+  archivo que salió. Se corrige solo mientras no haya ninguna revisión aprobada.
+  """
   code: String!
-  "Título del documento"
-  title: String!
-  "Descripción del documento"
+  """
+  Título de la revisión EN CURSO. Es una COPIA: el dato vive en la revisión,
+  porque está impreso en el rótulo. Para el título que dice el rótulo aprobado,
+  leer `currentRevision.title`.
+  """
+  currentTitle: String!
+  "Descripción del documento. Administrativa: no se imprime y se edita siempre"
   description: String
   "Módulo al que pertenece"
   module: ModuleType!
   "Proyecto al que pertenece. Nulo en el régimen de publicación, documentación que no circula"
   projectId: Int
-  "Tipo de documento"
-  documentType: DocumentType!
-  "Clase de documento"
-  documentClass: DocumentClass
+  "Tipo de la revisión EN CURSO. Copia, como `currentTitle`"
+  currentDocumentType: DocumentType!
+  "Clase de la revisión EN CURSO. Copia, como `currentTitle`"
+  currentDocumentClass: DocumentClass
   """
   Revisión VIGENTE: la última aprobada, y solo la aprobada. Nula mientras el
   documento no haya aprobado ninguna. No considera las revisiones abandonadas.
@@ -693,7 +701,18 @@ type DocumentRevision @key(fields: "id") {
   revisionCode: String!
   "Estado actual de la revisión"
   status: RevisionStatus!
-  "Versiones de archivo de esta revisión"
+  """
+  Título de ESTA revisión, y por lo tanto lo que dice el rótulo de sus archivos.
+  Vive acá y no en el documento porque está impreso dentro del archivo, y lo
+  impreso pertenece a la emisión que lo produjo. Se copia de la revisión anterior
+  al crearla, se edita mientras esté abierta y queda congelado al aprobarla.
+  """
+  title: String!
+  "Tipo de documento de ESTA revisión"
+  documentType: DocumentType!
+  "Clase de documento de ESTA revisión"
+  documentClass: DocumentClass
+  "Versiones de esta revisión. Cada una es un conjunto de archivos"
   versions: [DocumentVersion!]!
   "Versión actual (la más reciente)"
   currentVersion: DocumentVersion
@@ -734,6 +753,26 @@ type DocumentVersion @key(fields: "id") {
   revision: DocumentRevision!
   "Número de versión (1, 2, 3...)"
   versionNumber: Int!
+  """
+  Los archivos del conjunto. Un documento se entrega habitualmente como más de
+  uno: el PDF que se revisa y se marca, con su editable en custodia y la
+  evidencia que lo sustenta. Al menos uno con rol DELIVERABLE.
+  """
+  files: [DocVersionFile!]!
+  "Comentario sobre los cambios. Opcional: la observación viaja dentro del archivo"
+  comment: String
+}
+
+"Un archivo dentro del conjunto de la versión"
+type DocVersionFile {
+  "Identificador único"
+  id: Int!
+  "Fecha de creación"
+  createdAt: DateTime!
+  "Versión a la que pertenece"
+  version: DocumentVersion!
+  "Papel del archivo dentro del conjunto"
+  role: DocFileRole!
   "Key del archivo en DO Spaces"
   fileKey: String!
   "Nombre original del archivo"
@@ -742,10 +781,24 @@ type DocumentVersion @key(fields: "id") {
   fileSize: Int!
   "Tipo MIME del archivo"
   mimeType: String!
-  "Hash SHA-256, OBLIGATORIO: es lo que la firma acredita como contenido"
+  "Hash SHA-256, OBLIGATORIO en cada archivo: es lo que la firma acredita"
   checksum: String!
-  "Comentario sobre los cambios. Opcional: la observación viaja dentro del archivo"
-  comment: String
+}
+
+"""
+Papel del archivo dentro del conjunto de la versión.
+
+Enumeración y no catálogo: el sistema interpreta el efecto —qué se revisa, qué
+se marca, qué se exige al emitir—, de modo que un valor libre no tendría
+comportamiento asociado.
+"""
+enum DocFileRole {
+  "El entregable, típicamente PDF. Es lo que se revisa y se marca. Al menos uno"
+  DELIVERABLE
+  "La fuente editable, típicamente DWG. Acompaña en custodia. No se revisa"
+  SOURCE
+  "La evidencia que formó parte de producirlo: memoria de cálculo, ensayos, planillas"
+  SUPPORT
 }
 
 # ═══════════════════════════════════════════════════════

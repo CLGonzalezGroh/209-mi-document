@@ -19,6 +19,7 @@ import { assertDocumentContext } from "../utils/documentContext.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentOrderBy } from "../utils/orderByHelper.js"
 import {
+  DocFileRole,
   DocObjectType,
   ModuleType,
   RevisionStatus,
@@ -56,11 +57,11 @@ interface DocumentFilterInput {
 // Las revisiones se ordenan por CREACIÓN y nunca por código (BLOQUE 03, B12 y
 // H-10): con el cambio de esquema la secuencia puede quedar A, B, C, 0, 1.
 const documentIncludes = {
-  documentType: true,
-  documentClass: true,
+  currentDocumentType: true,
+  currentDocumentClass: true,
   revisions: {
     include: {
-      versions: true,
+      versions: { include: { files: true } },
       workflows: {
         include: {
           steps: { orderBy: { stepOrder: "asc" as const } },
@@ -170,7 +171,7 @@ export const documentResolvers = {
         if (filter?.query) {
           where.OR = [
             { code: { contains: filter.query, mode: "insensitive" as const } },
-            { title: { contains: filter.query, mode: "insensitive" as const } },
+            { currentTitle: { contains: filter.query, mode: "insensitive" as const } },
             { description: { contains: filter.query, mode: "insensitive" as const } },
           ]
         }
@@ -179,12 +180,14 @@ export const documentResolvers = {
           where.module = filter.module
         }
 
+        // Los filtros resuelven sobre la COPIA del documento y no por join a la
+        // revisión: es para lo que la copia existe (BLOQUE 03B, B2).
         if (filter?.documentTypeId) {
-          where.documentTypeId = filter.documentTypeId
+          where.currentDocumentTypeId = filter.documentTypeId
         }
 
         if (filter?.documentClassId) {
-          where.documentClassId = filter.documentClassId
+          where.currentDocumentClassId = filter.documentClassId
         }
 
         if (filter?.status) {
@@ -340,14 +343,14 @@ export const documentResolvers = {
 
         const documents = await context.orm.document.findMany({
           where: applyProjectScope(where, scope),
-          select: { id: true, code: true, title: true },
+          select: { id: true, code: true, currentTitle: true },
           orderBy: { code: "asc" },
         })
 
         return documents.map(
           (d): SelectOption => ({
             value: String(d.id),
-            label: `${d.code} - ${d.title}`,
+            label: `${d.code} - ${d.currentTitle}`,
           }),
         )
       } catch (error) {
@@ -442,12 +445,13 @@ export const documentResolvers = {
           const created = await tx.document.create({
             data: {
               code: input.code,
-              title: input.title,
               description: input.description,
               module: input.module,
               projectId: input.projectId,
-              documentTypeId: input.documentTypeId,
-              documentClassId: input.documentClassId,
+              // Copia de la revisión en curso, que acá es la que nace (B2).
+              currentTitle: input.title,
+              currentDocumentTypeId: input.documentTypeId,
+              currentDocumentClassId: input.documentClassId,
               createdById: userId,
               updatedById: userId,
               revisions: {
@@ -455,14 +459,32 @@ export const documentResolvers = {
                   revisionCode,
                   status: RevisionStatus.DRAFT,
                   assignedOrganizerId: organizerId,
+                  // La identificación es de la revisión (B1). En el alta la
+                  // aporta el input, porque no hay revisión anterior de la que
+                  // copiarla.
+                  title: input.title,
+                  documentTypeId: input.documentTypeId,
+                  documentClassId: input.documentClassId,
                   createdById: userId,
                   updatedById: userId,
                   ...(input.initialVersion && {
                     versions: {
                       create: {
                         versionNumber: 1,
-                        ...input.initialVersion,
+                        comment: input.initialVersion.comment,
                         createdById: userId,
+                        // La versión es un CONJUNTO (B6): el archivo del alta
+                        // entra como entregable, que es lo que era.
+                        files: {
+                          create: {
+                            role: DocFileRole.DELIVERABLE,
+                            fileKey: input.initialVersion.fileKey,
+                            fileName: input.initialVersion.fileName,
+                            fileSize: input.initialVersion.fileSize,
+                            mimeType: input.initialVersion.mimeType,
+                            checksum: input.initialVersion.checksum,
+                          },
+                        },
                       },
                     },
                   }),
@@ -494,7 +516,7 @@ export const documentResolvers = {
             actorId: userId,
             meta: {
               code: created.code,
-              title: created.title,
+              title: created.currentTitle,
               module: created.module,
               revisionCode,
               assignedOrganizerId: organizerId,
@@ -596,7 +618,7 @@ export const documentResolvers = {
           )
         }
 
-        const { documentTypeId, documentClassId, ...rest } = input
+        const { documentTypeId, documentClassId, title, ...rest } = input
 
         const document = await context.orm.$transaction(async (tx) => {
           const updated = await tx.document.update({
@@ -604,11 +626,12 @@ export const documentResolvers = {
             data: {
               ...rest,
               updatedById: userId,
+              ...(title !== undefined && { currentTitle: title }),
               ...(documentTypeId !== undefined && {
-                documentType: { connect: { id: documentTypeId } },
+                currentDocumentType: { connect: { id: documentTypeId } },
               }),
               ...(documentClassId !== undefined && {
-                documentClass: documentClassId
+                currentDocumentClass: documentClassId
                   ? { connect: { id: documentClassId } }
                   : { disconnect: true },
               }),

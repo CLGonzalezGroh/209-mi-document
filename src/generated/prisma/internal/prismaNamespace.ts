@@ -390,6 +390,11 @@ export const ModelName = {
   TaskDocumentReference: 'TaskDocumentReference',
   DocumentRevision: 'DocumentRevision',
   DocumentVersion: 'DocumentVersion',
+  DocVersionFile: 'DocVersionFile',
+  DocWorkingCopy: 'DocWorkingCopy',
+  DocWorkingCopyFile: 'DocWorkingCopyFile',
+  DocReplacement: 'DocReplacement',
+  DocReplacementItem: 'DocReplacementItem',
   ReviewWorkflow: 'ReviewWorkflow',
   ReviewStep: 'ReviewStep',
   DocStepSignature: 'DocStepSignature',
@@ -422,7 +427,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "documentClass" | "documentType" | "document" | "taskDocumentReference" | "documentRevision" | "documentVersion" | "reviewWorkflow" | "reviewStep" | "docStepSignature" | "transmittal" | "transmittalItem" | "attachment" | "docProjectSettings" | "docSettings" | "docWorkflowTemplate" | "docWorkflowTemplateStep" | "docProjectMember" | "docWorkflowEvent" | "docAuditEvent" | "scannedFile" | "area" | "documentSysLog" | "documentSysLogArchive"
+    modelProps: "documentClass" | "documentType" | "document" | "taskDocumentReference" | "documentRevision" | "documentVersion" | "docVersionFile" | "docWorkingCopy" | "docWorkingCopyFile" | "docReplacement" | "docReplacementItem" | "reviewWorkflow" | "reviewStep" | "docStepSignature" | "transmittal" | "transmittalItem" | "attachment" | "docProjectSettings" | "docSettings" | "docWorkflowTemplate" | "docWorkflowTemplateStep" | "docProjectMember" | "docWorkflowEvent" | "docAuditEvent" | "scannedFile" | "area" | "documentSysLog" | "documentSysLogArchive"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -867,6 +872,376 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.DocumentVersionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.DocumentVersionCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocVersionFile: {
+      payload: Prisma.$DocVersionFilePayload<ExtArgs>
+      fields: Prisma.DocVersionFileFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocVersionFileFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocVersionFilePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocVersionFileFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocVersionFilePayload>
+        }
+        findFirst: {
+          args: Prisma.DocVersionFileFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocVersionFilePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocVersionFileFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocVersionFilePayload>
+        }
+        findMany: {
+          args: Prisma.DocVersionFileFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocVersionFilePayload>[]
+        }
+        create: {
+          args: Prisma.DocVersionFileCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocVersionFilePayload>
+        }
+        createMany: {
+          args: Prisma.DocVersionFileCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocVersionFileCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocVersionFilePayload>[]
+        }
+        delete: {
+          args: Prisma.DocVersionFileDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocVersionFilePayload>
+        }
+        update: {
+          args: Prisma.DocVersionFileUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocVersionFilePayload>
+        }
+        deleteMany: {
+          args: Prisma.DocVersionFileDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocVersionFileUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocVersionFileUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocVersionFilePayload>[]
+        }
+        upsert: {
+          args: Prisma.DocVersionFileUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocVersionFilePayload>
+        }
+        aggregate: {
+          args: Prisma.DocVersionFileAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocVersionFile>
+        }
+        groupBy: {
+          args: Prisma.DocVersionFileGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocVersionFileGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocVersionFileCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocVersionFileCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocWorkingCopy: {
+      payload: Prisma.$DocWorkingCopyPayload<ExtArgs>
+      fields: Prisma.DocWorkingCopyFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocWorkingCopyFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocWorkingCopyFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyPayload>
+        }
+        findFirst: {
+          args: Prisma.DocWorkingCopyFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocWorkingCopyFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyPayload>
+        }
+        findMany: {
+          args: Prisma.DocWorkingCopyFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyPayload>[]
+        }
+        create: {
+          args: Prisma.DocWorkingCopyCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyPayload>
+        }
+        createMany: {
+          args: Prisma.DocWorkingCopyCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocWorkingCopyCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyPayload>[]
+        }
+        delete: {
+          args: Prisma.DocWorkingCopyDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyPayload>
+        }
+        update: {
+          args: Prisma.DocWorkingCopyUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocWorkingCopyDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocWorkingCopyUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocWorkingCopyUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocWorkingCopyUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyPayload>
+        }
+        aggregate: {
+          args: Prisma.DocWorkingCopyAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocWorkingCopy>
+        }
+        groupBy: {
+          args: Prisma.DocWorkingCopyGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocWorkingCopyGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocWorkingCopyCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocWorkingCopyCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocWorkingCopyFile: {
+      payload: Prisma.$DocWorkingCopyFilePayload<ExtArgs>
+      fields: Prisma.DocWorkingCopyFileFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocWorkingCopyFileFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyFilePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocWorkingCopyFileFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyFilePayload>
+        }
+        findFirst: {
+          args: Prisma.DocWorkingCopyFileFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyFilePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocWorkingCopyFileFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyFilePayload>
+        }
+        findMany: {
+          args: Prisma.DocWorkingCopyFileFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyFilePayload>[]
+        }
+        create: {
+          args: Prisma.DocWorkingCopyFileCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyFilePayload>
+        }
+        createMany: {
+          args: Prisma.DocWorkingCopyFileCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocWorkingCopyFileCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyFilePayload>[]
+        }
+        delete: {
+          args: Prisma.DocWorkingCopyFileDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyFilePayload>
+        }
+        update: {
+          args: Prisma.DocWorkingCopyFileUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyFilePayload>
+        }
+        deleteMany: {
+          args: Prisma.DocWorkingCopyFileDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocWorkingCopyFileUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocWorkingCopyFileUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyFilePayload>[]
+        }
+        upsert: {
+          args: Prisma.DocWorkingCopyFileUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocWorkingCopyFilePayload>
+        }
+        aggregate: {
+          args: Prisma.DocWorkingCopyFileAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocWorkingCopyFile>
+        }
+        groupBy: {
+          args: Prisma.DocWorkingCopyFileGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocWorkingCopyFileGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocWorkingCopyFileCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocWorkingCopyFileCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocReplacement: {
+      payload: Prisma.$DocReplacementPayload<ExtArgs>
+      fields: Prisma.DocReplacementFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocReplacementFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocReplacementFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementPayload>
+        }
+        findFirst: {
+          args: Prisma.DocReplacementFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocReplacementFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementPayload>
+        }
+        findMany: {
+          args: Prisma.DocReplacementFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementPayload>[]
+        }
+        create: {
+          args: Prisma.DocReplacementCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementPayload>
+        }
+        createMany: {
+          args: Prisma.DocReplacementCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocReplacementCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementPayload>[]
+        }
+        delete: {
+          args: Prisma.DocReplacementDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementPayload>
+        }
+        update: {
+          args: Prisma.DocReplacementUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocReplacementDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocReplacementUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocReplacementUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocReplacementUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementPayload>
+        }
+        aggregate: {
+          args: Prisma.DocReplacementAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocReplacement>
+        }
+        groupBy: {
+          args: Prisma.DocReplacementGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocReplacementGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocReplacementCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocReplacementCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocReplacementItem: {
+      payload: Prisma.$DocReplacementItemPayload<ExtArgs>
+      fields: Prisma.DocReplacementItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocReplacementItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocReplacementItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementItemPayload>
+        }
+        findFirst: {
+          args: Prisma.DocReplacementItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocReplacementItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementItemPayload>
+        }
+        findMany: {
+          args: Prisma.DocReplacementItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementItemPayload>[]
+        }
+        create: {
+          args: Prisma.DocReplacementItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementItemPayload>
+        }
+        createMany: {
+          args: Prisma.DocReplacementItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocReplacementItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementItemPayload>[]
+        }
+        delete: {
+          args: Prisma.DocReplacementItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementItemPayload>
+        }
+        update: {
+          args: Prisma.DocReplacementItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocReplacementItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocReplacementItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocReplacementItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocReplacementItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocReplacementItemPayload>
+        }
+        aggregate: {
+          args: Prisma.DocReplacementItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocReplacementItem>
+        }
+        groupBy: {
+          args: Prisma.DocReplacementItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocReplacementItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocReplacementItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocReplacementItemCountAggregateOutputType> | number
         }
       }
     }
@@ -2211,12 +2586,15 @@ export const DocumentScalarFieldEnum = {
   terminatedAt: 'terminatedAt',
   isSys: 'isSys',
   code: 'code',
-  title: 'title',
   description: 'description',
   module: 'module',
   projectId: 'projectId',
-  documentTypeId: 'documentTypeId',
-  documentClassId: 'documentClassId',
+  currentTitle: 'currentTitle',
+  currentDocumentTypeId: 'currentDocumentTypeId',
+  currentDocumentClassId: 'currentDocumentClassId',
+  obsoletedAt: 'obsoletedAt',
+  obsoletedById: 'obsoletedById',
+  obsoleteReason: 'obsoleteReason',
   projectTaskId: 'projectTaskId'
 } as const
 
@@ -2246,6 +2624,9 @@ export const DocumentRevisionScalarFieldEnum = {
   status: 'status',
   approvedById: 'approvedById',
   approvedAt: 'approvedAt',
+  title: 'title',
+  documentTypeId: 'documentTypeId',
+  documentClassId: 'documentClassId',
   assignedOrganizerId: 'assignedOrganizerId',
   abandonedAt: 'abandonedAt',
   abandonedById: 'abandonedById',
@@ -2261,15 +2642,77 @@ export const DocumentVersionScalarFieldEnum = {
   createdById: 'createdById',
   revisionId: 'revisionId',
   versionNumber: 'versionNumber',
-  fileKey: 'fileKey',
-  fileName: 'fileName',
-  fileSize: 'fileSize',
-  mimeType: 'mimeType',
-  checksum: 'checksum',
   comment: 'comment'
 } as const
 
 export type DocumentVersionScalarFieldEnum = (typeof DocumentVersionScalarFieldEnum)[keyof typeof DocumentVersionScalarFieldEnum]
+
+
+export const DocVersionFileScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  versionId: 'versionId',
+  role: 'role',
+  fileKey: 'fileKey',
+  fileName: 'fileName',
+  fileSize: 'fileSize',
+  mimeType: 'mimeType',
+  checksum: 'checksum'
+} as const
+
+export type DocVersionFileScalarFieldEnum = (typeof DocVersionFileScalarFieldEnum)[keyof typeof DocVersionFileScalarFieldEnum]
+
+
+export const DocWorkingCopyScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  revisionId: 'revisionId',
+  confirmedAt: 'confirmedAt',
+  confirmedById: 'confirmedById',
+  versionId: 'versionId',
+  discardedAt: 'discardedAt',
+  discardedById: 'discardedById',
+  discardReason: 'discardReason'
+} as const
+
+export type DocWorkingCopyScalarFieldEnum = (typeof DocWorkingCopyScalarFieldEnum)[keyof typeof DocWorkingCopyScalarFieldEnum]
+
+
+export const DocWorkingCopyFileScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  workingCopyId: 'workingCopyId',
+  role: 'role',
+  fileKey: 'fileKey',
+  fileName: 'fileName',
+  fileSize: 'fileSize',
+  mimeType: 'mimeType',
+  checksum: 'checksum'
+} as const
+
+export type DocWorkingCopyFileScalarFieldEnum = (typeof DocWorkingCopyFileScalarFieldEnum)[keyof typeof DocWorkingCopyFileScalarFieldEnum]
+
+
+export const DocReplacementScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  reason: 'reason'
+} as const
+
+export type DocReplacementScalarFieldEnum = (typeof DocReplacementScalarFieldEnum)[keyof typeof DocReplacementScalarFieldEnum]
+
+
+export const DocReplacementItemScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  replacementId: 'replacementId',
+  documentId: 'documentId',
+  role: 'role'
+} as const
+
+export type DocReplacementItemScalarFieldEnum = (typeof DocReplacementItemScalarFieldEnum)[keyof typeof DocReplacementItemScalarFieldEnum]
 
 
 export const ReviewWorkflowScalarFieldEnum = {
@@ -2691,6 +3134,34 @@ export type ListEnumRevisionStatusFieldRefInput<$PrismaModel> = FieldRefInputTyp
 
 
 /**
+ * Reference to a field of type 'DocFileRole'
+ */
+export type EnumDocFileRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocFileRole'>
+    
+
+
+/**
+ * Reference to a field of type 'DocFileRole[]'
+ */
+export type ListEnumDocFileRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocFileRole[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DocReplacementRole'
+ */
+export type EnumDocReplacementRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocReplacementRole'>
+    
+
+
+/**
+ * Reference to a field of type 'DocReplacementRole[]'
+ */
+export type ListEnumDocReplacementRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocReplacementRole[]'>
+    
+
+
+/**
  * Reference to a field of type 'WorkflowStatus'
  */
 export type EnumWorkflowStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WorkflowStatus'>
@@ -3029,6 +3500,11 @@ export type GlobalOmitConfig = {
   taskDocumentReference?: Prisma.TaskDocumentReferenceOmit
   documentRevision?: Prisma.DocumentRevisionOmit
   documentVersion?: Prisma.DocumentVersionOmit
+  docVersionFile?: Prisma.DocVersionFileOmit
+  docWorkingCopy?: Prisma.DocWorkingCopyOmit
+  docWorkingCopyFile?: Prisma.DocWorkingCopyFileOmit
+  docReplacement?: Prisma.DocReplacementOmit
+  docReplacementItem?: Prisma.DocReplacementItemOmit
   reviewWorkflow?: Prisma.ReviewWorkflowOmit
   reviewStep?: Prisma.ReviewStepOmit
   docStepSignature?: Prisma.DocStepSignatureOmit

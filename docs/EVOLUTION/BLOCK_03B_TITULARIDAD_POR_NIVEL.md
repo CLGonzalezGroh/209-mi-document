@@ -542,6 +542,43 @@ El renombre alcanzó más de lo que el enunciado de la fase preveía, y por el m
 
 **Pendiente del cierre del bloque, no de esta fase**: `rover-publish-current` y `npm run codegen` en la webapp. Hasta entonces la webapp local sigue viendo el esquema viejo, que es lo esperado.
 
+### Fase C — modelo y migración
+
+**Completada.** Migración `20260814140000_ownership_by_level`.
+
+**Sin cambios de comportamiento**, como el plan de fases preveía: las operaciones existentes hacen lo mismo que antes sobre el modelo nuevo. Lo que cambia de comportamiento —editar la metadata sobre la revisión, replicarla, y las seis operaciones de la copia de trabajo— es la fase E.
+
+| Cambio | Estado |
+| ------ | ------ |
+| `title`, `documentClassId`, `documentTypeId` en `document_revisions`, con respaldo desde el documento | Aplicado |
+| Renombre a `currentTitle`, `currentDocumentTypeId`, `currentDocumentClassId` | Aplicado |
+| `obsoletedAt`, `obsoletedById`, `obsoleteReason` en `documents` | Aplicado |
+| `doc_version_files`, con las versiones existentes migradas a rol `DELIVERABLE` | Aplicado |
+| `doc_working_copies` y `doc_working_copy_files` | Aplicado |
+| `doc_replacements` y `doc_replacement_items` | Aplicado |
+| Enumeraciones `DocFileRole` y `DocReplacementRole` | Aplicadas |
+
+**El renombre alcanzó lugares que el compilador no señala.** `tsc` no valida los `where` ni los `data` de Prisma cuando están tipados como `any`, de modo que los filtros del listado, el `select` del selector, el mapa de ordenamiento y los payloads de prueba **se revisaron a mano**. Uno de ellos —una prueba que creaba versiones con los campos de archivo en línea— compilaba y fallaba en ejecución.
+
+**Dos adaptaciones dejan una deuda declarada, que la fase E cierra:**
+
+- `updateDocument` escribe la copia del documento y **todavía no la revisión**, de modo que las dos pueden divergir. Es el comportamiento anterior, trasladado al nombre nuevo.
+- `registerVersion` conserva su forma de un archivo y lo registra como entregable. La copia de trabajo con sus seis operaciones la reemplaza.
+
+**La firma ya lee la identificación de la revisión** y no del documento. No es un cambio observable —la migración las dejó iguales—, pero es la fuente correcta. El payload sigue en `v1`, con el primer entregable; la fase D lo lleva a `v2` con la lista completa.
+
+| Verificación | Resultado |
+| ------------ | --------- |
+| `prisma migrate deploy`, `generate` y `migrate status` | Aplicada, cliente regenerado, base al día |
+| `tsc --noEmit` | Sin errores |
+| `npm run test:block03-all` | **180 pruebas, 0 fallos** — 177 anteriores más tres de las restricciones nuevas |
+| `rover subgraph check` | **Operation Check y Linter Check aprobados**, sin operaciones registradas afectadas |
+| Índices en base | `doc_working_copies_open_key` parcial sobre `confirmedAt IS NULL AND discardedAt IS NULL`; unicidad de archivo por versión; terna del ítem de reemplazo |
+
+**Pruebas nuevas contra base**, en `modelConstraintsPersistence`: el checksum obligatorio por archivo; que un `fileKey` no se repita dentro de una versión ni cambiando de rol; que la segunda copia de trabajo abierta se rechace **y que descartar la primera habilite otra**, que es lo que verifica que el índice sea parcial; y que un documento no se repita con el mismo papel en un acto de reemplazo, pero sí con el otro.
+
+**Lo que la verificación no cubre:** la base local estaba vacía al migrar, de modo que el respaldo de metadata a las revisiones y la conversión de versiones a `doc_version_files` **se ejercitaron sin filas**. En un despliegue con datos conviene contrastar los conteos antes y después.
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-23, D-24, D-25 y la nota prospectiva de promoción al activo

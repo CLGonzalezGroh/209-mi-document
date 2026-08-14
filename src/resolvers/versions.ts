@@ -7,6 +7,7 @@ import {
 } from "../utils/userAuthorization.js"
 import { assertObjectAccess } from "../utils/projectAuthorization.js"
 import {
+  DocFileRole,
   DocObjectType,
   RevisionStatus,
   WorkflowStatus,
@@ -17,6 +18,7 @@ import { emitAuditEvent } from "../events/emit.js"
 import { currentStep } from "../utils/reviewWorkflow.js"
 
 const versionIncludes = {
+  files: true,
   revision: {
     include: {
       document: true,
@@ -143,17 +145,26 @@ export const versionResolvers = {
         const nextVersionNumber = (revision.versions[0]?.versionNumber ?? 0) + 1
 
         const version = await context.orm.$transaction(async (tx) => {
+          // La versión es un CONJUNTO de archivos (BLOQUE 03B, B6). Esta
+          // operación conserva su forma de un archivo y lo registra como
+          // entregable, que es lo que era. La copia de trabajo con sus seis
+          // operaciones la reemplaza en la fase E (B12).
           const created = await tx.documentVersion.create({
             data: {
               revisionId,
               versionNumber: nextVersionNumber,
-              fileKey: input.fileKey,
-              fileName: input.fileName,
-              fileSize: input.fileSize,
-              mimeType: input.mimeType,
-              checksum: input.checksum,
               comment: input.comment,
               createdById: userId,
+              files: {
+                create: {
+                  role: DocFileRole.DELIVERABLE,
+                  fileKey: input.fileKey,
+                  fileName: input.fileName,
+                  fileSize: input.fileSize,
+                  mimeType: input.mimeType,
+                  checksum: input.checksum,
+                },
+              },
             },
             include: versionIncludes,
           })
