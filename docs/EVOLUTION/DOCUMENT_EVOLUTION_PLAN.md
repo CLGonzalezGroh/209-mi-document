@@ -962,6 +962,12 @@ Con un solo subsistema sin proyecto el hueco no se nota; con tres, cada uno nece
 
 Lo que se anticipa es **un escalón de módulo entre el proyecto y el despliegue**, con el mecanismo que el alcance ya tiene: documento → proyecto **o módulo** → despliegue. No hace falta decidirlo ahora, pero conviene no construir nada que lo impida — en particular, no tratar la ausencia de proyecto como equivalente al despliegue.
 
+**El hueco es más acotado de lo que parece a primera vista.** El eje de módulo **ya existe para los catálogos**: `DocumentClass` y `DocumentType` llevan `module` anulable, y D-21 lo describe como uno de los tres alcances que el negocio necesita. Lo que no lo tiene es la **configuración y la plantilla**.
+
+**No bloquea a `BLOCK_04`**, que es enteramente sobre documentos con contraparte y por lo tanto de proyecto. Registrado entre los bloques diferidos, con el argumento de por qué conviene abrirlo **después**: `BLOCK_04` va a cargar `DocProjectSettings` de configuración específica de contraparte —el catálogo de calificaciones, la matriz de responsabilidad, los documentos esperados—, y después de eso será evidente que el escalón de módulo no puede ser esa misma tabla con `projectId` anulable, porque la mitad de sus columnas no aplicarían. Decidirlo ahora, con la tabla todavía chica, arriesga elegir esa forma.
+
+Un punto para verificar al abrir `BLOCK_04`, y no ahora: D-22 construye una precedencia nueva de dos escalones para el catálogo de calificaciones. Como la calificación es de la contraparte, no debería necesitar escalón de módulo — conviene confirmarlo ahí en lugar de descubrirlo después.
+
 **El rol documental probablemente no necesite declararse en esos casos.** Sin proyecto no hay contraparte, y sin contraparte el rol es Interno necesariamente: es derivable en lugar de configurable, con el mismo criterio que el módulo aplica en otros lados. Queda por confirmar al abrirlo.
 
 **La unicidad del código no se toca**: `(code, module)` para los documentos sin proyecto es exactamente lo que calidad, comercial y activos necesitan.
@@ -1076,6 +1082,7 @@ Diferidos, con su propio análisis y sin fecha asignada:
 | ------ | --------- | ------ |
 | Interfaz tareas–documentos | Unificación del doble vínculo y avance de tarea por revisión aprobada (D-07; H-18) | Requiere definición funcional adicional. Se retoma tras consolidar el núcleo documental. |
 | Adjuntos | Destino de `Attachment` (D-08; H-21) | Depende de la cuestión de fondo sobre el alcance del módulo. |
+| Escalón de módulo en la configuración | Valores por defecto y plantilla de circuito con alcance de módulo, para los documentos sin proyecto | **No bloquea a `BLOCK_04`**, que es enteramente sobre documentos con contraparte. Su plazo lo fija el roadmap de calidad, comercial y activos: antes de que el primero use el ciclo. Conviene abrirlo **después** de `BLOCK_04`, que al cargar `DocProjectSettings` de configuración de contraparte va a dejar en evidencia que el escalón no puede ser esa misma tabla con proyecto anulable. |
 | Salida de `ScannedFile` y `Area` | Migración hacia `212-mi-digitalization` | Único subsistema con datos e interfaz en producción. Exige preservar la continuidad operativa del cliente que lo usa. |
 
 La cobertura de pruebas (H-26) no se trata como bloque propio: cada bloque incorpora sus propias pruebas como parte de sus criterios de aceptación.
