@@ -1,10 +1,13 @@
 import assert from "node:assert/strict"
+import { createHash } from "node:crypto"
 import test from "node:test"
-import { StepStatus, StepType } from "../generated/prisma/enums.js"
+import { DocFileRole, StepStatus, StepType } from "../generated/prisma/enums.js"
 import {
   buildSignature,
   buildSignaturePayload,
+  orderSignedFiles,
   SIGNATURE_ALGORITHM,
+  SIGNATURE_PAYLOAD_VERSION,
   signsStep,
   verifySignature,
   type SignatureInput,
@@ -13,20 +16,32 @@ import {
 const input = (overrides: Partial<SignatureInput> = {}): SignatureInput => ({
   step: { id: 10, stepType: StepType.APPROVE, stepOrder: 4 },
   workflowId: 5,
-  revision: { id: 3, revisionCode: "B" },
-  version: {
-    id: 7,
-    versionNumber: 2,
-    fileKey: "documents/2026/plano.pdf",
-    checksum: "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-  },
-  document: {
-    id: 1,
-    code: "C-DR-001",
+  revision: {
+    id: 3,
+    revisionCode: "B",
     title: "Plano de conexionado",
     documentClassId: 2,
     documentTypeId: 4,
   },
+  version: {
+    id: 7,
+    versionNumber: 2,
+    files: [
+      {
+        role: DocFileRole.DELIVERABLE,
+        fileKey: "documents/2026/plano.pdf",
+        fileName: "plano.pdf",
+        checksum: "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      },
+      {
+        role: DocFileRole.SOURCE,
+        fileKey: "documents/2026/plano.dwg",
+        fileName: "plano.dwg",
+        checksum: "1f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      },
+    ],
+  },
+  document: { id: 1, code: "C-DR-001" },
   assignedToId: 20,
   resolvedById: 20,
   delegationReason: null,
@@ -55,12 +70,16 @@ test("el payload lleva los insumos que la firma acredita", () => {
   assert.equal(payload.step.id, 10)
   assert.equal(payload.workflowId, 5)
   assert.equal(payload.revision.revisionCode, "B")
-  // La versión: es lo que la firma acredita como contenido.
+  // La identificación viaja con la REVISIÓN, que es donde vive (BLOQUE 03B, B1)
+  assert.equal(payload.revision.title, "Plano de conexionado")
+  assert.equal(payload.revision.documentClassId, 2)
+  // La versión acredita el CONJUNTO completo, no un archivo (B8)
   assert.equal(payload.version.versionNumber, 2)
-  assert.equal(payload.version.checksum.length, 64)
-  // La metadata del documento: la firma acredita también la identificación (B6).
+  assert.equal(payload.version.files.length, 2)
+  assert.equal(payload.version.files[0].checksum.length, 64)
+  // El documento aporta lo suyo: su identidad, que no cambia (B3)
   assert.equal(payload.document.code, "C-DR-001")
-  assert.equal(payload.document.title, "Plano de conexionado")
+  assert.equal(payload.payloadVersion, SIGNATURE_PAYLOAD_VERSION)
   // Quién estaba asignado y quién resolvió (B9).
   assert.equal(payload.actor.assignedToId, 20)
   assert.equal(payload.actor.resolvedById, 20)
@@ -108,22 +127,88 @@ test("el rechazo firma distinto que la aprobación", () => {
 test("una versión distinta produce una firma distinta", () => {
   const primera = buildSignature(input())
   const segunda = buildSignature(
-    input({
-      version: { ...input().version, id: 8, versionNumber: 3, checksum: "otro" },
-    }),
+    input({ version: { ...input().version, id: 8, versionNumber: 3 } }),
   )
 
   assert.notEqual(primera.hash, segunda.hash)
 })
 
-test("cambiar la metadata del documento cambia la firma", () => {
+test("cambiar la metadata de la revisión cambia la firma", () => {
   // Es lo que vuelve verificable el congelamiento de B6.
   const original = buildSignature(input())
   const retitulado = buildSignature(
-    input({ document: { ...input().document, title: "Otro título" } }),
+    input({ revision: { ...input().revision, title: "Otro título" } }),
   )
 
   assert.notEqual(original.hash, retitulado.hash)
+})
+
+// --- El conjunto de archivos (BLOQUE 03B, B8) ---
+
+test("sustituir la fuente cambia la firma, aunque nadie la revise", () => {
+  // La custodia del editable importa PORQUE es la fuente del entregable: si
+  // pudiera sustituirse sin producir versión nueva, la correspondencia entre uno
+  // y otro sería una afirmación sin evidencia.
+  const original = buildSignature(input())
+  const files = input().version.files.map((f) =>
+    f.role === DocFileRole.SOURCE ? { ...f, checksum: "otro" } : f,
+  )
+  const conOtraFuente = buildSignature(
+    input({ version: { ...input().version, files } }),
+  )
+
+  assert.notEqual(original.hash, conOtraFuente.hash)
+})
+
+test("quitar un archivo del conjunto cambia la firma", () => {
+  const original = buildSignature(input())
+  const soloEntregable = buildSignature(
+    input({
+      version: {
+        ...input().version,
+        files: input().version.files.filter(
+          (f) => f.role === DocFileRole.DELIVERABLE,
+        ),
+      },
+    }),
+  )
+
+  assert.notEqual(original.hash, soloEntregable.hash)
+})
+
+test("el orden en que la consulta devuelve los archivos no altera la firma", () => {
+  // `canonicalize` ordena las claves de los objetos pero CONSERVA el orden de
+  // los arreglos: sin fijarlo, el mismo conjunto produciría hashes distintos
+  // según cómo hubiera venido de la base.
+  const enOrden = buildSignature(input())
+  const alReves = buildSignature(
+    input({
+      version: { ...input().version, files: [...input().version.files].reverse() },
+    }),
+  )
+
+  assert.equal(enOrden.hash, alReves.hash)
+})
+
+test("los archivos se ordenan por rol y después por fileKey", () => {
+  const desordenados = [
+    { role: "SOURCE", fileKey: "b", fileName: "b.dwg", checksum: "1" },
+    { role: "DELIVERABLE", fileKey: "z", fileName: "z.pdf", checksum: "2" },
+    { role: "DELIVERABLE", fileKey: "a", fileName: "a.pdf", checksum: "3" },
+  ]
+
+  assert.deepEqual(
+    orderSignedFiles(desordenados).map((f) => f.fileKey),
+    ["a", "z", "b"],
+  )
+})
+
+test("ordenar no muta el arreglo recibido", () => {
+  const files = [...input().version.files].reverse()
+  const antes = files.map((f) => f.fileKey)
+  orderSignedFiles(files)
+
+  assert.deepEqual(files.map((f) => f.fileKey), antes)
 })
 
 // --- Verificación posterior ---
@@ -141,7 +226,7 @@ test("alterar el payload guardado invalida la firma", () => {
   const firma = buildSignature(input())
   const adulterada = {
     ...firma,
-    payload: firma.payload.replace("Plano de conexionado", "Otro plano"),
+    payload: firma.payload.replace("Plano de conexionado", "Otro plano!!!"),
   }
 
   const resultado = verifySignature(adulterada)
@@ -156,4 +241,21 @@ test("un algoritmo que no es el del módulo no se verifica", () => {
     valid: false,
     reason: "UNSUPPORTED_ALGORITHM",
   })
+})
+
+test("una firma en el formato anterior sigue verificándose", () => {
+  // Verificar es recalcular el hash SOBRE EL PAYLOAD GUARDADO, y no
+  // reconstruirlo desde las entidades. Por eso el cambio de forma no invalida lo
+  // firmado antes: `payloadVersion` distingue con qué reglas se leyó cada uno.
+  const v1 = JSON.stringify({
+    payloadVersion: 1,
+    action: StepStatus.APPROVED,
+    document: { code: "C-DR-001", title: "Plano de conexionado" },
+  })
+  const hash = createHash("sha256").update(v1, "utf8").digest("hex")
+
+  assert.deepEqual(
+    verifySignature({ algorithm: SIGNATURE_ALGORITHM, payload: v1, hash }),
+    { valid: true },
+  )
 })

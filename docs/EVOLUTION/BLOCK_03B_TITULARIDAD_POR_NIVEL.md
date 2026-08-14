@@ -579,6 +579,30 @@ El renombre alcanzó más de lo que el enunciado de la fase preveía, y por el m
 
 **Lo que la verificación no cubre:** la base local estaba vacía al migrar, de modo que el respaldo de metadata a las revisiones y la conversión de versiones a `doc_version_files` **se ejercitaron sin filas**. En un despliegue con datos conviene contrastar los conteos antes y después.
 
+### Fase D — utilidades puras
+
+**Completada.** Cuatro derivaciones, sin operaciones que las usen todavía: eso es la fase E.
+
+**El payload firmado pasa a `v2`,** y el cambio de forma es mayor que agregar una lista. La identificación **se muda de `document` a `revision`**, porque después de `B1` es ahí donde vive: el título, la clase y el tipo están impresos en el rótulo, y lo impreso pertenece a la emisión que lo produjo. Bajo `document` queda solo lo que es suyo —el id y el código—, que no necesita snapshot precisamente porque no cambia.
+
+**El orden de los archivos se fija en el código y no se confía a la base.** `canonicalize` ordena las claves de los objetos pero conserva el orden de los arreglos, de modo que la misma versión habría producido hashes distintos según cómo viniera de la consulta. `orderSignedFiles` ordena por rol y después por `fileKey`, y hay una prueba que verifica que invertir la lista no altera el hash.
+
+**Las firmas anteriores siguen verificándose**, y hay una prueba que lo demuestra con un payload `v1` construido a mano: verificar es recalcular sobre el payload guardado, no reconstruirlo desde entidades que pudieron cambiar.
+
+**La réplica de metadata resultó ser la regla que ya existía.** La copia del documento es la metadata de `lastLiveRevision` —la última no abandonada—, que es la misma función de la que sale el código sucesor: una regla con tres usos. De ahí cae sola la propiedad que el bloque perseguía: **abandonar una revisión devuelve la metadata anterior sin necesidad de revertir nada**, porque la abandonada deja de ser la última viva y el cálculo cae en la que estaba antes. Nunca se sobrescribió el origen.
+
+**La causa de la obsolescencia se deriva del papel en el acto**, no de su existencia: haber reemplazado a otro (`REPLACING`) no vuelve obsoleto a nadie, y un documento que reemplazó y después fue reemplazado lo está por reemplazo. Ambos casos tienen prueba.
+
+**La copia de trabajo distingue cambio de reordenamiento.** Un archivo cambió si cambió su `checksum` o su rol; el nombre y el tamaño acompañan al contenido y no se evalúan aparte, porque no pueden cambiar sin que cambie el archivo. Recibir los mismos archivos en otro orden **no** es un cambio, y arrastrar la fuente sin volver a subirla tampoco — es lo que vuelve barata la edición.
+
+| Verificación | Resultado |
+| ------------ | --------- |
+| `tsc --noEmit` | Sin errores |
+| `npm run test:block03b-all` | **210 pruebas, 0 fallos** |
+| `rover subgraph check` | Aprobado. Solo cambia la descripción del payload |
+
+Suites nuevas `test:document-metadata` y `test:working-copy`, y los guiones `test:block03b`, `-db` y `-all` que las incorporan.
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-23, D-24, D-25 y la nota prospectiva de promoción al activo

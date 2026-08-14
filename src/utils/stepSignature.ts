@@ -20,8 +20,13 @@ export const SIGNATURE_ALGORITHM = "SHA-256"
  * Versión del formato del payload. Se firma junto con el resto: sin ella, un
  * cambio futuro en la forma del payload dejaría las firmas viejas indistinguibles
  * de las nuevas y no se sabría con qué reglas recalcularlas.
+ *
+ * `2` (BLOQUE 03B): la versión pasó a ser un CONJUNTO de archivos (B6) y la
+ * identificación pasó a la revisión (B1). Las firmas en `1` siguen verificando
+ * con su propia forma, porque verificar es recalcular sobre el payload guardado
+ * y no reconstruirlo desde las entidades.
  */
-export const SIGNATURE_PAYLOAD_VERSION = 1
+export const SIGNATURE_PAYLOAD_VERSION = 2
 
 /** Los pasos que actúan sobre una versión firman. ASSIGN no (B7). */
 export const SIGNING_STEP_TYPES: readonly StepType[] = [
@@ -47,6 +52,14 @@ export type SignatureAction =
   | typeof StepStatus.APPROVED
   | typeof StepStatus.REJECTED
 
+/** Un archivo del conjunto de la versión, tal como se acredita. */
+export type SignedFile = {
+  role: string
+  fileKey: string
+  fileName: string
+  checksum: string
+}
+
 export type SignatureInput = {
   step: {
     id: number
@@ -54,31 +67,44 @@ export type SignatureInput = {
     stepOrder: number
   }
   workflowId: number
+  /**
+   * La revisión, con su IDENTIFICACIÓN (BLOQUE 03B, B1). El título, la clase y
+   * el tipo viajan acá y no bajo `document` porque es donde viven: están
+   * impresos en el rótulo del archivo, y lo impreso pertenece a la emisión que
+   * lo produjo. Con ellos la firma acredita la identificación además del
+   * contenido, que es lo que D-05 persigue.
+   */
   revision: {
     id: number
     revisionCode: string
+    title: string
+    documentClassId: number | null
+    documentTypeId: number | null
   }
   /**
-   * Versión vigente al firmar. Siempre existe: los cuatro tipos que firman
-   * actúan después de que someter exigiera al menos una versión (B5).
+   * Versión vigente al firmar, con TODOS sus archivos. Siempre existe: los
+   * cuatro tipos que firman actúan después de que someter exigiera al menos una
+   * versión (B5).
+   *
+   * Acredita también lo que nadie revisó, y esa es la razón de la decisión
+   * (BLOQUE 03B, B8): la custodia del editable importa porque es la fuente del
+   * entregable. Si pudiera sustituirse sin producir versión nueva, la
+   * correspondencia entre uno y otro sería una afirmación sin evidencia; que
+   * hayan sido firmados juntos es lo que la sostiene.
    */
   version: {
     id: number
     versionNumber: number
-    fileKey: string
-    checksum: string
+    files: SignedFile[]
   }
   /**
-   * Metadata del documento vigente al firmar (B6). Con ella la firma acredita
-   * la identificación además del contenido, que es lo que D-05 persigue, y el
-   * snapshot por revisión queda resuelto sin estructura nueva.
+   * El documento aporta lo que es suyo: su identidad. El código no cambia
+   * (B3), de modo que es lo único que no necesita snapshot — y precisamente por
+   * eso se firma, porque es lo que ata la evidencia a un documento concreto.
    */
   document: {
     id: number
     code: string
-    title: string
-    documentClassId: number | null
-    documentTypeId: number | null
   }
   assignedToId: number
   resolvedById: number
@@ -114,6 +140,20 @@ const canonicalize = (value: CanonicalValue): CanonicalValue => {
   return sorted
 }
 
+/**
+ * Los archivos de la versión, en orden DETERMINÍSTICO: por rol y después por
+ * `fileKey`.
+ *
+ * `canonicalize` ordena las claves de los objetos pero **conserva el orden de
+ * los arreglos**, de modo que dejar la lista en el orden en que la devolvió la
+ * consulta haría que el mismo conjunto produjera hashes distintos. El orden se
+ * fija acá y no se confía a la base.
+ */
+export const orderSignedFiles = (files: SignedFile[]): SignedFile[] =>
+  [...files].sort(
+    (a, b) => a.role.localeCompare(b.role) || a.fileKey.localeCompare(b.fileKey),
+  )
+
 /** Payload canónico serializado, tal como se persiste y tal como se firma. */
 export const buildSignaturePayload = (input: SignatureInput): string => {
   const payload: CanonicalValue = {
@@ -129,19 +169,23 @@ export const buildSignaturePayload = (input: SignatureInput): string => {
     revision: {
       id: input.revision.id,
       revisionCode: input.revision.revisionCode,
+      title: input.revision.title,
+      documentClassId: input.revision.documentClassId,
+      documentTypeId: input.revision.documentTypeId,
     },
     version: {
       id: input.version.id,
       versionNumber: input.version.versionNumber,
-      fileKey: input.version.fileKey,
-      checksum: input.version.checksum,
+      files: orderSignedFiles(input.version.files).map((f) => ({
+        role: f.role,
+        fileKey: f.fileKey,
+        fileName: f.fileName,
+        checksum: f.checksum,
+      })),
     },
     document: {
       id: input.document.id,
       code: input.document.code,
-      title: input.document.title,
-      documentClassId: input.document.documentClassId,
-      documentTypeId: input.document.documentTypeId,
     },
     actor: {
       assignedToId: input.assignedToId,

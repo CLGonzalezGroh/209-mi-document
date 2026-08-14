@@ -884,10 +884,20 @@ type DocStepSignature {
   "Algoritmo del hash"
   algorithm: String!
   """
-  Payload canónico serializado. Contiene el paso, su circuito y su revisión; la
-  versión vigente al firmar con su número, fileKey y checksum; la metadata del
-  documento vigente al firmar; el usuario asignado y el que resolvió; y la
+  Payload canónico serializado. Contiene el paso y su circuito; la revisión con
+  su identificación al firmar —título, clase y tipo—; la versión vigente con
+  TODOS los archivos de su conjunto, cada uno con su rol, su nombre, su key y su
+  checksum; el código del documento; el usuario asignado y el que resolvió; y la
   acción con su momento.
+
+  Acredita también los archivos que nadie revisó, y esa es la razón: la custodia
+  del editable importa porque es la fuente del entregable, y que hayan sido
+  firmados juntos es lo que sostiene su correspondencia.
+
+  Lleva `payloadVersion`, que declara con qué reglas leerlo. Las firmas de
+  formatos anteriores siguen verificándose: verificar es recalcular el hash
+  sobre el payload guardado, y no reconstruirlo desde entidades que pudieron
+  cambiar después.
   """
   payload: String!
   "Hash del payload"

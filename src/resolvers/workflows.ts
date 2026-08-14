@@ -228,25 +228,30 @@ const persistSignature = async (
       stepOrder: step.stepOrder,
     },
     workflowId: step.workflowId,
+    // La identificación viaja con la REVISIÓN, que es donde vive (BLOQUE 03B,
+    // B1). El documento aporta lo suyo: su identidad, que no cambia (B3).
     revision: {
-      id: step.workflow.revision.id,
-      revisionCode: step.workflow.revision.revisionCode,
-    },
-    version: {
-      id: version.id,
-      versionNumber: version.versionNumber,
-      fileKey: deliverable.fileKey,
-      checksum: deliverable.checksum,
-    },
-    // La identificación se lee de la REVISIÓN, que es donde vive (BLOQUE 03B,
-    // B1). El código sigue siendo del documento: es su identificador y no
-    // cambia (B3).
-    document: {
-      id: document.id,
-      code: document.code,
+      id: revision.id,
+      revisionCode: revision.revisionCode,
       title: revision.title,
       documentClassId: revision.documentClassId,
       documentTypeId: revision.documentTypeId,
+    },
+    // El conjunto COMPLETO, incluida la fuente que nadie revisó: que hayan sido
+    // firmados juntos es lo que sostiene su correspondencia (B8).
+    version: {
+      id: version.id,
+      versionNumber: version.versionNumber,
+      files: version.files.map((f) => ({
+        role: f.role,
+        fileKey: f.fileKey,
+        fileName: f.fileName,
+        checksum: f.checksum,
+      })),
+    },
+    document: {
+      id: document.id,
+      code: document.code,
     },
     assignedToId: step.assignedToId,
     resolvedById,

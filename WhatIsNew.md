@@ -574,4 +574,17 @@ Los tres datos que el bloque mueve de nivel quedan en su lugar. **Sin cambios de
 
 > **Atención al migrar**: la migración `20260814140000_ownership_by_level` respalda la metadata del documento a **todas** sus revisiones. Para la revisión en curso el valor es exacto; para las aprobadas es la mejor aproximación disponible, porque no existe historia de la que reconstruir lo que cada una decía. Se ejercitó sobre una base vacía: conviene contrastar los conteos de `document_revisions` y `doc_version_files` antes y después.
 
+### Fase D — Utilidades puras
+
+Cuatro derivaciones, todavía sin operaciones que las usen.
+
+- **El payload firmado pasa a `v2`.** La identificación —título, clase y tipo— se muda de `document` a `revision`, porque es ahí donde vive; bajo `document` queda el código, que no necesita snapshot porque no cambia. Y la versión acredita **todos** los archivos de su conjunto, incluida la fuente que nadie revisó: que hayan sido firmados juntos es lo que sostiene su correspondencia con el entregable.
+- **Las firmas anteriores siguen verificándose.** Verificar es recalcular sobre el payload guardado, y `payloadVersion` declara con qué reglas leer cada uno.
+- **Los archivos se ordenan por rol y después por key antes de firmar.** La serialización canónica ordena las claves de los objetos pero conserva el orden de los arreglos: sin fijarlo, la misma versión habría producido hashes distintos según cómo viniera de la consulta.
+- **La réplica de metadata reusa `lastLiveRevision`**, la misma función de la que sale el código sucesor. De ahí cae sola la propiedad buscada: abandonar una revisión devuelve la metadata anterior sin revertir nada.
+- **La causa de la obsolescencia se deriva del papel en el acto de reemplazo**, no de su existencia.
+- **La copia de trabajo distingue cambio de reordenamiento**: cambió si cambió el checksum o el rol. Arrastrar la fuente sin volver a subirla no es un cambio.
+
+**210 pruebas, 0 fallos.** Suites nuevas `test:document-metadata` y `test:working-copy`, y los guiones `test:block03b`, `test:block03b-db` y `test:block03b-all`.
+
 ---
