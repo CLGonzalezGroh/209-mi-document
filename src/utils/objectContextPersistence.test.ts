@@ -24,7 +24,8 @@ import { resolveObjectContext } from "./objectContext.js"
  * `Record` solo exige que exista la función—, de modo que la única evidencia
  * posible es esta.
  *
- * BLOQUE 03 suma tres tipos, y la prueba pasa a cubrir **los trece**.
+ * BLOQUE 03 suma tres tipos y BLOQUE 03B uno, y la prueba pasa a cubrir **los
+ * catorce**.
  *
  * Requiere la base local (`npm run test:object-context-db`).
  */
@@ -336,7 +337,29 @@ test("un objeto inexistente devuelve null y no contexto vacío", async () => {
   }
 })
 
-test("los trece tipos de objeto tienen derivador", async () => {
+test("el acto de reemplazo toma el contexto de los documentos que agrupa", async () => {
+  // Los documentos de un acto COMPARTEN ÁMBITO (BLOQUE 03B, B5), y esa es la
+  // condición que vuelve bien definida la derivación: cualquiera de ellos da la
+  // misma respuesta, de modo que no hay que elegir uno.
+  const acto = await prisma.docReplacement.create({
+    data: {
+      reason: "unificación de prueba",
+      createdById: 1,
+      items: {
+        create: { documentId: creados.documentId, role: "REPLACED" },
+      },
+    },
+  })
+
+  assert.deepEqual(await contextoDe(DocObjectType.DOC_REPLACEMENT, acto.id), {
+    projectId: PROYECTO,
+    module: ModuleType.PROJECTS,
+  })
+
+  await prisma.docReplacement.delete({ where: { id: acto.id } })
+})
+
+test("los catorce tipos de objeto tienen derivador", async () => {
   // Ninguno queda sin regla: es la prueba que BLOQUE 01 exige y que cada tipo
   // nuevo debe seguir pasando.
   for (const objectType of Object.values(DocObjectType)) {
@@ -345,5 +368,5 @@ test("los trece tipos de objeto tienen derivador", async () => {
       `${objectType} no tiene derivador de contexto`,
     )
   }
-  assert.equal(Object.values(DocObjectType).length, 13)
+  assert.equal(Object.values(DocObjectType).length, 14)
 })

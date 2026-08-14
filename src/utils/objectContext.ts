@@ -209,6 +209,29 @@ const derivadores: Record<
     return template && { projectId: template.projectId, module: null }
   },
 
+  // El acto de reemplazo toma el contexto de CUALQUIERA de sus documentos, y no
+  // de uno elegido a mano: los documentos de un acto comparten ámbito (BLOQUE
+  // 03B, B5), y esa es justamente la condición que vuelve bien definida esta
+  // derivación. Lo que cruza de un proyecto al régimen de publicación no es
+  // reemplazo sino promoción, que no se registra acá.
+  [DocObjectType.DOC_REPLACEMENT]: async (client, id) => {
+    const acto = await client.docReplacement.findUnique({
+      where: { id },
+      select: {
+        items: {
+          take: 1,
+          select: {
+            document: { select: { projectId: true, module: true } },
+          },
+        },
+      },
+    })
+    if (!acto) return null
+
+    const doc = acto.items[0]?.document
+    return doc ? { projectId: doc.projectId, module: doc.module } : SIN_CONTEXTO
+  },
+
   // La configuración del despliegue no pertenece a ningún proyecto ni a ningún
   // módulo: es exactamente lo que la vuelve el último escalón de la precedencia.
   [DocObjectType.DOC_SETTINGS]: async (client, id) => {

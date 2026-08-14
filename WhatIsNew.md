@@ -604,4 +604,14 @@ Primera fase que cambia comportamiento.
 
 > **Atención**: `rover subgraph check` ahora informa *"Compared 47 schema changes against 0 operations"* y marca los retiros como fallo. **No cambió el código: no queda ninguna operación registrada en la ventana**, y sin operaciones el veredicto por defecto de un cambio incompatible es el fallo. Lo que el `PASSED` de las fases anteriores afirmaba era que ninguna operación registrada usaba lo retirado, no que el cambio no fuera incompatible. La evidencia que sostiene los retiros es la búsqueda del nombre viejo en `201-mi-webapp`, donde ningún consumidor escrito a mano los usa.
 
+### Fase F — Trazabilidad
+
+- **Tipo de objeto nuevo `DOC_REPLACEMENT`.** El acto de reemplazo toca varios documentos y ninguno lo representa: su traza cuelga del acto, que es lo que tiene identidad propia. Su contexto se deriva de cualquiera de sus documentos, y eso está bien definido porque comparten ámbito.
+- **La copia de trabajo no recibe tipo propio**: su traza cuelga de la revisión. No es un objeto del dominio sino el conjunto en preparación de esa revisión, y lo que se consulta es qué le pasó a la revisión.
+- La derivación de contexto pasa a cubrir **los catorce tipos**.
+
+**224 pruebas, 0 fallos.**
+
+> **Atención al migrar**: la migración `20260814160000_replacement_object_type` agrega un valor a `DocObjectType`. Es puramente aditiva.
+
 ---

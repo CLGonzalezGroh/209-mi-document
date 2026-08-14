@@ -172,9 +172,11 @@ export const replacementResolvers = {
             },
           })
 
+          // El objeto del evento es el ACTO y no uno de los documentos: elegir
+          // cuál sería arbitrario, y el acto es lo que tiene identidad propia.
           await emitAuditEvent(tx, {
             action: AuditAction.ReplaceDocuments,
-            objectId: replacingIds[0],
+            objectId: acto.id,
             actorId: userId,
             meta: {
               replacementId: acto.id,

@@ -183,7 +183,8 @@ export const DocObjectType = {
   DOC_PROJECT_MEMBER: 'DOC_PROJECT_MEMBER',
   DOC_STEP_SIGNATURE: 'DOC_STEP_SIGNATURE',
   DOC_WORKFLOW_TEMPLATE: 'DOC_WORKFLOW_TEMPLATE',
-  DOC_SETTINGS: 'DOC_SETTINGS'
+  DOC_SETTINGS: 'DOC_SETTINGS',
+  DOC_REPLACEMENT: 'DOC_REPLACEMENT'
 } as const
 
 export type DocObjectType = (typeof DocObjectType)[keyof typeof DocObjectType]

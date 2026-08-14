@@ -5,6 +5,7 @@ import { prisma } from "../lib/prisma.js"
 import { ResolverContext } from "../types.js"
 import {
   DocFileRole,
+  DocObjectType,
   DocProjectSide,
   DocumentRole,
   ModuleType,
@@ -1397,4 +1398,70 @@ test("la firma acredita el conjunto completo, incluida la fuente que nadie revis
   assert.ok(payload.revision.title)
   assert.equal(payload.document.code, `${CODIGO}-WC3`)
   assert.deepEqual(verifySignature(firma), { valid: true })
+})
+
+test("la traza registra las acciones y transiciones de la titularidad por nivel", async () => {
+  const acciones = (
+    await prisma.docAuditEvent.findMany({
+      where: { projectId: PROYECTO },
+      select: { action: true },
+      distinct: ["action"],
+    })
+  ).map((a) => a.action)
+
+  for (const esperada of [
+    AuditAction.UpdateRevisionMetadata,
+    AuditAction.CorrectDocumentCode,
+    AuditAction.ObsoleteDocument,
+    AuditAction.OpenWorkingCopy,
+    AuditAction.UpdateWorkingCopy,
+    AuditAction.ConfirmWorkingCopy,
+    AuditAction.DiscardWorkingCopy,
+  ]) {
+    assert.ok(acciones.includes(esperada), `falta la acción ${esperada}`)
+  }
+
+  const transiciones = (
+    await prisma.docWorkflowEvent.findMany({
+      where: { projectId: PROYECTO },
+      select: { name: true },
+      distinct: ["name"],
+    })
+  ).map((t) => t.name)
+
+  assert.ok(transiciones.includes(WorkflowEvent.DocumentObsoleted))
+  assert.ok(transiciones.includes(WorkflowEvent.VersionRegistered))
+})
+
+test("el acto de reemplazo cuelga de sí mismo y no de un documento cualquiera", async () => {
+  // Toca varios documentos: colgar su traza de uno obligaría a elegir cuál, y la
+  // elección sería arbitraria (BLOQUE 03B, fase F).
+  const evento = await prisma.docAuditEvent.findFirstOrThrow({
+    where: { action: AuditAction.ReplaceDocuments, projectId: PROYECTO },
+  })
+
+  assert.equal(evento.objectType, DocObjectType.DOC_REPLACEMENT)
+  const acto = await prisma.docReplacement.findUniqueOrThrow({
+    where: { id: evento.objectId! },
+    include: { items: true },
+  })
+  assert.equal(acto.items.length, 3)
+
+  // Y el contexto se derivó de los documentos que agrupa, no se informó a mano
+  assert.equal(evento.projectId, PROYECTO)
+  assert.equal(evento.module, ModuleType.PROJECTS)
+})
+
+test("la copia de trabajo deja su traza en la revisión, con su contexto", async () => {
+  // No tiene tipo de objeto propio: no es un objeto del dominio sino el conjunto
+  // en preparación de esa revisión, y lo que se consulta es qué le pasó a ella.
+  const evento = await prisma.docAuditEvent.findFirstOrThrow({
+    where: { action: AuditAction.ConfirmWorkingCopy, projectId: PROYECTO },
+  })
+
+  assert.equal(evento.objectType, DocObjectType.DOCUMENT_REVISION)
+  assert.equal(evento.projectId, PROYECTO)
+  const meta = evento.meta as any
+  assert.ok(meta.versionId)
+  assert.ok(meta.archivos >= 1)
 })

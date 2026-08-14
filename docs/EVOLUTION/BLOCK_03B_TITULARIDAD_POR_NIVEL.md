@@ -636,6 +636,27 @@ Conviene ser preciso sobre qué afirmaba aquel `PASSED`: que **ninguna operació
 
 **`registerVersion` queda marcada como obsoleta y no se retira todavía**: internamente ya escribe el conjunto con el archivo como entregable, y romperla antes de que la fase G retire el campo del contrato no compra nada.
 
+### Fase F — trazabilidad
+
+**Completada.** Migración `20260814160000_replacement_object_type`.
+
+Las acciones y transiciones se habían incorporado en la fase E, porque las operaciones no podían emitir sin ellas. Lo que esta fase resuelve es **de qué objeto cuelga cada traza**, que es donde había quedado un defecto.
+
+**El acto de reemplazo recibe tipo de objeto propio.** En la fase E su evento apuntaba a `replacingIds[0]` —el primero de los que reemplazan—, y esa elección era arbitraria: el acto toca varios documentos y ninguno lo representa. Con `DOC_REPLACEMENT`, el evento apunta al acto, que es lo que tiene identidad propia, y desde ahí se llega a todos.
+
+**Su contexto se deriva de cualquiera de sus documentos, y eso no es una comodidad.** Los documentos de un acto comparten ámbito por `B5`, y esa invariante es justamente lo que vuelve **bien definida** la derivación: cualquiera da la misma respuesta. Si el acto pudiera cruzar de un proyecto al régimen de publicación, no habría contexto único que derivar — otra consecuencia de que lo que cruza sea promoción y no reemplazo.
+
+**La copia de trabajo no recibe tipo propio, y es deliberado.** Su traza cuelga de la revisión: no es un objeto del dominio sino el conjunto en preparación de esa revisión, y lo que alguien consulta es qué le pasó a la revisión, no qué le pasó a la copia 17 que se descartó. Ponerla aparte partiría en dos una línea de tiempo que se lee entera.
+
+| Verificación | Resultado |
+| ------------ | --------- |
+| `tsc --noEmit` | Sin errores |
+| `npm run test:block03b-all` | **224 pruebas, 0 fallos** |
+| Enumeración en base | `DocObjectType` con catorce valores |
+| Derivación de contexto | Los catorce tipos con derivador, y ninguno devuelve contexto vacío para un objeto inexistente |
+
+Pruebas nuevas: la derivación del acto de reemplazo contra base; que las siete acciones y las dos transiciones del bloque queden registradas; que el evento del reemplazo apunte al acto y no a un documento; y que la traza de la copia de trabajo cuelgue de la revisión con su contexto derivado.
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-23, D-24, D-25 y la nota prospectiva de promoción al activo

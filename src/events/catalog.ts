@@ -137,7 +137,7 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   // un objeto del dominio sino el conjunto en preparación de esa revisión—.
   [AuditAction.UpdateRevisionMetadata]: DocObjectType.DOCUMENT_REVISION,
   [AuditAction.CorrectDocumentCode]: DocObjectType.DOCUMENT,
-  [AuditAction.ReplaceDocuments]: DocObjectType.DOCUMENT,
+  [AuditAction.ReplaceDocuments]: DocObjectType.DOC_REPLACEMENT,
   [AuditAction.ObsoleteDocument]: DocObjectType.DOCUMENT,
   [AuditAction.OpenWorkingCopy]: DocObjectType.DOCUMENT_REVISION,
   [AuditAction.UpdateWorkingCopy]: DocObjectType.DOCUMENT_REVISION,
@@ -250,4 +250,7 @@ export const DOC_OBJECT_READ_PERMISSION: Record<DocObjectType, string> = {
   [DocObjectType.DOC_STEP_SIGNATURE]: PERMISSIONS.DOCUMENTS_WORKFLOW_LIST,
   [DocObjectType.DOC_WORKFLOW_TEMPLATE]: PERMISSIONS.DOCUMENTS_WORKFLOW_LIST,
   [DocObjectType.DOC_SETTINGS]: PERMISSIONS.DOCUMENTS_SETTINGS_READ,
+  // El acto de reemplazo se lee con los documentos que toca: la traza forma
+  // parte del objeto, y quien puede leer el documento puede leer su historia.
+  [DocObjectType.DOC_REPLACEMENT]: PERMISSIONS.DOCUMENTS_DOCUMENT_READ,
 }
