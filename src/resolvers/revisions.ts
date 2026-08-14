@@ -24,6 +24,7 @@ import {
   stepsForRejectionRetry,
 } from "../utils/workflowTemplate.js"
 import { stepsSkippedByCancellation } from "../utils/reviewWorkflow.js"
+import { metadataOfCurrentRevision } from "../utils/documentMetadata.js"
 
 // Una revisión tiene VARIOS circuitos sucesivos (D-11, B2), ordenados por
 // creación: el vigente es el que está IN_PROGRESS y se deriva, no se almacena.
@@ -293,6 +294,173 @@ export const revisionResolvers = {
       }
     },
 
+
+    /**
+     * Edita la identificación de la revisión (BLOQUE 03B, B1 y B2).
+     *
+     * El título, la clase y el tipo viven en la revisión porque están impresos
+     * en el rótulo del archivo, y lo impreso pertenece a la emisión que lo
+     * produjo. Editarlos acá es lo que vuelve **estructural** el congelamiento:
+     * una revisión aprobada no se modifica, y con eso la regla deja de
+     * necesitar enunciado propio.
+     *
+     * La copia del documento se replica en el mismo acto. Su único escritor es
+     * esta transición, que es lo que impide que se desincronice.
+     */
+    updateRevisionMetadata: async (
+      _: any,
+      {
+        revisionId,
+        input,
+      }: {
+        revisionId: number
+        input: {
+          title?: string
+          documentTypeId?: number
+          documentClassId?: number | null
+        }
+      },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_UPDATE],
+        context,
+      })
+      logger.info("updateRevisionMetadata", { userId })
+
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT_REVISION,
+        objectId: revisionId,
+        context,
+        notFoundMessage: "Revisión no encontrada",
+      })
+
+      if (
+        input.title === undefined &&
+        input.documentTypeId === undefined &&
+        input.documentClassId === undefined
+      ) {
+        throw new GraphQLError("No se informó ningún cambio.", {
+          extensions: { code: "BAD_USER_INPUT" },
+        })
+      }
+
+      if (input.title !== undefined && !input.title.trim()) {
+        throw new GraphQLError("El título no puede quedar vacío.", {
+          extensions: { code: "BAD_USER_INPUT" },
+        })
+      }
+
+      try {
+        const result = await context.orm.$transaction(async (tx) => {
+          const revision = await tx.documentRevision.findFirst({
+            where: { id: revisionId },
+            select: {
+              id: true,
+              documentId: true,
+              revisionCode: true,
+              status: true,
+              title: true,
+              documentTypeId: true,
+              documentClassId: true,
+            },
+          })
+
+          if (!revision) {
+            throw new GraphQLError("Revisión no encontrada", {
+              extensions: { code: "NOT_FOUND" },
+            })
+          }
+
+          // El congelamiento no es una precondición añadida: es que una revisión
+          // aprobada no se modifica. Corregir exige abrir la siguiente, que
+          // vuelve a habilitar la edición sobre ella.
+          if (!REVISION_ABIERTA.includes(revision.status)) {
+            throw new GraphQLError(
+              "La identificación de una revisión que ya no está en curso no se edita. Abrir la revisión siguiente vuelve a habilitarla.",
+              { extensions: { code: "CONFLICT" } },
+            )
+          }
+
+          const antes = {
+            title: revision.title,
+            documentTypeId: revision.documentTypeId,
+            documentClassId: revision.documentClassId,
+          }
+          const despues = {
+            title: input.title?.trim() ?? antes.title,
+            documentTypeId: input.documentTypeId ?? antes.documentTypeId,
+            documentClassId:
+              input.documentClassId === undefined
+                ? antes.documentClassId
+                : input.documentClassId,
+          }
+
+          const updated = await tx.documentRevision.update({
+            where: { id: revisionId },
+            data: { ...despues, updatedById: userId },
+            include: revisionIncludes,
+          })
+
+          // Réplica a la copia del documento. Se recalcula desde las revisiones
+          // en lugar de copiar lo que se acaba de escribir: si la editada no
+          // fuera la que está en curso, copiar a ciegas dejaría al documento
+          // declarando algo que su revisión en curso no dice.
+          const revisiones = await tx.documentRevision.findMany({
+            where: { documentId: revision.documentId },
+            select: {
+              id: true,
+              revisionCode: true,
+              status: true,
+              createdAt: true,
+              title: true,
+              documentTypeId: true,
+              documentClassId: true,
+            },
+          })
+          const copia = metadataOfCurrentRevision(revisiones)
+          if (copia) {
+            await tx.document.update({
+              where: { id: revision.documentId },
+              data: {
+                currentTitle: copia.title,
+                currentDocumentTypeId: copia.documentTypeId,
+                currentDocumentClassId: copia.documentClassId,
+                updatedById: userId,
+              },
+            })
+          }
+
+          await emitAuditEvent(tx, {
+            action: AuditAction.UpdateRevisionMetadata,
+            objectId: revisionId,
+            actorId: userId,
+            meta: {
+              revisionCode: revision.revisionCode,
+              antes,
+              despues,
+            },
+          })
+
+          return updated
+        })
+
+        return result
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "UPDATE_REVISION_METADATA",
+          messages: {
+            notFound: "La revisión no existe.",
+            default: "Error al editar la identificación de la revisión.",
+          },
+        })
+      }
+    },
+
     /**
      * Abandona la revisión (BLOQUE 03, B11).
      *
@@ -420,6 +588,40 @@ export const revisionResolvers = {
             toState: RevisionStatus.ABANDONED,
             actorId: userId,
           })
+
+          // La metadata vuelve sola (BLOQUE 03B, B2): la abandonada deja de ser
+          // la última viva y la copia se recalcula sobre la que estaba antes.
+          // No se revierte nada, porque nunca se sobrescribió el origen.
+          const revisiones = await tx.documentRevision.findMany({
+            where: { documentId: revision.documentId },
+            select: {
+              id: true,
+              revisionCode: true,
+              status: true,
+              createdAt: true,
+              title: true,
+              documentTypeId: true,
+              documentClassId: true,
+            },
+          })
+          const copia = metadataOfCurrentRevision(
+            revisiones.map((r) =>
+              r.id === revisionId
+                ? { ...r, status: RevisionStatus.ABANDONED }
+                : r,
+            ),
+          )
+          if (copia) {
+            await tx.document.update({
+              where: { id: revision.documentId },
+              data: {
+                currentTitle: copia.title,
+                currentDocumentTypeId: copia.documentTypeId,
+                currentDocumentClassId: copia.documentClassId,
+                updatedById: userId,
+              },
+            })
+          }
 
           await emitAuditEvent(tx, {
             action: AuditAction.AbandonRevision,

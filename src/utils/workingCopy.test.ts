@@ -36,6 +36,24 @@ test("sin versión vigente el conjunto arranca vacío", () => {
   assert.deepEqual(preloadFrom(undefined), [])
 })
 
+test("la precarga proyecta la forma del conjunto y descarta lo de la fila", () => {
+  // Los archivos llegan como registros de la versión, con su id y su versionId.
+  // Arrastrarlos haría que la copia intentara nacer con la identidad de otro, y
+  // el error aparecería recién al escribir en base.
+  const desdeLaBase = [
+    { id: 99, versionId: 7, createdAt: new Date(), ...pdf },
+  ] as unknown as CopyFile[]
+
+  assert.deepEqual(Object.keys(preloadFrom(desdeLaBase)[0]).sort(), [
+    "checksum",
+    "fileKey",
+    "fileName",
+    "fileSize",
+    "mimeType",
+    "role",
+  ])
+})
+
 test("la precarga copia y no comparte referencias con el origen", () => {
   const origen = [pdf]
   const copia = preloadFrom(origen)

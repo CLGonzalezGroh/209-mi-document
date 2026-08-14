@@ -65,6 +65,24 @@ export const AuditAction = {
   UpdateWorkflowTemplate: "UpdateWorkflowTemplate",
   DeleteWorkflowTemplate: "DeleteWorkflowTemplate",
   DeclareDocSettings: "DeclareDocSettings",
+
+  // Titularidad por nivel (BLOQUE 03B).
+  //
+  // `UpdateRevisionMetadata` es donde ahora se edita la identificación: vive en
+  // la revisión porque está impresa en el rótulo (B1). `UpdateDocument` queda
+  // para lo administrativo, que no se congela.
+  //
+  // `CorrectDocumentCode` tiene acción propia y no es un `UpdateDocument` más:
+  // es la IDENTIDAD cambiando, y sin evento sería inexplicable en una auditoría
+  // posterior (B4).
+  UpdateRevisionMetadata: "UpdateRevisionMetadata",
+  CorrectDocumentCode: "CorrectDocumentCode",
+  ReplaceDocuments: "ReplaceDocuments",
+  ObsoleteDocument: "ObsoleteDocument",
+  OpenWorkingCopy: "OpenWorkingCopy",
+  UpdateWorkingCopy: "UpdateWorkingCopy",
+  ConfirmWorkingCopy: "ConfirmWorkingCopy",
+  DiscardWorkingCopy: "DiscardWorkingCopy",
 } as const
 
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
@@ -112,6 +130,19 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   [AuditAction.UpdateWorkflowTemplate]: DocObjectType.DOC_WORKFLOW_TEMPLATE,
   [AuditAction.DeleteWorkflowTemplate]: DocObjectType.DOC_WORKFLOW_TEMPLATE,
   [AuditAction.DeclareDocSettings]: DocObjectType.DOC_SETTINGS,
+
+  // Titularidad por nivel (BLOQUE 03B). El objeto es el que CAMBIA: la revisión
+  // cuando se edita su identificación, el documento cuando se corrige su código
+  // o caduca, y la revisión cuando se opera su copia de trabajo —la copia no es
+  // un objeto del dominio sino el conjunto en preparación de esa revisión—.
+  [AuditAction.UpdateRevisionMetadata]: DocObjectType.DOCUMENT_REVISION,
+  [AuditAction.CorrectDocumentCode]: DocObjectType.DOCUMENT,
+  [AuditAction.ReplaceDocuments]: DocObjectType.DOCUMENT,
+  [AuditAction.ObsoleteDocument]: DocObjectType.DOCUMENT,
+  [AuditAction.OpenWorkingCopy]: DocObjectType.DOCUMENT_REVISION,
+  [AuditAction.UpdateWorkingCopy]: DocObjectType.DOCUMENT_REVISION,
+  [AuditAction.ConfirmWorkingCopy]: DocObjectType.DOCUMENT_REVISION,
+  [AuditAction.DiscardWorkingCopy]: DocObjectType.DOCUMENT_REVISION,
 }
 
 // ================================
@@ -150,6 +181,12 @@ export const WorkflowEvent = {
   WorkflowCancelled: "WorkflowCancelled",
   RevisionAbandoned: "RevisionAbandoned",
   StepCompleted: "StepCompleted",
+
+  // Titularidad por nivel (BLOQUE 03B). `DocumentObsoleted` es una transición y
+  // no solo una acción: el documento deja de admitir revisiones nuevas, que es
+  // un cambio de estado y no una edición.
+  DocumentObsoleted: "DocumentObsoleted",
+  VersionRegistered: "VersionRegistered",
 } as const
 
 export type WorkflowEvent = (typeof WorkflowEvent)[keyof typeof WorkflowEvent]
@@ -181,6 +218,8 @@ export const WORKFLOW_EVENT_OBJECT: Record<WorkflowEvent, DocObjectType> = {
   [WorkflowEvent.WorkflowCancelled]: DocObjectType.REVIEW_WORKFLOW,
   [WorkflowEvent.RevisionAbandoned]: DocObjectType.DOCUMENT_REVISION,
   [WorkflowEvent.StepCompleted]: DocObjectType.REVIEW_STEP,
+  [WorkflowEvent.DocumentObsoleted]: DocObjectType.DOCUMENT,
+  [WorkflowEvent.VersionRegistered]: DocObjectType.DOCUMENT_VERSION,
 }
 
 // ================================

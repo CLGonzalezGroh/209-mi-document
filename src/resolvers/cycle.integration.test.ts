@@ -18,6 +18,8 @@ import { documentResolvers } from "./documents.js"
 import { revisionResolvers } from "./revisions.js"
 import { versionResolvers } from "./versions.js"
 import { workflowResolvers } from "./workflows.js"
+import { replacementResolvers } from "./replacements.js"
+import { workingCopyResolvers } from "./workingCopies.js"
 import { projectSettingsResolvers } from "./projectSettings.js"
 import { projectMemberResolvers } from "./projectMembers.js"
 import { resolverTypes } from "./resolversTypes/index.js"
@@ -645,36 +647,79 @@ test("una revisión aprobada no admite versiones nuevas", async () => {
   )
 })
 
-test("con la revisión aprobada la metadata no se edita, y la siguiente la habilita", async () => {
+test("la identificación se edita en la revisión, y la aprobada ya no la admite", async () => {
+  // El congelamiento dejó de ser una precondición y pasó a ser estructura
+  // (BLOQUE 03B, B1): una revisión aprobada no se modifica, y con eso la regla
+  // no necesita enunciado propio.
   const doc = await prisma.document.findFirstOrThrow({
     where: { code: `${CODIGO}-MIN` },
+    include: { revisions: { orderBy: { createdAt: "desc" } } },
   })
+  const aprobada = doc.revisions[0]
 
   assert.equal(
     await codigoDeError(() =>
-      documentResolvers.Mutation.updateDocument(
+      revisionResolvers.Mutation.updateRevisionMetadata(
         null,
-        { id: doc.id, input: { title: "Otro título" } },
+        { revisionId: aprobada.id, input: { title: "Otro título" } },
         context,
       ),
     ),
     "CONFLICT",
   )
 
-  await revisionResolvers.Mutation.createRevision(
+  // Lo administrativo NO se congela: la descripción no aparece en ningún rótulo
+  const conDescripcion: any = await documentResolvers.Mutation.updateDocument(
+    null,
+    { id: doc.id, input: { description: "Corregida con la revisión aprobada" } },
+    context,
+  )
+  assert.equal(conDescripcion.description, "Corregida con la revisión aprobada")
+
+  // Abrir la siguiente vuelve a habilitar la identificación
+  const siguiente: any = await revisionResolvers.Mutation.createRevision(
     null,
     { documentId: doc.id, input: {} },
     context,
   )
+  // La revisión nueva NACE con la metadata copiada de la anterior (B1)
+  assert.equal(siguiente.title, aprobada.title)
 
-  const editado: any = await documentResolvers.Mutation.updateDocument(
+  const editada: any = await revisionResolvers.Mutation.updateRevisionMetadata(
     null,
-    { id: doc.id, input: { title: "Título corregido" } },
+    { revisionId: siguiente.id, input: { title: "Título corregido" } },
     context,
   )
-  // El documento conserva la metadata como COPIA, nombrada por su lectura
-  // (BLOQUE 03B, B2): `currentTitle` es la de la revisión en curso.
-  assert.equal(editado.currentTitle, "Título corregido")
+  assert.equal(editada.title, "Título corregido")
+
+  // La copia del documento se replica en el mismo acto (B2)
+  const conCopia = await prisma.document.findUniqueOrThrow({ where: { id: doc.id } })
+  assert.equal(conCopia.currentTitle, "Título corregido")
+  // Y la revisión aprobada conserva la suya: es lo que dice su rótulo
+  const intacta = await prisma.documentRevision.findUniqueOrThrow({
+    where: { id: aprobada.id },
+  })
+  assert.equal(intacta.title, aprobada.title)
+})
+
+test("abandonar la revisión devuelve la metadata, sin revertir nada", async () => {
+  // La propiedad que el bloque perseguía: la abandonada deja de ser la última
+  // viva y la copia se recalcula sobre la que estaba antes (B2).
+  const doc = await prisma.document.findFirstOrThrow({
+    where: { code: `${CODIGO}-MIN` },
+    include: { revisions: { orderBy: { createdAt: "desc" } } },
+  })
+  const enCurso = doc.revisions[0]
+  const anterior = doc.revisions[1]
+
+  await revisionResolvers.Mutation.abandonRevision(
+    null,
+    { revisionId: enCurso.id, reason: "se desiste de la corrección" },
+    context,
+  )
+
+  const despues = await prisma.document.findUniqueOrThrow({ where: { id: doc.id } })
+  assert.equal(despues.currentTitle, anterior.title)
 })
 
 test("el código informado se rechaza bajo un esquema calculado, y se exige bajo texto libre", async () => {
@@ -970,4 +1015,386 @@ test("el alta propone la plantilla resuelta por alcance, y el armado puede no se
     where: { workflowId: armado.id },
   })
   assert.equal(intacto, 3)
+})
+
+// ════════════════════════════════════════════════════════════
+// BLOQUE 03B — Código, reemplazo, obsolescencia y copia de trabajo
+// ════════════════════════════════════════════════════════════
+
+test("el código se corrige mientras nada salió, y después ya no", async () => {
+  // La ventana es "sin ninguna revisión aprobada": la condición material de que
+  // nada salió (BLOQUE 03B, B4). Es más precisa que "antes de la primera
+  // revisión" —si la primera se abandona, sigue sin haberse aprobado nada—.
+  const doc: any = await crear("COD")
+
+  const corregido: any = await documentResolvers.Mutation.correctDocumentCode(
+    null,
+    { id: doc.id, code: `${CODIGO}-COD-BIS` },
+    context,
+  )
+  assert.equal(corregido.code, `${CODIGO}-COD-BIS`)
+
+  // Abandonar la primera y abrir otra NO cierra la ventana
+  await revisionResolvers.Mutation.abandonRevision(
+    null,
+    { revisionId: doc.revisions[0].id, reason: "se rehace" },
+    context,
+  )
+  const segunda: any = await revisionResolvers.Mutation.createRevision(
+    null,
+    { documentId: doc.id, input: {} },
+    context,
+  )
+  const otraVez: any = await documentResolvers.Mutation.correctDocumentCode(
+    null,
+    { id: doc.id, code: `${CODIGO}-COD-TER` },
+    context,
+  )
+  assert.equal(otraVez.code, `${CODIGO}-COD-TER`)
+
+  // Aprobar cierra la ventana para siempre
+  const armado = await armar(segunda.workflows[0].id, [StepType.APPROVE])
+  await versionResolvers.Mutation.registerVersion(
+    null,
+    { revisionId: segunda.id, input: archivo(1) },
+    context,
+  )
+  await workflowResolvers.Mutation.submitRevision(
+    null,
+    { revisionId: segunda.id },
+    context,
+  )
+  const aprobacion = await pasoDe(armado.id, StepType.APPROVE)
+  await workflowResolvers.Mutation.approveStep(null, { stepId: aprobacion.id }, context)
+
+  assert.equal(
+    await codigoDeError(() =>
+      documentResolvers.Mutation.correctDocumentCode(
+        null,
+        { id: doc.id, code: `${CODIGO}-COD-NO` },
+        context,
+      ),
+    ),
+    "CONFLICT",
+  )
+})
+
+test("reemplazar supera: los reemplazados quedan obsoletos en el mismo acto", async () => {
+  // Unificación N:1, una de las tres cardinalidades que la misma relación
+  // expresa (BLOQUE 03B, B5).
+  const uno: any = await crear("RE1")
+  const dos: any = await crear("RE2")
+  const nuevo: any = await crear("RE3")
+
+  const acto: any = await replacementResolvers.Mutation.replaceDocuments(
+    null,
+    {
+      input: {
+        replacedIds: [uno.id, dos.id],
+        replacingIds: [nuevo.id],
+        reason: "los dos planos pasan a ser uno",
+      },
+    },
+    context,
+  )
+
+  assert.equal(acto.items.length, 3)
+  assert.equal(acto.reason, "los dos planos pasan a ser uno")
+
+  const [a, b, c] = await Promise.all(
+    [uno.id, dos.id, nuevo.id].map((id) =>
+      prisma.document.findUniqueOrThrow({ where: { id } }),
+    ),
+  )
+  assert.ok(a.obsoletedAt)
+  assert.ok(b.obsoletedAt)
+  // El que reemplaza NO queda obsoleto: es el que supera
+  assert.equal(c.obsoletedAt, null)
+})
+
+test("el acto de reemplazo exige ámbito compartido", async () => {
+  // Lo que cruza de un proyecto al régimen de publicación no es reemplazo sino
+  // promoción, que es otra cosa y pertenece al módulo de activos (B10).
+  const deProyecto: any = await crear("AMB1")
+  const publicado: any = await documentResolvers.Mutation.createDocument(
+    null,
+    {
+      input: {
+        code: `${CODIGO}-AMB2`,
+        title: "Documento publicado",
+        module: ModuleType.QUALITY,
+        documentTypeId,
+        // Sin proyecto no hay configuración que aporte el armador por defecto
+        assignedOrganizerId: USER_ID,
+      },
+    },
+    context,
+  )
+
+  assert.equal(
+    await codigoDeError(() =>
+      replacementResolvers.Mutation.replaceDocuments(
+        null,
+        {
+          input: {
+            replacedIds: [deProyecto.id],
+            replacingIds: [publicado.id],
+            reason: "promoción mal expresada",
+          },
+        },
+        context,
+      ),
+    ),
+    "BAD_USER_INPUT",
+  )
+})
+
+test("un documento queda obsoleto por fuera de alcance, sin que nada lo reemplace", async () => {
+  // La segunda causa (B5): es la que impide derivar la obsolescencia de la
+  // existencia de un reemplazo.
+  const doc: any = await crear("OBS")
+
+  const obsoleto: any = await documentResolvers.Mutation.obsoleteDocument(
+    null,
+    { id: doc.id, reason: "salió del alcance del proyecto" },
+    context,
+  )
+
+  assert.ok(obsoleto.obsoletedAt)
+  assert.equal(obsoleto.obsoleteReason, "salió del alcance del proyecto")
+  const items = await prisma.docReplacementItem.findMany({
+    where: { documentId: doc.id },
+  })
+  assert.equal(items.length, 0)
+
+  // Declarar obsoleto exige motivo, y no se repite
+  assert.equal(
+    await codigoDeError(() =>
+      documentResolvers.Mutation.obsoleteDocument(
+        null,
+        { id: doc.id, reason: "otra vez" },
+        context,
+      ),
+    ),
+    "CONFLICT",
+  )
+})
+
+test("la copia de trabajo precarga, arrastra la fuente y produce una versión", async () => {
+  // El caso corriente de ingeniería: se corrige el PDF y el DWG viaja solo,
+  // conservando su fileKey y su checksum, sin volver a subirse (B12).
+  const doc: any = await crear("WC")
+  const revision = doc.revisions[0]
+  await armar(revision.workflows[0].id, [StepType.APPROVE])
+
+  // Primera versión: entregable y fuente juntos, por el atajo de un solo acto
+  const primera: any = await workingCopyResolvers.Mutation.confirmWorkingCopy(
+    null,
+    {
+      revisionId: revision.id,
+      input: {
+        files: [
+          { ...archivo(1), role: DocFileRole.DELIVERABLE },
+          {
+            fileKey: "k1.dwg",
+            fileName: "plano-v1.dwg",
+            fileSize: 20,
+            mimeType: "image/vnd.dwg",
+            checksum: "d".repeat(64),
+            role: DocFileRole.SOURCE,
+          },
+        ],
+      },
+    },
+    context,
+  )
+  assert.equal(primera.versionNumber, 1)
+  assert.equal(primera.files.length, 2)
+
+  // Abrir precarga los dos archivos de la versión vigente
+  const copia: any = await workingCopyResolvers.Mutation.openWorkingCopy(
+    null,
+    { revisionId: revision.id },
+    context,
+  )
+  assert.equal(copia.files.length, 2)
+
+  // Una segunda copia abierta se rechaza
+  assert.equal(
+    await codigoDeError(() =>
+      workingCopyResolvers.Mutation.openWorkingCopy(
+        null,
+        { revisionId: revision.id },
+        context,
+      ),
+    ),
+    "CONFLICT",
+  )
+
+  // Sin tocar nada no hay nada que confirmar
+  assert.equal(
+    await codigoDeError(() =>
+      workingCopyResolvers.Mutation.confirmWorkingCopy(
+        null,
+        { revisionId: revision.id },
+        context,
+      ),
+    ),
+    "BAD_REQUEST",
+  )
+
+  // Se corrige SOLO el entregable
+  await workingCopyResolvers.Mutation.putWorkingCopyFile(
+    null,
+    {
+      revisionId: revision.id,
+      input: { ...archivo(1), checksum: "e".repeat(64), role: DocFileRole.DELIVERABLE },
+    },
+    context,
+  )
+
+  const segunda: any = await workingCopyResolvers.Mutation.confirmWorkingCopy(
+    null,
+    { revisionId: revision.id, input: { comment: "conexionado corregido" } },
+    context,
+  )
+
+  assert.equal(segunda.versionNumber, 2)
+  assert.equal(segunda.files.length, 2)
+  const fuente = segunda.files.find((f: any) => f.role === DocFileRole.SOURCE)
+  // La fuente viajó sola, con su key y su checksum intactos
+  assert.equal(fuente.fileKey, "k1.dwg")
+  assert.equal(fuente.checksum, "d".repeat(64))
+
+  // La copia quedó confirmada y apunta a la versión que produjo
+  const cerrada = await prisma.docWorkingCopy.findUniqueOrThrow({
+    where: { id: copia.id },
+  })
+  assert.equal(cerrada.versionId, segunda.id)
+  assert.ok(cerrada.confirmedAt)
+})
+
+test("un conjunto sin entregable no se confirma, y descartar no consume numeración", async () => {
+  const doc: any = await crear("WC2")
+  const revision = doc.revisions[0]
+  await armar(revision.workflows[0].id, [StepType.APPROVE])
+
+  assert.equal(
+    await codigoDeError(() =>
+      workingCopyResolvers.Mutation.confirmWorkingCopy(
+        null,
+        {
+          revisionId: revision.id,
+          input: {
+            files: [
+              {
+                fileKey: "solo.dwg",
+                fileName: "solo.dwg",
+                fileSize: 1,
+                mimeType: "image/vnd.dwg",
+                checksum: "f".repeat(64),
+                role: DocFileRole.SOURCE,
+              },
+            ],
+          },
+        },
+        context,
+      ),
+    ),
+    "BAD_USER_INPUT",
+  )
+
+  await workingCopyResolvers.Mutation.openWorkingCopy(
+    null,
+    { revisionId: revision.id },
+    context,
+  )
+  await workingCopyResolvers.Mutation.putWorkingCopyFile(
+    null,
+    { revisionId: revision.id, input: { ...archivo(7), role: DocFileRole.DELIVERABLE } },
+    context,
+  )
+  await workingCopyResolvers.Mutation.discardWorkingCopy(
+    null,
+    { revisionId: revision.id, reason: "se rehace desde cero" },
+    context,
+  )
+
+  // Descartar no produce versión: la numeración interna no salta
+  const versiones = await prisma.documentVersion.count({
+    where: { revisionId: revision.id },
+  })
+  assert.equal(versiones, 0)
+
+  // Y descartada la primera, se puede abrir otra
+  const otra: any = await workingCopyResolvers.Mutation.openWorkingCopy(
+    null,
+    { revisionId: revision.id },
+    context,
+  )
+  assert.ok(otra.id)
+})
+
+test("resolver un paso con una copia abierta se rechaza", async () => {
+  // Declarar que se terminó mientras una iteración sigue abierta es una
+  // contradicción, y evita que la revisión se apruebe con trabajo colgando (B12).
+  const doc: any = await crear("WC3")
+  const revision = doc.revisions[0]
+  const armado = await armar(revision.workflows[0].id, [StepType.APPROVE])
+
+  await workingCopyResolvers.Mutation.confirmWorkingCopy(
+    null,
+    {
+      revisionId: revision.id,
+      input: { files: [{ ...archivo(3), role: DocFileRole.DELIVERABLE }] },
+    },
+    context,
+  )
+  await workflowResolvers.Mutation.submitRevision(
+    null,
+    { revisionId: revision.id },
+    context,
+  )
+
+  // El aprobador abre una copia para marcar el archivo, y no la cierra
+  await workingCopyResolvers.Mutation.openWorkingCopy(
+    null,
+    { revisionId: revision.id },
+    context,
+  )
+
+  const aprobacion = await pasoDe(armado.id, StepType.APPROVE)
+  assert.equal(
+    await codigoDeError(() =>
+      workflowResolvers.Mutation.approveStep(null, { stepId: aprobacion.id }, context),
+    ),
+    "CONFLICT",
+  )
+
+  // Descartada, el paso se resuelve
+  await workingCopyResolvers.Mutation.discardWorkingCopy(
+    null,
+    { revisionId: revision.id, reason: "sin observaciones" },
+    context,
+  )
+  const resuelto: any = await workflowResolvers.Mutation.approveStep(
+    null,
+    { stepId: aprobacion.id },
+    context,
+  )
+  assert.equal(resuelto.status, StepStatus.APPROVED)
+})
+
+test("la firma acredita el conjunto completo, incluida la fuente que nadie revisó", async () => {
+  const firma = await prisma.docStepSignature.findFirstOrThrow({
+    where: { step: { workflow: { revision: { document: { code: `${CODIGO}-WC3` } } } } },
+  })
+  const payload = JSON.parse(firma.payload)
+
+  assert.equal(payload.payloadVersion, 2)
+  assert.ok(payload.version.files.length >= 1)
+  // La identificación viaja con la revisión (B1); el código, con el documento (B3)
+  assert.ok(payload.revision.title)
+  assert.equal(payload.document.code, `${CODIGO}-WC3`)
+  assert.deepEqual(verifySignature(firma), { valid: true })
 })

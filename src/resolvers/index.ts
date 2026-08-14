@@ -5,6 +5,8 @@ import { resolverTypes } from "./resolversTypes/index.js"
 import { documentResolvers } from "./documents.js"
 import { documentTypeResolvers } from "./documentTypes.js"
 import { revisionResolvers } from "./revisions.js"
+import { replacementResolvers } from "./replacements.js"
+import { workingCopyResolvers } from "./workingCopies.js"
 import { versionResolvers } from "./versions.js"
 import { workflowResolvers } from "./workflows.js"
 import { transmittalResolvers } from "./transmittals.js"
@@ -50,6 +52,8 @@ export const resolvers: GraphQLResolverMap<ResolverContext> = {
     ...areaResolvers.Mutation,
     ...versionResolvers.Mutation,
     ...revisionResolvers.Mutation,
+    ...replacementResolvers.Mutation,
+    ...workingCopyResolvers.Mutation,
     ...workflowResolvers.Mutation,
     ...transmittalResolvers.Mutation,
     ...documentSysLogResolvers.Mutation,

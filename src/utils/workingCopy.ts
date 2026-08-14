@@ -31,7 +31,17 @@ export type CopyFile = {
  * nace sin archivo, donde la elaboración existe precisamente para producirlo.
  */
 export const preloadFrom = (files: CopyFile[] | null | undefined): CopyFile[] =>
-  (files ?? []).map((f) => ({ ...f }))
+  // Proyecta EXACTAMENTE la forma del conjunto y no la fila de la que sale: los
+  // archivos llegan como registros de la versión, con su id y su versionId, y
+  // arrastrarlos haría que la copia intentara nacer con la identidad de otro.
+  (files ?? []).map((f) => ({
+    role: f.role,
+    fileKey: f.fileKey,
+    fileName: f.fileName,
+    fileSize: f.fileSize,
+    mimeType: f.mimeType,
+    checksum: f.checksum,
+  }))
 
 /** Índice por `fileKey`, que es lo que distingue a un archivo del conjunto. */
 const byKey = (files: CopyFile[]) => new Map(files.map((f) => [f.fileKey, f]))

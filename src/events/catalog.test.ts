@@ -109,5 +109,15 @@ test("el catálogo cubre las escrituras relevadas más lo que agregaron los bloq
   //   + AbandonRevision
   //   + CreateWorkflowTemplate, UpdateWorkflowTemplate, DeleteWorkflowTemplate
   //   + DeclareDocSettings
-  assert.equal(AUDIT_ACTIONS.length, 35)
+  //
+  // El Bloque 03B suma 8, de 35 a 43. Son actos que antes no existían o que se
+  // separan de `UpdateDocument` porque no son ediciones:
+  //
+  //   + UpdateRevisionMetadata  la identificación se edita en la revisión (B1)
+  //   + CorrectDocumentCode     es la IDENTIDAD cambiando, y sin evento sería
+  //                             inexplicable en una auditoría posterior (B4)
+  //   + ReplaceDocuments, ObsoleteDocument   el fin de la vida útil (B5)
+  //   + OpenWorkingCopy, UpdateWorkingCopy, ConfirmWorkingCopy,
+  //     DiscardWorkingCopy                   el ciclo de la copia (B12)
+  assert.equal(AUDIT_ACTIONS.length, 43)
 })

@@ -44,6 +44,17 @@ export const versionResolvers = {
      * identidad sino de momento: la elabora el elaborador, la marca el revisor,
      * la marca el aprobador. El permiso especial habilita hacerlo por otro.
      */
+    /**
+     * @deprecated Reemplazada por la copia de trabajo (BLOQUE 03B, B12).
+     *
+     * Se conserva mientras el contrato la exponga: registrar un archivo suelto
+     * es el caso de un conjunto de uno, y no hay motivo para romper a quien la
+     * invoque antes de que la fase G retire el campo. Internamente ya escribe el
+     * conjunto, con el archivo como entregable.
+     *
+     * No la use en código nuevo: `confirmWorkingCopy` recibe el conjunto
+     * completo en un solo acto y hace exactamente lo mismo para un archivo.
+     */
     registerVersion: async (
       _: any,
       {

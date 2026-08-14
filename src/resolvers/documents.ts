@@ -559,6 +559,208 @@ export const documentResolvers = {
       }
     },
 
+
+    /**
+     * Corrige el código del documento (BLOQUE 03B, B4).
+     *
+     * El código es el IDENTIFICADOR y no cambia: está en los transmittals
+     * emitidos, en el payload de cada firma, en las referencias cruzadas de
+     * otros documentos y en el rótulo de cada archivo que salió. Cambiarlo no
+     * renombra un registro, rompe la correspondencia con todo lo que ya lo
+     * nombra y que el sistema no controla.
+     *
+     * La única excepción es el error de carga, y su ventana es **mientras el
+     * documento no tenga ninguna revisión aprobada**: la condición material de
+     * que nada salió. Es más precisa que "antes de la primera revisión" —si la
+     * primera se abandona, sigue sin haberse aprobado nada— y no requiere
+     * indicador nuevo, porque es la lectura de revisión vigente nula.
+     *
+     * Después, lo que corresponde es un documento nuevo que lo reemplace (B5).
+     */
+    correctDocumentCode: async (
+      _: any,
+      { id, code }: { id: number; code: string },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_UPDATE],
+        context,
+      })
+      logger.info("correctDocumentCode", { userId })
+
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT,
+        objectId: id,
+        context,
+        notFoundMessage: "Documento no encontrado",
+      })
+
+      if (!code?.trim()) {
+        throw new GraphQLError("El código no puede quedar vacío.", {
+          extensions: { code: "BAD_USER_INPUT" },
+        })
+      }
+
+      try {
+        return await context.orm.$transaction(async (tx) => {
+          const document = await tx.document.findFirst({
+            where: { id },
+            select: { id: true, code: true, revisions: { select: { status: true } } },
+          })
+
+          if (!document) {
+            throw new GraphQLError("Documento no encontrado", {
+              extensions: { code: "NOT_FOUND" },
+            })
+          }
+
+          const aprobada = document.revisions.some(
+            (r) => r.status === RevisionStatus.APPROVED,
+          )
+          if (aprobada) {
+            throw new GraphQLError(
+              "El código no se corrige después de aprobar una revisión: el documento ya salió con él. Lo que corresponde es dar de alta un documento nuevo que lo reemplace.",
+              { extensions: { code: "CONFLICT" } },
+            )
+          }
+
+          const anterior = document.code
+          if (anterior === code.trim()) {
+            throw new GraphQLError("El código informado es el que ya tiene.", {
+              extensions: { code: "BAD_USER_INPUT" },
+            })
+          }
+
+          const updated = await tx.document.update({
+            where: { id },
+            data: { code: code.trim(), updatedById: userId },
+            include: documentIncludes,
+          })
+
+          // Acción propia y no un `UpdateDocument` más: es la IDENTIDAD
+          // cambiando, y sin evento sería inexplicable en una auditoría.
+          await emitAuditEvent(tx, {
+            action: AuditAction.CorrectDocumentCode,
+            objectId: id,
+            actorId: userId,
+            meta: { anterior, nuevo: updated.code },
+          })
+
+          return updated
+        })
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "CORRECT_DOCUMENT_CODE",
+          messages: {
+            notFound: "El documento no existe.",
+            uniqueConstraint: "Ya existe un documento con ese código en el ámbito.",
+            default: "Error al corregir el código del documento.",
+          },
+        })
+      }
+    },
+
+    /**
+     * Declara obsoleto un documento por haber salido del alcance (BLOQUE 03B, B5).
+     *
+     * Es la segunda causa de obsolescencia, la que **nada reemplaza**: el
+     * documento dejó de tener sentido en el proyecto. Por eso el hecho se
+     * registra y no se deriva de la existencia de un reemplazo; lo que sí se
+     * deriva es la causa.
+     *
+     * Obsoleto no es dado de baja: `terminatedAt` corrige un alta que no debió
+     * existir, y esto es un hecho del ciclo de vida —el documento existió,
+     * sirvió y dejó de servir— que conserva su historia entera.
+     */
+    obsoleteDocument: async (
+      _: any,
+      { id, reason }: { id: number; reason: string },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_OBSOLETE],
+        context,
+      })
+      logger.info("obsoleteDocument", { userId })
+
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT,
+        objectId: id,
+        context,
+        notFoundMessage: "Documento no encontrado",
+      })
+
+      if (!reason?.trim()) {
+        throw new GraphQLError(
+          "Declarar obsoleto un documento exige motivo.",
+          { extensions: { code: "BAD_USER_INPUT" } },
+        )
+      }
+
+      try {
+        return await context.orm.$transaction(async (tx) => {
+          const document = await tx.document.findFirst({
+            where: { id },
+            select: { id: true, code: true, obsoletedAt: true },
+          })
+
+          if (!document) {
+            throw new GraphQLError("Documento no encontrado", {
+              extensions: { code: "NOT_FOUND" },
+            })
+          }
+          if (document.obsoletedAt) {
+            throw new GraphQLError("El documento ya está obsoleto.", {
+              extensions: { code: "CONFLICT" },
+            })
+          }
+
+          const updated = await tx.document.update({
+            where: { id },
+            data: {
+              obsoletedAt: new Date(),
+              obsoletedById: userId,
+              obsoleteReason: reason.trim(),
+              updatedById: userId,
+            },
+            include: documentIncludes,
+          })
+
+          await emitAuditEvent(tx, {
+            action: AuditAction.ObsoleteDocument,
+            objectId: id,
+            actorId: userId,
+            meta: { code: document.code, reason: reason.trim() },
+          })
+          await emitWorkflowEvent(tx, {
+            name: WorkflowEvent.DocumentObsoleted,
+            objectId: id,
+            fromState: null,
+            toState: "OBSOLETE",
+            actorId: userId,
+          })
+
+          return updated
+        })
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "OBSOLETE_DOCUMENT",
+          messages: {
+            notFound: "El documento no existe.",
+            default: "Error al declarar obsoleto el documento.",
+          },
+        })
+      }
+    },
+
     updateDocument: async (
       _: any,
       {
@@ -567,10 +769,8 @@ export const documentResolvers = {
       }: {
         id: number
         input: {
-          title?: string
           description?: string
-          documentTypeId?: number
-          documentClassId?: number
+          projectTaskId?: number | null
         }
       },
       context: ResolverContext,
@@ -590,51 +790,21 @@ export const documentResolvers = {
       })
 
       try {
-        // La metadata se CONGELA con la revisión aprobada (BLOQUE 03, B6).
+        // Solo lo ADMINISTRATIVO (BLOQUE 03B, B1). La identificación —título,
+        // clase y tipo— se edita sobre la revisión, con `updateRevisionMetadata`:
+        // está impresa en el rótulo, y lo impreso pertenece a la emisión que lo
+        // produjo.
         //
-        // El motivo es material: parte de la metadata está impresa dentro del
-        // archivo —el rótulo lleva código, título y a menudo clase y tipo—, de
-        // modo que cambiarla después de aprobar produciría una divergencia
-        // silenciosa entre lo que el sistema afirma y lo que el entregable dice.
-        //
-        // Se mira la ÚLTIMA revisión viva y no "si existe alguna aprobada":
-        // abrir la revisión siguiente vuelve a habilitar la edición, y el
-        // archivo que se elabore llevará el rótulo nuevo.
-        const revisions = await context.orm.documentRevision.findMany({
-          where: { documentId: id },
-          select: {
-            id: true,
-            revisionCode: true,
-            status: true,
-            createdAt: true,
-          },
-        })
-        const last = lastLiveRevision(revisions)
-
-        if (last?.status === RevisionStatus.APPROVED) {
-          throw new GraphQLError(
-            "La revisión vigente está aprobada y su identificación no se edita. Para corregirla, abra una revisión nueva.",
-            { extensions: { code: "CONFLICT" } },
-          )
-        }
-
-        const { documentTypeId, documentClassId, title, ...rest } = input
-
+        // Con eso desaparece la precondición de congelamiento que esta operación
+        // llevaba: no hace falta mirar si la revisión vigente está aprobada,
+        // porque acá ya no se toca nada que el rótulo muestre. La descripción no
+        // se imprime en ninguno, y corregirla no debe exigir abrir una revisión.
         const document = await context.orm.$transaction(async (tx) => {
           const updated = await tx.document.update({
             where: { id },
             data: {
-              ...rest,
+              ...input,
               updatedById: userId,
-              ...(title !== undefined && { currentTitle: title }),
-              ...(documentTypeId !== undefined && {
-                currentDocumentType: { connect: { id: documentTypeId } },
-              }),
-              ...(documentClassId !== undefined && {
-                currentDocumentClass: documentClassId
-                  ? { connect: { id: documentClassId } }
-                  : { disconnect: true },
-              }),
             },
             include: documentIncludes,
           })

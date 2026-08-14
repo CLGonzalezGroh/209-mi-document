@@ -173,6 +173,31 @@ const assertTurn = (step: LoadedStep) => {
 }
 
 /**
+ * Resolver un paso exige NO tener copia de trabajo abierta (BLOQUE 03B, B12).
+ *
+ * Declarar que se terminó mientras una iteración sigue abierta es una
+ * contradicción, y evita además que una revisión llegue a aprobarse con trabajo
+ * colgando —lo que dejaría a la firma acreditando una versión que el autor
+ * todavía estaba corrigiendo—.
+ */
+const assertNoOpenWorkingCopy = async (
+  context: ResolverContext,
+  revisionId: number,
+) => {
+  const abierta = await context.orm.docWorkingCopy.findFirst({
+    where: { revisionId, confirmedAt: null, discardedAt: null },
+    select: { id: true },
+  })
+
+  if (abierta) {
+    throw new GraphQLError(
+      "La revisión tiene una copia de trabajo abierta. Confírmela o descártela antes de resolver el paso.",
+      { extensions: { code: "CONFLICT" } },
+    )
+  }
+}
+
+/**
  * Persiste la firma del paso (BLOQUE 03, B7).
  *
  * Firman los pasos que actúan sobre una versión. `ASSIGN` no: al completarse
@@ -594,6 +619,9 @@ export const workflowResolvers = {
       const abierto = revision.workflows[0]
       const vigente = abierto ? currentStep(abierto.steps) : null
 
+      // Someter es declarar que la elaboración terminó (BLOQUE 03B, B12)
+      await assertNoOpenWorkingCopy(context, revisionId)
+
       if (!vigente || vigente.stepType !== StepType.PREPARE) {
         throw new GraphQLError(
           "Solo se somete una revisión cuyo paso en curso es la elaboración.",
@@ -728,6 +756,7 @@ export const workflowResolvers = {
       }
 
       assertTurn(step)
+      await assertNoOpenWorkingCopy(context, step.workflow.revisionId)
       const actor = await resolveActor(step, userId, context, delegationReason)
 
       try {
@@ -896,6 +925,7 @@ export const workflowResolvers = {
       }
 
       assertTurn(step)
+      await assertNoOpenWorkingCopy(context, step.workflow.revisionId)
       const actor = await resolveActor(step, userId, context, delegationReason)
 
       try {

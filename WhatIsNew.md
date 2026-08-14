@@ -587,4 +587,21 @@ Cuatro derivaciones, todavía sin operaciones que las usen.
 
 **210 pruebas, 0 fallos.** Suites nuevas `test:document-metadata` y `test:working-copy`, y los guiones `test:block03b`, `test:block03b-db` y `test:block03b-all`.
 
+### Fase E — Operaciones
+
+Primera fase que cambia comportamiento.
+
+- **`updateRevisionMetadata`** — la identificación (título, clase, tipo) se edita sobre la revisión, y la copia del documento se replica en el mismo acto.
+- **`updateDocument`** queda solo con lo administrativo, y **pierde su precondición de congelamiento**: lo que edita no aparece en ningún rótulo, de modo que corregir una descripción ya no exige abrir una revisión.
+- **`correctDocumentCode`** — corrige el código mientras el documento no tenga ninguna revisión aprobada, con acción propia en la traza.
+- **`replaceDocuments`** — el acto N:M entre documentos del mismo ámbito. Los reemplazados quedan obsoletos en el mismo acto.
+- **`obsoleteDocument`** — la segunda causa: fuera de alcance, sin que nada reemplace.
+- **La copia de trabajo**, con cinco operaciones: `openWorkingCopy`, `putWorkingCopyFile`, `removeWorkingCopyFile`, `confirmWorkingCopy` y `discardWorkingCopy`. La versión nace al confirmar. Abrir precarga los archivos de la versión vigente, de modo que corregir el PDF arrastra el DWG sin volver a subirlo.
+- **Resolver un paso —y someter— exige no tener copia abierta.** Declarar que se terminó con una iteración en curso es una contradicción.
+- **`registerVersion` queda obsoleta.** Sigue funcionando; internamente escribe el conjunto con el archivo como entregable. Use `confirmWorkingCopy`, que recibe el conjunto completo en un solo acto.
+
+**220 pruebas, 0 fallos.**
+
+> **Atención**: `rover subgraph check` ahora informa *"Compared 47 schema changes against 0 operations"* y marca los retiros como fallo. **No cambió el código: no queda ninguna operación registrada en la ventana**, y sin operaciones el veredicto por defecto de un cambio incompatible es el fallo. Lo que el `PASSED` de las fases anteriores afirmaba era que ninguna operación registrada usaba lo retirado, no que el cambio no fuera incompatible. La evidencia que sostiene los retiros es la búsqueda del nombre viejo en `201-mi-webapp`, donde ningún consumidor escrito a mano los usa.
+
 ---

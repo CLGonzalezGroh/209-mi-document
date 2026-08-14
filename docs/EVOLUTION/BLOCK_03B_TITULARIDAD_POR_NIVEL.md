@@ -603,6 +603,39 @@ El renombre alcanzó más de lo que el enunciado de la fase preveía, y por el m
 
 Suites nuevas `test:document-metadata` y `test:working-copy`, y los guiones `test:block03b`, `-db` y `-all` que las incorporan.
 
+### Fase E — operaciones
+
+**Completada.** Es la primera fase que cambia comportamiento.
+
+| Operación | Qué resuelve |
+| --------- | ------------ |
+| `updateRevisionMetadata` | La identificación se edita en la revisión, y se replica a la copia del documento en el mismo acto |
+| `updateDocument` | Queda solo con lo administrativo, y **pierde su precondición de congelamiento** |
+| `correctDocumentCode` | La ventana del error de carga, con acción propia en la traza |
+| `replaceDocuments` | El acto N:M, que deja obsoletos a los reemplazados |
+| `obsoleteDocument` | La segunda causa: fuera de alcance, sin que nada reemplace |
+| `openWorkingCopy`, `putWorkingCopyFile`, `removeWorkingCopyFile`, `confirmWorkingCopy`, `discardWorkingCopy` | El ciclo de la copia, con la versión naciendo al confirmar |
+
+**El congelamiento dejó de tener código.** `updateDocument` llevaba una precondición que leía la última revisión viva y rechazaba si estaba aprobada. Con la identificación en la revisión, esa precondición **se borra**: lo que queda en el documento no aparece en ningún rótulo. La regla no se trasladó, desapareció — que es lo que `B1` prometía al volverla estructural.
+
+**Adjuntar y reemplazar un archivo resultaron ser la misma operación.** `putWorkingCopyFile` cubre las dos: el hecho es que el conjunto pasa a tener este archivo con este contenido. Distinguirlas obligaría al llamador a saber qué había antes, que es justamente lo que la copia precargada le evita.
+
+**Someter también exige la copia cerrada,** no solo aprobar y rechazar. Someter es declarar que la elaboración terminó, y es la misma contradicción.
+
+**Un defecto que las pruebas puras no habrían encontrado.** `preloadFrom` devolvía los archivos con un `spread` de la fila, arrastrando `id`, `versionId` y `createdAt`: la copia intentaba nacer con la identidad de otro y fallaba recién al escribir en base. Se corrigió proyectando la forma exacta, y **se agregó la prueba pura que lo habría atrapado** — verifica las claves que la proyección devuelve, no solo los valores.
+
+| Verificación | Resultado |
+| ------------ | --------- |
+| `tsc --noEmit` | Sin errores |
+| `npm run test:block03b-all` | **220 pruebas, 0 fallos** |
+| Búsqueda en `201-mi-webapp` | Ningún consumidor escrito a mano usa las operaciones ni los campos retirados |
+
+**El `rover subgraph check` cambió de veredicto, y el motivo no es el código.** Ahora informa *"Compared 47 schema changes against 0 operations"* y marca los retiros como `FAIL`; en las fases B y C la misma comprobación pasó. Lo que cambió es que **no queda ninguna operación registrada en la ventana**, de modo que el veredicto pasó a ser el que corresponde por defecto a un cambio incompatible cuando no hay con qué probar que es seguro.
+
+Conviene ser preciso sobre qué afirmaba aquel `PASSED`: que **ninguna operación registrada usaba** lo retirado. No que los cambios no fueran incompatibles — siempre lo fueron, y están declarados como tales. Hoy la comprobación ya no distingue *"nadie lo usa"* de *"no sabemos"*, y por eso la evidencia que sostiene el retiro es la búsqueda en la webapp y no el check. El `Linter Check` sigue aprobando.
+
+**`registerVersion` queda marcada como obsoleta y no se retira todavía**: internamente ya escribe el conjunto con el archivo como entregable, y romperla antes de que la fase G retire el campo del contrato no compra nada.
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-23, D-24, D-25 y la nota prospectiva de promoción al activo
