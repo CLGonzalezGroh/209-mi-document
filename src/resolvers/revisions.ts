@@ -159,6 +159,7 @@ export const revisionResolvers = {
               id: true,
               code: true,
               projectId: true,
+              obsoletedAt: true,
               currentTitle: true,
               currentDocumentClassId: true,
               currentDocumentTypeId: true,
@@ -169,6 +170,18 @@ export const revisionResolvers = {
             throw new GraphQLError("Documento no encontrado", {
               extensions: { code: "NOT_FOUND" },
             })
+          }
+
+          // Un documento obsoleto no admite revisiones nuevas (BLOQUE 03B, B5):
+          // emitir sobre lo que ya fue superado, o sobre lo que salió del
+          // alcance, sería contradictorio. Todo lo demás se conserva —su código,
+          // su historia, sus versiones firmadas y sus transmittals—, que es
+          // justamente lo que la obsolescencia preserva y la baja no.
+          if (document.obsoletedAt) {
+            throw new GraphQLError(
+              "El documento está obsoleto y no admite revisiones nuevas.",
+              { extensions: { code: "CONFLICT" } },
+            )
           }
 
           // Una revisión abierta por documento. La abortada no cuenta: dejó de

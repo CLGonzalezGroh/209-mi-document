@@ -1430,3 +1430,294 @@ test("la copia de trabajo deja su traza en la revisión, con su contexto", async
   assert.ok(meta.versionId)
   assert.ok(meta.archivos >= 1)
 })
+
+// ════════════════════════════════════════════════════════════
+// BLOQUE 03B — Criterios de aceptación sin cubrir por los recorridos
+// ════════════════════════════════════════════════════════════
+
+test("la firma acredita los dos checksum, y el respaldo entra sin contar como entregable", async () => {
+  // Criterios 5 y 16. La custodia del editable importa PORQUE es la fuente del
+  // entregable: que hayan sido firmados juntos es lo que sostiene que se
+  // correspondan. El respaldo viaja igual, y no cuenta para el mínimo.
+  const doc: any = await crear("TRES")
+  const revision = doc.revisions[0]
+  const armado = await armar(revision.workflows[0].id, [StepType.APPROVE])
+
+  await workingCopyResolvers.Mutation.confirmWorkingCopy(
+    null,
+    {
+      revisionId: revision.id,
+      input: {
+        files: [
+          { ...archivo(1), role: DocFileRole.DELIVERABLE },
+          {
+            fileKey: "tres.dwg",
+            fileName: "plano.dwg",
+            fileSize: 20,
+            mimeType: "image/vnd.dwg",
+            checksum: "a".repeat(64),
+            role: DocFileRole.SOURCE,
+          },
+          {
+            fileKey: "tres.xlsx",
+            fileName: "memoria.xlsx",
+            fileSize: 5,
+            mimeType: "application/vnd.ms-excel",
+            checksum: "b".repeat(64),
+            role: DocFileRole.SUPPORT,
+          },
+        ],
+      },
+    },
+    context,
+  )
+  await workflowResolvers.Mutation.submitRevision(
+    null,
+    { revisionId: revision.id },
+    context,
+  )
+  const aprobacion = await pasoDe(armado.id, StepType.APPROVE)
+  await workflowResolvers.Mutation.approveStep(null, { stepId: aprobacion.id }, context)
+
+  const firma = await prisma.docStepSignature.findFirstOrThrow({
+    where: { stepId: aprobacion.id },
+  })
+  const payload = JSON.parse(firma.payload)
+
+  assert.equal(payload.version.files.length, 3)
+  const roles = payload.version.files.map((f: any) => f.role)
+  assert.deepEqual(roles, ["DELIVERABLE", "SOURCE", "SUPPORT"])
+  for (const esperado of ["1".repeat(64), "a".repeat(64), "b".repeat(64)]) {
+    assert.ok(
+      payload.version.files.some((f: any) => f.checksum === esperado),
+      `falta el checksum ${esperado.slice(0, 4)}…`,
+    )
+  }
+  assert.deepEqual(verifySignature(firma), { valid: true })
+})
+
+test("los listados y filtros resuelven sobre el documento, sin join a la revisión", async () => {
+  // Criterio 9. Es para lo que la copia existe: si el filtro tuviera que ir a la
+  // revisión, la copia no compraría nada.
+  const listado: any = await documentResolvers.Query.documents(
+    null,
+    { filter: { documentTypeId, query: "TEST-BLOCK03-TRES" } },
+    context,
+  )
+
+  assert.ok(listado.items.length >= 1)
+  assert.ok(listado.items.every((d: any) => d.currentDocumentTypeId === documentTypeId))
+})
+
+test("currentTitle es el de la revisión en curso, y la vigente conserva el suyo", async () => {
+  // Criterio 10. Las dos lecturas conviven y ninguna se confunde con la otra.
+  const doc: any = await crear("DOS-LECTURAS")
+  const primera = doc.revisions[0]
+  const armado = await armar(primera.workflows[0].id, [StepType.APPROVE])
+
+  await workingCopyResolvers.Mutation.confirmWorkingCopy(
+    null,
+    {
+      revisionId: primera.id,
+      input: { files: [{ ...archivo(1), role: DocFileRole.DELIVERABLE }] },
+    },
+    context,
+  )
+  await workflowResolvers.Mutation.submitRevision(
+    null,
+    { revisionId: primera.id },
+    context,
+  )
+  const paso = await pasoDe(armado.id, StepType.APPROVE)
+  await workflowResolvers.Mutation.approveStep(null, { stepId: paso.id }, context)
+
+  const segunda: any = await revisionResolvers.Mutation.createRevision(
+    null,
+    { documentId: doc.id, input: {} },
+    context,
+  )
+  await revisionResolvers.Mutation.updateRevisionMetadata(
+    null,
+    { revisionId: segunda.id, input: { title: "Título de la B" } },
+    context,
+  )
+
+  const guardado = await prisma.document.findUniqueOrThrow({ where: { id: doc.id } })
+  assert.equal(guardado.currentTitle, "Título de la B")
+
+  const vigente: any = await resolverTypes.Document.currentRevision({ id: doc.id })
+  assert.equal(vigente.title, `Documento DOS-LECTURAS`)
+})
+
+test("el acto de reemplazo se consulta desde cualquiera de los documentos que toca", async () => {
+  // Criterio 11. El acto tiene identidad propia y ninguno de los tres lo
+  // representa: se llega desde todos.
+  const uno: any = await crear("CONS1")
+  const dos: any = await crear("CONS2")
+  const nuevo: any = await crear("CONS3")
+
+  const acto: any = await replacementResolvers.Mutation.replaceDocuments(
+    null,
+    {
+      input: {
+        replacedIds: [uno.id, dos.id],
+        replacingIds: [nuevo.id],
+        reason: "unificación consultable",
+      },
+    },
+    context,
+  )
+
+  for (const id of [uno.id, dos.id, nuevo.id]) {
+    const items: any = await resolverTypes.Document.replacementItems({ id })
+    assert.equal(items.length, 1)
+    assert.equal(items[0].replacementId, acto.id)
+  }
+})
+
+test("un documento obsoleto se lee entero y no admite revisiones nuevas", async () => {
+  // Criterios 12 y 13. Lo que la obsolescencia conserva es exactamente lo que la
+  // baja lógica destruiría, y el código sigue tomado: es lo que impide que el
+  // reemplazo se vuelva una vía indirecta para reutilizar un identificador.
+  const doc = await prisma.document.findFirstOrThrow({
+    where: { code: `${CODIGO}-CONS1` },
+    include: { revisions: { include: { versions: true } } },
+  })
+  assert.ok(doc.obsoletedAt)
+  assert.equal(doc.revisions.length, 1)
+
+  assert.equal(
+    await codigoDeError(() =>
+      revisionResolvers.Mutation.createRevision(
+        null,
+        { documentId: doc.id, input: {} },
+        context,
+      ),
+    ),
+    "CONFLICT",
+  )
+
+  // El código sigue tomado: darlo de alta otra vez en el mismo ámbito se rechaza
+  assert.equal(
+    await codigoDeError(() => crear("CONS1")),
+    "CONFLICT",
+  )
+})
+
+test("la causa de la obsolescencia se lee derivada, y distingue las dos", async () => {
+  // Criterio 15. La causa no se guarda: figurar como reemplazado la determina.
+  const reemplazado = await prisma.document.findFirstOrThrow({
+    where: { code: `${CODIGO}-CONS1` },
+  })
+  const fueraDeAlcance = await prisma.document.findFirstOrThrow({
+    where: { code: `${CODIGO}-OBS` },
+  })
+  const vigente = await prisma.document.findFirstOrThrow({
+    where: { code: `${CODIGO}-CONS3` },
+  })
+
+  assert.equal(
+    await resolverTypes.Document.obsolescenceCause(reemplazado),
+    "REPLACEMENT",
+  )
+  assert.equal(
+    await resolverTypes.Document.obsolescenceCause(fueraDeAlcance),
+    "OUT_OF_SCOPE",
+  )
+  // El que reemplaza no está obsoleto, aunque figure en el acto
+  assert.equal(await resolverTypes.Document.obsolescenceCause(vigente), null)
+})
+
+test("cada acto terminal deja su propio estado, y ninguno produce el del otro", async () => {
+  // Criterio 17. Es la colisión que el bloque vino a deshacer: el circuito se
+  // cancela, la revisión se abandona.
+  const doc: any = await crear("TERMINAL")
+  const revision = doc.revisions[0]
+  const armado = await armar(revision.workflows[0].id, [StepType.APPROVE])
+
+  await workflowResolvers.Mutation.cancelWorkflow(
+    null,
+    { workflowId: armado.id, reason: "mal armado" },
+    context,
+  )
+
+  const circuito = await prisma.reviewWorkflow.findUniqueOrThrow({
+    where: { id: armado.id },
+  })
+  const sobrevive = await prisma.documentRevision.findUniqueOrThrow({
+    where: { id: revision.id },
+  })
+  assert.equal(circuito.status, WorkflowStatus.CANCELLED)
+  // La revisión SOBREVIVE y vuelve a borrador: cancelar no es abandonar
+  assert.equal(sobrevive.status, RevisionStatus.DRAFT)
+  assert.equal(sobrevive.abandonedAt, null)
+
+  await revisionResolvers.Mutation.abandonRevision(
+    null,
+    { revisionId: revision.id, reason: "ya no tiene sentido" },
+    context,
+  )
+  const abandonada = await prisma.documentRevision.findUniqueOrThrow({
+    where: { id: revision.id },
+  })
+  assert.equal(abandonada.status, RevisionStatus.ABANDONED)
+  assert.ok(abandonada.abandonedAt)
+
+  // El estado del circuito no aparece nunca en la revisión, ni al revés
+  const estados = await prisma.documentRevision.findMany({
+    where: { document: { code: { startsWith: CODIGO } } },
+    select: { status: true },
+    distinct: ["status"],
+  })
+  assert.ok(!estados.map((e) => String(e.status)).includes("CANCELLED"))
+})
+
+test("confirmar el conjunto completo de una vez equivale a la secuencia incremental", async () => {
+  // Criterio 24. No son dos modelos sino la misma transición, con y sin
+  // acumulación previa: el atajo es lo que necesita un cliente automático.
+  const conjunto = [
+    { ...archivo(4), role: DocFileRole.DELIVERABLE },
+    {
+      fileKey: "equiv.dwg",
+      fileName: "equiv.dwg",
+      fileSize: 3,
+      mimeType: "image/vnd.dwg",
+      checksum: "c".repeat(64),
+      role: DocFileRole.SOURCE,
+    },
+  ]
+
+  const deUnaVez: any = await crear("EQ1")
+  await armar(deUnaVez.revisions[0].workflows[0].id, [StepType.APPROVE])
+  const atajo: any = await workingCopyResolvers.Mutation.confirmWorkingCopy(
+    null,
+    { revisionId: deUnaVez.revisions[0].id, input: { files: conjunto } },
+    context,
+  )
+
+  const incremental: any = await crear("EQ2")
+  await armar(incremental.revisions[0].workflows[0].id, [StepType.APPROVE])
+  const revisionId = incremental.revisions[0].id
+  await workingCopyResolvers.Mutation.openWorkingCopy(null, { revisionId }, context)
+  for (const file of conjunto) {
+    await workingCopyResolvers.Mutation.putWorkingCopyFile(
+      null,
+      { revisionId, input: file },
+      context,
+    )
+  }
+  const acumulado: any = await workingCopyResolvers.Mutation.confirmWorkingCopy(
+    null,
+    { revisionId },
+    context,
+  )
+
+  const forma = (v: any) =>
+    v.files
+      .map((f: any) => `${f.role}:${f.fileKey}:${f.checksum}`)
+      .sort()
+      .join("|")
+
+  assert.equal(atajo.versionNumber, acumulado.versionNumber)
+  assert.equal(forma(atajo), forma(acumulado))
+})

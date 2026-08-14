@@ -685,6 +685,35 @@ El primer intento de esa prueba tenía un defecto propio: contaba los argumentos
 
 **Pendiente del cierre**: `rover-publish-current` y `npm run codegen` en la webapp. Se difieren a propósito — publicar cambia lo que ve el desarrollo local, y conviene hacerlo cuando el bloque esté cerrado y no entre fases.
 
+### Fase H — pruebas de las tres capas
+
+**Completada.** **238 pruebas, 0 fallos**: **138 puras**, **46 contra base** y **54 de integración**.
+
+**Auditar los criterios uno por uno encontró un invariante sin implementar.** El criterio 12 pedía que un documento reemplazado rechazara abrir una revisión nueva, y **no había código que lo hiciera**: `createRevision` no miraba `obsoletedAt`. Ni la compilación ni las 230 pruebas anteriores lo señalaban, porque nada lo ejercitaba. Es exactamente lo que esta fase existe para encontrar, y la razón de recorrer los criterios en lugar de dar por buena la cobertura acumulada.
+
+Emitir sobre lo que ya fue superado —o sobre lo que salió del alcance— es contradictorio. Todo lo demás se conserva, que es justamente lo que la obsolescencia preserva y la baja lógica no.
+
+**Ocho criterios estaban cubiertos solo a medias**, y se completaron:
+
+| Criterio | Lo que faltaba |
+| -------- | -------------- |
+| 5 y 16 | Una firma con **los tres** archivos y sus tres `checksum`, con el respaldo adentro |
+| 9 | Que el filtro por tipo resuelva sobre el documento y no por join |
+| 10 | Los dos valores a la vez: `currentTitle` en la B y la vigente conservando el de la A |
+| 11 | Que el acto se alcance desde **los tres** documentos, y no solo desde el que lo creó |
+| 13 | Que el código de un obsoleto siga tomado — dar de alta el mismo se rechaza |
+| 15 | Que la causa derivada distinga las dos, y devuelva nulo para el que reemplaza |
+| 17 | Que ningún estado de revisión sea `CANCELLED` en toda la base del proyecto |
+| 24 | Que el atajo y la secuencia incremental produzcan **la misma versión**, comparada archivo por archivo |
+
+El criterio 17 quedó como una comprobación sobre el conjunto y no sobre un caso: recorre las revisiones del proyecto y verifica que **ninguna** lleve el estado del circuito. Es la forma de probar una colisión de vocabulario — un caso puntual no demuestra que no reaparezca en otro lado.
+
+| Verificación | Resultado |
+| ------------ | --------- |
+| `tsc --noEmit` | Sin errores |
+| `npm run test:block03b-all` | 238 pruebas, 0 fallos |
+| Los 24 criterios | Cubiertos, con la implementación del 12 incorporada en esta fase |
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-23, D-24, D-25 y la nota prospectiva de promoción al activo
