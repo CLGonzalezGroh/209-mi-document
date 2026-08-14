@@ -531,3 +531,19 @@ Tipos nuevos: `DocStepSignature`, `DocWorkflowTemplate`, `DocWorkflowTemplateSte
 - **Derivación de contexto de los trece tipos de objeto**, incluido que un objeto inexistente devuelva nulo en lugar de contexto vacío —la distinción de la que depende la autorización—.
 
 ---
+
+# What's new in María Ingeniería API Documents 2.5.0
+
+2026-08-14
+
+## Titularidad por nivel (BLOQUE 03B)
+
+Bloque en curso. Esta sección se extiende con cada fase.
+
+### Fase A — Permisos
+
+- Actualización de `@CLGonzalezGroh/mi-common` a `2.7.0`.
+- **Permiso nuevo** `documents:document:obsolete`, dado de alta en `205-mi-admin` 2.2.6. Habilitará reemplazar un documento por otro que lo supera y declararlo obsoleto por fuera de alcance, cuando la fase E incorpore esas operaciones.
+- Sin cambios de comportamiento todavía: ninguna operación exige el permiso nuevo.
+
+---

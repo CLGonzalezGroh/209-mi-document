@@ -490,6 +490,26 @@ Mismo orden que `BLOCK_02` y `BLOCK_03`, con una fase de vocabulario adelante pa
 
 **Las fases D y E son donde el bloque se puede detener sin romper nada**, si hiciera falta pausarlo: hasta ahí el modelo está migrado y las utilidades probadas, pero ninguna operación cambió de comportamiento.
 
+## Evidencia de validación
+
+### Fase A — permisos
+
+**Completada.** `202-mi-common` 2.7.0 publicada, `205-mi-admin` 2.2.6, `209-mi-document` 2.5.0.
+
+**La decisión que la fase debía tomar** quedó resuelta así: corregir el código se autoriza con `documents:document:update`, que ya existe —es una edición, y su ventana ya está acotada por estado—, y **un solo permiso nuevo** gobierna los dos actos que terminan la vida útil del documento, reemplazarlo y declararlo obsoleto. Es la economía de `B9` de `BLOCK_03`, que gobierna todo acto sobre el trabajo ajeno con uno solo.
+
+**La acción `archive` se descartó**, aunque existía en el catálogo. En este código se usa exclusivamente para archivar registros de sistema —`*_SYS_LOG_ARCHIVE` en los nueve módulos—, y "archivar documento" se leería como darlo de baja, que es justamente lo que `B5` separa de la obsolescencia.
+
+**Se agregó la acción `obsolete` al catálogo**, en lugar de pasar una cadena literal como hizo `BLOCK_03` con `admin:update`. El motivo apareció al revisar el consumidor: la grilla de permisos resuelve la etiqueta de la acción contra `ACTION_LIST`, de modo que **un valor ausente de esa lista se renderiza en blanco y no es filtrable**. Eso explica además algo que parecía un descuido en el seed de `BLOCK_03` —el permiso con código `admin:update` declara `action: ACTIONS.UPDATE`—: no es una inconsistencia, es lo que mantiene la fila visible. Acá el problema se resuelve en el origen y código y seed declaran lo mismo.
+
+| Verificación | Resultado |
+| ------------ | --------- |
+| `type-check` y `lint` de `202-mi-common` | Sin errores |
+| Publicación a GitHub Packages | `@CLGonzalezGroh/mi-common@2.7.0` |
+| `tsc --noEmit` de `205-mi-admin` y `209-mi-document` con la dependencia actualizada | Sin errores |
+| `npm run seed:permissions` | 408 permisos, 795 `rolePermissions` en 22 roles |
+| Consulta directa a la base | `documents:document:obsolete`, acción `obsolete`, 1 rol |
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-23, D-24, D-25 y la nota prospectiva de promoción al activo
