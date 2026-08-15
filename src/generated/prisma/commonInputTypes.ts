@@ -474,6 +474,23 @@ export type EnumDocProjectSideWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumDocProjectSideFilter<$PrismaModel>
 }
 
+export type EnumQualificationEffectFilter<$PrismaModel = never> = {
+  equals?: $Enums.QualificationEffect | Prisma.EnumQualificationEffectFieldRefInput<$PrismaModel>
+  in?: $Enums.QualificationEffect[] | Prisma.ListEnumQualificationEffectFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QualificationEffect[] | Prisma.ListEnumQualificationEffectFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQualificationEffectFilter<$PrismaModel> | $Enums.QualificationEffect
+}
+
+export type EnumQualificationEffectWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.QualificationEffect | Prisma.EnumQualificationEffectFieldRefInput<$PrismaModel>
+  in?: $Enums.QualificationEffect[] | Prisma.ListEnumQualificationEffectFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QualificationEffect[] | Prisma.ListEnumQualificationEffectFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQualificationEffectWithAggregatesFilter<$PrismaModel> | $Enums.QualificationEffect
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumQualificationEffectFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumQualificationEffectFilter<$PrismaModel>
+}
+
 export type EnumDocObjectTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.DocObjectType | Prisma.EnumDocObjectTypeFieldRefInput<$PrismaModel>
   in?: $Enums.DocObjectType[] | Prisma.ListEnumDocObjectTypeFieldRefInput<$PrismaModel>
@@ -1081,6 +1098,23 @@ export type NestedEnumDocProjectSideWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumDocProjectSideFilter<$PrismaModel>
   _max?: Prisma.NestedEnumDocProjectSideFilter<$PrismaModel>
+}
+
+export type NestedEnumQualificationEffectFilter<$PrismaModel = never> = {
+  equals?: $Enums.QualificationEffect | Prisma.EnumQualificationEffectFieldRefInput<$PrismaModel>
+  in?: $Enums.QualificationEffect[] | Prisma.ListEnumQualificationEffectFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QualificationEffect[] | Prisma.ListEnumQualificationEffectFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQualificationEffectFilter<$PrismaModel> | $Enums.QualificationEffect
+}
+
+export type NestedEnumQualificationEffectWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.QualificationEffect | Prisma.EnumQualificationEffectFieldRefInput<$PrismaModel>
+  in?: $Enums.QualificationEffect[] | Prisma.ListEnumQualificationEffectFieldRefInput<$PrismaModel>
+  notIn?: $Enums.QualificationEffect[] | Prisma.ListEnumQualificationEffectFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumQualificationEffectWithAggregatesFilter<$PrismaModel> | $Enums.QualificationEffect
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumQualificationEffectFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumQualificationEffectFilter<$PrismaModel>
 }
 
 export type NestedEnumDocObjectTypeFilter<$PrismaModel = never> = {

@@ -73,6 +73,7 @@ export const ModelName = {
   DocWorkflowTemplate: 'DocWorkflowTemplate',
   DocWorkflowTemplateStep: 'DocWorkflowTemplateStep',
   DocProjectMember: 'DocProjectMember',
+  DocQualification: 'DocQualification',
   DocWorkflowEvent: 'DocWorkflowEvent',
   DocAuditEvent: 'DocAuditEvent',
   ScannedFile: 'ScannedFile',
@@ -438,6 +439,24 @@ export const DocProjectMemberScalarFieldEnum = {
 } as const
 
 export type DocProjectMemberScalarFieldEnum = (typeof DocProjectMemberScalarFieldEnum)[keyof typeof DocProjectMemberScalarFieldEnum]
+
+
+export const DocQualificationScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  terminatedAt: 'terminatedAt',
+  isSys: 'isSys',
+  projectId: 'projectId',
+  code: 'code',
+  label: 'label',
+  effect: 'effect',
+  sortOrder: 'sortOrder'
+} as const
+
+export type DocQualificationScalarFieldEnum = (typeof DocQualificationScalarFieldEnum)[keyof typeof DocQualificationScalarFieldEnum]
 
 
 export const DocWorkflowEventScalarFieldEnum = {

@@ -85,6 +85,14 @@ export const AuditAction = {
   UpdateWorkingCopy: "UpdateWorkingCopy",
   ConfirmWorkingCopy: "ConfirmWorkingCopy",
   DiscardWorkingCopy: "DiscardWorkingCopy",
+
+  // Emisión y respuesta (BLOQUE 04). El catálogo de calificaciones es
+  // configuración del contrato: quién agregó o dio de baja una calificación
+  // explica por qué una respuesta pudo registrarse con ese valor.
+  CreateQualification: "CreateQualification",
+  UpdateQualification: "UpdateQualification",
+  TerminateQualification: "TerminateQualification",
+  ActivateQualification: "ActivateQualification",
 } as const
 
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
@@ -144,6 +152,12 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   [AuditAction.UpdateWorkingCopy]: DocObjectType.DOCUMENT_REVISION,
   [AuditAction.ConfirmWorkingCopy]: DocObjectType.DOCUMENT_REVISION,
   [AuditAction.DiscardWorkingCopy]: DocObjectType.DOCUMENT_REVISION,
+
+  // Emisión y respuesta (BLOQUE 04)
+  [AuditAction.CreateQualification]: DocObjectType.DOC_QUALIFICATION,
+  [AuditAction.UpdateQualification]: DocObjectType.DOC_QUALIFICATION,
+  [AuditAction.TerminateQualification]: DocObjectType.DOC_QUALIFICATION,
+  [AuditAction.ActivateQualification]: DocObjectType.DOC_QUALIFICATION,
 }
 
 // ================================
@@ -188,6 +202,12 @@ export const WorkflowEvent = {
   // un cambio de estado y no una edición.
   DocumentObsoleted: "DocumentObsoleted",
   VersionRegistered: "VersionRegistered",
+
+  // Emisión y respuesta (BLOQUE 04). La baja de una calificación es una
+  // transición y no solo una edición: deja de estar disponible para calificar,
+  // sin revalidar lo ya calificado.
+  QualificationTerminated: "QualificationTerminated",
+  QualificationActivated: "QualificationActivated",
 } as const
 
 export type WorkflowEvent = (typeof WorkflowEvent)[keyof typeof WorkflowEvent]
@@ -221,6 +241,8 @@ export const WORKFLOW_EVENT_OBJECT: Record<WorkflowEvent, DocObjectType> = {
   [WorkflowEvent.StepCompleted]: DocObjectType.REVIEW_STEP,
   [WorkflowEvent.DocumentObsoleted]: DocObjectType.DOCUMENT,
   [WorkflowEvent.VersionRegistered]: DocObjectType.DOCUMENT_VERSION,
+  [WorkflowEvent.QualificationTerminated]: DocObjectType.DOC_QUALIFICATION,
+  [WorkflowEvent.QualificationActivated]: DocObjectType.DOC_QUALIFICATION,
 }
 
 // ================================
@@ -254,4 +276,7 @@ export const DOC_OBJECT_READ_PERMISSION: Record<DocObjectType, string> = {
   // El acto de reemplazo se lee con los documentos que toca: la traza forma
   // parte del objeto, y quien puede leer el documento puede leer su historia.
   [DocObjectType.DOC_REPLACEMENT]: PERMISSIONS.DOCUMENTS_DOCUMENT_READ,
+  // El catálogo de calificaciones tiene recurso propio: administrarlo es
+  // configurar el contrato, distinto de operar los documentos que califica.
+  [DocObjectType.DOC_QUALIFICATION]: PERMISSIONS.DOCUMENTS_QUALIFICATION_READ,
 }

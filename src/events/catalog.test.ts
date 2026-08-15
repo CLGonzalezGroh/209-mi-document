@@ -121,5 +121,13 @@ test("el catálogo cubre las escrituras relevadas más lo que agregaron los bloq
   //     DiscardWorkingCopy                   el ciclo de la copia (B12)
   //   − RegisterVersion         se retira con su operación: la versión dejó de
   //                             ser un archivo y pasó a ser un conjunto (B6)
-  assert.equal(AUDIT_ACTIONS.length, 42)
+  //
+  // El Bloque 04 suma 4 en su fase 1, de 42 a 46: el ciclo del catálogo de
+  // calificaciones. Tiene traza propia porque es configuración del CONTRATO, y
+  // quién agregó o dio de baja una calificación explica por qué una respuesta
+  // pudo registrarse con ese valor (B11).
+  //
+  //   + CreateQualification, UpdateQualification
+  //   + TerminateQualification, ActivateQualification
+  assert.equal(AUDIT_ACTIONS.length, 46)
 })

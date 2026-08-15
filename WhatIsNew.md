@@ -644,3 +644,33 @@ El bloque queda **promovido a la SFS**. Ocho documentos de dominio actualizados,
 > Los guiones de publicación usan `--routing-url http://localhost:4209`, de modo que solo afectan al desarrollo local. Testing y producción leen el supergrafo de un archivo montado.
 
 ---
+
+# What's new in María Ingeniería API Documents 2.6.0
+
+2026-08-15
+
+## Emisión y respuesta (BLOQUE 04)
+
+Bloque en curso. Esta sección se extiende con cada fase.
+
+### Fase 1 — El catálogo de calificaciones
+
+La respuesta de la contraparte se expresaba con `ClientStatus`, **enumeración fija de cuatro valores**. No resiste el uso real: cada cliente tiene su propio juego de calificaciones, con sus códigos y su cantidad, y el rótulo que el usuario ve es el del cliente y no una traducción nuestra.
+
+- **`DocQualification`**, con código, rótulo y efecto. Los dos primeros son lo que el usuario ve; el efecto es lo único que el sistema interpreta.
+- **El efecto es una enumeración de tres valores** —`ACCEPTED`, `ACCEPTED_WITH_COMMENTS`, `REJECTED`— y no dos indicadores. Responde dos preguntas independientes: ¿habilita usar el documento? ¿obliga a emitir una revisión nueva? Solo tres de las cuatro combinaciones existen, porque si el documento no sirve hay que volver a emitirlo. Con dos booleanos la cuarta puede escribirse en la base y hay que impedirla por validación; así no puede expresarse. Las dos preguntas se **exponen derivadas** en el contrato, para que ningún consumidor las deduzca por su cuenta.
+- **Alcance por despliegue y por proyecto, sin herencia.** El proyecto que declara una calificación propia usa las suyas y solo las suyas. Es una diferencia deliberada con el alcance de los catálogos de clase y tipo: la lista de calificaciones es la del **contrato**, y una lista mezclada no es la de nadie y admite calificar con un valor que la contraparte no usa.
+- **La baja lógica no cambia el alcance.** El alcance se decide sobre el catálogo completo y las dadas de baja se filtran después: dar de baja la última calificación propia no devuelve el proyecto al catálogo del despliegue. Y lo ya calificado no se revalida — la validación ocurre solo en escritura.
+- **El alcance no se edita.** Mover una calificación entre el despliegue y un proyecto cambiaría los valores disponibles sin que nadie lo declare: se crea en el alcance que corresponde y se da de baja la que sobra, que además deja la traza de las dos cosas.
+- **Autorización en dos capas**, con el criterio de `BLOQUE 02`: la calificación de un proyecto exige membresía, la del despliegue se resuelve con el permiso global.
+- **Cuatro acciones nuevas de auditoría y dos transiciones**, más `DOC_QUALIFICATION` como tipo de objeto con su derivador de contexto. El catálogo tiene traza propia porque es configuración del contrato: quién agregó o dio de baja una calificación explica por qué una respuesta pudo registrarse con ese valor.
+
+**`ClientStatus` no se retira todavía.** Sigue en `transmittal_items` hasta que la fase 4 lo reemplace junto con la respuesta: retirarlo ahora dejaría al módulo sin forma de registrar una respuesta entre una fase y la otra.
+
+- Actualización de `@CLGonzalezGroh/mi-common` a `2.8.0`.
+- **Permisos nuevos** `documents:qualification:{read,list,select,create,update,delete}`, dados de alta en `205-mi-admin`. El rol básico lee y selecciona; el rol completo administra.
+
+> **Atención al migrar**: `20260815120000_qualification_catalog` crea la tabla y **siembra el catálogo del despliegue** con las cuatro entradas que `ClientStatus` tenía, de modo que el despliegue queda operativo sin configurar nada. `20260815140000_qualification_object_type` agrega el valor a `DocObjectType` y va aparte porque PostgreSQL no admite usar un valor de enumeración recién creado en la misma transacción.
+
+**247 pruebas, 0 fallos.**
+

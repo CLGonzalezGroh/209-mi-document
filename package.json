@@ -1,6 +1,6 @@
 {
   "name": "209-mi-document",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "María Ingeniería API de Gestión Documental",
   "type": "module",
   "main": "index.js",
@@ -40,7 +40,11 @@
     "test:model-constraints-db": "node --import tsx --test src/utils/modelConstraintsPersistence.test.ts",
     "test:block03-integration": "node --import tsx --test src/resolvers/cycle.integration.test.ts",
     "test:block03-db": "npm run test:block03 && npm run test:events-db && npm run test:project-scope-db && npm run test:object-context-db && npm run test:model-constraints-db",
-    "test:block03-all": "npm run test:block03-db && npm run test:block02-integration && npm run test:block03-integration"
+    "test:block03-all": "npm run test:block03-db && npm run test:block02-integration && npm run test:block03-integration",
+    "test:qualifications": "node --import tsx --test src/utils/qualifications.test.ts",
+    "test:block04": "npm run test:block03b && npm run test:qualifications",
+    "test:block04-db": "npm run test:block04 && npm run test:events-db && npm run test:project-scope-db && npm run test:object-context-db && npm run test:model-constraints-db",
+    "test:block04-all": "npm run test:block04-db && npm run test:block02-integration && npm run test:block03-integration"
   },
   "keywords": [],
   "author": "César González Groh",
@@ -55,7 +59,7 @@
   "dependencies": {
     "@apollo/server": "^5.5.1",
     "@apollo/subgraph": "^2.14.2",
-    "@CLGonzalezGroh/mi-common": "^2.7.0",
+    "@CLGonzalezGroh/mi-common": "^2.8.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "graphql": "^16.13.2",

@@ -170,6 +170,15 @@ export const DocProjectSide = {
 export type DocProjectSide = (typeof DocProjectSide)[keyof typeof DocProjectSide]
 
 
+export const QualificationEffect = {
+  ACCEPTED: 'ACCEPTED',
+  ACCEPTED_WITH_COMMENTS: 'ACCEPTED_WITH_COMMENTS',
+  REJECTED: 'REJECTED'
+} as const
+
+export type QualificationEffect = (typeof QualificationEffect)[keyof typeof QualificationEffect]
+
+
 export const DocObjectType = {
   DOCUMENT: 'DOCUMENT',
   DOCUMENT_REVISION: 'DOCUMENT_REVISION',
@@ -184,7 +193,8 @@ export const DocObjectType = {
   DOC_STEP_SIGNATURE: 'DOC_STEP_SIGNATURE',
   DOC_WORKFLOW_TEMPLATE: 'DOC_WORKFLOW_TEMPLATE',
   DOC_SETTINGS: 'DOC_SETTINGS',
-  DOC_REPLACEMENT: 'DOC_REPLACEMENT'
+  DOC_REPLACEMENT: 'DOC_REPLACEMENT',
+  DOC_QUALIFICATION: 'DOC_QUALIFICATION'
 } as const
 
 export type DocObjectType = (typeof DocObjectType)[keyof typeof DocObjectType]

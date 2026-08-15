@@ -152,6 +152,11 @@ export type DocWorkflowTemplateStep = Prisma.DocWorkflowTemplateStepModel
  */
 export type DocProjectMember = Prisma.DocProjectMemberModel
 /**
+ * Model DocQualification
+ * 
+ */
+export type DocQualification = Prisma.DocQualificationModel
+/**
  * Model DocWorkflowEvent
  * 
  */

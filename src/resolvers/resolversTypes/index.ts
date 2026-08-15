@@ -16,8 +16,13 @@ import {
   DocumentSysLogArchive,
   TaskDocumentReference,
 } from "../../generated/prisma/client.js"
-import { RevisionStatus, WorkflowStatus } from "../../generated/prisma/enums.js"
+import {
+  QualificationEffect,
+  RevisionStatus,
+  WorkflowStatus,
+} from "../../generated/prisma/enums.js"
 import { lastLiveRevision } from "../../utils/revisionScheme.js"
+import { enablesUse, requiresNewRevision } from "../../utils/qualifications.js"
 import { obsolescenceCause } from "../../utils/documentMetadata.js"
 
 /** Detalle que ambas lecturas devuelven cuando tienen que ir a la base. */
@@ -394,6 +399,21 @@ export const resolverTypes = {
     updatedBy: (parent: { updatedById: number }) => {
       return { __typename: "UserName", id: parent.updatedById }
     },
+  },
+
+  // Las dos preguntas de D-22 se DERIVAN del efecto y se exponen resueltas, en
+  // lugar de que cada consumidor las deduzca de la enumeración (BLOQUE 04, B11).
+  DocQualification: {
+    createdBy: (parent: { createdById: number }) => {
+      return { __typename: "UserName", id: parent.createdById }
+    },
+    updatedBy: (parent: { updatedById: number }) => {
+      return { __typename: "UserName", id: parent.updatedById }
+    },
+    enablesUse: (parent: { effect: QualificationEffect }) =>
+      enablesUse(parent.effect),
+    requiresNewRevision: (parent: { effect: QualificationEffect }) =>
+      requiresNewRevision(parent.effect),
   },
 
   DocProjectSettings: {

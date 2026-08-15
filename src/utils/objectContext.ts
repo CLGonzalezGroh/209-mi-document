@@ -241,6 +241,18 @@ const derivadores: Record<
     })
     return settings && { projectId: null, module: null }
   },
+
+  // La calificación lleva su proyecto en el alcance, y puede no tener ninguno:
+  // la de alcance nulo es la del despliegue. El módulo es nulo porque el
+  // catálogo no es documentación sino configuración del contrato, con la misma
+  // forma que la plantilla del circuito.
+  [DocObjectType.DOC_QUALIFICATION]: async (client, id) => {
+    const qualification = await client.docQualification.findUnique({
+      where: { id },
+      select: { projectId: true },
+    })
+    return qualification && { projectId: qualification.projectId, module: null }
+  },
 }
 
 /**

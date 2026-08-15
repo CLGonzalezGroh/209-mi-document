@@ -910,6 +910,72 @@ model DocProjectMember {
 }
 
 // ================================
+// EMISIÓN Y RESPUESTA — BLOQUE 04
+// ================================
+
+// Efecto de una calificación de la contraparte (BLOQUE 04, B11).
+//
+// Lo que cambia el tratamiento aguas abajo son DOS preguntas independientes
+// —¿habilita usar el documento? ¿obliga a emitir una revisión nueva?— y solo
+// TRES de sus cuatro combinaciones existen: si el documento no sirve, hay que
+// volver a emitirlo.
+//
+// Por eso se modela como enumeración y no como dos indicadores. Con dos
+// booleanos la cuarta combinación puede escribirse en la base y hay que
+// impedirla por validación; acá no puede expresarse. Es el criterio de D-13:
+// sin atributo, la incoherencia no puede existir.
+enum QualificationEffect {
+  ACCEPTED // Habilita usar el documento. No obliga a emitir revisión nueva
+  ACCEPTED_WITH_COMMENTS // Habilita usar el documento y obliga a emitir revisión nueva
+  REJECTED // No habilita usar el documento y obliga a emitir revisión nueva
+}
+
+// Calificación con que la contraparte responde una emisión (BLOQUE 04, B11).
+//
+// Reemplaza a la enumeración fija ClientStatus: cada cliente tiene su propio
+// juego de calificaciones, con SUS códigos y SU cantidad, y el rótulo que el
+// usuario ve es el del cliente y no una traducción nuestra. El código y el
+// rótulo son lo que el usuario ve; el efecto es lo único que el sistema
+// interpreta.
+//
+// Sirve a los dos modos con el mismo catálogo, que es la razón para modelarlo
+// una sola vez: en RECEIVER la planta emite la calificación al cerrar el
+// circuito, en ISSUER el control documental transcribe la que el cliente
+// devolvió (D-12).
+model DocQualification {
+  id           Int       @id @default(autoincrement())
+  createdAt    DateTime  @default(now())
+  createdById  Int
+  updatedAt    DateTime? @updatedAt
+  updatedById  Int       @default(1)
+  terminatedAt DateTime?
+  isSys        Boolean   @default(false)
+
+  // Alcance. Nulo = catálogo del despliegue. Referencia externa sin FK:
+  // Project vive en mi-project.
+  //
+  // SIN HERENCIA, a diferencia de D-21: el proyecto que declara una calificación
+  // propia usa las suyas y SOLO las suyas. La lista de calificaciones es la del
+  // contrato, y una lista mezclada —cuatro del despliegue más tres del cliente—
+  // no es la de nadie y admite calificar con un valor que la contraparte no usa.
+  projectId Int?
+
+  code   String // El de la contraparte: "A", "B", "1", "APROBADO"...
+  label  String // El rótulo que el usuario ve, tal como lo escribe el cliente
+  effect QualificationEffect
+
+  // El orden es el de la lista del cliente, no el alfabético.
+  sortOrder Int @default(0)
+
+  // Unicidad del código dentro de su alcance, recreada con NULLS NOT DISTINCT en
+  // la migración: sin la cláusula, dos calificaciones del despliegue con el mismo
+  // código no chocarían, que es el defecto de H-19.
+  @@unique([code, projectId], map: "doc_qualifications_code_scope_key") // NULLS NOT DISTINCT en la base
+  @@index([projectId])
+  @@map("doc_qualifications")
+}
+
+// ================================
 // EVENTOS DE DOMINIO — BLOQUE 01
 // ================================
 
@@ -939,6 +1005,11 @@ enum DocObjectType {
   // porque no es un objeto del dominio sino el conjunto en preparación de esa
   // revisión, y lo que se consulta es qué le pasó a la revisión.
   DOC_REPLACEMENT
+
+  // Emisión y respuesta (BLOQUE 04). El catálogo de calificaciones tiene traza
+  // propia: es configuración del contrato, y quién agregó o dio de baja una
+  // calificación explica por qué una respuesta pudo registrarse con ese valor.
+  DOC_QUALIFICATION
 }
 
 // Transición de estado de un objeto del dominio documental.

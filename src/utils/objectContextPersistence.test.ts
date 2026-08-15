@@ -7,6 +7,7 @@ import {
   DocProjectSide,
   DocumentRole,
   ModuleType,
+  QualificationEffect,
   RevisionScheme,
   StepStatus,
   StepType,
@@ -42,6 +43,7 @@ const creados: {
   signatureId: number
   templateId: number
   settingsId: number
+  qualificationId: number
   memberId: number
   transmittalId: number
   classId: number
@@ -53,6 +55,7 @@ const limpiar = async () => {
   await prisma.transmittal.deleteMany({ where: { projectId: PROYECTO } })
   await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
   await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: PROYECTO } })
+  await prisma.docQualification.deleteMany({ where: { projectId: PROYECTO } })
   await prisma.docProjectMember.deleteMany({ where: { projectId: PROYECTO } })
   await prisma.docProjectSettings.deleteMany({ where: { projectId: PROYECTO } })
   await prisma.documentType.deleteMany({ where: { code: `${CODIGO}-T` } })
@@ -196,6 +199,16 @@ before(async () => {
     },
   })
 
+  const calificacion = await prisma.docQualification.create({
+    data: {
+      projectId: PROYECTO,
+      code: `${CODIGO}-Q`,
+      label: "Aprobado (cliente)",
+      effect: QualificationEffect.ACCEPTED,
+      createdById: 1,
+    },
+  })
+
   Object.assign(creados, {
     documentId: documento.id,
     publicadoId: publicado.id,
@@ -206,6 +219,7 @@ before(async () => {
     signatureId: firma.id,
     templateId: plantilla.id,
     settingsId: settings.id,
+    qualificationId: calificacion.id,
     projectSettingsId: projectSettings.id,
     memberId: miembro.id,
     transmittalId: transmittal.id,
@@ -322,6 +336,26 @@ test("la configuración del despliegue no tiene ni proyecto ni módulo", async (
   )
 })
 
+test("la calificación lleva su alcance, y la del despliegue no tiene proyecto", async () => {
+  // Misma forma que la plantilla del circuito: el proyecto sale del alcance y el
+  // módulo es nulo, porque el catálogo no es documentación sino configuración
+  // del contrato (BLOQUE 04, B11).
+  assert.deepEqual(
+    await contextoDe(DocObjectType.DOC_QUALIFICATION, creados.qualificationId),
+    { projectId: PROYECTO, module: null },
+  )
+
+  const delDespliegue = await prisma.docQualification.findFirst({
+    where: { projectId: null },
+    select: { id: true },
+  })
+  assert.ok(delDespliegue, "la siembra del despliegue debe existir")
+  assert.deepEqual(
+    await contextoDe(DocObjectType.DOC_QUALIFICATION, delDespliegue.id),
+    { projectId: null, module: null },
+  )
+})
+
 // --- La distinción que la autorización necesita ---
 
 test("un objeto inexistente devuelve null y no contexto vacío", async () => {
@@ -359,7 +393,7 @@ test("el acto de reemplazo toma el contexto de los documentos que agrupa", async
   await prisma.docReplacement.delete({ where: { id: acto.id } })
 })
 
-test("los catorce tipos de objeto tienen derivador", async () => {
+test("los quince tipos de objeto tienen derivador", async () => {
   // Ninguno queda sin regla: es la prueba que BLOQUE 01 exige y que cada tipo
   // nuevo debe seguir pasando.
   for (const objectType of Object.values(DocObjectType)) {
@@ -368,5 +402,5 @@ test("los catorce tipos de objeto tienen derivador", async () => {
       `${objectType} no tiene derivador de contexto`,
     )
   }
-  assert.equal(Object.values(DocObjectType).length, 14)
+  assert.equal(Object.values(DocObjectType).length, 15)
 })

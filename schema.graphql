@@ -144,6 +144,23 @@ enum ClientStatus {
   REVIEWED_NO_EXCEPTION
 }
 
+"""
+Efecto de una calificación de la contraparte.
+
+Lo que cambia el tratamiento aguas abajo son dos preguntas independientes
+—¿habilita usar el documento? ¿obliga a emitir una revisión nueva?— y solo tres
+de sus cuatro combinaciones existen: si el documento no sirve, hay que volver a
+emitirlo. Por eso es una enumeración de tres valores y no dos indicadores.
+"""
+enum QualificationEffect {
+  "Habilita usar el documento. No obliga a emitir revisión nueva"
+  ACCEPTED
+  "Habilita usar el documento y obliga a emitir revisión nueva"
+  ACCEPTED_WITH_COMMENTS
+  "No habilita usar el documento y obliga a emitir revisión nueva"
+  REJECTED
+}
+
 "Módulos de la aplicación para inputs"
 enum ModuleTypeInput {
   "Calidad"
@@ -248,6 +265,16 @@ enum ClientStatusInput {
   REJECTED
   "Revisado sin objeción"
   REVIEWED_NO_EXCEPTION
+}
+
+"Efecto de una calificación de la contraparte, para inputs"
+enum QualificationEffectInput {
+  "Habilita usar el documento. No obliga a emitir revisión nueva"
+  ACCEPTED
+  "Habilita usar el documento y obliga a emitir revisión nueva"
+  ACCEPTED_WITH_COMMENTS
+  "No habilita usar el documento y obliga a emitir revisión nueva"
+  REJECTED
 }
 
 "Estado de los registros a filtrar utilizando el campo terminatedAt"
@@ -472,6 +499,8 @@ enum DocObjectType {
   traza cuelga de la revisión en la que se prepara.
   """
   DOC_REPLACEMENT
+  "Calificación del catálogo de respuestas de la contraparte"
+  DOC_QUALIFICATION
 }
 
 "Objeto del dominio documental para inputs"
@@ -1348,6 +1377,51 @@ type DocSettings {
 }
 
 """
+Calificación con que la contraparte responde una emisión.
+
+Reemplaza a la enumeración fija `ClientStatus`: cada cliente tiene su propio
+juego de calificaciones, con sus códigos y su cantidad, y el rótulo que el
+usuario ve es el del cliente. El código y el rótulo son lo que el usuario ve; el
+efecto es lo único que el sistema interpreta.
+"""
+type DocQualification {
+  "Identificador único"
+  id: Int!
+  "Fecha de creación"
+  createdAt: DateTime!
+  "Usuario que la creó"
+  createdBy: UserName!
+  "Fecha de última modificación"
+  updatedAt: DateTime
+  "Usuario que la modificó"
+  updatedBy: UserName!
+  "Fecha de baja lógica. Nula si está vigente"
+  terminatedAt: DateTime
+  "Provista por el sistema"
+  isSys: Boolean!
+  """
+  Alcance. Nulo = catálogo del despliegue.
+
+  El proyecto que declara una calificación propia usa las suyas y solo las
+  suyas: la lista de calificaciones es la del contrato, y una lista mezclada no
+  es la de nadie.
+  """
+  projectId: Int
+  "Código de la contraparte, tal como ella lo usa"
+  code: String!
+  "Rótulo que el usuario ve"
+  label: String!
+  "Lo único que el sistema interpreta"
+  effect: QualificationEffect!
+  "Orden de la lista del cliente, no el alfabético"
+  sortOrder: Int!
+  "¿Habilita usar el documento? Derivado del efecto"
+  enablesUse: Boolean!
+  "¿Obliga a emitir una revisión nueva? Derivado del efecto"
+  requiresNewRevision: Boolean!
+}
+
+"""
 Plantilla del circuito. PROPONE el circuito; el armado lo define.
 
 Se resuelve contra la tupla del propio documento y gana la MÁS ESPECÍFICA
@@ -2003,6 +2077,45 @@ input UpdateDocWorkflowTemplateInput {
   steps: [WorkflowTemplateStepInput!]
 }
 
+"Input para filtrar el catálogo de calificaciones"
+input QualificationFilterInput {
+  "Alcance. Omitido = catálogo del despliegue"
+  projectId: Int
+  "Estado de los registros a devolver"
+  terminatedFilter: TerminatedFilterInput
+}
+
+"Input para crear una calificación"
+input CreateQualificationInput {
+  "Alcance. Omitido = catálogo del despliegue"
+  projectId: Int
+  "Código de la contraparte"
+  code: String!
+  "Rótulo que el usuario ve"
+  label: String!
+  "Efecto que el sistema interpreta"
+  effect: QualificationEffectInput!
+  "Orden dentro de la lista"
+  sortOrder: Int
+}
+
+"""
+Input para editar una calificación.
+
+El alcance no se edita: moverla entre el despliegue y un proyecto cambiaría qué
+valores tiene disponible cada proyecto sin que nadie lo declare.
+"""
+input UpdateQualificationInput {
+  "Código de la contraparte"
+  code: String
+  "Rótulo que el usuario ve"
+  label: String
+  "Efecto que el sistema interpreta"
+  effect: QualificationEffectInput
+  "Orden dentro de la lista"
+  sortOrder: Int
+}
+
 "Input para declarar la configuración documental del despliegue"
 input DeclareDocSettingsInput {
   "Esquema con que se propone el código de una primera revisión"
@@ -2485,6 +2598,23 @@ type Query {
   "Configuración documental del despliegue. Registro único"
   docSettings: DocSettings!
 
+  "Catálogo de calificaciones tal como está declarado, sin resolver alcance"
+  qualifications(filter: QualificationFilterInput): [DocQualification!]!
+
+  "Una calificación por su identificador"
+  qualificationById(id: Int!): DocQualification!
+
+  """
+  Calificaciones con que se puede responder en un proyecto.
+
+  Resuelve el alcance —las propias si el proyecto declaró alguna, las del
+  despliegue si no— y excluye las dadas de baja.
+  """
+  projectQualifications(projectId: Int!): [DocQualification!]!
+
+  "Calificaciones vigentes del proyecto, como lista de selección"
+  qualificationsSelectList(projectId: Int!): [SelectOption!]!
+
   "Miembros de un proyecto documental"
   docProjectMembers(
     projectId: Int!
@@ -2769,6 +2899,19 @@ type Mutation {
 
   "Declarar la configuración documental del despliegue"
   declareDocSettings(input: DeclareDocSettingsInput!): DocSettings!
+
+  # ─── Calificaciones ───
+  "Incorporar una calificación al catálogo del despliegue o de un proyecto"
+  createQualification(input: CreateQualificationInput!): DocQualification!
+
+  "Editar una calificación. El alcance no se edita"
+  updateQualification(id: Int!, input: UpdateQualificationInput!): DocQualification!
+
+  "Dar de baja lógica una calificación. Lo ya calificado con ella no se revalida"
+  terminateQualification(id: Int!): DocQualification!
+
+  "Volver a habilitar una calificación dada de baja"
+  activateQualification(id: Int!): DocQualification!
 
   # ─── Transmittals ───
   "Crear un nuevo transmittal"

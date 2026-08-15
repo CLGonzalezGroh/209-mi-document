@@ -406,6 +406,7 @@ export const ModelName = {
   DocWorkflowTemplate: 'DocWorkflowTemplate',
   DocWorkflowTemplateStep: 'DocWorkflowTemplateStep',
   DocProjectMember: 'DocProjectMember',
+  DocQualification: 'DocQualification',
   DocWorkflowEvent: 'DocWorkflowEvent',
   DocAuditEvent: 'DocAuditEvent',
   ScannedFile: 'ScannedFile',
@@ -427,7 +428,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "documentClass" | "documentType" | "document" | "taskDocumentReference" | "documentRevision" | "documentVersion" | "docVersionFile" | "docWorkingCopy" | "docWorkingCopyFile" | "docReplacement" | "docReplacementItem" | "reviewWorkflow" | "reviewStep" | "docStepSignature" | "transmittal" | "transmittalItem" | "attachment" | "docProjectSettings" | "docSettings" | "docWorkflowTemplate" | "docWorkflowTemplateStep" | "docProjectMember" | "docWorkflowEvent" | "docAuditEvent" | "scannedFile" | "area" | "documentSysLog" | "documentSysLogArchive"
+    modelProps: "documentClass" | "documentType" | "document" | "taskDocumentReference" | "documentRevision" | "documentVersion" | "docVersionFile" | "docWorkingCopy" | "docWorkingCopyFile" | "docReplacement" | "docReplacementItem" | "reviewWorkflow" | "reviewStep" | "docStepSignature" | "transmittal" | "transmittalItem" | "attachment" | "docProjectSettings" | "docSettings" | "docWorkflowTemplate" | "docWorkflowTemplateStep" | "docProjectMember" | "docQualification" | "docWorkflowEvent" | "docAuditEvent" | "scannedFile" | "area" | "documentSysLog" | "documentSysLogArchive"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2059,6 +2060,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DocQualification: {
+      payload: Prisma.$DocQualificationPayload<ExtArgs>
+      fields: Prisma.DocQualificationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocQualificationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocQualificationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocQualificationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocQualificationPayload>
+        }
+        findFirst: {
+          args: Prisma.DocQualificationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocQualificationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocQualificationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocQualificationPayload>
+        }
+        findMany: {
+          args: Prisma.DocQualificationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocQualificationPayload>[]
+        }
+        create: {
+          args: Prisma.DocQualificationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocQualificationPayload>
+        }
+        createMany: {
+          args: Prisma.DocQualificationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocQualificationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocQualificationPayload>[]
+        }
+        delete: {
+          args: Prisma.DocQualificationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocQualificationPayload>
+        }
+        update: {
+          args: Prisma.DocQualificationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocQualificationPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocQualificationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocQualificationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocQualificationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocQualificationPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocQualificationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocQualificationPayload>
+        }
+        aggregate: {
+          args: Prisma.DocQualificationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocQualification>
+        }
+        groupBy: {
+          args: Prisma.DocQualificationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocQualificationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocQualificationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocQualificationCountAggregateOutputType> | number
+        }
+      }
+    }
     DocWorkflowEvent: {
       payload: Prisma.$DocWorkflowEventPayload<ExtArgs>
       fields: Prisma.DocWorkflowEventFieldRefs
@@ -2885,6 +2960,24 @@ export const DocProjectMemberScalarFieldEnum = {
 export type DocProjectMemberScalarFieldEnum = (typeof DocProjectMemberScalarFieldEnum)[keyof typeof DocProjectMemberScalarFieldEnum]
 
 
+export const DocQualificationScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  terminatedAt: 'terminatedAt',
+  isSys: 'isSys',
+  projectId: 'projectId',
+  code: 'code',
+  label: 'label',
+  effect: 'effect',
+  sortOrder: 'sortOrder'
+} as const
+
+export type DocQualificationScalarFieldEnum = (typeof DocQualificationScalarFieldEnum)[keyof typeof DocQualificationScalarFieldEnum]
+
+
 export const DocWorkflowEventScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -3288,6 +3381,20 @@ export type ListEnumDocProjectSideFieldRefInput<$PrismaModel> = FieldRefInputTyp
 
 
 /**
+ * Reference to a field of type 'QualificationEffect'
+ */
+export type EnumQualificationEffectFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QualificationEffect'>
+    
+
+
+/**
+ * Reference to a field of type 'QualificationEffect[]'
+ */
+export type ListEnumQualificationEffectFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QualificationEffect[]'>
+    
+
+
+/**
  * Reference to a field of type 'DocObjectType'
  */
 export type EnumDocObjectTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocObjectType'>
@@ -3516,6 +3623,7 @@ export type GlobalOmitConfig = {
   docWorkflowTemplate?: Prisma.DocWorkflowTemplateOmit
   docWorkflowTemplateStep?: Prisma.DocWorkflowTemplateStepOmit
   docProjectMember?: Prisma.DocProjectMemberOmit
+  docQualification?: Prisma.DocQualificationOmit
   docWorkflowEvent?: Prisma.DocWorkflowEventOmit
   docAuditEvent?: Prisma.DocAuditEventOmit
   scannedFile?: Prisma.ScannedFileOmit
