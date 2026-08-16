@@ -52,11 +52,20 @@ enum RevisionStatus {
   APPROVED // Aprobada, metadata congelada, no admite versiones nuevas
   SUPERSEDED // Reemplazada por una revisión posterior aprobada
   ABANDONED // Se desistió antes de aprobarla (BLOQUE 03B, B11). No consume código
-  // OBSOLETE se retiró: estaba declarado sin uso, reservado a los estados
-  // terminales por respuesta de la contraparte. BLOCK_04 no lo necesita —la
-  // calificación es el resultado del paso y no un estado de la revisión—, y
-  // dejarlo disponible invitaba a que la respuesta externa lo ocupara, que es
-  // el defecto del §1: dos máquinas de estados describiendo lo mismo.
+  REJECTED // La contraparte la rechazó y el circuito concluyó. Solo en RECEIVER
+  // OBSOLETE se retiró en BLOQUE 03B: estaba declarado sin uso y reservado a los
+  // estados terminales por respuesta de la contraparte.
+  //
+  // BLOQUE 04 corrige aquella confirmación. `REJECTED` no es el `OBSOLETE` que
+  // se retiró —obsoleto es lo que dejó de aplicar— sino lo que en modo Receptor
+  // le faltaba a la revisión: en Emisor e Interno el rechazo la devuelve a
+  // borrador y abre otro circuito, pero ahí el elaborador está AFUERA y no hay a
+  // quién devolverle el trabajo (B12). Sin este estado la revisión quedaba en
+  // DRAFT para siempre, bloqueando la emisión siguiente, que es H-01 reapareciendo
+  // en el otro modo.
+  //
+  // Consume código, a diferencia de ABANDONED: esta revisión salió y la
+  // contraparte ya la recibió con su código.
 }
 
 enum WorkflowStatus {

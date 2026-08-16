@@ -215,6 +215,10 @@ export const WorkflowEvent = {
   // juzgar (B8), que no pueden emitir `StepApproved`.
   WorkflowCancelled: "WorkflowCancelled",
   RevisionAbandoned: "RevisionAbandoned",
+  // La revisión que la contraparte rechazó en modo Receptor (BLOQUE 04, B12).
+  // No es `RevisionReturned`: ahí el trabajo vuelve al elaborador, y acá el
+  // elaborador está afuera y la revisión concluye.
+  RevisionRejected: "RevisionRejected",
   StepCompleted: "StepCompleted",
 
   // Titularidad por nivel (BLOQUE 03B). `DocumentObsoleted` es una transición y
@@ -262,6 +266,7 @@ export const WORKFLOW_EVENT_OBJECT: Record<WorkflowEvent, DocObjectType> = {
   [WorkflowEvent.DocumentTypeActivated]: DocObjectType.DOCUMENT_TYPE,
   [WorkflowEvent.WorkflowCancelled]: DocObjectType.REVIEW_WORKFLOW,
   [WorkflowEvent.RevisionAbandoned]: DocObjectType.DOCUMENT_REVISION,
+  [WorkflowEvent.RevisionRejected]: DocObjectType.DOCUMENT_REVISION,
   [WorkflowEvent.StepCompleted]: DocObjectType.REVIEW_STEP,
   [WorkflowEvent.DocumentObsoleted]: DocObjectType.DOCUMENT,
   [WorkflowEvent.VersionRegistered]: DocObjectType.DOCUMENT_VERSION,

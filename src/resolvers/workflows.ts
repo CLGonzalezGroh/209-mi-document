@@ -14,12 +14,22 @@ import type { Prisma } from "../generated/prisma/client.js"
 import {
   DocFileRole,
   DocObjectType,
+  DocumentRole,
+  QualificationEffect,
   RevisionStatus,
   WorkflowStatus,
   StepStatus,
   StepType,
 } from "../generated/prisma/enums.js"
 import { AuditAction, WorkflowEvent } from "../events/catalog.js"
+import { assertIssued } from "../utils/itemResponse.js"
+import { resolveScope } from "../utils/qualifications.js"
+import {
+  assertOutcomeMatches,
+  assertQualificationRequirement,
+  concludesRevision,
+  terminalStatusFor,
+} from "../utils/receiverCircuit.js"
 import {
   emitAuditEvent,
   emitWorkflowEvents,
@@ -296,6 +306,124 @@ const persistSignature = async (
   })
 }
 
+/**
+ * Rol documental del proyecto al que pertenece la revisión (BLOQUE 04, B12).
+ *
+ * Es lo único que el circuito necesita saber del rol: si su conclusión devuelve
+ * el trabajo o cierra la revisión. Un proyecto sin rol declarado no puede tener
+ * documentos con contraparte, de modo que se trata como Interno — el caso en que
+ * el ciclo termina al aprobar.
+ */
+const roleOfRevision = async (
+  context: ResolverContext,
+  revisionId: number,
+): Promise<DocumentRole> => {
+  const revision = await context.orm.documentRevision.findUniqueOrThrow({
+    where: { id: revisionId },
+    select: { document: { select: { projectId: true } } },
+  })
+
+  if (revision.document.projectId === null) return DocumentRole.INTERNAL
+
+  const settings = await context.orm.docProjectSettings.findUnique({
+    where: { projectId: revision.document.projectId },
+    select: { documentRole: true },
+  })
+
+  return settings?.documentRole ?? DocumentRole.INTERNAL
+}
+
+/**
+ * Datos que la calificación necesita para registrarse como respuesta.
+ *
+ * Se resuelven ANTES de abrir la transacción, con las mismas dos validaciones
+ * que la vía transcripta: que la calificación pertenezca al catálogo vigente del
+ * proyecto (B11) y que el documento haya llegado por un ítem de transmittal
+ * —sin emisión no hay nada que responder—.
+ */
+const prepareQualification = async (
+  context: ResolverContext,
+  revisionId: number,
+  qualificationId: number,
+  apruebaElPaso: boolean,
+): Promise<{
+  itemId: number
+  qualificationId: number
+  effect: QualificationEffect
+}> => {
+  const item = await context.orm.transmittalItem.findFirst({
+    where: { documentRevisionId: revisionId },
+    select: {
+      id: true,
+      transmittal: { select: { projectId: true, status: true } },
+    },
+  })
+
+  if (!item) {
+    throw new GraphQLError(
+      "Este documento no llegó por un transmittal: no hay emisión que calificar",
+      { extensions: { code: "BAD_REQUEST" } },
+    )
+  }
+
+  assertIssued(item.transmittal.status)
+
+  const catalogo = await context.orm.docQualification.findMany({
+    where: {
+      OR: [{ projectId: item.transmittal.projectId }, { projectId: null }],
+    },
+    select: { id: true, projectId: true, terminatedAt: true, effect: true },
+  })
+
+  const elegida = resolveScope(catalogo, item.transmittal.projectId)
+    .filter((q) => q.terminatedAt === null)
+    .find((q) => q.id === qualificationId)
+
+  if (!elegida) {
+    throw new GraphQLError(
+      "Esa calificación no pertenece al catálogo vigente del proyecto",
+      { extensions: { code: "BAD_USER_INPUT" } },
+    )
+  }
+
+  // El desenlace del paso se DERIVA del efecto (D-22), y por eso la operación
+  // elegida tiene que coincidir con él: sin esta verificación el circuito podría
+  // quedar diciendo lo contrario que la respuesta que la contraparte lee.
+  assertOutcomeMatches(elegida.effect, apruebaElPaso)
+
+  return { itemId: item.id, qualificationId, effect: elegida.effect }
+}
+
+/**
+ * Registra la calificación como respuesta del ítem, dentro de la transacción que
+ * resuelve el paso.
+ *
+ * En modo Receptor la calificación la **produce el circuito** en lugar de
+ * transcribirla el control documental, pero queda en el mismo lugar: el ítem por
+ * el que el documento llegó. Es lo que la vuelve legible por el contratista.
+ *
+ * `respondedBy` va vacío a propósito: quien responde es la planta, que sí es
+ * usuaria del sistema, de modo que la autoría la da `registeredById` y la
+ * divergencia derivada es correctamente falsa.
+ */
+const registrarCalificacion = async (
+  tx: Prisma.TransactionClient,
+  respuesta: { itemId: number; qualificationId: number },
+  userId: number,
+  comments: string | undefined,
+): Promise<void> => {
+  await tx.docTransmittalResponse.create({
+    data: {
+      transmittalItemId: respuesta.itemId,
+      qualificationId: respuesta.qualificationId,
+      comments,
+      respondedAt: new Date(),
+      registeredById: userId,
+      updatedById: userId,
+    },
+  })
+}
+
 export const workflowResolvers = {
   Query: {
     /**
@@ -535,7 +663,7 @@ export const workflowResolvers = {
                 : null,
             },
           })
-          await emitWorkflowEvents(tx, [
+          const transiciones: WorkflowEventInput[] = [
             {
               name: WorkflowEvent.StepCompleted,
               objectId: armado.id,
@@ -543,7 +671,31 @@ export const workflowResolvers = {
               toState: StepStatus.COMPLETED,
               actorId: userId,
             },
-          ])
+          ]
+
+          // En modo Receptor **armar es confirmar la recepción** (BLOQUE 04,
+          // B12): el documento llegó elaborado desde afuera, no hay paso de
+          // elaboración que completar, y por lo tanto tampoco hay someter. La
+          // revisión queda en revisión en el mismo acto.
+          //
+          // Sin esto, la revisión quedaría en borrador con un circuito armado y
+          // ninguna operación capaz de moverla: `submitRevision` completa un
+          // paso que en este rol no existe.
+          if (concludesRevision(documentRole)) {
+            await tx.documentRevision.update({
+              where: { id: workflow.revisionId },
+              data: { status: RevisionStatus.IN_REVIEW, updatedById: userId },
+            })
+            transiciones.push({
+              name: WorkflowEvent.RevisionSubmitted,
+              objectId: workflow.revisionId,
+              fromState: RevisionStatus.DRAFT,
+              toState: RevisionStatus.IN_REVIEW,
+              actorId: userId,
+            })
+          }
+
+          await emitWorkflowEvents(tx, transiciones)
 
           return tx.reviewWorkflow.findFirst({
             where: { id: workflowId },
@@ -728,7 +880,13 @@ export const workflowResolvers = {
         stepId,
         comments,
         delegationReason,
-      }: { stepId: number; comments?: string; delegationReason?: string },
+        qualificationId,
+      }: {
+        stepId: number
+        comments?: string
+        delegationReason?: string
+        qualificationId?: number
+      },
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
@@ -758,6 +916,21 @@ export const workflowResolvers = {
       assertTurn(step)
       await assertNoOpenWorkingCopy(context, step.workflow.revisionId)
       const actor = await resolveActor(step, userId, context, delegationReason)
+
+      // La calificación es la CONCLUSIÓN del circuito en modo Receptor (B12):
+      // se exige cuando esta aprobación lo cierra, y se prohíbe fuera de ese rol.
+      const cierra = completesWorkflow(step.workflow.steps, stepId)
+      const rol = await roleOfRevision(context, step.workflow.revisionId)
+      assertQualificationRequirement(rol, cierra, qualificationId)
+
+      const respuesta = qualificationId
+        ? await prepareQualification(
+            context,
+            step.workflow.revisionId,
+            qualificationId,
+            true,
+          )
+        : null
 
       try {
         const result = await context.orm.$transaction(async (tx) => {
@@ -795,7 +968,14 @@ export const workflowResolvers = {
 
           // El circuito cierra con los pasos que DECIDEN. Los acuses se
           // resuelven después, con operación propia (B10).
-          if (completesWorkflow(step.workflow.steps, stepId)) {
+          if (cierra) {
+            // En modo Receptor la conclusión del circuito ES la respuesta de la
+            // planta: se registra sobre el ítem por el que ese documento llegó,
+            // que es el único lugar donde los dos modos la leen igual (B5).
+            if (respuesta) {
+              await registrarCalificacion(tx, respuesta, userId, comments)
+            }
+
             await tx.reviewWorkflow.update({
               where: { id: step.workflowId },
               data: { status: WorkflowStatus.COMPLETED, completedAt: now },
@@ -897,7 +1077,13 @@ export const workflowResolvers = {
         stepId,
         comments,
         delegationReason,
-      }: { stepId: number; comments: string; delegationReason?: string },
+        qualificationId,
+      }: {
+        stepId: number
+        comments: string
+        delegationReason?: string
+        qualificationId?: number
+      },
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
@@ -927,6 +1113,24 @@ export const workflowResolvers = {
       assertTurn(step)
       await assertNoOpenWorkingCopy(context, step.workflow.revisionId)
       const actor = await resolveActor(step, userId, context, delegationReason)
+
+      // Un rechazo SIEMPRE concluye el circuito, de modo que en modo Receptor
+      // siempre lleva calificación (B12).
+      const rol = await roleOfRevision(context, step.workflow.revisionId)
+      assertQualificationRequirement(rol, true, qualificationId)
+
+      const respuesta = qualificationId
+        ? await prepareQualification(
+            context,
+            step.workflow.revisionId,
+            qualificationId,
+            false,
+          )
+        : null
+
+      // En modo Receptor el rechazo CONCLUYE la revisión en lugar de devolverla:
+      // el elaborador está afuera y no hay a quién devolverle el trabajo (B12).
+      const concluye = concludesRevision(rol)
 
       try {
         const result = await context.orm.$transaction(async (tx) => {
@@ -972,16 +1176,30 @@ export const workflowResolvers = {
             data: { status: WorkflowStatus.REJECTED, completedAt: now },
           })
 
+          if (respuesta) {
+            await registrarCalificacion(tx, respuesta, userId, comments)
+          }
+
           await tx.documentRevision.update({
             where: { id: step.workflow.revisionId },
-            data: { status: RevisionStatus.DRAFT, updatedById: userId },
+            data: {
+              status: concluye ? terminalStatusFor(false) : RevisionStatus.DRAFT,
+              updatedById: userId,
+            },
           })
 
           // Circuito nuevo desde la elaboración, con el mismo elenco copiado.
           // El armado no se repite: el trabajo vuelve al elaborador sin rearmar
           // nada, que es el caso frecuente.
-          const heredados = stepsForRejectionRetry(step.workflow.steps)
-          const nuevo = await tx.reviewWorkflow.create({
+          //
+          // En modo Receptor no hay circuito sucesor: la emisión siguiente llega
+          // con revisión nueva, en un transmittal nuevo (D-10).
+          const heredados = concluye
+            ? []
+            : stepsForRejectionRetry(step.workflow.steps)
+          const nuevo = concluye
+            ? null
+            : await tx.reviewWorkflow.create({
             data: {
               revisionId: step.workflow.revisionId,
               status: WorkflowStatus.IN_PROGRESS,
@@ -1005,7 +1223,8 @@ export const workflowResolvers = {
             meta: {
               workflowId: step.workflowId,
               comments,
-              retryWorkflowId: nuevo.id,
+              retryWorkflowId: nuevo?.id ?? null,
+              qualificationId: qualificationId ?? null,
               onBehalfOf: actor.delegationReason ? step.assignedToId : null,
             },
           })
@@ -1031,19 +1250,27 @@ export const workflowResolvers = {
               toState: WorkflowStatus.REJECTED,
               actorId: userId,
             },
+            // La transición nombra lo que ocurrió: devolver el trabajo, o
+            // concluir la revisión porque no hay a quién devolvérselo.
             {
-              name: WorkflowEvent.RevisionReturned,
+              name: concluye
+                ? WorkflowEvent.RevisionRejected
+                : WorkflowEvent.RevisionReturned,
               objectId: step.workflow.revisionId,
               fromState: RevisionStatus.IN_REVIEW,
-              toState: RevisionStatus.DRAFT,
+              toState: concluye ? RevisionStatus.REJECTED : RevisionStatus.DRAFT,
               actorId: userId,
             },
-            {
-              name: WorkflowEvent.WorkflowStarted,
-              objectId: nuevo.id,
-              toState: WorkflowStatus.IN_PROGRESS,
-              actorId: userId,
-            },
+            ...(nuevo
+              ? [
+                  {
+                    name: WorkflowEvent.WorkflowStarted,
+                    objectId: nuevo.id,
+                    toState: WorkflowStatus.IN_PROGRESS,
+                    actorId: userId,
+                  },
+                ]
+              : []),
           ])
 
           return updatedStep

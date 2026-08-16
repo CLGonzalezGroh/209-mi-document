@@ -16,16 +16,27 @@ import { DocObjectType } from "../generated/prisma/enums.js"
 import { handleError } from "../utils/handleError.js"
 import { buildTransmittalOrderBy } from "../utils/orderByHelper.js"
 import {
-  TransmittalStatus,
-  TransmittalNature,
+  DocumentRole,
+  RevisionStatus,
+  StepStatus,
+  StepType,
   SysLogModule,
+  TransmittalNature,
+  TransmittalStatus,
+  WorkflowStatus,
 } from "../generated/prisma/enums.js"
+import type { Prisma } from "../generated/prisma/client.js"
 import {
   assertCarriesItems,
   assertNature,
   generateTransmittalCode,
   responseLinkViolation,
 } from "../utils/transmittalCirculation.js"
+import {
+  autoAssignableSteps,
+  concludesRevision,
+} from "../utils/receiverCircuit.js"
+import { emitWorkflowEvents } from "../events/emit.js"
 import {
   assertApprovedForEmission,
   missingFileRoles,
@@ -166,6 +177,132 @@ const assertQualificationInScope = async (
       { extensions: { code: "BAD_USER_INPUT" } },
     )
   }
+}
+
+/**
+ * Circuitos de una emisión entrante que la plantilla puede armar sola (B12).
+ *
+ * Se resuelve **antes** de la transacción: son lecturas, y el armado que sí se
+ * aplica ocurre adentro. Los documentos que la plantilla no cubre no aparecen
+ * acá y quedan con su armado pendiente, para que la planta lo resuelva a mano.
+ */
+type CircuitoArmable = {
+  workflowId: number
+  revisionId: number
+  assignStepId: number
+  steps: Array<{ stepOrder: number; stepType: StepType; assignedToId: number }>
+}
+
+const circuitosPorArmar = async (
+  context: ResolverContext,
+  transmittalId: number,
+): Promise<CircuitoArmable[]> => {
+  const items = await context.orm.transmittalItem.findMany({
+    where: { transmittalId },
+    select: {
+      documentRevision: {
+        select: {
+          id: true,
+          workflows: {
+            where: { status: WorkflowStatus.IN_PROGRESS },
+            select: {
+              id: true,
+              steps: { where: { stepType: StepType.ASSIGN } },
+              template: { select: { steps: { orderBy: { stepOrder: "asc" } } } },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  const armables: CircuitoArmable[] = []
+
+  for (const { documentRevision } of items) {
+    const circuito = documentRevision.workflows[0]
+    const armado = circuito?.steps.find((s) => s.status === StepStatus.PENDING)
+
+    if (!circuito || !armado) continue
+
+    const steps = autoAssignableSteps(
+      DocumentRole.RECEIVER,
+      circuito.template?.steps,
+    )
+
+    if (!steps) continue
+
+    armables.push({
+      workflowId: circuito.id,
+      revisionId: documentRevision.id,
+      assignStepId: armado.id,
+      steps,
+    })
+  }
+
+  return armables
+}
+
+/**
+ * Materializa el circuito y somete la revisión, sin actor humano.
+ *
+ * El armado se resuelve **por sistema**: `resolvedById` queda nulo, que es lo
+ * que el modelo reserva para eso, en lugar de atribuirle el acto al contratista
+ * que emitió o a la persona que la plantilla designó.
+ */
+const armarPorPlantilla = async (
+  tx: Prisma.TransactionClient,
+  circuito: CircuitoArmable,
+): Promise<void> => {
+  const now = new Date()
+
+  await tx.reviewStep.createMany({
+    data: circuito.steps.map((s, i) => ({
+      workflowId: circuito.workflowId,
+      // El armado ocupa el orden 1; los siguientes se renumeran contiguos.
+      stepOrder: i + 2,
+      stepType: s.stepType,
+      assignedToId: s.assignedToId,
+      status: StepStatus.PENDING,
+    })),
+  })
+
+  await tx.reviewStep.update({
+    where: { id: circuito.assignStepId },
+    data: { status: StepStatus.COMPLETED, completedAt: now },
+  })
+
+  // No hay elaboración que esperar: la revisión queda sometida en el mismo acto.
+  await tx.documentRevision.update({
+    where: { id: circuito.revisionId },
+    data: { status: RevisionStatus.IN_REVIEW },
+  })
+
+  await emitAuditEvent(tx, {
+    action: AuditAction.DefineWorkflow,
+    objectId: circuito.assignStepId,
+    // Nulo: lo emite el sistema (B12).
+    actorId: null,
+    meta: {
+      workflowId: circuito.workflowId,
+      revisionId: circuito.revisionId,
+      stepsCount: circuito.steps.length,
+      fromTemplate: true,
+    },
+  })
+  await emitWorkflowEvents(tx, [
+    {
+      name: WorkflowEvent.StepCompleted,
+      objectId: circuito.assignStepId,
+      fromState: StepStatus.PENDING,
+      toState: StepStatus.COMPLETED,
+    },
+    {
+      name: WorkflowEvent.RevisionSubmitted,
+      objectId: circuito.revisionId,
+      fromState: RevisionStatus.DRAFT,
+      toState: RevisionStatus.IN_REVIEW,
+    },
+  ])
 }
 
 const withCodeRetry = async <T>(operacion: () => Promise<T>): Promise<T> => {
@@ -838,6 +975,15 @@ export const transmittalResolvers = {
           logger.warn("emisión con archivos faltantes", { id, faltantes })
         }
 
+        // En modo Receptor, emitir **es** entregar: el circuito de calificación
+        // de la planta arranca solo, desde la plantilla que resuelve quién revisa
+        // cada disciplina y tipo (B12). No hay armado que hacer, porque acá el
+        // armado no tiene contenido: el elaborador —lo único que D-03 dice que
+        // nunca se preasigna— está afuera del sistema.
+        const aArmar = concludesRevision(settings.documentRole)
+          ? await circuitosPorArmar(context, id)
+          : []
+
         const updated = await context.orm.$transaction(async (tx) => {
           const issued = await tx.transmittal.update({
             where: { id },
@@ -849,6 +995,10 @@ export const transmittalResolvers = {
             },
             include: transmittalIncludes,
           })
+
+          for (const circuito of aArmar) {
+            await armarPorPlantilla(tx, circuito)
+          }
 
           await emitAuditEvent(tx, {
             action: AuditAction.IssueTransmittal,

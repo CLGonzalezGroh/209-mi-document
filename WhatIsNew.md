@@ -756,3 +756,27 @@ Cierra **H-12** y **H-15**.
 
 **324 pruebas, 0 fallos.**
 
+### Fase 6 — El circuito del rol Receptor
+
+Ejecuta lo que `B16` de `BLOQUE 03` dejó habilitado y no implementó. Las dos diferencias del rol se desprenden de **un solo hecho**: allí la elaboración no ocurre dentro del sistema.
+
+- **Armar es confirmar la recepción.** El circuito sin paso de elaboración ya funcionaba desde `BLOQUE 03`; lo que faltaba era que el armado dejara la revisión **sometida**, porque no hay elaboración que esperar. Sin eso quedaba en borrador con el circuito armado y ninguna operación capaz de moverla: `submitRevision` completa un paso que en este rol no existe.
+- **La calificación es la conclusión del circuito**, no un dato al lado. Se exige exactamente cuando la resolución cierra el circuito —al aprobar el último paso que decide, o al rechazar en cualquiera— y se prohíbe fuera del modo Receptor, donde la calificación la produce el cliente y la transcribe el control documental. Queda registrada en la respuesta del ítem: **el mismo lugar donde los dos modos la leen igual**.
+- **La operación elegida no puede contradecir al efecto.** Sin esa verificación el desenlace no se derivaría del efecto: se podría rechazar el paso con una calificación que habilita el documento, y el circuito quedaría diciendo lo contrario que la respuesta que la contraparte lee.
+- **El rechazo concluye la revisión y no abre circuito nuevo.** La regla uniforme sigue siendo que el rechazo devuelve el trabajo a quien elabora; lo que cambia es dónde vive esa persona. En modo Emisor todo queda exactamente igual, con prueba que lo verifica.
+
+**`RevisionStatus.REJECTED`, y una corrección a D-26.** Aquella decisión eliminó `OBSOLETE` afirmando que este bloque no necesitaría un estado terminal por respuesta de la contraparte. La confirmación se dio **antes** de construir este circuito, y es el único lugar donde el problema aparece: sin estado terminal la revisión rechazada quedaba en `DRAFT` para siempre y `createRevision` bloqueaba la emisión siguiente — **H-01 reapareciendo en el otro modo**.
+
+No es el `OBSOLETE` retirado —obsoleto es lo que dejó de aplicar, y esto es una emisión que la contraparte no aceptó— y **consume código**, a diferencia de `ABANDONED`, porque salió y la contraparte la recibió con él. La secuencia sigue de largo en los tres desenlaces: rechazada la `A`, la siguiente es la `B`, igual que si hubiera sido aprobada. Que el rechazo no implique avance contractual es un asunto del progreso del proyecto, no del código de revisión. Lo que D-26 sostiene sigue en pie: la respuesta de la contraparte no es un estado de la revisión; `REJECTED` expresa la conclusión del **circuito**, que en este rol es interno a la planta.
+
+> **Atención al migrar**: `20260817120000_revision_rejected` agrega el valor a `RevisionStatus`. Es aditiva, y el índice único parcial del código —que excluye solo a las abandonadas— sigue contando a las rechazadas sin cambios.
+
+**No hay acto de armado del lado de la planta.** Emitir el transmittal entrante **arma el circuito de cada documento y somete su revisión**, sin intervención: quién revisa y quién califica está predefinido.
+
+El mecanismo ya estaba construido y sin usar. `DocWorkflowTemplate` resuelve por **proyecto, clase y tipo con actores preasignados**, y al crear el documento el sistema ya deja adherida la plantilla aplicable al circuito. En proyectos **clase significa disciplina** —el nombre es genérico para que otros módulos clasifiquen con otro criterio—, de modo que la plantilla **es** la matriz de responsabilidad para los ejes que hoy existen; lo que la matriz diferida agregaría es el **área**, que depende de D-14.
+
+Que el sistema pueda resolver ese armado se apoya en D-03: el armado siempre tiene contenido **porque el elaborador nunca se preasigna**, y acá no hay elaborador. Se resuelve con `resolvedById` nulo, en lugar de atribuirle el acto al contratista que emitió.
+
+**Con red**: sin plantilla, o con algún paso sin actor, ese documento conserva su armado pendiente y la planta lo resuelve a mano, mientras el resto del transmittal avanza. Rechazar la emisión dejaría al contratista trabado por una configuración ajena.
+
+**346 pruebas, 0 fallos.**

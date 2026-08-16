@@ -3063,17 +3063,34 @@ type Mutation {
     comments: String
     "Obligatorio cuando quien resuelve no es el asignado. Exige el permiso de administración"
     delegationReason: String
+    """
+    Calificación con que la planta responde, en modo Receptor.
+
+    Exigida cuando esta aprobación CONCLUYE el circuito, porque ahí la
+    conclusión es la respuesta, y prohibida en los otros roles. Su efecto debe
+    habilitar el documento: el desenlace del paso se deriva del efecto.
+    """
+    qualificationId: Int
   ): ReviewStep!
 
   """
   Rechazar un paso, con firma, y reinstanciar el circuito desde la elaboración
   con el mismo elenco copiado. El documento rechazado no queda sin salida ni
   consume una revisión nueva.
+
+  **En modo Receptor el rechazo concluye la revisión** en lugar de devolverla: el
+  elaborador está afuera y no hay a quién devolverle el trabajo. No se abre
+  circuito nuevo, y la emisión siguiente llega con revisión nueva.
   """
   rejectStep(
     stepId: Int!
     comments: String!
     delegationReason: String
+    """
+    Calificación con que la planta rechaza, en modo Receptor. Exigida ahí y
+    prohibida en los otros roles. Su efecto debe rechazar el documento.
+    """
+    qualificationId: Int
   ): ReviewStep!
 
   """

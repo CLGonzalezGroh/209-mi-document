@@ -18,6 +18,7 @@ import {
 import { transmittalResolvers } from "./transmittals.js"
 import { documentResolvers } from "./documents.js"
 import { workflowResolvers } from "./workflows.js"
+import { revisionResolvers } from "./revisions.js"
 import { workingCopyResolvers } from "./workingCopies.js"
 import { projectSettingsResolvers } from "./projectSettings.js"
 import { projectMemberResolvers } from "./projectMembers.js"
@@ -53,6 +54,7 @@ const CODIGO = "TEST-BLOCK04"
 const limpiar = async () => {
   await prisma.transmittal.deleteMany({ where: { projectId: { in: PROYECTOS } } })
   await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
+  await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: { in: PROYECTOS } } })
   await prisma.docProjectMember.deleteMany({ where: { projectId: { in: PROYECTOS } } })
   await prisma.docProjectSettings.deleteMany({ where: { projectId: { in: PROYECTOS } } })
   await prisma.docAuditEvent.deleteMany({ where: { projectId: { in: PROYECTOS } } })
@@ -1068,5 +1070,456 @@ test("el avance cuenta solo lo que espera calificación", async () => {
 
   const avance = await resolverTypes.Transmittal.responseProgress(transmittal)
   assert.deepEqual(avance, { expected: 0, answered: 0, pending: 0 })
+})
+
+// ════════════════════════════════════════════════════════════
+// FASE 6 — El circuito del rol Receptor
+// ════════════════════════════════════════════════════════════
+
+/** Emisión entrante del contratista, ya cargada en el sistema de la planta. */
+const recibido = async (sufijo: string) => {
+  const revision = await documento(RECEPTOR, sufijo)
+  await versionCon(revision.id, [DocFileRole.DELIVERABLE])
+
+  const transmittal = await conItem(
+    RECEPTOR,
+    revision.id,
+    PurposeCode.FOR_APPROVAL,
+  )
+  const emitidoTx = (await transmittalResolvers.Mutation.issueTransmittal(
+    null,
+    { id: transmittal.id },
+    context,
+  )) as any
+
+  return { revision, transmittal: emitidoTx, item: emitidoTx.items[0] }
+}
+
+/**
+ * Plantilla del proyecto receptor, con los revisores preasignados.
+ *
+ * Es la matriz de responsabilidad para los ejes que hoy existen: resuelve por
+ * proyecto, clase —disciplina, en proyectos— y tipo.
+ */
+const conPlantilla = async (pasos: StepType[]) => {
+  await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: RECEPTOR } })
+
+  return prisma.docWorkflowTemplate.create({
+    data: {
+      name: "Matriz del proyecto",
+      projectId: RECEPTOR,
+      createdById: USER_ID,
+      steps: {
+        create: pasos.map((stepType, i) => ({
+          stepOrder: i + 1,
+          stepType,
+          assignedToId: USER_ID,
+        })),
+      },
+    },
+  })
+}
+
+const sinPlantilla = () =>
+  prisma.docWorkflowTemplate.deleteMany({ where: { projectId: RECEPTOR } })
+
+/**
+ * Emisión entrante en un proyecto SIN plantilla, para ejercitar el armado
+ * manual. Se declara en cada prueba en lugar de depender del orden del archivo:
+ * con plantilla el circuito se arma solo y el armado manual ya no aplica.
+ */
+const recibidoManual = async (sufijo: string) => {
+  await sinPlantilla()
+  return recibido(sufijo)
+}
+
+/** Armado manual, que queda como red cuando la plantilla no alcanza. */
+const confirmarRecepcion = async (revisionId: number, pasos = 1) => {
+  const circuito = await prisma.reviewWorkflow.findFirstOrThrow({
+    where: { revisionId, status: WorkflowStatus.IN_PROGRESS },
+  })
+
+  return workflowResolvers.Mutation.defineWorkflow(
+    null,
+    {
+      workflowId: circuito.id,
+      input: {
+        steps: Array.from({ length: pasos }, (_, i) => ({
+          stepOrder: i + 1,
+          stepType: i === pasos - 1 ? StepType.APPROVE : StepType.REVIEW,
+          assignedToId: USER_ID,
+        })),
+      },
+    },
+    context,
+  ) as Promise<any>
+}
+
+const pasoVigente = (workflowId: number, stepType: StepType) =>
+  prisma.reviewStep.findFirstOrThrow({
+    where: { workflowId, stepType, status: StepStatus.PENDING },
+  })
+
+// --- El circuito nace sin elaboración, y armar es confirmar la recepción ---
+
+test("el circuito del receptor se arma sin paso de elaboración", async () => {
+  // El documento llega elaborado desde afuera: no hay a quién asignarle esa
+  // tarea, y por eso el armado no admite elaborador.
+  const { revision } = await recibidoManual("RCV-A")
+
+  const armado = await confirmarRecepcion(revision.id, 2)
+
+  assert.deepEqual(
+    armado.steps.map((s: any) => s.stepType),
+    [StepType.ASSIGN, StepType.REVIEW, StepType.APPROVE],
+  )
+})
+
+test("armar somete la revisión, porque no hay elaboración que esperar", async () => {
+  // Sin esto la revisión quedaría en borrador con el circuito armado y ninguna
+  // operación capaz de moverla: submitRevision completa un paso que acá no existe.
+  const { revision } = await recibidoManual("RCV-B")
+
+  await confirmarRecepcion(revision.id)
+
+  const despues = await prisma.documentRevision.findUniqueOrThrow({
+    where: { id: revision.id },
+  })
+  assert.equal(despues.status, RevisionStatus.IN_REVIEW)
+})
+
+test("designar un elaborador en modo Receptor se rechaza", async () => {
+  const { revision } = await recibidoManual("RCV-C")
+  const circuito = await prisma.reviewWorkflow.findFirstOrThrow({
+    where: { revisionId: revision.id, status: WorkflowStatus.IN_PROGRESS },
+  })
+
+  await assert.rejects(
+    () =>
+      workflowResolvers.Mutation.defineWorkflow(
+        null,
+        {
+          workflowId: circuito.id,
+          input: {
+            preparerId: USER_ID,
+            steps: [
+              { stepOrder: 1, stepType: StepType.APPROVE, assignedToId: USER_ID },
+            ],
+          },
+        },
+        context,
+      ) as Promise<unknown>,
+  )
+})
+
+// --- La calificación es la conclusión del circuito ---
+
+test("concluir sin calificación se rechaza", async () => {
+  const { revision } = await recibidoManual("RCV-D")
+  const armado = await confirmarRecepcion(revision.id)
+  const paso = await pasoVigente(armado.id, StepType.APPROVE)
+
+  await assert.rejects(
+    () =>
+      workflowResolvers.Mutation.approveStep(
+        null,
+        { stepId: paso.id },
+        context,
+      ) as Promise<unknown>,
+    /concluye con la calificación/,
+  )
+})
+
+test("un paso intermedio no lleva calificación", async () => {
+  const { revision } = await recibidoManual("RCV-E")
+  const armado = await confirmarRecepcion(revision.id, 2)
+  const revisionStep = await pasoVigente(armado.id, StepType.REVIEW)
+  const aprobado = await calificacion("APPROVED")
+
+  await assert.rejects(
+    () =>
+      workflowResolvers.Mutation.approveStep(
+        null,
+        { stepId: revisionStep.id, qualificationId: aprobado.id },
+        context,
+      ) as Promise<unknown>,
+    /no en un paso intermedio/,
+  )
+
+  // Sin ella avanza normalmente.
+  await workflowResolvers.Mutation.approveStep(
+    null,
+    { stepId: revisionStep.id },
+    context,
+  )
+})
+
+test("la operación no puede contradecir al efecto de la calificación", async () => {
+  const { revision } = await recibidoManual("RCV-F")
+  const armado = await confirmarRecepcion(revision.id)
+  const paso = await pasoVigente(armado.id, StepType.APPROVE)
+  const rechazado = await calificacion("REJECTED")
+
+  await assert.rejects(
+    () =>
+      workflowResolvers.Mutation.approveStep(
+        null,
+        { stepId: paso.id, qualificationId: rechazado.id },
+        context,
+      ) as Promise<unknown>,
+    /no puede aprobarse con ella/,
+  )
+})
+
+test("aprobar con calificación registra la respuesta y aprueba la revisión", async () => {
+  const { revision, item } = await recibidoManual("RCV-G")
+  const armado = await confirmarRecepcion(revision.id)
+  const paso = await pasoVigente(armado.id, StepType.APPROVE)
+  const conComentarios = await calificacion("APPROVED_WITH_COMMENTS")
+
+  await workflowResolvers.Mutation.approveStep(
+    null,
+    { stepId: paso.id, qualificationId: conComentarios.id },
+    context,
+  )
+
+  const aprobada = await prisma.documentRevision.findUniqueOrThrow({
+    where: { id: revision.id },
+  })
+  assert.equal(aprobada.status, RevisionStatus.APPROVED)
+
+  // La calificación queda en el ítem, que es donde los dos modos la leen igual.
+  const respuesta = await prisma.docTransmittalResponse.findUniqueOrThrow({
+    where: { transmittalItemId: item.id },
+  })
+  assert.equal(respuesta.qualificationId, conComentarios.id)
+  assert.equal(respuesta.respondedBy, null)
+})
+
+// --- La conclusión es terminal ---
+
+test("el rechazo concluye la revisión y no abre circuito nuevo", async () => {
+  // En Emisor e Interno el rechazo devuelve el trabajo y reinstancia el
+  // circuito. Acá el elaborador está afuera: no hay a quién devolvérselo.
+  const { revision, item } = await recibidoManual("RCV-H")
+  const armado = await confirmarRecepcion(revision.id)
+  const paso = await pasoVigente(armado.id, StepType.APPROVE)
+  const rechazado = await calificacion("REJECTED")
+
+  await workflowResolvers.Mutation.rejectStep(
+    null,
+    {
+      stepId: paso.id,
+      comments: "Falta la memoria de cálculo",
+      qualificationId: rechazado.id,
+    },
+    context,
+  )
+
+  const despues = await prisma.documentRevision.findUniqueOrThrow({
+    where: { id: revision.id },
+  })
+  assert.equal(despues.status, RevisionStatus.REJECTED)
+
+  const circuitos = await prisma.reviewWorkflow.count({
+    where: { revisionId: revision.id },
+  })
+  assert.equal(circuitos, 1, "no debe abrirse un circuito nuevo")
+
+  const respuesta = await prisma.docTransmittalResponse.findUniqueOrThrow({
+    where: { transmittalItemId: item.id },
+  })
+  assert.equal(respuesta.qualificationId, rechazado.id)
+})
+
+test("la revisión rechazada no bloquea la emisión siguiente, y conserva su código", async () => {
+  // Es lo que el estado terminal viene a resolver: sin él la revisión quedaba en
+  // borrador para siempre y createRevision no dejaba abrir la siguiente, que es
+  // H-01 reapareciendo en el otro modo.
+  const { revision } = await recibidoManual("RCV-I")
+  const armado = await confirmarRecepcion(revision.id)
+  const paso = await pasoVigente(armado.id, StepType.APPROVE)
+  const rechazado = await calificacion("REJECTED")
+
+  await workflowResolvers.Mutation.rejectStep(
+    null,
+    { stepId: paso.id, comments: "Rechazada", qualificationId: rechazado.id },
+    context,
+  )
+
+  const siguiente = (await revisionResolvers.Mutation.createRevision(
+    null,
+    { documentId: revision.documentId, input: {} },
+    context,
+  )) as any
+
+  // La rechazada CONSUMIÓ su código y la secuencia sigue de largo: rechazada la
+  // A, la próxima es la B, igual que si hubiera sido aprobada o aprobada con
+  // comentarios. Lo que el rechazo no implica es avance contractual, y eso no es
+  // un asunto del código de revisión.
+  assert.equal(revision.revisionCode, "A")
+  assert.equal(siguiente.revisionCode, "B")
+})
+
+// --- En modo Emisor nada de esto cambia ---
+
+test("en modo Emisor el rechazo sigue devolviendo el trabajo", async () => {
+  const revision = await documento(EMISOR, "RCV-J")
+  await versionCon(revision.id, [DocFileRole.DELIVERABLE])
+
+  const circuito = await prisma.reviewWorkflow.findFirstOrThrow({
+    where: { revisionId: revision.id, status: WorkflowStatus.IN_PROGRESS },
+  })
+  await workflowResolvers.Mutation.defineWorkflow(
+    null,
+    {
+      workflowId: circuito.id,
+      input: {
+        preparerId: USER_ID,
+        steps: [
+          { stepOrder: 1, stepType: StepType.APPROVE, assignedToId: USER_ID },
+        ],
+      },
+    },
+    context,
+  )
+  await workflowResolvers.Mutation.submitRevision(
+    null,
+    { revisionId: revision.id },
+    context,
+  )
+
+  const paso = await pasoVigente(circuito.id, StepType.APPROVE)
+  await workflowResolvers.Mutation.rejectStep(
+    null,
+    { stepId: paso.id, comments: "Corregir el conexionado" },
+    context,
+  )
+
+  const despues = await prisma.documentRevision.findUniqueOrThrow({
+    where: { id: revision.id },
+  })
+  assert.equal(despues.status, RevisionStatus.DRAFT)
+
+  const circuitos = await prisma.reviewWorkflow.count({
+    where: { revisionId: revision.id },
+  })
+  assert.equal(circuitos, 2, "el rechazo abre un circuito nuevo")
+})
+
+// --- La plantilla arma sola: no hay armado del lado de la planta ---
+
+test("emitir el transmittal entrante arma el circuito y somete la revisión", async () => {
+  // No hay acto de armado en la planta: quién revisa cada disciplina y tipo está
+  // predefinido en la plantilla del proyecto, que es la matriz para esos ejes.
+  await conPlantilla([StepType.REVIEW, StepType.APPROVE])
+
+  const { revision } = await recibido("AUTO-A")
+
+  const circuito = await prisma.reviewWorkflow.findFirstOrThrow({
+    where: { revisionId: revision.id },
+    include: { steps: { orderBy: { stepOrder: "asc" } } },
+  })
+
+  assert.deepEqual(
+    circuito.steps.map((s: any) => s.stepType),
+    [StepType.ASSIGN, StepType.REVIEW, StepType.APPROVE],
+  )
+  assert.equal(circuito.steps[0].status, StepStatus.COMPLETED)
+  assert.equal(
+    circuito.steps[0].resolvedById,
+    null,
+    "el armado lo resuelve el sistema, no una persona",
+  )
+
+  const sometida = await prisma.documentRevision.findUniqueOrThrow({
+    where: { id: revision.id },
+  })
+  assert.equal(sometida.status, RevisionStatus.IN_REVIEW)
+})
+
+test("el circuito armado por plantilla concluye como cualquier otro", async () => {
+  await conPlantilla([StepType.APPROVE])
+
+  const { revision, item } = await recibido("AUTO-B")
+  const circuito = await prisma.reviewWorkflow.findFirstOrThrow({
+    where: { revisionId: revision.id, status: WorkflowStatus.IN_PROGRESS },
+  })
+  const paso = await pasoVigente(circuito.id, StepType.APPROVE)
+  const aprobado = await calificacion("APPROVED")
+
+  await workflowResolvers.Mutation.approveStep(
+    null,
+    { stepId: paso.id, qualificationId: aprobado.id },
+    context,
+  )
+
+  const aprobada = await prisma.documentRevision.findUniqueOrThrow({
+    where: { id: revision.id },
+  })
+  assert.equal(aprobada.status, RevisionStatus.APPROVED)
+
+  const respuesta = await prisma.docTransmittalResponse.findUniqueOrThrow({
+    where: { transmittalItemId: item.id },
+  })
+  assert.equal(respuesta.qualificationId, aprobado.id)
+})
+
+test("sin plantilla el armado queda pendiente, y la planta lo resuelve a mano", async () => {
+  // Es la red y no el camino: rechazar la emisión dejaría al contratista trabado
+  // por una configuración que él no puede corregir.
+  await sinPlantilla()
+
+  const { revision } = await recibido("AUTO-C")
+
+  const enBorrador = await prisma.documentRevision.findUniqueOrThrow({
+    where: { id: revision.id },
+  })
+  assert.equal(enBorrador.status, RevisionStatus.DRAFT)
+
+  await confirmarRecepcion(revision.id)
+
+  const sometida = await prisma.documentRevision.findUniqueOrThrow({
+    where: { id: revision.id },
+  })
+  assert.equal(sometida.status, RevisionStatus.IN_REVIEW)
+})
+
+test("una plantilla con un paso sin actor no alcanza para armar sola", async () => {
+  // Un solo paso sin actor deja el armado con algo que decidir, y entonces no
+  // puede resolverlo el sistema.
+  await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: RECEPTOR } })
+  await prisma.docWorkflowTemplate.create({
+    data: {
+      name: "Matriz incompleta",
+      projectId: RECEPTOR,
+      createdById: USER_ID,
+      steps: {
+        create: [
+          { stepOrder: 1, stepType: StepType.REVIEW, assignedToId: USER_ID },
+          { stepOrder: 2, stepType: StepType.APPROVE, assignedToId: null },
+        ],
+      },
+    },
+  })
+
+  const { revision } = await recibido("AUTO-D")
+
+  const enBorrador = await prisma.documentRevision.findUniqueOrThrow({
+    where: { id: revision.id },
+  })
+  assert.equal(enBorrador.status, RevisionStatus.DRAFT)
+
+  await sinPlantilla()
+})
+
+test("en modo Emisor emitir no arma nada", async () => {
+  const { revision } = await emitido("AUTO-E")
+
+  // La revisión ya estaba aprobada por su propio circuito, que se armó a mano.
+  const aprobada = await prisma.documentRevision.findUniqueOrThrow({
+    where: { id: revision.id },
+  })
+  assert.equal(aprobada.status, RevisionStatus.APPROVED)
 })
 

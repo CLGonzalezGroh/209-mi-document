@@ -38,7 +38,7 @@ Verificada sobre el código después de `BLOCK_03B`.
 - **D-10** — la revisión es la unidad externa; toda respuesta cierra la revisión emitida y la emisión siguiente lleva revisión nueva.
 - **D-11 / `B16`** — el rol Receptor admite **un solo circuito** por revisión, y su calificación la cierra.
 - **D-15** — el acceso se acota por membresía de proyecto, con el lado del usuario declarado.
-- **D-26** — una palabra por nivel para los estados terminales, y `RevisionStatus.OBSOLETE` eliminado: la respuesta de la contraparte **no es un estado de la revisión**.
+- **D-26** — una palabra por nivel para los estados terminales, y `RevisionStatus.OBSOLETE` eliminado: la respuesta de la contraparte **no es un estado de la revisión**. Su parte confirmatoria —que este bloque no necesitaría ningún estado terminal— **se corrige en `B12`**; lo que sostiene sigue en pie.
 - **`B14` de `BLOCK_03`** — `currentRevision` es la última aprobada; `lastRevision`, la última no abandonada.
 
 ## Alcance incluido
@@ -318,7 +318,25 @@ La secuencia completa:
 5. **la calificación se registra en la respuesta del ítem** (`B5`), producida por el circuito en lugar de transcripta. Es lo que el contratista lee, y lo que la orientación sobre federación pide que sea legible por quien emitió;
 6. **la emisión siguiente lleva revisión nueva**, en un transmittal nuevo.
 
-**El desenlace del paso se deriva del efecto de la calificación** y no al revés: `REJECTED` rechaza el paso, los otros dos lo aprueban. Es lo que D-22 pide al conservar el desenlace binario del circuito — la lógica del circuito no se ramifica, y la calificación es lo que el usuario elige y la interfaz muestra.
+**No hay acto de armado del lado de la planta.** Quién revisa y quién califica está **predefinido**, de modo que emitir el transmittal entrante arma el circuito de cada documento y somete su revisión, en el mismo acto y sin intervención.
+
+El mecanismo ya estaba construido y sin usar: **`DocWorkflowTemplate` resuelve su alcance por proyecto, clase y tipo, con actores preasignados**, y al crear el documento el sistema ya deja adherida al circuito la plantilla aplicable. En proyectos, **clase significa disciplina** —el nombre es genérico para que otros módulos clasifiquen con otro criterio—, de modo que la plantilla **es** la matriz de responsabilidad para los ejes que hoy existen. Lo que la matriz diferida agregaría es el **área**, que depende de D-14.
+
+El argumento de por qué el sistema puede resolver ese armado es de D-03: el armado siempre tiene contenido **porque el elaborador nunca se preasigna**. Acá no hay elaborador, así que con la plantilla completa queda literalmente vacío. Se resuelve **por sistema**, con `resolvedById` nulo, en lugar de atribuirle el acto al contratista que emitió.
+
+**Y queda una red.** Si el proyecto no tiene plantilla, o alguno de sus pasos no declara actor, ese documento conserva su armado pendiente y la planta lo resuelve a mano; el resto del transmittal avanza igual. Se descartó rechazar la emisión: dejaría al contratista trabado por una configuración que él no puede corregir, con el documento ya listo para entrar.
+
+**El desenlace del paso se deriva del efecto de la calificación** y no al revés: `REJECTED` rechaza el paso, los otros dos lo aprueban. Es lo que D-22 pide al conservar el desenlace binario del circuito — la lógica del circuito no se ramifica, y la calificación es lo que el usuario elige y la interfaz muestra. La operación elegida no puede contradecir al efecto: sin esa verificación el circuito quedaría diciendo lo contrario que la respuesta que la contraparte lee.
+
+#### La revisión rechazada necesita estado propio, y D-26 se corrige
+
+Al implementarlo apareció lo que la confirmación de D-26 no podía prever. **En modo Receptor el rechazo concluye la revisión**, y ninguno de los estados existentes sirve: `DRAFT` la deja bloqueando la emisión siguiente —`createRevision` no admite abrir otra mientras haya una en curso, que es H-01 otra vez—, `APPROVED` sería falso, `ABANDONED` **libera el código** y esta revisión salió con el suyo, y `SUPERSEDED` es el efecto de aprobar la siguiente.
+
+`RevisionStatus` incorpora **`REJECTED`**. No es el `OBSOLETE` que `BLOCK_03B` retiró —obsoleto es lo que dejó de aplicar— y **consume código**, de modo que el índice único parcial, que excluye solo a las abandonadas, sigue contándola sin cambios.
+
+**La secuencia sigue de largo en los tres desenlaces.** Aprobada, aprobada con comentarios o rechazada: si hay revisión posterior, lleva código nuevo, y rechazada la `A` la siguiente es la `B`. Que el rechazo no implique avance contractual —no se certifica— es un asunto del progreso del proyecto y no del código de revisión, que solo describe cuántas veces salió el documento.
+
+Lo que D-26 sostiene no se toca: la respuesta de la contraparte no es un estado de la revisión. `REJECTED` expresa la conclusión del **circuito**, que en este rol es interno a la planta; en modo Emisor la revisión emitida sigue sin moverse (`B7`).
 
 **Las marcas de la planta son versiones** (`B6`), producidas por quien tiene el paso vigente, como en cualquier circuito.
 

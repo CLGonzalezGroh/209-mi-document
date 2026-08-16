@@ -148,5 +148,10 @@ test("el catálogo cubre las escrituras relevadas más lo que agregaron los bloq
   // estado que H-12 denunciaba sin ninguna (B8).
   //
   //   + AcknowledgeTransmittal
+  //
+  // La fase 6 no suma acciones: el circuito del rol Receptor usa las que ya
+  // existen —aprobar y rechazar un paso— y lo que cambia es su desenlace. Sí
+  // suma una transición, `RevisionRejected`, porque el hecho es otro: la
+  // revisión concluye en lugar de volver al elaborador (B12).
   assert.equal(AUDIT_ACTIONS.length, 50)
 })

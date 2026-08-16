@@ -880,6 +880,12 @@ Retirar un armado, desistir de una emisión y dar por concluida una identidad so
 
 **Confirmado al cerrar el bloque: `BLOCK_04` no lo necesita**, de modo que la eliminación no le deja deuda. La reserva quería evitar una segunda migración de enumeración que ya no va a hacer falta.
 
+**Esa confirmación resultó equivocada, y se corrige al implementar `BLOCK_04`.** Se dio antes de construir el circuito del rol Receptor, que es el único lugar donde el problema aparece: en Emisor e Interno el rechazo devuelve la revisión a borrador y abre otro circuito, pero allí el elaborador está afuera y no hay a quién devolverle el trabajo. Sin estado terminal la revisión quedaba en `DRAFT` para siempre, y `createRevision` —que no admite abrir otra mientras haya una en curso— bloqueaba la emisión siguiente. Es H-01 reapareciendo en el otro modo.
+
+`RevisionStatus` incorpora entonces **`REJECTED`**, que no es el `OBSOLETE` retirado: obsoleto es lo que dejó de aplicar, y esto es una emisión que la contraparte no aceptó. **Consume código**, a diferencia de `ABANDONED`, porque salió y la contraparte la recibió con él.
+
+Lo que D-26 sostiene sigue en pie: la respuesta de la contraparte **no** es un estado de la revisión. En modo Emisor la revisión emitida no se mueve (`B7`), y la calificación vive en la respuesta del ítem. `REJECTED` no expresa la respuesta sino la conclusión del **circuito**, que en ese rol es interno a la planta.
+
 ### D-27 — La versión nace al confirmar, y antes hay una copia de trabajo
 
 **Estado:** `PROMOVIDO_A_SFS`.
@@ -1097,7 +1103,7 @@ Diferidos, con su propio análisis y sin fecha asignada:
 | ------ | --------- | ------ |
 | Interfaz tareas–documentos | Unificación del doble vínculo y avance de tarea por revisión aprobada (D-07; H-18) | Requiere definición funcional adicional. Se retoma tras consolidar el núcleo documental. |
 | Adjuntos | Destino de `Attachment` (D-08; H-21) | Depende de la cuestión de fondo sobre el alcance del módulo. |
-| Matriz de responsabilidad | Propuesta de revisores por disciplina, tipo o área en modo Receptor (D-18; H-36) | Se separó al abrir `BLOCK_04`. `B16` de `BLOCK_03` la dejó como **otra fuente de propuesta para el paso de armado**, que ya existe y ya admite plantilla: es una comodidad sobre un mecanismo construido, no una puerta del ciclo. Sale sin dejar deuda — sin ella, el receptor asigna los revisores a mano, que es lo que hace hoy. |
+| Matriz de responsabilidad | Propuesta de revisores **por área** en modo Receptor (D-18; H-36). Los otros dos ejes ya están: la plantilla de `BLOCK_03` resuelve por proyecto, clase y tipo con actores preasignados, y en proyectos **clase es la disciplina**. `BLOCK_04` la usa para armar el circuito del receptor sin intervención, de modo que lo que resta es el eje de área, que depende de D-14 | Se separó al abrir `BLOCK_04`. `B16` de `BLOCK_03` la dejó como **otra fuente de propuesta para el paso de armado**, que ya existe y ya admite plantilla: es una comodidad sobre un mecanismo construido, no una puerta del ciclo. Sale sin dejar deuda — sin ella, el receptor asigna los revisores a mano, que es lo que hace hoy. |
 | Escalón de módulo en la configuración | Valores por defecto y plantilla de circuito con alcance de módulo, para los documentos sin proyecto | **No bloquea a `BLOCK_04`**, que es enteramente sobre documentos con contraparte. Su plazo lo fija el roadmap de calidad, comercial y activos: antes de que el primero use el ciclo. Conviene abrirlo **después** de `BLOCK_04`, que al cargar `DocProjectSettings` de configuración de contraparte va a dejar en evidencia que el escalón no puede ser esa misma tabla con proyecto anulable. |
 | Salida de `ScannedFile` y `Area` | Migración hacia `212-mi-digitalization` | Único subsistema con datos e interfaz en producción. Exige preservar la continuidad operativa del cliente que lo usa. |
 
