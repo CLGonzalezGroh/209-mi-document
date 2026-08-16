@@ -124,6 +124,23 @@ export const responseLinkViolation = (
 }
 
 /**
+ * Solo los transmittals de emisión llevan ítems (B5).
+ *
+ * La respuesta cuelga del ítem de la emisión que contesta, y no crea uno propio:
+ * duplicarlo sobre la misma revisión crearía dos registros de lo mismo y
+ * chocaría contra la unicidad de `B3`, o la debilitaría hasta volverla inútil.
+ * El transmittal de respuesta es el sobre en que la respuesta viajó.
+ */
+export const assertCarriesItems = (nature: TransmittalNature): void => {
+  if (nature === TransmittalNature.RESPONSE) {
+    throw new GraphQLError(
+      "Un transmittal de respuesta no lleva ítems propios: la respuesta cuelga del ítem de la emisión que contesta",
+      { extensions: { code: "BAD_USER_INPUT" } },
+    )
+  }
+}
+
+/**
  * Código sucesor dentro del proyecto (B2).
  *
  * Puro y separado de la lectura, para que la generación pueda reintentarse

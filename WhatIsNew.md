@@ -692,3 +692,30 @@ Cierra **H-29** y **H-16**, y resuelve `B11` de `BLOQUE 02` en la dirección que
 
 **269 pruebas, 0 fallos**, con una suite de integración nueva para la circulación.
 
+### Fase 3 — La puerta de emisión y las reglas del propósito
+
+Cierra **H-11** y le da a `PurposeCode` sus dos primeras reglas de comportamiento: existía desde el origen del módulo y ninguna validación lo consultaba.
+
+- **La puerta se aplica al incorporar el ítem, y no solo al emitir.** Una revisión en circuito no es candidata a salir, de modo que tampoco es candidata a entrar en la carpeta: admitirla en borrador para rechazarla después obliga a armar el transmittal con documentos que van a trabar la emisión, y a descubrirlo al final. Se verifica de nuevo al emitir, porque entre una cosa y la otra la revisión pudo abandonarse.
+- **Sin excepción por propósito**, según D-18. Y **solo donde la emisión es saliente**: en modo Receptor no hay puerta, y no es una excepción a la regla sino su consecuencia — la puerta exige aprobación **interna**, y el contratista no la hace dentro del sistema.
+- **Una revisión se emite una sola vez**, sostenido por unicidad de `documentRevisionId` en el ítem y no por validación. La unicidad anterior era por transmittal, de modo que la misma revisión podía salir en dos. Absorbe dos reglas que estaban planteadas por separado: una revisión respondida tampoco vuelve a emitirse —ya salió— y un reintento del emisor no puede duplicar la emisión.
+- **Primera regla del propósito**: declara si se espera calificación. Para aprobación y revisión sí; para información, construcción y conforme a obra no. Es expectativa y no permiso — una respuesta sobre una emisión informativa se registra igual. Sin ella, la bandeja de lo que falta contestar acumula para siempre emisiones que nadie va a responder.
+- **Segunda regla**: qué archivos espera. La emisión final —apto para construcción, conforme a obra— espera el editable además del entregable. **Es advertencia y no puerta**, por dos motivos. El caso legítimo existe: el editable pesa cientos de megabytes o llega en un formato que no viaja por el mismo canal. Y el que decide: al emitir, la revisión ya está aprobada y su versión es inmutable, de modo que **no hay forma legal de agregar la fuente que falta** — una puerta dura exigiría algo que el propio sistema hace imposible. De ahí el principio: *una puerta solo puede ser dura si existe una manera legal de satisfacerla*.
+- **La advertencia se adelanta al momento en que sirve.** `DocumentRevision.missingFileRoles(purpose:)` la responde mientras la revisión está abierta y la copia de trabajo sin confirmar, tomando el propósito por argumento porque la revisión todavía no sabe con cuál va a salir. En la emisión se repite, ya sin remedio, y **el hecho queda en la auditoría**: el caso legítimo pasa a ser un dato registrado en lugar de un silencio.
+
+**Un defecto que encontraron las pruebas y no la compilación.** La advertencia leía los archivos de la versión que el padre traía precargada, y varias consultas la incluyen **sin ellos**: daba "faltan todos" con la misma confianza que una respuesta correcta. Ahora la precarga se usa solo si trae sus archivos, que es la distinción que el módulo ya hacía un nivel más arriba entre *no vinieron* y *no hay*.
+
+> **Atención al migrar**: `20260816140000_emission_gate` reemplaza la unicidad `[transmittalId, documentRevisionId]` del ítem por una sobre `documentRevisionId` a secas, y repone el índice de acceso por transmittal.
+
+**287 pruebas, 0 fallos.**
+
+**Los ítems se editan en borrador**, adelantado desde la fase 5 (`B9`, cierra **H-13**). `addTransmittalItem` y `removeTransmittalItem` permiten crear el transmittal vacío y vincular los documentos después.
+
+El adelanto tiene un motivo y no es solo comodidad: `B3` formula la puerta **al incorporar el ítem**, y sin estas operaciones el único momento en que un ítem se incorporaba era la creación — la regla quedaba escrita para un caso que no podía probarse. Ahora tiene su caso propio, y con él la contracara de la unicidad: **quitar el ítem libera la revisión** para otra carpeta, porque nunca salió.
+
+- **Emitido, el contenido queda fijo.** Corregir una emisión ya salida no es editarla sino emitir otra. Es el tercer nivel en que el módulo aplica el mismo corte: la versión no se modifica, la revisión aprobada tampoco.
+- **Solo la emisión lleva ítems.** La respuesta cuelga del ítem de la emisión que contesta y no crea uno propio — es lo que justifica que la unicidad de la fase 3 vaya sin condiciones.
+- Dos acciones de auditoría nuevas. Quitar un ítem libera una revisión, y sin registro esa liberación sería inexplicable después.
+
+**292 pruebas, 0 fallos.**
+

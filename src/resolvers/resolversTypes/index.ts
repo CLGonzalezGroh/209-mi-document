@@ -17,6 +17,8 @@ import {
   TaskDocumentReference,
 } from "../../generated/prisma/client.js"
 import {
+  DocFileRole,
+  PurposeCode,
   QualificationEffect,
   RevisionStatus,
   WorkflowStatus,
@@ -24,7 +26,41 @@ import {
 import { lastLiveRevision } from "../../utils/revisionScheme.js"
 import { enablesUse, requiresNewRevision } from "../../utils/qualifications.js"
 import { directionOf } from "../../utils/transmittalCirculation.js"
+import {
+  expectsQualification,
+  missingFileRoles,
+} from "../../utils/emissionPurpose.js"
 import { obsolescenceCause } from "../../utils/documentMetadata.js"
+
+/**
+ * Roles de archivo de la última versión de una revisión.
+ *
+ * Aprovecha lo que el padre ya trae, si lo trae: la advertencia de archivos
+ * faltantes se consulta sobre listados y no debe costar una lectura por fila.
+ */
+const rolesDeLaUltimaVersion = async (parent: any): Promise<DocFileRole[]> => {
+  const cargadas: any[] = Array.isArray(parent?.versions) ? parent.versions : []
+
+  const precargada = cargadas.length
+    ? cargadas.reduce((prev, curr) =>
+        curr.versionNumber > prev.versionNumber ? curr : prev,
+      )
+    : null
+
+  // La versión precargada sirve SOLO si trae sus archivos. Varias consultas la
+  // incluyen sin ellos, y darla por buena devolvía "faltan todos" con la misma
+  // confianza que una respuesta correcta. Es la distinción que `revisionsOf` ya
+  // hace un nivel más arriba: no vinieron no es lo mismo que no hay.
+  const ultima = Array.isArray(precargada?.files)
+    ? precargada
+    : await prisma.documentVersion.findFirst({
+        where: { revisionId: parent.id },
+        include: { files: true },
+        orderBy: { versionNumber: "desc" },
+      })
+
+  return (ultima?.files ?? []).map((f: any) => f.role)
+}
 
 /** Detalle que ambas lecturas devuelven cuando tienen que ir a la base. */
 const revisionDetail = {
@@ -253,6 +289,45 @@ export const resolverTypes = {
         orderBy: { versionNumber: "desc" },
       })
       return version
+    },
+
+    /**
+     * Qué le faltaría si se emitiera con ese propósito (BLOQUE 04, B4).
+     *
+     * Toma el propósito por argumento porque la revisión todavía no sabe con
+     * cuál va a salir. Es la misma regla que el ítem aplica ya conociéndolo, y
+     * se expone en los dos lados para que la advertencia llegue mientras la
+     * revisión está abierta, que es cuando incorporar el archivo no cuesta nada.
+     */
+    missingFileRoles: async (
+      parent: any,
+      { purpose }: { purpose: PurposeCode },
+    ) => {
+      const roles = await rolesDeLaUltimaVersion(parent)
+
+      return missingFileRoles(purpose, roles)
+    },
+  },
+
+  TransmittalItem: {
+    /** Expectativa y no permiso: gobierna qué figura como pendiente. */
+    expectsQualification: (parent: { purposeCode: PurposeCode }) =>
+      expectsQualification(parent.purposeCode),
+
+    missingFileRoles: async (parent: any) => {
+      const revision =
+        parent.documentRevision ??
+        (await prisma.documentRevision.findUnique({
+          where: { id: parent.documentRevisionId },
+          select: { id: true },
+        }))
+
+      if (!revision) return []
+
+      return missingFileRoles(
+        parent.purposeCode,
+        await rolesDeLaUltimaVersion(revision),
+      )
     },
   },
 

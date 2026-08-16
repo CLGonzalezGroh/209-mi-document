@@ -753,8 +753,19 @@ model Transmittal {
 model TransmittalItem {
   id Int @id @default(autoincrement())
 
-  transmittalId      Int
-  documentRevisionId Int
+  transmittalId Int
+
+  // Una revisión se emite UNA SOLA VEZ (BLOQUE 04, B3): la unicidad reemplaza a
+  // [transmittalId, documentRevisionId], que solo impedía el duplicado dentro
+  // del mismo transmittal. Es un índice sin condiciones porque solo los
+  // transmittals de emisión llevan ítems.
+  //
+  // Absorbe dos reglas que estaban planteadas por separado: una revisión
+  // respondida tampoco vuelve a emitirse —ya salió— y un reintento del emisor no
+  // puede duplicar la emisión.
+  //
+  // Quitar el ítem, posible solo en borrador, libera la revisión.
+  documentRevisionId Int         @unique
   purposeCode        PurposeCode
   clientStatus       ClientStatus?
   clientComments     String?
@@ -763,7 +774,7 @@ model TransmittalItem {
   transmittal      Transmittal      @relation(fields: [transmittalId], references: [id], onDelete: Cascade)
   documentRevision DocumentRevision @relation(fields: [documentRevisionId], references: [id])
 
-  @@unique([transmittalId, documentRevisionId])
+  @@index([transmittalId])
   @@map("transmittal_items")
 }
 

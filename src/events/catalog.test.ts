@@ -129,5 +129,11 @@ test("el catálogo cubre las escrituras relevadas más lo que agregaron los bloq
   //
   //   + CreateQualification, UpdateQualification
   //   + TerminateQualification, ActivateQualification
-  assert.equal(AUDIT_ACTIONS.length, 46)
+  //
+  // Y 2 en su fase 3, de 46 a 48: agregar y quitar un documento del transmittal
+  // mientras está en borrador (B9). Quitar libera la revisión para otra carpeta,
+  // y sin registro esa liberación sería inexplicable después.
+  //
+  //   + AddTransmittalItem, RemoveTransmittalItem
+  assert.equal(AUDIT_ACTIONS.length, 48)
 })

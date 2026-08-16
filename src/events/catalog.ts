@@ -89,6 +89,8 @@ export const AuditAction = {
   // Emisión y respuesta (BLOQUE 04). El catálogo de calificaciones es
   // configuración del contrato: quién agregó o dio de baja una calificación
   // explica por qué una respuesta pudo registrarse con ese valor.
+  AddTransmittalItem: "AddTransmittalItem",
+  RemoveTransmittalItem: "RemoveTransmittalItem",
   CreateQualification: "CreateQualification",
   UpdateQualification: "UpdateQualification",
   TerminateQualification: "TerminateQualification",
@@ -154,6 +156,11 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   [AuditAction.DiscardWorkingCopy]: DocObjectType.DOCUMENT_REVISION,
 
   // Emisión y respuesta (BLOQUE 04)
+  // Agregar y quitar un documento son actos sobre el TRANSMITTAL, que es lo
+  // que cambia de contenido. Quitar además libera la revisión para otra carpeta,
+  // y sin registro esa liberación sería inexplicable después.
+  [AuditAction.AddTransmittalItem]: DocObjectType.TRANSMITTAL,
+  [AuditAction.RemoveTransmittalItem]: DocObjectType.TRANSMITTAL,
   [AuditAction.CreateQualification]: DocObjectType.DOC_QUALIFICATION,
   [AuditAction.UpdateQualification]: DocObjectType.DOC_QUALIFICATION,
   [AuditAction.TerminateQualification]: DocObjectType.DOC_QUALIFICATION,

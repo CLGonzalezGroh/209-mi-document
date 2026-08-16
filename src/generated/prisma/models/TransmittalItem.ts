@@ -249,18 +249,17 @@ export type TransmittalItemOrderByWithRelationInput = {
 
 export type TransmittalItemWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  transmittalId_documentRevisionId?: Prisma.TransmittalItemTransmittalIdDocumentRevisionIdCompoundUniqueInput
+  documentRevisionId?: number
   AND?: Prisma.TransmittalItemWhereInput | Prisma.TransmittalItemWhereInput[]
   OR?: Prisma.TransmittalItemWhereInput[]
   NOT?: Prisma.TransmittalItemWhereInput | Prisma.TransmittalItemWhereInput[]
   transmittalId?: Prisma.IntFilter<"TransmittalItem"> | number
-  documentRevisionId?: Prisma.IntFilter<"TransmittalItem"> | number
   purposeCode?: Prisma.EnumPurposeCodeFilter<"TransmittalItem"> | $Enums.PurposeCode
   clientStatus?: Prisma.EnumClientStatusNullableFilter<"TransmittalItem"> | $Enums.ClientStatus | null
   clientComments?: Prisma.StringNullableFilter<"TransmittalItem"> | string | null
   transmittal?: Prisma.XOR<Prisma.TransmittalScalarRelationFilter, Prisma.TransmittalWhereInput>
   documentRevision?: Prisma.XOR<Prisma.DocumentRevisionScalarRelationFilter, Prisma.DocumentRevisionWhereInput>
-}, "id" | "transmittalId_documentRevisionId">
+}, "id" | "documentRevisionId">
 
 export type TransmittalItemOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -354,11 +353,6 @@ export type TransmittalItemListRelationFilter = {
 
 export type TransmittalItemOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type TransmittalItemTransmittalIdDocumentRevisionIdCompoundUniqueInput = {
-  transmittalId: number
-  documentRevisionId: number
 }
 
 export type TransmittalItemCountOrderByAggregateInput = {

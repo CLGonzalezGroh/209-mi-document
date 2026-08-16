@@ -22,10 +22,15 @@ import {
   SysLogModule,
 } from "../generated/prisma/enums.js"
 import {
+  assertCarriesItems,
   assertNature,
   generateTransmittalCode,
   responseLinkViolation,
 } from "../utils/transmittalCirculation.js"
+import {
+  assertApprovedForEmission,
+  missingFileRoles,
+} from "../utils/emissionPurpose.js"
 import { AuditAction, WorkflowEvent } from "../events/catalog.js"
 import { emitAuditEvent, emitWorkflowEvent } from "../events/emit.js"
 import { Transmittal } from "../generated/prisma/client.js"
@@ -49,6 +54,9 @@ const transmittalIncludes = {
         include: {
           document: true,
           versions: {
+            // Con sus archivos: la advertencia de B4 se resuelve sobre ellos,
+            // y sin incluirlos cada ítem cuesta una lectura extra.
+            include: { files: true },
             orderBy: { versionNumber: "desc" as const },
             take: 1,
           },
@@ -105,6 +113,21 @@ const restriccionViolada = (error: any): string => {
 
 const esColisionDeCodigo = (error: any): boolean =>
   error?.code === "P2002" && restriccionViolada(error).includes("code")
+
+/**
+ * Emitido, el contenido del transmittal queda fijo (B9).
+ *
+ * La carátula que la contraparte recibió declara un contenido; corregir una
+ * emisión ya salida no es editarla sino emitir otra.
+ */
+const assertDraft = (status: TransmittalStatus, accion: string): void => {
+  if (status !== TransmittalStatus.DRAFT) {
+    throw new GraphQLError(
+      `Solo se pueden ${accion} mientras el transmittal está en borrador`,
+      { extensions: { code: "BAD_REQUEST" } },
+    )
+  }
+}
 
 const withCodeRetry = async <T>(operacion: () => Promise<T>): Promise<T> => {
   for (let intento = 1; ; intento++) {
@@ -401,6 +424,23 @@ export const transmittalResolvers = {
           })
         }
 
+        // La puerta se aplica al INCORPORAR el ítem y no solo al emitir (B3):
+        // una revisión en circuito no es candidata a salir, de modo que tampoco
+        // es candidata a entrar en la carpeta. Solo donde la emisión es
+        // saliente; en modo Receptor no hay aprobación interna que exigir.
+        if (input.items.length > 0) {
+          assertCarriesItems(input.nature)
+        }
+
+        if (input.nature === TransmittalNature.EMISSION && input.items.length > 0) {
+          const revisiones = await context.orm.documentRevision.findMany({
+            where: { id: { in: input.items.map((i) => i.documentRevisionId) } },
+            select: { id: true, revisionCode: true, status: true },
+          })
+
+          assertApprovedForEmission(settings.documentRole, revisiones)
+        }
+
         // El código se calcula DENTRO de la transacción y el índice único
         // `[projectId, code]` es el árbitro (B2). El reintento repite la
         // transacción entera, porque una violación de unicidad la aborta en
@@ -459,7 +499,12 @@ export const transmittalResolvers = {
           logName: "CREATE_TRANSMITTAL",
           module: SysLogModule.PROJECTS,
           messages: {
-            uniqueConstraint: "Ya existe un transmittal con ese código.",
+            // Dos unicidades distintas llegan acá y no deben confundirse: la
+            // del código, que el reintento ya agotó, y la de la revisión, que
+            // es el árbitro de "no emitidas" (B3) y le habla a quien la eligió.
+            uniqueConstraint: esColisionDeCodigo(error)
+              ? "No se pudo asignar un código libre para el transmittal. Reintente."
+              : "Una de las revisiones ya fue incluida en otro transmittal: una revisión se emite una sola vez.",
             foreignKeyConstraint:
               "Una de las revisiones de documento no existe.",
             default: "Error al crear el transmittal.",
@@ -467,6 +512,197 @@ export const transmittalResolvers = {
         })
       }
     },
+    /**
+     * Los ítems se editan mientras el transmittal está en borrador (B9).
+     *
+     * Emitido, el contenido queda fijo: la carátula que la contraparte recibió
+     * declara un contenido, y corregir una emisión ya salida no es editarla sino
+     * emitir otra. Es el mismo corte que `B3` aplica a la puerta, y el tercer
+     * nivel en que el módulo lo aplica —la versión no se modifica, la revisión
+     * aprobada tampoco—.
+     */
+    addTransmittalItem: async (
+      _: any,
+      {
+        transmittalId,
+        input,
+      }: {
+        transmittalId: number
+        input: { documentRevisionId: number; purposeCode: string }
+      },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_UPDATE],
+        context,
+      })
+      logger.info("addTransmittalItem", { userId })
+
+      // Fuera del try: un rechazo de autorización no es un error del servicio.
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.TRANSMITTAL,
+        objectId: transmittalId,
+        context,
+        notFoundMessage: "Transmittal no encontrado",
+      })
+
+      try {
+        const transmittal = await context.orm.transmittal.findUniqueOrThrow({
+          where: { id: transmittalId },
+          select: { id: true, projectId: true, nature: true, status: true },
+        })
+
+        assertCarriesItems(transmittal.nature)
+        assertDraft(transmittal.status, "agregar documentos")
+
+        const settings = await context.orm.docProjectSettings.findUnique({
+          where: { projectId: transmittal.projectId },
+          select: { documentRole: true },
+        })
+
+        if (!settings) {
+          throw new GraphQLError(
+            "El proyecto no declaró su rol documental: no puede circular documentación",
+            { extensions: { code: "BAD_USER_INPUT" } },
+          )
+        }
+
+        const revision = await context.orm.documentRevision.findUnique({
+          where: { id: input.documentRevisionId },
+          select: { id: true, revisionCode: true, status: true },
+        })
+
+        if (!revision) {
+          throw new GraphQLError("La revisión no existe", {
+            extensions: { code: "NOT_FOUND" },
+          })
+        }
+
+        // La misma puerta que la creación, sobre el mismo util (B3): es acá
+        // donde "se aplica al incorporar el ítem" tiene su caso propio.
+        assertApprovedForEmission(settings.documentRole, [revision])
+
+        return await context.orm.$transaction(async (tx) => {
+          const item = await tx.transmittalItem.create({
+            data: {
+              transmittalId,
+              documentRevisionId: input.documentRevisionId,
+              purposeCode: input.purposeCode as any,
+            },
+          })
+
+          await emitAuditEvent(tx, {
+            action: AuditAction.AddTransmittalItem,
+            objectId: transmittalId,
+            actorId: userId,
+            meta: {
+              itemId: item.id,
+              documentRevisionId: input.documentRevisionId,
+              purposeCode: input.purposeCode,
+            },
+          })
+
+          return tx.transmittal.findUniqueOrThrow({
+            where: { id: transmittalId },
+            include: transmittalIncludes,
+          })
+        })
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "ADD_TRANSMITTAL_ITEM",
+          module: SysLogModule.PROJECTS,
+          messages: {
+            notFound: "El transmittal o la revisión no existen.",
+            uniqueConstraint:
+              "Esa revisión ya fue incluida en otro transmittal: una revisión se emite una sola vez.",
+            default: "Error al agregar el documento al transmittal.",
+          },
+        })
+      }
+    },
+
+    /**
+     * Quitar el ítem **libera la revisión** para otra carpeta.
+     *
+     * Es la contracara de la unicidad de `B3`: la revisión deja de estar emitida
+     * porque nunca salió, y vuelve a ser candidata. Solo en borrador, por lo
+     * mismo que rige para agregar.
+     */
+    removeTransmittalItem: async (
+      _: any,
+      { itemId }: { itemId: number },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_UPDATE],
+        context,
+      })
+      logger.info("removeTransmittalItem", { userId })
+
+      const item = await context.orm.transmittalItem.findUnique({
+        where: { id: itemId },
+        select: {
+          id: true,
+          documentRevisionId: true,
+          transmittal: { select: { id: true, status: true } },
+        },
+      })
+
+      if (!item) {
+        throw new GraphQLError("El ítem no existe", {
+          extensions: { code: "NOT_FOUND" },
+        })
+      }
+
+      // Fuera del try, y sobre el transmittal: el ítem no lleva proyecto propio.
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.TRANSMITTAL,
+        objectId: item.transmittal.id,
+        context,
+        notFoundMessage: "Transmittal no encontrado",
+      })
+
+      try {
+        assertDraft(item.transmittal.status, "quitar documentos")
+
+        return await context.orm.$transaction(async (tx) => {
+          await tx.transmittalItem.delete({ where: { id: itemId } })
+
+          await emitAuditEvent(tx, {
+            action: AuditAction.RemoveTransmittalItem,
+            objectId: item.transmittal.id,
+            actorId: userId,
+            meta: {
+              itemId,
+              documentRevisionId: item.documentRevisionId,
+            },
+          })
+
+          return tx.transmittal.findUniqueOrThrow({
+            where: { id: item.transmittal.id },
+            include: transmittalIncludes,
+          })
+        })
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "REMOVE_TRANSMITTAL_ITEM",
+          module: SysLogModule.PROJECTS,
+          messages: {
+            notFound: "El ítem no existe.",
+            default: "Error al quitar el documento del transmittal.",
+          },
+        })
+      }
+    },
+
     issueTransmittal: async (
       _: any,
       { id }: { id: number },
@@ -506,6 +742,63 @@ export const transmittalResolvers = {
           )
         }
 
+        const settings = await context.orm.docProjectSettings.findUnique({
+          where: { projectId: transmittal.projectId },
+          select: { documentRole: true },
+        })
+
+        if (!settings) {
+          throw new GraphQLError(
+            "El proyecto no declaró su rol documental: no puede circular documentación",
+            { extensions: { code: "BAD_USER_INPUT" } },
+          )
+        }
+
+        const items = await context.orm.transmittalItem.findMany({
+          where: { transmittalId: id },
+          select: {
+            purposeCode: true,
+            documentRevision: {
+              select: {
+                id: true,
+                revisionCode: true,
+                status: true,
+                versions: {
+                  orderBy: { versionNumber: "desc" },
+                  take: 1,
+                  select: { files: { select: { role: true } } },
+                },
+              },
+            },
+          },
+        })
+
+        // La puerta se verifica de nuevo al emitir: entre incorporar el ítem y
+        // emitir, la revisión pudo abandonarse (B3).
+        assertApprovedForEmission(
+          settings.documentRole,
+          items.map((i) => i.documentRevision),
+        )
+
+        // Los archivos que el propósito espera se ADVIERTEN y no se exigen (B4).
+        // En este punto la revisión ya está aprobada: no admite versiones nuevas
+        // y su conjunto es inmutable, de modo que una puerta dura acá sería
+        // insatisfacible. Lo que queda es que el hecho no pase en silencio.
+        const faltantes = items
+          .map((item) => ({
+            revisionCode: item.documentRevision.revisionCode,
+            purposeCode: item.purposeCode,
+            missing: missingFileRoles(
+              item.purposeCode,
+              item.documentRevision.versions[0]?.files.map((f) => f.role) ?? [],
+            ),
+          }))
+          .filter((f) => f.missing.length > 0)
+
+        if (faltantes.length > 0) {
+          logger.warn("emisión con archivos faltantes", { id, faltantes })
+        }
+
         const updated = await context.orm.$transaction(async (tx) => {
           const issued = await tx.transmittal.update({
             where: { id },
@@ -522,7 +815,13 @@ export const transmittalResolvers = {
             action: AuditAction.IssueTransmittal,
             objectId: id,
             actorId: userId,
-            meta: { code: issued.code },
+            meta: {
+              code: issued.code,
+              // Lo que faltaba queda REGISTRADO y no solo advertido: es lo que
+              // convierte el caso legítimo —el editable que viaja por otro
+              // medio— en un dato de la auditoría en lugar de un silencio.
+              ...(faltantes.length > 0 && { missingFiles: faltantes }),
+            },
           })
           await emitWorkflowEvent(tx, {
             name: WorkflowEvent.TransmittalIssued,

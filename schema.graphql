@@ -813,6 +813,18 @@ type DocumentRevision @key(fields: "id") {
   "Versión actual (la más reciente)"
   currentVersion: DocumentVersion
   """
+  Qué le faltaría a esta revisión si se emitiera con el propósito indicado.
+
+  Se consulta **mientras la revisión está abierta**, que es cuando incorporar el
+  archivo no cuesta nada: la copia de trabajo está abierta y el conjunto todavía
+  no se confirmó. Al emitir la advertencia se repite, ya sin remedio, porque la
+  versión aprobada es inmutable.
+
+  Toma el propósito por argumento porque la revisión todavía no sabe con cuál va
+  a salir.
+  """
+  missingFileRoles(purpose: PurposeCodeInput!): [DocFileRole!]!
+  """
   Circuitos de la revisión, por secuencia de creación. Una revisión admite
   VARIOS circuitos sucesivos: cada rechazo abre uno nuevo desde la elaboración,
   y cada cancelación uno desde el armado.
@@ -1172,6 +1184,22 @@ type TransmittalItem {
   documentRevision: DocumentRevision!
   "Propósito del envío del documento"
   purposeCode: PurposeCode!
+  """
+  ¿Se espera calificación de la contraparte? Derivado del propósito.
+
+  Es expectativa y no permiso: una respuesta sobre una emisión informativa se
+  registra igual. Lo que gobierna es qué figura como pendiente.
+  """
+  expectsQualification: Boolean!
+  """
+  Roles de archivo que el propósito espera y la versión emitida no trae.
+
+  Es **advertencia y no puerta**: al emitir, la revisión ya está aprobada y su
+  versión es inmutable, de modo que no habría forma legal de agregar lo que
+  falta. El caso legítimo existe — el editable que por tamaño o formato viaja
+  por otro medio.
+  """
+  missingFileRoles: [DocFileRole!]!
   "Estado de respuesta del cliente"
   clientStatus: ClientStatus
   "Comentarios del cliente"
@@ -2251,7 +2279,13 @@ input CreateTransmittalInput {
   counterpartyReference: String
   "La emisión que se contesta. Exigida en una respuesta, prohibida en una emisión"
   respondsToTransmittalId: Int
-  "Items a incluir en el transmittal"
+  """
+  Items a incluir. Puede ir vacío y agregarse después con `addTransmittalItem`
+  mientras el transmittal siga en borrador.
+
+  Solo la emisión lleva ítems: la respuesta cuelga del ítem de la emisión que
+  contesta.
+  """
   items: [TransmittalItemInput!]!
 }
 
@@ -2979,6 +3013,23 @@ type Mutation {
   # ─── Transmittals ───
   "Crear un nuevo transmittal"
   createTransmittal(input: CreateTransmittalInput!): Transmittal!
+
+  """
+  Agregar un documento al transmittal, mientras está en borrador.
+
+  Rige la misma puerta que al crear: en una emisión saliente, solo revisiones
+  aprobadas. Y la misma unicidad: una revisión se emite una sola vez.
+  """
+  addTransmittalItem(transmittalId: Int!, input: TransmittalItemInput!): Transmittal!
+
+  """
+  Quitar un documento del transmittal, mientras está en borrador.
+
+  Libera la revisión, que vuelve a ser candidata para otra carpeta. Emitido, el
+  contenido queda fijo: corregir una emisión ya salida no es editarla sino
+  emitir otra.
+  """
+  removeTransmittalItem(itemId: Int!): Transmittal!
 
   "Emitir un transmittal (cambiar a ISSUED)"
   issueTransmittal(id: Int!): Transmittal!

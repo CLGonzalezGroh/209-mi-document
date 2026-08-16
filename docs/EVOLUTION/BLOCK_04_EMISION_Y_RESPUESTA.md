@@ -259,6 +259,8 @@ Cierra H-13.
 
 **En borrador se agregan y se quitan ítems; emitido, el contenido queda fijo.** Es el mismo corte que `B3` aplica a la puerta, por la misma razón: lo que salió no se puede cambiar, porque la carátula que la contraparte recibió declara un contenido.
 
+**Se ejecuta en la fase 3 y no en la 5**, donde estaba agendado. El motivo es que `B3` formula la puerta *al incorporar el ítem*, y sin esta operación el único momento en que un ítem se incorpora es la creación: la regla quedaba escrita para un caso que no podía probarse. Acá tiene su caso propio, y con él la contracara de la unicidad —**quitar el ítem libera la revisión**— que tampoco era demostrable de otro modo.
+
 Corregir una emisión ya salida no es editarla: es emitir otra. El módulo ya tiene esa forma en dos niveles —la versión no se modifica, la revisión aprobada tampoco— y este es el tercero.
 
 ### B10 — El cierre es un acto documental explícito
@@ -412,9 +414,9 @@ El catálogo de calificaciones se siembra con las cuatro entradas que `ClientSta
 | ---- | --------- |
 | 1 | Catálogo de calificaciones, con su alcance y su siembra (`B11`) |
 | 2 | Naturaleza, sentido derivado, código por proyecto y referencia externa (`B1`, `B2`) |
-| 3 | Puerta de emisión y reglas de propósito (`B3`, `B4`) |
+| 3 | Puerta de emisión, reglas de propósito e ítems en borrador (`B3`, `B4`, `B9`) |
 | 4 | La respuesta como objeto, con archivos, autoría y corrección (`B5`, `B6`, `B7`) |
-| 5 | Acuse, ítems en borrador y cierre (`B8`, `B9`, `B10`) |
+| 5 | Acuse y cierre (`B8`, `B10`) |
 | 6 | Circuito del rol Receptor (`B12`) |
 | 7 | Documento pendiente, derivado, y su consulta por rol (`B13`) |
 | 8 | Migración, contrato y pruebas de las tres capas |
