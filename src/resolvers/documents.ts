@@ -21,13 +21,16 @@ import { buildDocumentOrderBy } from "../utils/orderByHelper.js"
 import {
   DocFileRole,
   DocObjectType,
+  DocumentRole,
   ModuleType,
   RevisionStatus,
   RevisionScheme,
   StepStatus,
+  SysLogModule,
   WorkflowStatus,
 } from "../generated/prisma/enums.js"
 import { AuditAction, WorkflowEvent } from "../events/catalog.js"
+import { isPending } from "../utils/pendingDocuments.js"
 import {
   emitAuditEvent,
   emitWorkflowEvent,
@@ -361,6 +364,91 @@ export const documentResolvers = {
           logName: "GET_DOCUMENTS_SELECT_LIST",
           messages: {
             default: "Error al obtener la lista de documentos.",
+          },
+        })
+      }
+    },
+
+    /**
+     * Documentos pendientes de salir (BLOQUE 04, B13).
+     *
+     * **No hay documento esperado: hay documento**, y pendiente es el que
+     * todavía no salió. No se declara con un atributo: se deriva de la ausencia
+     * de ítem de transmittal para su revisión en curso, que es la misma relación
+     * que `B3` volvió única, leída al revés.
+     *
+     * En modo Emisor **es también la lista de candidatos a emitir**: lo que el
+     * control documental mira para armar el próximo transmittal y lo que mira
+     * para saber qué debe todavía es lo mismo.
+     *
+     * En modo Interno devuelve vacío, y no es un error: sin contraparte no hay
+     * emisión, de modo que no hay nada pendiente de salir. Es literalmente cero.
+     */
+    pendingDocuments: async (
+      _: any,
+      { projectId }: { projectId: number },
+      context: ResolverContext,
+    ) => {
+      const userId = await projectAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_LIST],
+        projectId,
+        context,
+      })
+      logger.info("pendingDocuments", { userId })
+
+      try {
+        const settings = await context.orm.docProjectSettings.findUnique({
+          where: { projectId },
+          select: { documentRole: true },
+        })
+
+        if (!settings || settings.documentRole === DocumentRole.INTERNAL) {
+          return []
+        }
+
+        // Se resuelve en memoria sobre las revisiones vivas del proyecto, y no
+        // con un `where`: la condición mira **la revisión en curso**, que es la
+        // última no abandonada por secuencia de creación, y esa regla ya vive en
+        // `lastLiveRevision`. Reescribirla como consulta la duplicaría en otro
+        // lenguaje, con el riesgo de que las dos versiones se separen.
+        const documentos = await context.orm.document.findMany({
+          where: {
+            projectId,
+            terminatedAt: null,
+            obsoletedAt: null,
+            revisions: { some: { status: { not: RevisionStatus.ABANDONED } } },
+          },
+          include: {
+            currentDocumentType: true,
+            currentDocumentClass: true,
+            revisions: {
+              where: { status: { not: RevisionStatus.ABANDONED } },
+              include: { transmittalItems: { select: { id: true } } },
+            },
+          },
+        })
+
+        return documentos.filter((doc) =>
+          isPending(
+            settings.documentRole,
+            doc.revisions.map((r) => ({
+              id: r.id,
+              revisionCode: r.revisionCode,
+              status: r.status,
+              createdAt: r.createdAt,
+              emitted: r.transmittalItems.length > 0,
+            })),
+          ),
+        )
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "GET_PENDING_DOCUMENTS",
+          module: SysLogModule.DOCUMENT,
+          messages: {
+            default: "Error al obtener los documentos pendientes.",
           },
         })
       }

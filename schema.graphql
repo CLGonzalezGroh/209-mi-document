@@ -104,7 +104,6 @@ enum StepStatus {
   SKIPPED
 }
 
-"Estado del transmittal"
 """
 Naturaleza del transmittal.
 
@@ -132,6 +131,7 @@ enum TransmittalDirection {
   INCOMING
 }
 
+"Estado del transmittal"
 enum TransmittalStatus {
   "En preparación"
   DRAFT
@@ -159,7 +159,6 @@ enum PurposeCode {
   AS_BUILT
 }
 
-"Estado de respuesta del cliente"
 """
 Efecto de una calificación de la contraparte.
 
@@ -257,7 +256,6 @@ enum TransmittalStatusInput {
   CLOSED
 }
 
-"Código de propósito para inputs"
 "Naturaleza del transmittal, para inputs"
 enum TransmittalNatureInput {
   "Entrega de documentación producida"
@@ -266,6 +264,7 @@ enum TransmittalNatureInput {
   RESPONSE
 }
 
+"Código de propósito para inputs"
 enum PurposeCodeInput {
   "Para aprobación del cliente"
   FOR_APPROVAL
@@ -279,7 +278,6 @@ enum PurposeCodeInput {
   AS_BUILT
 }
 
-"Estado de respuesta del cliente para inputs"
 "Efecto de una calificación de la contraparte, para inputs"
 enum QualificationEffectInput {
   "Habilita usar el documento. No obliga a emitir revisión nueva"
@@ -2818,6 +2816,26 @@ type Query {
   "Configuración documental de un proyecto. Nula si todavía no declaró su rol"
   docProjectSettings(projectId: Int!): DocProjectSettings
 
+  """
+  Documentos pendientes de salir en un proyecto.
+
+  No hay documento esperado: hay documento, y pendiente es el que todavía no
+  salió. No se declara con un atributo — se DERIVA de la ausencia de ítem de
+  transmittal para su revisión en curso.
+
+  Qué significa según el rol del proyecto:
+
+  - **Emisor** — la revisión en curso está aprobada y todavía no se emitió. Es
+    también la lista de candidatos a incorporar al próximo transmittal.
+  - **Receptor** — el contratista todavía no la entregó en ningún transmittal.
+  - **Interno** — devuelve vacío: sin contraparte no hay emisión, de modo que no
+    hay nada pendiente de salir.
+
+  Mira la revisión EN CURSO y no cualquiera: después de que la contraparte
+  rechaza, el documento debe la siguiente y vuelve a figurar.
+  """
+  pendingDocuments(projectId: Int!): [Document!]!
+
   "Configuración documental del despliegue. Registro único"
   docSettings: DocSettings!
 
@@ -2836,7 +2854,7 @@ type Query {
   projectQualifications(projectId: Int!): [DocQualification!]!
 
   "Calificaciones vigentes del proyecto, como lista de selección"
-  qualificationsSelectList(projectId: Int!): [SelectOption!]!
+  qualificationsSelectList(projectId: Int!): [SelectList!]!
 
   "Miembros de un proyecto documental"
   docProjectMembers(
@@ -3177,7 +3195,6 @@ type Mutation {
   "Emitir un transmittal (cambiar a ISSUED)"
   issueTransmittal(id: Int!): Transmittal!
 
-  "Registrar respuesta del cliente en un transmittal"
   """
   Registrar la respuesta de un documento emitido.
 

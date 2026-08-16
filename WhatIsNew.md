@@ -780,3 +780,41 @@ Que el sistema pueda resolver ese armado se apoya en D-03: el armado siempre tie
 **Con red**: sin plantilla, o con algún paso sin actor, ese documento conserva su armado pendiente y la planta lo resuelve a mano, mientras el resto del transmittal avanza. Rechazar la emisión dejaría al contratista trabado por una configuración ajena.
 
 **346 pruebas, 0 fallos.**
+
+### Fase 7 — El documento pendiente, derivado
+
+Cierra **H-31 sin incorporar ningún concepto**, que es lo contrario de lo que el plan anticipaba al anotarlo como *un concepto nuevo, sin correlato en el modelo actual*.
+
+- **No hay documento esperado: hay documento.** Todo el que se da de alta en el proyecto lo es, y el que aparece después del alcance inicial también — nació más tarde, no es de otra clase. Esperado y adicional describen **cuándo apareció** y no **qué es**, y el cuándo ya lo registra la auditoría. Hay prueba de que los dos figuran igual.
+- **Pendiente es el que todavía no salió**, y no necesita atributo: se deriva de la ausencia de ítem de transmittal, que es la misma relación que la fase 3 volvió única, leída al revés.
+- **Se mira la revisión en curso, no cualquiera.** Mirar *ninguna revisión salió* sería más simple y estaría mal: después de que la contraparte rechaza, el documento debe la revisión siguiente, y con aquella lectura dejaría de figurar para siempre por haber salido una vez. Es la misma `lastRevision` de `BLOQUE 03` y la misma de la que se deriva el código sucesor — una regla con tres usos.
+- **En modo Emisor es también la lista de candidatos**: lo que el control documental mira para armar el próximo transmittal y lo que mira para saber qué debe todavía es la misma consulta. Lo que está en circuito no figura — es trabajo en curso, no deuda.
+- **En modo Interno devuelve vacío, y no es un error**: sin contraparte no hay emisión, de modo que no hay nada pendiente de salir. Es literalmente cero.
+
+La condición se resuelve en memoria y no como `where`: la regla de cuál es la revisión en curso ya vive en `lastLiveRevision`, y reescribirla en el lenguaje de la consulta la duplicaría con el riesgo de que las dos versiones se separen.
+
+**360 pruebas, 0 fallos.**
+
+### Fase 8 — Migración, contrato y auditoría de los criterios
+
+- **La ruta completa de migración se verificó de punta a punta**, reconstruyendo en una base limpia el estado **previo a todo el bloque** —catorce migraciones— y aplicando encima las ocho del bloque. Aplican limpio y en orden.
+- **`prisma/checks/block04_precondicion.sql`**, de solo lectura, para correr contra cada cliente antes de migrar: transmittals e ítems con datos, respuestas del cliente ya registradas —el dato que la migración descartaría sin destino—, códigos repetidos por proyecto y revisiones emitidas más de una vez. Probado en los dos sentidos: **cero bloqueos con el subsistema vacío, y bloqueo con un transmittal registrado**. Suma un control informativo: los proyectos con documentos y sin rol documental declarado, que después de migrar no van a poder emitir.
+- **Ningún consumidor escrito a mano quedó apuntando a lo retirado.** `issuedTo`, `clientStatus`, `clientComments`, `responseAt`, `responseComments`, `ClientStatus` y `respondTransmittal` aparecen en la webapp **solo** en artefactos generados por `codegen` y en un manual. Es la verificación que `BLOQUE 03` aprendió a hacer a mano, porque ni `rover` ni `tsc` la dan.
+
+**Dos cosas que encontró la auditoría de los 22 criterios, y no la compilación:**
+
+**Los permisos de la fase 1 nunca se habían sembrado.** Las pruebas de las fases 4 y 6 pasaban porque crean calificaciones con acceso directo a la base; la primera que ejercitó el resolver falló con *no estás autorizado*. Es exactamente el tercer paso del alta de un permiso —la constante, el alta en `mi-admin`, y **`npm run seed:permissions` en cada despliegue**— y sin él el catálogo es inoperable aunque todo compile.
+
+**El criterio 22 estaba mal enunciado.** Afirmaba que `documents.ts` no registraba cambios, y sí los registra: la consulta de pendientes de la fase 7. Medido, resulta ser **puramente aditivo** —ninguna línea retirada ni modificada— y `revisions.ts`, `versions.ts`, `workingCopies.ts`, `replacements.ts` y `stepSignature.ts` no registran **una sola línea**. El criterio se corrigió para decir lo que la diferencia muestra, con las dos excepciones declaradas.
+
+**Siete pruebas nuevas** cubren los criterios que estaban cubiertos a medias: el sobre que transporta respuestas sin ítems propios, la operación en lote retirada, la respuesta sin calificación, el actor de la corrección, el alcance del catálogo por proyecto resuelto por el resolver, el paso que queda rechazado, y que una respuesta fallida no deja evento suelto.
+
+**El contrato se publicó y el supergrafo compuso.** `rover subgraph check` reportó **composición y linter en verde**, y su verificación de operaciones falla con **exactamente los 25 cambios incompatibles declarados** —`issuedTo`, `clientStatus`, `clientComments`, `responseAt`, `responseComments`, `respondTransmittal` y las enumeraciones e inputs que los acompañaban—, ninguno inesperado. La webapp regeneró sus artefactos con `codegen` y **compila limpio**: lo retirado desapareció y lo nuevo está.
+
+**Dos defectos del contrato que solo apareció al verificar:**
+
+**El esquema no parseaba.** Al retirar `ClientStatus` quedaron sus descripciones huérfanas, y las descripciones de tres tipos quedaron separadas de lo que describían. Ninguna verificación anterior lo vio: `tsc` no lee el `.graphql`, y la suite de contrato lo recorre con expresiones regulares, que no distinguen SDL válido de texto parecido a SDL. Se agrega **una prueba que lo parsea**, más otra que verifica que esa prueba detecta el defecto que la motivó — el error deja de necesitar credenciales y red para aparecer.
+
+**`qualificationsSelectList` declaraba `SelectOption`**, que no existe en el contrato: el tipo del módulo es `SelectList`. Compilaba, porque el nombre venía del tipo de TypeScript de `mi-common`.
+
+**369 pruebas, 0 fallos.**

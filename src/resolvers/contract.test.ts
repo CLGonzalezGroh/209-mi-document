@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 import { readFileSync } from "node:fs"
+import { parse } from "graphql"
 import { resolvers } from "./index.js"
 
 /**
@@ -17,6 +18,34 @@ import { resolvers } from "./index.js"
  */
 
 const contrato = readFileSync("./schema.graphql", { encoding: "utf-8" })
+
+/**
+ * Antes que nada, el contrato tiene que ser SDL válido.
+ *
+ * Lo agrega `BLOQUE 04`, fase 8, después de que un error de sintaxis llegara
+ * hasta `rover subgraph check`: una descripción quedó separada del tipo que
+ * describía, y **ninguna de las verificaciones anteriores lo vio**. `tsc` no lee
+ * el `.graphql`, y el resto de esta suite lo recorre con expresiones regulares,
+ * que no distinguen SDL válido de texto parecido a SDL.
+ *
+ * Es barato y corre en la suite pura: el error deja de necesitar credenciales y
+ * red para aparecer.
+ */
+test("el contrato es SDL sintácticamente válido", () => {
+  assert.doesNotThrow(() => parse(contrato))
+})
+
+test("y la verificación detecta el defecto que la motivó", () => {
+  // Una descripción separada del tipo que describe: dos descripciones seguidas.
+  // Si esto no fallara, la prueba anterior no estaría verificando nada.
+  assert.throws(() =>
+    parse(`
+      "Descripción huérfana"
+      "Otra descripción"
+      enum Ejemplo { UNO }
+    `),
+  )
+})
 
 /**
  * Los campos de un tipo raíz, leídos del contrato.

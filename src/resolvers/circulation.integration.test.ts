@@ -21,6 +21,7 @@ import { workflowResolvers } from "./workflows.js"
 import { revisionResolvers } from "./revisions.js"
 import { workingCopyResolvers } from "./workingCopies.js"
 import { projectSettingsResolvers } from "./projectSettings.js"
+import { qualificationResolvers } from "./qualifications.js"
 import { projectMemberResolvers } from "./projectMembers.js"
 import { resolverTypes } from "./resolversTypes/index.js"
 import { TransmittalDirection } from "../utils/transmittalCirculation.js"
@@ -1521,5 +1522,265 @@ test("en modo Emisor emitir no arma nada", async () => {
     where: { id: revision.id },
   })
   assert.equal(aprobada.status, RevisionStatus.APPROVED)
+})
+
+// ════════════════════════════════════════════════════════════
+// FASE 7 — El documento pendiente, derivado
+// ════════════════════════════════════════════════════════════
+
+const pendientes = async (projectId: number) =>
+  (await documentResolvers.Query.pendingDocuments(
+    null,
+    { projectId },
+    context,
+  )) as any[]
+
+const codigos = (docs: any[]) => docs.map((d) => d.code).sort()
+
+test("en modo Emisor pende lo aprobado que no salió, y es la lista de candidatos", async () => {
+  // Lo que el control documental mira para armar el próximo transmittal y lo que
+  // mira para saber qué debe todavía es la misma consulta.
+  const listo = await documento(EMISOR, "ZPEND-LISTO")
+  await versionCon(listo.id, [DocFileRole.DELIVERABLE])
+  await aprobar(listo.id)
+
+  const enCurso = await documento(EMISOR, "ZPEND-CURSO")
+  await versionCon(enCurso.id, [DocFileRole.DELIVERABLE])
+
+  const salido = await documento(EMISOR, "ZPEND-SALIDO")
+  await versionCon(salido.id, [DocFileRole.DELIVERABLE])
+  await aprobar(salido.id)
+  await conItem(EMISOR, salido.id, PurposeCode.FOR_APPROVAL)
+
+  const lista = codigos(
+    (await pendientes(EMISOR)).filter((d) => d.code.startsWith(`${CODIGO}-ZPEND`)),
+  )
+
+  // El que está en circuito no figura: es trabajo en curso, no deuda.
+  assert.deepEqual(lista, [`${CODIGO}-ZPEND-LISTO`])
+})
+
+test("en modo Receptor pende lo que el contratista no entregó", async () => {
+  await sinPlantilla()
+
+  // La planta declara el documento por contrato: sin archivo todavía, que es un
+  // estado legítimo desde que el archivo pasó a ser producto de la elaboración.
+  const declarado = await documento(RECEPTOR, "ZRCPT-DECLARADO")
+
+  const entregado = await documento(RECEPTOR, "ZRCPT-ENTREGADO")
+  await versionCon(entregado.id, [DocFileRole.DELIVERABLE])
+  await conItem(RECEPTOR, entregado.id, PurposeCode.FOR_APPROVAL)
+
+  const lista = codigos(
+    (await pendientes(RECEPTOR)).filter((d) => d.code.startsWith(`${CODIGO}-ZRCPT`)),
+  )
+
+  assert.deepEqual(lista, [`${CODIGO}-ZRCPT-DECLARADO`])
+  assert.ok(declarado.id)
+})
+
+test("el documento adicional no se distingue del declarado: no hay dos tipos", async () => {
+  // Esperado y adicional describen CUÁNDO apareció, no QUÉ es, y el cuándo ya lo
+  // registra la auditoría.
+  await sinPlantilla()
+
+  const primero = await documento(RECEPTOR, "ZADIC-INICIAL")
+  const tardio = await documento(RECEPTOR, "ZADIC-TARDIO")
+
+  const lista = codigos(
+    (await pendientes(RECEPTOR)).filter((d) => d.code.startsWith(`${CODIGO}-ZADIC`)),
+  )
+
+  assert.deepEqual(lista, [`${CODIGO}-ZADIC-INICIAL`, `${CODIGO}-ZADIC-TARDIO`])
+  assert.ok(primero.id && tardio.id)
+})
+
+test("tras el rechazo de la contraparte, el documento vuelve a pender", async () => {
+  await sinPlantilla()
+
+  const { revision, item } = await recibido("PEND-RCV")
+  const armado = await confirmarRecepcion(revision.id)
+  const paso = await pasoVigente(armado.id, StepType.APPROVE)
+  const rechazado = await calificacion("REJECTED")
+
+  await workflowResolvers.Mutation.rejectStep(
+    null,
+    { stepId: paso.id, comments: "Rechazada", qualificationId: rechazado.id },
+    context,
+  )
+
+  // Con la revisión rechazada emitida, todavía no debe nada: la B no existe.
+  const antes = (await pendientes(RECEPTOR)).map((d) => d.id)
+  assert.equal(antes.includes(revision.documentId), false)
+
+  await revisionResolvers.Mutation.createRevision(
+    null,
+    { documentId: revision.documentId, input: {} },
+    context,
+  )
+
+  // Abierta la B, el contratista la debe.
+  const despues = (await pendientes(RECEPTOR)).map((d) => d.id)
+  assert.equal(despues.includes(revision.documentId), true)
+  assert.ok(item.id)
+})
+
+test("en modo Interno no hay nada pendiente de salir", async () => {
+  const interno = await documento(INTERNO, "ZPEND-INTERNO")
+
+  assert.deepEqual(await pendientes(INTERNO), [])
+  assert.ok(interno.id)
+})
+
+// ════════════════════════════════════════════════════════════
+// FASE 8 — Huecos que dejó la auditoría de los criterios
+// ════════════════════════════════════════════════════════════
+
+test("criterio 10: el transmittal de respuesta transporta respuestas y no tiene ítems", async () => {
+  const { transmittal, item } = await emitido("AUD-CARRIER")
+  const aprobado = await calificacion("APPROVED")
+
+  const sobre = await crear(EMISOR, TransmittalNature.RESPONSE, {
+    respondsToTransmittalId: transmittal.id,
+  })
+  await responder(item.id, {
+    qualificationId: aprobado.id,
+    responseTransmittalId: sobre.id,
+  })
+
+  const propios = await prisma.transmittalItem.count({
+    where: { transmittalId: sobre.id },
+  })
+  assert.equal(propios, 0, "el sobre no crea ítems propios")
+
+  const transportadas = await prisma.docTransmittalResponse.findMany({
+    where: { responseTransmittalId: sobre.id },
+    select: { transmittalItemId: true },
+  })
+  assert.deepEqual(
+    transportadas.map((r) => r.transmittalItemId),
+    [item.id],
+    "sus respuestas apuntan a los ítems de la emisión que contesta",
+  )
+})
+
+test("criterio 11: no existe la operación que actualizaba ítems en lote", async () => {
+  // H-14 desaparece por construcción y no por validación: la operación que
+  // recibía (transmittalId, itemId) y no comprobaba la pertenencia ya no está.
+  assert.equal(
+    "respondTransmittal" in transmittalResolvers.Mutation,
+    false,
+    "respondTransmittal debe estar retirada",
+  )
+  assert.equal("registerItemResponse" in transmittalResolvers.Mutation, true)
+})
+
+test("criterio 12: una respuesta sin calificación se rechaza", async () => {
+  const { item } = await emitido("AUD-SINCAL")
+
+  await assert.rejects(() => responder(item.id, {}))
+})
+
+test("criterio 13: la corrección registra al actor, además del valor anterior", async () => {
+  const { item } = await emitido("AUD-ACTOR")
+  const aprobado = await calificacion("APPROVED")
+  const conComentarios = await calificacion("APPROVED_WITH_COMMENTS")
+
+  const respuesta = await responder(item.id, { qualificationId: aprobado.id })
+  await transmittalResolvers.Mutation.correctItemResponse(
+    null,
+    { responseId: respuesta.id, input: { qualificationId: conComentarios.id } },
+    context,
+  )
+
+  const evento = await prisma.docAuditEvent.findFirstOrThrow({
+    where: { action: AuditAction.CorrectItemResponse, objectId: respuesta.id },
+  })
+  assert.equal(evento.createdById, USER_ID)
+})
+
+test("criterio 17: el proyecto sin calificaciones propias resuelve las del despliegue", async () => {
+  await prisma.docQualification.deleteMany({ where: { projectId: EMISOR } })
+
+  const delDespliegue = (await qualificationResolvers.Query.projectQualifications(
+    null,
+    { projectId: EMISOR },
+    context,
+  )) as any[]
+  assert.ok(delDespliegue.length >= 4)
+  assert.ok(delDespliegue.every((q) => q.projectId === null))
+
+  const propia = await qualificationResolvers.Mutation.createQualification(
+    null,
+    {
+      input: {
+        projectId: EMISOR,
+        code: "PROPIA",
+        label: "Calificación del cliente",
+        effect: "ACCEPTED",
+      },
+    },
+    context,
+  )
+
+  const propias = (await qualificationResolvers.Query.projectQualifications(
+    null,
+    { projectId: EMISOR },
+    context,
+  )) as any[]
+  assert.deepEqual(
+    propias.map((q) => q.id),
+    [(propia as any).id],
+    "declarada una propia, el proyecto usa las suyas y solo las suyas",
+  )
+
+  await prisma.docQualification.deleteMany({ where: { projectId: EMISOR } })
+})
+
+test("criterio 18: la calificación que rechaza deja el paso rechazado", async () => {
+  await sinPlantilla()
+
+  const { revision } = await recibido("AUD-PASO")
+  const armado = await confirmarRecepcion(revision.id)
+  const paso = await pasoVigente(armado.id, StepType.APPROVE)
+  const rechazado = await calificacion("REJECTED")
+
+  await workflowResolvers.Mutation.rejectStep(
+    null,
+    { stepId: paso.id, comments: "Rechazada", qualificationId: rechazado.id },
+    context,
+  )
+
+  const resuelto = await prisma.reviewStep.findUniqueOrThrow({
+    where: { id: paso.id },
+  })
+  assert.equal(resuelto.status, StepStatus.REJECTED)
+
+  const circuito = await prisma.reviewWorkflow.findUniqueOrThrow({
+    where: { id: armado.id },
+  })
+  assert.equal(circuito.status, WorkflowStatus.REJECTED)
+})
+
+test("criterio 21: una respuesta que falla no deja evento suelto", async () => {
+  // La emisión del evento ocurre DENTRO de la transacción del cambio (B3 de
+  // BLOQUE 01): si el cambio no se aplica, el evento tampoco existe.
+  const { item } = await emitido("AUD-TX")
+  const aprobado = await calificacion("APPROVED")
+
+  await responder(item.id, { qualificationId: aprobado.id })
+
+  const antes = await prisma.docAuditEvent.count({
+    where: { action: AuditAction.RegisterItemResponse },
+  })
+
+  // Segundo intento sobre el mismo ítem: falla por unicidad dentro de la
+  // transacción, después de que el evento se escribió en ella.
+  await assert.rejects(() => responder(item.id, { qualificationId: aprobado.id }))
+
+  const despues = await prisma.docAuditEvent.count({
+    where: { action: AuditAction.RegisterItemResponse },
+  })
+  assert.equal(despues, antes, "el evento se fue con la transacción que falló")
 })
 

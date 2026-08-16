@@ -424,7 +424,7 @@ El catálogo de calificaciones se siembra con las cuatro entradas que `ClientSta
 19. En modo Receptor el circuito se instancia sin paso de elaboración, y su conclusión no abre un circuito nuevo.
 20. En modo Emisor, el documento con revisión aprobada y sin emitir figura como pendiente, y es el mismo conjunto que la consulta de candidatos de `B3`. En modo Receptor, el documento dado de alta y nunca incluido en un transmittal figura como pendiente, sin importar quién lo creó.
 21. Cada operación del bloque emite sus eventos de auditoría y de transición **dentro de la misma transacción** del cambio, según `B3` de `BLOCK_01`.
-22. Ninguna regla del ciclo interno cambió: `documents.ts`, `revisions.ts`, `versions.ts`, `workingCopies.ts`, `replacements.ts` y `stepSignature.ts` no registran cambios funcionales, **verificado por diferencia** entre el commit que abre el bloque y el que lo cierra. La única excepción declarada es `workflows.ts`, por `B12`.
+22. Ninguna regla del ciclo interno cambió, **verificado por diferencia** entre el commit que abre el bloque y el que lo cierra. `revisions.ts`, `versions.ts`, `workingCopies.ts`, `replacements.ts` y `stepSignature.ts` no registran **una sola línea** de cambio. Dos excepciones, ambas declaradas: `workflows.ts`, por `B12`, y `documents.ts`, que suma la consulta de pendientes de `B13` y **solo agrega** — ninguna línea retirada ni modificada.
 
 ## Fases
 
