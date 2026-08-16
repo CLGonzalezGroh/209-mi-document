@@ -31,6 +31,7 @@ import {
   missingFileRoles,
 } from "../utils/emissionPurpose.js"
 import {
+  assertCanAcknowledge,
   assertCarrier,
   assertIssued,
   statusAfterResponse,
@@ -56,6 +57,9 @@ interface TransmittalFilterInput {
 const transmittalIncludes = {
   items: {
     include: {
+      // La respuesta viaja con el ítem: el avance de B10 se deriva de ella, y
+      // sin incluirla cada transmittal cuesta una lectura extra.
+      response: { include: { files: true } },
       documentRevision: {
         include: {
           document: true,
@@ -1149,9 +1153,127 @@ export const transmittalResolvers = {
       }
     },
 
+    /**
+     * Acusar recibo de una emisión (B8). Da operación al `ACKNOWLEDGED` que
+     * hasta ahora ninguna asignaba (H-12).
+     *
+     * **No es una calificación**: no dice nada sobre el documento, dice que el
+     * envío llegó. Por eso vive en el transmittal y no en el ítem, y por eso no
+     * entra en el catálogo de D-22, cuyos dos efectos declaran inexistente
+     * justamente la combinación en que un acuse caería.
+     *
+     * No es precondición de la respuesta: un cliente puede responder sin haber
+     * acusado nunca.
+     */
+    acknowledgeTransmittal: async (
+      _: any,
+      {
+        id,
+        input,
+      }: {
+        id: number
+        input?: { acknowledgedBy?: string; acknowledgedAt?: Date }
+      },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_UPDATE],
+        context,
+      })
+      logger.info("acknowledgeTransmittal", { userId })
+
+      // Fuera del try: un rechazo de autorización no es un error del servicio.
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.TRANSMITTAL,
+        objectId: id,
+        context,
+        notFoundMessage: "Transmittal no encontrado",
+      })
+
+      try {
+        const transmittal = await context.orm.transmittal.findUniqueOrThrow({
+          where: { id },
+          select: {
+            id: true,
+            code: true,
+            projectId: true,
+            nature: true,
+            status: true,
+          },
+        })
+
+        const settings = await context.orm.docProjectSettings.findUnique({
+          where: { projectId: transmittal.projectId },
+          select: { documentRole: true },
+        })
+
+        if (!settings) {
+          throw new GraphQLError(
+            "El proyecto no declaró su rol documental: no puede circular documentación",
+            { extensions: { code: "BAD_USER_INPUT" } },
+          )
+        }
+
+        assertCanAcknowledge(
+          settings.documentRole,
+          transmittal.nature,
+          transmittal.status,
+        )
+
+        return await context.orm.$transaction(async (tx) => {
+          const acusado = await tx.transmittal.update({
+            where: { id },
+            data: {
+              status: TransmittalStatus.ACKNOWLEDGED,
+              acknowledgedBy: input?.acknowledgedBy,
+              acknowledgedAt: input?.acknowledgedAt ?? new Date(),
+              acknowledgeRegisteredById: userId,
+              acknowledgeRegisteredAt: new Date(),
+              updatedById: userId,
+            },
+            include: transmittalIncludes,
+          })
+
+          await emitAuditEvent(tx, {
+            action: AuditAction.AcknowledgeTransmittal,
+            objectId: id,
+            actorId: userId,
+            meta: {
+              code: transmittal.code,
+              // La misma divergencia derivada que en la respuesta: quien acusó
+              // no es necesariamente quien lo registró (D-12).
+              transcripto: wasTranscribed(input?.acknowledgedBy),
+            },
+          })
+          await emitWorkflowEvent(tx, {
+            name: WorkflowEvent.TransmittalAcknowledged,
+            objectId: id,
+            fromState: transmittal.status,
+            toState: TransmittalStatus.ACKNOWLEDGED,
+            actorId: userId,
+          })
+
+          return acusado
+        })
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "ACKNOWLEDGE_TRANSMITTAL",
+          module: SysLogModule.PROJECTS,
+          messages: {
+            notFound: "El transmittal no existe.",
+            default: "Error al registrar el acuse de recibo.",
+          },
+        })
+      }
+    },
+
     closeTransmittal: async (
       _: any,
-      { id }: { id: number },
+      { id, input }: { id: number; input?: { closeReason?: string } },
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
@@ -1199,6 +1321,9 @@ export const transmittalResolvers = {
             where: { id },
             data: {
               status: TransmittalStatus.CLOSED,
+              closedAt: new Date(),
+              closedById: userId,
+              closeReason: input?.closeReason,
               updatedById: userId,
             },
             include: transmittalIncludes,
@@ -1208,7 +1333,10 @@ export const transmittalResolvers = {
             action: AuditAction.CloseTransmittal,
             objectId: id,
             actorId: userId,
-            meta: { code: closed.code },
+            meta: {
+              code: closed.code,
+              ...(input?.closeReason && { closeReason: input.closeReason }),
+            },
           })
           await emitWorkflowEvent(tx, {
             name: WorkflowEvent.TransmittalClosed,

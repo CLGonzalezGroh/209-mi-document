@@ -26,7 +26,10 @@ import {
 import { lastLiveRevision } from "../../utils/revisionScheme.js"
 import { enablesUse, requiresNewRevision } from "../../utils/qualifications.js"
 import { directionOf } from "../../utils/transmittalCirculation.js"
-import { wasTranscribed } from "../../utils/itemResponse.js"
+import {
+  responseProgress,
+  wasTranscribed,
+} from "../../utils/itemResponse.js"
 import {
   expectsQualification,
   missingFileRoles,
@@ -573,6 +576,43 @@ export const resolverTypes = {
     },
     issuedBy: (parent: Transmittal) => {
       return { __typename: "UserName", id: parent.issuedById }
+    },
+    acknowledgeRegisteredBy: (parent: Transmittal) =>
+      parent.acknowledgeRegisteredById
+        ? { __typename: "UserName", id: parent.acknowledgeRegisteredById }
+        : null,
+    closedBy: (parent: Transmittal) =>
+      parent.closedById
+        ? { __typename: "UserName", id: parent.closedById }
+        : null,
+    /**
+     * Avance de las respuestas, derivado de los ítems y de su propósito
+     * (BLOQUE 04, B10). Cuenta solo los que esperan calificación: una lista de
+     * pendientes que incluye lo que nadie va a contestar no sirve para nada.
+     */
+    responseProgress: async (parent: any) => {
+      // Los ítems precargados sirven SOLO si traen su respuesta. Varias
+      // consultas los incluyen sin ella, y darlos por buenos contaría cero
+      // respondidos con la misma confianza que un conteo correcto. Es el mismo
+      // defecto que la advertencia de archivos faltantes tuvo en la fase 3.
+      const precargados: any[] | null = Array.isArray(parent.items)
+        ? parent.items
+        : null
+
+      const items =
+        precargados?.every((i) => "response" in i) === true
+          ? precargados
+          : await prisma.transmittalItem.findMany({
+              where: { transmittalId: parent.id },
+              select: { purposeCode: true, response: { select: { id: true } } },
+            })
+
+      return responseProgress(
+        items.map((i) => ({
+          purposeCode: i.purposeCode,
+          hasResponse: Boolean(i.response),
+        })),
+      )
     },
     /**
      * El sentido se DERIVA del rol del proyecto y de la naturaleza (BLOQUE 04,

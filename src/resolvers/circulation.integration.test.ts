@@ -653,7 +653,10 @@ test("el transmittal de respuesta no lleva ítems propios", async () => {
 // ════════════════════════════════════════════════════════════
 
 /** Emisión ya salida, lista para recibir respuesta. */
-const emitido = async (sufijo: string, purpose = PurposeCode.FOR_APPROVAL) => {
+const emitido = async (
+  sufijo: string,
+  purpose: PurposeCode = PurposeCode.FOR_APPROVAL,
+) => {
   const revision = await documento(EMISOR, sufijo)
   await versionCon(revision.id, [DocFileRole.DELIVERABLE])
   await aprobar(revision.id)
@@ -919,5 +922,151 @@ test("la respuesta se corrige, y la traza conserva el valor anterior", async () 
   const meta = evento.meta as any
   assert.equal(meta.antes.qualificationId, aprobado.id)
   assert.equal(meta.antes.comments, "Error de transcripción")
+})
+
+// ════════════════════════════════════════════════════════════
+// FASE 5 — El acuse de recibo y el cierre
+// ════════════════════════════════════════════════════════════
+
+const acusar = (id: number, input?: Record<string, unknown>) =>
+  transmittalResolvers.Mutation.acknowledgeTransmittal(
+    null,
+    { id, input: input as any },
+    context,
+  ) as Promise<any>
+
+const cerrar = (id: number, input?: Record<string, unknown>) =>
+  transmittalResolvers.Mutation.closeTransmittal(
+    null,
+    { id, input: input as any },
+    context,
+  ) as Promise<any>
+
+// --- El acuse (B8) ---
+
+test("el acuse asigna el estado que hasta ahora nadie asignaba", async () => {
+  // H-12: ACKNOWLEDGED existía en la enumeración y ninguna operación lo ponía.
+  const { transmittal } = await emitido("ACK-A")
+
+  const acusado = await acusar(transmittal.id, {
+    acknowledgedBy: "Mesa de entradas del cliente",
+    acknowledgedAt: new Date("2026-08-02T09:00:00Z"),
+  })
+
+  assert.equal(acusado.status, "ACKNOWLEDGED")
+  assert.equal(acusado.acknowledgedBy, "Mesa de entradas del cliente")
+  assert.equal(acusado.acknowledgeRegisteredById, USER_ID)
+  assert.ok(acusado.acknowledgedAt < acusado.acknowledgeRegisteredAt)
+})
+
+test("en modo Receptor no hay nada que acusar", async () => {
+  const revision = await documento(RECEPTOR, "ACK-B")
+  const entrante = await conItem(RECEPTOR, revision.id, PurposeCode.FOR_APPROVAL)
+  await transmittalResolvers.Mutation.issueTransmittal(
+    null,
+    { id: entrante.id },
+    context,
+  )
+
+  await assert.rejects(
+    () => acusar(entrante.id),
+    /solo existe en modo Emisor/,
+  )
+})
+
+test("el acuse no es precondición de la respuesta", async () => {
+  // Un cliente puede responder sin haber acusado nunca.
+  const { item } = await emitido("ACK-C")
+  const aprobado = await calificacion("APPROVED")
+
+  const respuesta = await responder(item.id, { qualificationId: aprobado.id })
+  assert.ok(respuesta.id)
+})
+
+test("responder después de acusar mantiene la secuencia", async () => {
+  const { transmittal, item } = await emitido("ACK-D")
+  const aprobado = await calificacion("APPROVED")
+
+  await acusar(transmittal.id)
+  await responder(item.id, { qualificationId: aprobado.id })
+
+  const despues = await prisma.transmittal.findUniqueOrThrow({
+    where: { id: transmittal.id },
+  })
+  assert.equal(despues.status, "RESPONDED")
+})
+
+// --- El cierre (B10) ---
+
+test("se cierra con respuestas parciales, y con motivo", async () => {
+  // Las respuestas parciales son la práctica normal: un cierre que esperara a
+  // que todas llegaran no ocurriría nunca (D-18).
+  const revisionA = await documento(EMISOR, "CLOSE-A1")
+  const revisionB = await documento(EMISOR, "CLOSE-A2")
+  for (const r of [revisionA, revisionB]) {
+    await versionCon(r.id, [DocFileRole.DELIVERABLE])
+    await aprobar(r.id)
+  }
+
+  const transmittal = await conItem(
+    EMISOR,
+    revisionA.id,
+    PurposeCode.FOR_APPROVAL,
+  )
+  await transmittalResolvers.Mutation.addTransmittalItem(
+    null,
+    {
+      transmittalId: transmittal.id,
+      input: {
+        documentRevisionId: revisionB.id,
+        purposeCode: PurposeCode.FOR_APPROVAL,
+      },
+    },
+    context,
+  )
+  const emitidoTx = (await transmittalResolvers.Mutation.issueTransmittal(
+    null,
+    { id: transmittal.id },
+    context,
+  )) as any
+
+  const aprobado = await calificacion("APPROVED")
+  await responder(emitidoTx.items[0].id, { qualificationId: aprobado.id })
+
+  const cerrado = await cerrar(transmittal.id, {
+    closeReason: "El cliente no va a contestar el resto",
+  })
+
+  assert.equal(cerrado.status, "CLOSED")
+  assert.equal(cerrado.closedById, USER_ID)
+  assert.equal(cerrado.closeReason, "El cliente no va a contestar el resto")
+
+  // El avance muestra lo que falta, sin condicionar el cierre.
+  const avance = await resolverTypes.Transmittal.responseProgress(cerrado)
+  assert.deepEqual(avance, { expected: 2, answered: 1, pending: 1 })
+})
+
+test("cerrar no impide una respuesta tardía", async () => {
+  // Cerrar declara que se dejó de esperar, no que se dejó de escuchar.
+  const { transmittal, item } = await emitido("CLOSE-B")
+  const aprobado = await calificacion("APPROVED")
+
+  await cerrar(transmittal.id)
+  const tardia = await responder(item.id, { qualificationId: aprobado.id })
+
+  assert.ok(tardia.id)
+
+  // Y la respuesta tardía no reabre lo cerrado.
+  const despues = await prisma.transmittal.findUniqueOrThrow({
+    where: { id: transmittal.id },
+  })
+  assert.equal(despues.status, "CLOSED")
+})
+
+test("el avance cuenta solo lo que espera calificación", async () => {
+  const { transmittal } = await emitido("CLOSE-C", PurposeCode.FOR_INFORMATION)
+
+  const avance = await resolverTypes.Transmittal.responseProgress(transmittal)
+  assert.deepEqual(avance, { expected: 0, answered: 0, pending: 0 })
 })
 

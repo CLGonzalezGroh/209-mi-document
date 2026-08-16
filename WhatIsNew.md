@@ -738,3 +738,21 @@ Cierra **H-30**, **H-33** y **H-14**, y retira `ClientStatus` en favor del catá
 
 **312 pruebas, 0 fallos.**
 
+### Fase 5 — El acuse de recibo y el cierre
+
+Cierra **H-12** y **H-15**.
+
+- **El acuse le da operación al `ACKNOWLEDGED` que nadie asignaba.** Es el defecto que H-12 denunciaba: un valor de la enumeración que se aceptaba como estado de origen y ninguna operación ponía.
+- **No es una calificación**, y hay una prueba de por qué: no dice nada sobre el documento, dice que el envío llegó. Forzarlo dentro del catálogo de calificaciones lo dejaría en la **cuarta combinación de efectos que D-22 declara inexistente** —no habilita nada y no obliga a nada— y rompería la regla que les da sentido a los dos efectos. Por eso vive en el transmittal y no en el ítem.
+- **Solo en modo Emisor**, donde la emisión viaja afuera y no se sabe si llegó. En modo Receptor el contratista carga el transmittal dentro del sistema: no hay nada que acusar, y el acto equivalente es la confirmación de la recepción, que pertenece al circuito del rol Receptor. Declararlo evita implementar un estado que ahí no significa nada — el mismo defecto de H-12 al otro lado.
+- **Misma autoría diferenciada que la respuesta**: quién acusó como texto, quién lo registró como `User`, fecha real y fecha de registro. Y **no es precondición de responder**: un cliente puede contestar sin haber acusado nunca.
+- **El cierre es un acto documental explícito**, con motivo opcional, actor y fecha en el modelo. No exige respuestas completas: las parciales son la práctica normal, de modo que un cierre derivado de que todos los ítems estuvieran respondidos no ocurriría nunca.
+- **Cerrar no impide una respuesta tardía.** Cerrar declara que se dejó de esperar, no que se dejó de escuchar; y la respuesta tardía tampoco reabre lo cerrado.
+- **`responseProgress`, derivado**: cuántos ítems esperaban calificación y cuántos la tienen. Cuenta solo los que la esperan según su propósito — *faltan 3 de las 5 que esperaban respuesta* en lugar de *faltan 3 de 8*. Es lo que el cierre muestra, no lo que lo condiciona.
+
+**El mismo riesgo de carga parcial de la fase 3, atajado antes de que mordiera.** El avance se deriva de si cada ítem tiene respuesta, y varias consultas los incluyen sin ella: contaría cero respondidos con la misma confianza que un conteo correcto. Los ítems precargados se usan solo si traen su respuesta, y `transmittalIncludes` ahora la incluye.
+
+> **Cambios de contrato**, compatibles: `acknowledgeTransmittal` es nueva, y `closeTransmittal` gana un input opcional con el motivo.
+
+**324 pruebas, 0 fallos.**
+

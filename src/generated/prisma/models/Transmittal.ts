@@ -32,6 +32,8 @@ export type TransmittalAvgAggregateOutputType = {
   projectId: number | null
   respondsToTransmittalId: number | null
   issuedById: number | null
+  acknowledgeRegisteredById: number | null
+  closedById: number | null
 }
 
 export type TransmittalSumAggregateOutputType = {
@@ -40,6 +42,8 @@ export type TransmittalSumAggregateOutputType = {
   projectId: number | null
   respondsToTransmittalId: number | null
   issuedById: number | null
+  acknowledgeRegisteredById: number | null
+  closedById: number | null
 }
 
 export type TransmittalMinAggregateOutputType = {
@@ -55,6 +59,13 @@ export type TransmittalMinAggregateOutputType = {
   respondsToTransmittalId: number | null
   issuedById: number | null
   issuedAt: Date | null
+  acknowledgedBy: string | null
+  acknowledgedAt: Date | null
+  acknowledgeRegisteredById: number | null
+  acknowledgeRegisteredAt: Date | null
+  closedAt: Date | null
+  closedById: number | null
+  closeReason: string | null
 }
 
 export type TransmittalMaxAggregateOutputType = {
@@ -70,6 +81,13 @@ export type TransmittalMaxAggregateOutputType = {
   respondsToTransmittalId: number | null
   issuedById: number | null
   issuedAt: Date | null
+  acknowledgedBy: string | null
+  acknowledgedAt: Date | null
+  acknowledgeRegisteredById: number | null
+  acknowledgeRegisteredAt: Date | null
+  closedAt: Date | null
+  closedById: number | null
+  closeReason: string | null
 }
 
 export type TransmittalCountAggregateOutputType = {
@@ -85,6 +103,13 @@ export type TransmittalCountAggregateOutputType = {
   respondsToTransmittalId: number
   issuedById: number
   issuedAt: number
+  acknowledgedBy: number
+  acknowledgedAt: number
+  acknowledgeRegisteredById: number
+  acknowledgeRegisteredAt: number
+  closedAt: number
+  closedById: number
+  closeReason: number
   _all: number
 }
 
@@ -95,6 +120,8 @@ export type TransmittalAvgAggregateInputType = {
   projectId?: true
   respondsToTransmittalId?: true
   issuedById?: true
+  acknowledgeRegisteredById?: true
+  closedById?: true
 }
 
 export type TransmittalSumAggregateInputType = {
@@ -103,6 +130,8 @@ export type TransmittalSumAggregateInputType = {
   projectId?: true
   respondsToTransmittalId?: true
   issuedById?: true
+  acknowledgeRegisteredById?: true
+  closedById?: true
 }
 
 export type TransmittalMinAggregateInputType = {
@@ -118,6 +147,13 @@ export type TransmittalMinAggregateInputType = {
   respondsToTransmittalId?: true
   issuedById?: true
   issuedAt?: true
+  acknowledgedBy?: true
+  acknowledgedAt?: true
+  acknowledgeRegisteredById?: true
+  acknowledgeRegisteredAt?: true
+  closedAt?: true
+  closedById?: true
+  closeReason?: true
 }
 
 export type TransmittalMaxAggregateInputType = {
@@ -133,6 +169,13 @@ export type TransmittalMaxAggregateInputType = {
   respondsToTransmittalId?: true
   issuedById?: true
   issuedAt?: true
+  acknowledgedBy?: true
+  acknowledgedAt?: true
+  acknowledgeRegisteredById?: true
+  acknowledgeRegisteredAt?: true
+  closedAt?: true
+  closedById?: true
+  closeReason?: true
 }
 
 export type TransmittalCountAggregateInputType = {
@@ -148,6 +191,13 @@ export type TransmittalCountAggregateInputType = {
   respondsToTransmittalId?: true
   issuedById?: true
   issuedAt?: true
+  acknowledgedBy?: true
+  acknowledgedAt?: true
+  acknowledgeRegisteredById?: true
+  acknowledgeRegisteredAt?: true
+  closedAt?: true
+  closedById?: true
+  closeReason?: true
   _all?: true
 }
 
@@ -250,6 +300,13 @@ export type TransmittalGroupByOutputType = {
   respondsToTransmittalId: number | null
   issuedById: number
   issuedAt: Date | null
+  acknowledgedBy: string | null
+  acknowledgedAt: Date | null
+  acknowledgeRegisteredById: number | null
+  acknowledgeRegisteredAt: Date | null
+  closedAt: Date | null
+  closedById: number | null
+  closeReason: string | null
   _count: TransmittalCountAggregateOutputType | null
   _avg: TransmittalAvgAggregateOutputType | null
   _sum: TransmittalSumAggregateOutputType | null
@@ -288,6 +345,13 @@ export type TransmittalWhereInput = {
   respondsToTransmittalId?: Prisma.IntNullableFilter<"Transmittal"> | number | null
   issuedById?: Prisma.IntFilter<"Transmittal"> | number
   issuedAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
+  acknowledgedBy?: Prisma.StringNullableFilter<"Transmittal"> | string | null
+  acknowledgedAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
+  acknowledgeRegisteredById?: Prisma.IntNullableFilter<"Transmittal"> | number | null
+  acknowledgeRegisteredAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
+  closedAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
+  closedById?: Prisma.IntNullableFilter<"Transmittal"> | number | null
+  closeReason?: Prisma.StringNullableFilter<"Transmittal"> | string | null
   items?: Prisma.TransmittalItemListRelationFilter
   respondsTo?: Prisma.XOR<Prisma.TransmittalNullableScalarRelationFilter, Prisma.TransmittalWhereInput> | null
   responses?: Prisma.TransmittalListRelationFilter
@@ -307,6 +371,13 @@ export type TransmittalOrderByWithRelationInput = {
   respondsToTransmittalId?: Prisma.SortOrderInput | Prisma.SortOrder
   issuedById?: Prisma.SortOrder
   issuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  acknowledgedBy?: Prisma.SortOrderInput | Prisma.SortOrder
+  acknowledgedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  acknowledgeRegisteredById?: Prisma.SortOrderInput | Prisma.SortOrder
+  acknowledgeRegisteredAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  closedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  closedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  closeReason?: Prisma.SortOrderInput | Prisma.SortOrder
   items?: Prisma.TransmittalItemOrderByRelationAggregateInput
   respondsTo?: Prisma.TransmittalOrderByWithRelationInput
   responses?: Prisma.TransmittalOrderByRelationAggregateInput
@@ -330,6 +401,13 @@ export type TransmittalWhereUniqueInput = Prisma.AtLeast<{
   respondsToTransmittalId?: Prisma.IntNullableFilter<"Transmittal"> | number | null
   issuedById?: Prisma.IntFilter<"Transmittal"> | number
   issuedAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
+  acknowledgedBy?: Prisma.StringNullableFilter<"Transmittal"> | string | null
+  acknowledgedAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
+  acknowledgeRegisteredById?: Prisma.IntNullableFilter<"Transmittal"> | number | null
+  acknowledgeRegisteredAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
+  closedAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
+  closedById?: Prisma.IntNullableFilter<"Transmittal"> | number | null
+  closeReason?: Prisma.StringNullableFilter<"Transmittal"> | string | null
   items?: Prisma.TransmittalItemListRelationFilter
   respondsTo?: Prisma.XOR<Prisma.TransmittalNullableScalarRelationFilter, Prisma.TransmittalWhereInput> | null
   responses?: Prisma.TransmittalListRelationFilter
@@ -349,6 +427,13 @@ export type TransmittalOrderByWithAggregationInput = {
   respondsToTransmittalId?: Prisma.SortOrderInput | Prisma.SortOrder
   issuedById?: Prisma.SortOrder
   issuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  acknowledgedBy?: Prisma.SortOrderInput | Prisma.SortOrder
+  acknowledgedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  acknowledgeRegisteredById?: Prisma.SortOrderInput | Prisma.SortOrder
+  acknowledgeRegisteredAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  closedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  closedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  closeReason?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TransmittalCountOrderByAggregateInput
   _avg?: Prisma.TransmittalAvgOrderByAggregateInput
   _max?: Prisma.TransmittalMaxOrderByAggregateInput
@@ -372,6 +457,13 @@ export type TransmittalScalarWhereWithAggregatesInput = {
   respondsToTransmittalId?: Prisma.IntNullableWithAggregatesFilter<"Transmittal"> | number | null
   issuedById?: Prisma.IntWithAggregatesFilter<"Transmittal"> | number
   issuedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Transmittal"> | Date | string | null
+  acknowledgedBy?: Prisma.StringNullableWithAggregatesFilter<"Transmittal"> | string | null
+  acknowledgedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Transmittal"> | Date | string | null
+  acknowledgeRegisteredById?: Prisma.IntNullableWithAggregatesFilter<"Transmittal"> | number | null
+  acknowledgeRegisteredAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Transmittal"> | Date | string | null
+  closedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Transmittal"> | Date | string | null
+  closedById?: Prisma.IntNullableWithAggregatesFilter<"Transmittal"> | number | null
+  closeReason?: Prisma.StringNullableWithAggregatesFilter<"Transmittal"> | string | null
 }
 
 export type TransmittalCreateInput = {
@@ -385,6 +477,13 @@ export type TransmittalCreateInput = {
   counterpartyReference?: string | null
   issuedById: number
   issuedAt?: Date | string | null
+  acknowledgedBy?: string | null
+  acknowledgedAt?: Date | string | null
+  acknowledgeRegisteredById?: number | null
+  acknowledgeRegisteredAt?: Date | string | null
+  closedAt?: Date | string | null
+  closedById?: number | null
+  closeReason?: string | null
   items?: Prisma.TransmittalItemCreateNestedManyWithoutTransmittalInput
   respondsTo?: Prisma.TransmittalCreateNestedOneWithoutResponsesInput
   responses?: Prisma.TransmittalCreateNestedManyWithoutRespondsToInput
@@ -404,6 +503,13 @@ export type TransmittalUncheckedCreateInput = {
   respondsToTransmittalId?: number | null
   issuedById: number
   issuedAt?: Date | string | null
+  acknowledgedBy?: string | null
+  acknowledgedAt?: Date | string | null
+  acknowledgeRegisteredById?: number | null
+  acknowledgeRegisteredAt?: Date | string | null
+  closedAt?: Date | string | null
+  closedById?: number | null
+  closeReason?: string | null
   items?: Prisma.TransmittalItemUncheckedCreateNestedManyWithoutTransmittalInput
   responses?: Prisma.TransmittalUncheckedCreateNestedManyWithoutRespondsToInput
   carriedResponses?: Prisma.DocTransmittalResponseUncheckedCreateNestedManyWithoutResponseTransmittalInput
@@ -420,6 +526,13 @@ export type TransmittalUpdateInput = {
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedById?: Prisma.IntFieldUpdateOperationsInput | number
   issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.TransmittalItemUpdateManyWithoutTransmittalNestedInput
   respondsTo?: Prisma.TransmittalUpdateOneWithoutResponsesNestedInput
   responses?: Prisma.TransmittalUpdateManyWithoutRespondsToNestedInput
@@ -439,6 +552,13 @@ export type TransmittalUncheckedUpdateInput = {
   respondsToTransmittalId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   issuedById?: Prisma.IntFieldUpdateOperationsInput | number
   issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.TransmittalItemUncheckedUpdateManyWithoutTransmittalNestedInput
   responses?: Prisma.TransmittalUncheckedUpdateManyWithoutRespondsToNestedInput
   carriedResponses?: Prisma.DocTransmittalResponseUncheckedUpdateManyWithoutResponseTransmittalNestedInput
@@ -457,6 +577,13 @@ export type TransmittalCreateManyInput = {
   respondsToTransmittalId?: number | null
   issuedById: number
   issuedAt?: Date | string | null
+  acknowledgedBy?: string | null
+  acknowledgedAt?: Date | string | null
+  acknowledgeRegisteredById?: number | null
+  acknowledgeRegisteredAt?: Date | string | null
+  closedAt?: Date | string | null
+  closedById?: number | null
+  closeReason?: string | null
 }
 
 export type TransmittalUpdateManyMutationInput = {
@@ -470,6 +597,13 @@ export type TransmittalUpdateManyMutationInput = {
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedById?: Prisma.IntFieldUpdateOperationsInput | number
   issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TransmittalUncheckedUpdateManyInput = {
@@ -485,6 +619,13 @@ export type TransmittalUncheckedUpdateManyInput = {
   respondsToTransmittalId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   issuedById?: Prisma.IntFieldUpdateOperationsInput | number
   issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TransmittalNullableScalarRelationFilter = {
@@ -520,6 +661,13 @@ export type TransmittalCountOrderByAggregateInput = {
   respondsToTransmittalId?: Prisma.SortOrder
   issuedById?: Prisma.SortOrder
   issuedAt?: Prisma.SortOrder
+  acknowledgedBy?: Prisma.SortOrder
+  acknowledgedAt?: Prisma.SortOrder
+  acknowledgeRegisteredById?: Prisma.SortOrder
+  acknowledgeRegisteredAt?: Prisma.SortOrder
+  closedAt?: Prisma.SortOrder
+  closedById?: Prisma.SortOrder
+  closeReason?: Prisma.SortOrder
 }
 
 export type TransmittalAvgOrderByAggregateInput = {
@@ -528,6 +676,8 @@ export type TransmittalAvgOrderByAggregateInput = {
   projectId?: Prisma.SortOrder
   respondsToTransmittalId?: Prisma.SortOrder
   issuedById?: Prisma.SortOrder
+  acknowledgeRegisteredById?: Prisma.SortOrder
+  closedById?: Prisma.SortOrder
 }
 
 export type TransmittalMaxOrderByAggregateInput = {
@@ -543,6 +693,13 @@ export type TransmittalMaxOrderByAggregateInput = {
   respondsToTransmittalId?: Prisma.SortOrder
   issuedById?: Prisma.SortOrder
   issuedAt?: Prisma.SortOrder
+  acknowledgedBy?: Prisma.SortOrder
+  acknowledgedAt?: Prisma.SortOrder
+  acknowledgeRegisteredById?: Prisma.SortOrder
+  acknowledgeRegisteredAt?: Prisma.SortOrder
+  closedAt?: Prisma.SortOrder
+  closedById?: Prisma.SortOrder
+  closeReason?: Prisma.SortOrder
 }
 
 export type TransmittalMinOrderByAggregateInput = {
@@ -558,6 +715,13 @@ export type TransmittalMinOrderByAggregateInput = {
   respondsToTransmittalId?: Prisma.SortOrder
   issuedById?: Prisma.SortOrder
   issuedAt?: Prisma.SortOrder
+  acknowledgedBy?: Prisma.SortOrder
+  acknowledgedAt?: Prisma.SortOrder
+  acknowledgeRegisteredById?: Prisma.SortOrder
+  acknowledgeRegisteredAt?: Prisma.SortOrder
+  closedAt?: Prisma.SortOrder
+  closedById?: Prisma.SortOrder
+  closeReason?: Prisma.SortOrder
 }
 
 export type TransmittalSumOrderByAggregateInput = {
@@ -566,6 +730,8 @@ export type TransmittalSumOrderByAggregateInput = {
   projectId?: Prisma.SortOrder
   respondsToTransmittalId?: Prisma.SortOrder
   issuedById?: Prisma.SortOrder
+  acknowledgeRegisteredById?: Prisma.SortOrder
+  closedById?: Prisma.SortOrder
 }
 
 export type TransmittalScalarRelationFilter = {
@@ -680,6 +846,13 @@ export type TransmittalCreateWithoutResponsesInput = {
   counterpartyReference?: string | null
   issuedById: number
   issuedAt?: Date | string | null
+  acknowledgedBy?: string | null
+  acknowledgedAt?: Date | string | null
+  acknowledgeRegisteredById?: number | null
+  acknowledgeRegisteredAt?: Date | string | null
+  closedAt?: Date | string | null
+  closedById?: number | null
+  closeReason?: string | null
   items?: Prisma.TransmittalItemCreateNestedManyWithoutTransmittalInput
   respondsTo?: Prisma.TransmittalCreateNestedOneWithoutResponsesInput
   carriedResponses?: Prisma.DocTransmittalResponseCreateNestedManyWithoutResponseTransmittalInput
@@ -698,6 +871,13 @@ export type TransmittalUncheckedCreateWithoutResponsesInput = {
   respondsToTransmittalId?: number | null
   issuedById: number
   issuedAt?: Date | string | null
+  acknowledgedBy?: string | null
+  acknowledgedAt?: Date | string | null
+  acknowledgeRegisteredById?: number | null
+  acknowledgeRegisteredAt?: Date | string | null
+  closedAt?: Date | string | null
+  closedById?: number | null
+  closeReason?: string | null
   items?: Prisma.TransmittalItemUncheckedCreateNestedManyWithoutTransmittalInput
   carriedResponses?: Prisma.DocTransmittalResponseUncheckedCreateNestedManyWithoutResponseTransmittalInput
 }
@@ -718,6 +898,13 @@ export type TransmittalCreateWithoutRespondsToInput = {
   counterpartyReference?: string | null
   issuedById: number
   issuedAt?: Date | string | null
+  acknowledgedBy?: string | null
+  acknowledgedAt?: Date | string | null
+  acknowledgeRegisteredById?: number | null
+  acknowledgeRegisteredAt?: Date | string | null
+  closedAt?: Date | string | null
+  closedById?: number | null
+  closeReason?: string | null
   items?: Prisma.TransmittalItemCreateNestedManyWithoutTransmittalInput
   responses?: Prisma.TransmittalCreateNestedManyWithoutRespondsToInput
   carriedResponses?: Prisma.DocTransmittalResponseCreateNestedManyWithoutResponseTransmittalInput
@@ -735,6 +922,13 @@ export type TransmittalUncheckedCreateWithoutRespondsToInput = {
   counterpartyReference?: string | null
   issuedById: number
   issuedAt?: Date | string | null
+  acknowledgedBy?: string | null
+  acknowledgedAt?: Date | string | null
+  acknowledgeRegisteredById?: number | null
+  acknowledgeRegisteredAt?: Date | string | null
+  closedAt?: Date | string | null
+  closedById?: number | null
+  closeReason?: string | null
   items?: Prisma.TransmittalItemUncheckedCreateNestedManyWithoutTransmittalInput
   responses?: Prisma.TransmittalUncheckedCreateNestedManyWithoutRespondsToInput
   carriedResponses?: Prisma.DocTransmittalResponseUncheckedCreateNestedManyWithoutResponseTransmittalInput
@@ -772,6 +966,13 @@ export type TransmittalUpdateWithoutResponsesInput = {
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedById?: Prisma.IntFieldUpdateOperationsInput | number
   issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.TransmittalItemUpdateManyWithoutTransmittalNestedInput
   respondsTo?: Prisma.TransmittalUpdateOneWithoutResponsesNestedInput
   carriedResponses?: Prisma.DocTransmittalResponseUpdateManyWithoutResponseTransmittalNestedInput
@@ -790,6 +991,13 @@ export type TransmittalUncheckedUpdateWithoutResponsesInput = {
   respondsToTransmittalId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   issuedById?: Prisma.IntFieldUpdateOperationsInput | number
   issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.TransmittalItemUncheckedUpdateManyWithoutTransmittalNestedInput
   carriedResponses?: Prisma.DocTransmittalResponseUncheckedUpdateManyWithoutResponseTransmittalNestedInput
 }
@@ -826,6 +1034,13 @@ export type TransmittalScalarWhereInput = {
   respondsToTransmittalId?: Prisma.IntNullableFilter<"Transmittal"> | number | null
   issuedById?: Prisma.IntFilter<"Transmittal"> | number
   issuedAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
+  acknowledgedBy?: Prisma.StringNullableFilter<"Transmittal"> | string | null
+  acknowledgedAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
+  acknowledgeRegisteredById?: Prisma.IntNullableFilter<"Transmittal"> | number | null
+  acknowledgeRegisteredAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
+  closedAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
+  closedById?: Prisma.IntNullableFilter<"Transmittal"> | number | null
+  closeReason?: Prisma.StringNullableFilter<"Transmittal"> | string | null
 }
 
 export type TransmittalCreateWithoutItemsInput = {
@@ -839,6 +1054,13 @@ export type TransmittalCreateWithoutItemsInput = {
   counterpartyReference?: string | null
   issuedById: number
   issuedAt?: Date | string | null
+  acknowledgedBy?: string | null
+  acknowledgedAt?: Date | string | null
+  acknowledgeRegisteredById?: number | null
+  acknowledgeRegisteredAt?: Date | string | null
+  closedAt?: Date | string | null
+  closedById?: number | null
+  closeReason?: string | null
   respondsTo?: Prisma.TransmittalCreateNestedOneWithoutResponsesInput
   responses?: Prisma.TransmittalCreateNestedManyWithoutRespondsToInput
   carriedResponses?: Prisma.DocTransmittalResponseCreateNestedManyWithoutResponseTransmittalInput
@@ -857,6 +1079,13 @@ export type TransmittalUncheckedCreateWithoutItemsInput = {
   respondsToTransmittalId?: number | null
   issuedById: number
   issuedAt?: Date | string | null
+  acknowledgedBy?: string | null
+  acknowledgedAt?: Date | string | null
+  acknowledgeRegisteredById?: number | null
+  acknowledgeRegisteredAt?: Date | string | null
+  closedAt?: Date | string | null
+  closedById?: number | null
+  closeReason?: string | null
   responses?: Prisma.TransmittalUncheckedCreateNestedManyWithoutRespondsToInput
   carriedResponses?: Prisma.DocTransmittalResponseUncheckedCreateNestedManyWithoutResponseTransmittalInput
 }
@@ -888,6 +1117,13 @@ export type TransmittalUpdateWithoutItemsInput = {
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedById?: Prisma.IntFieldUpdateOperationsInput | number
   issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   respondsTo?: Prisma.TransmittalUpdateOneWithoutResponsesNestedInput
   responses?: Prisma.TransmittalUpdateManyWithoutRespondsToNestedInput
   carriedResponses?: Prisma.DocTransmittalResponseUpdateManyWithoutResponseTransmittalNestedInput
@@ -906,6 +1142,13 @@ export type TransmittalUncheckedUpdateWithoutItemsInput = {
   respondsToTransmittalId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   issuedById?: Prisma.IntFieldUpdateOperationsInput | number
   issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   responses?: Prisma.TransmittalUncheckedUpdateManyWithoutRespondsToNestedInput
   carriedResponses?: Prisma.DocTransmittalResponseUncheckedUpdateManyWithoutResponseTransmittalNestedInput
 }
@@ -921,6 +1164,13 @@ export type TransmittalCreateWithoutCarriedResponsesInput = {
   counterpartyReference?: string | null
   issuedById: number
   issuedAt?: Date | string | null
+  acknowledgedBy?: string | null
+  acknowledgedAt?: Date | string | null
+  acknowledgeRegisteredById?: number | null
+  acknowledgeRegisteredAt?: Date | string | null
+  closedAt?: Date | string | null
+  closedById?: number | null
+  closeReason?: string | null
   items?: Prisma.TransmittalItemCreateNestedManyWithoutTransmittalInput
   respondsTo?: Prisma.TransmittalCreateNestedOneWithoutResponsesInput
   responses?: Prisma.TransmittalCreateNestedManyWithoutRespondsToInput
@@ -939,6 +1189,13 @@ export type TransmittalUncheckedCreateWithoutCarriedResponsesInput = {
   respondsToTransmittalId?: number | null
   issuedById: number
   issuedAt?: Date | string | null
+  acknowledgedBy?: string | null
+  acknowledgedAt?: Date | string | null
+  acknowledgeRegisteredById?: number | null
+  acknowledgeRegisteredAt?: Date | string | null
+  closedAt?: Date | string | null
+  closedById?: number | null
+  closeReason?: string | null
   items?: Prisma.TransmittalItemUncheckedCreateNestedManyWithoutTransmittalInput
   responses?: Prisma.TransmittalUncheckedCreateNestedManyWithoutRespondsToInput
 }
@@ -970,6 +1227,13 @@ export type TransmittalUpdateWithoutCarriedResponsesInput = {
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedById?: Prisma.IntFieldUpdateOperationsInput | number
   issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.TransmittalItemUpdateManyWithoutTransmittalNestedInput
   respondsTo?: Prisma.TransmittalUpdateOneWithoutResponsesNestedInput
   responses?: Prisma.TransmittalUpdateManyWithoutRespondsToNestedInput
@@ -988,6 +1252,13 @@ export type TransmittalUncheckedUpdateWithoutCarriedResponsesInput = {
   respondsToTransmittalId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   issuedById?: Prisma.IntFieldUpdateOperationsInput | number
   issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.TransmittalItemUncheckedUpdateManyWithoutTransmittalNestedInput
   responses?: Prisma.TransmittalUncheckedUpdateManyWithoutRespondsToNestedInput
 }
@@ -1004,6 +1275,13 @@ export type TransmittalCreateManyRespondsToInput = {
   counterpartyReference?: string | null
   issuedById: number
   issuedAt?: Date | string | null
+  acknowledgedBy?: string | null
+  acknowledgedAt?: Date | string | null
+  acknowledgeRegisteredById?: number | null
+  acknowledgeRegisteredAt?: Date | string | null
+  closedAt?: Date | string | null
+  closedById?: number | null
+  closeReason?: string | null
 }
 
 export type TransmittalUpdateWithoutRespondsToInput = {
@@ -1017,6 +1295,13 @@ export type TransmittalUpdateWithoutRespondsToInput = {
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedById?: Prisma.IntFieldUpdateOperationsInput | number
   issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.TransmittalItemUpdateManyWithoutTransmittalNestedInput
   responses?: Prisma.TransmittalUpdateManyWithoutRespondsToNestedInput
   carriedResponses?: Prisma.DocTransmittalResponseUpdateManyWithoutResponseTransmittalNestedInput
@@ -1034,6 +1319,13 @@ export type TransmittalUncheckedUpdateWithoutRespondsToInput = {
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedById?: Prisma.IntFieldUpdateOperationsInput | number
   issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.TransmittalItemUncheckedUpdateManyWithoutTransmittalNestedInput
   responses?: Prisma.TransmittalUncheckedUpdateManyWithoutRespondsToNestedInput
   carriedResponses?: Prisma.DocTransmittalResponseUncheckedUpdateManyWithoutResponseTransmittalNestedInput
@@ -1051,6 +1343,13 @@ export type TransmittalUncheckedUpdateManyWithoutRespondsToInput = {
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issuedById?: Prisma.IntFieldUpdateOperationsInput | number
   issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1115,6 +1414,13 @@ export type TransmittalSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   respondsToTransmittalId?: boolean
   issuedById?: boolean
   issuedAt?: boolean
+  acknowledgedBy?: boolean
+  acknowledgedAt?: boolean
+  acknowledgeRegisteredById?: boolean
+  acknowledgeRegisteredAt?: boolean
+  closedAt?: boolean
+  closedById?: boolean
+  closeReason?: boolean
   items?: boolean | Prisma.Transmittal$itemsArgs<ExtArgs>
   respondsTo?: boolean | Prisma.Transmittal$respondsToArgs<ExtArgs>
   responses?: boolean | Prisma.Transmittal$responsesArgs<ExtArgs>
@@ -1135,6 +1441,13 @@ export type TransmittalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   respondsToTransmittalId?: boolean
   issuedById?: boolean
   issuedAt?: boolean
+  acknowledgedBy?: boolean
+  acknowledgedAt?: boolean
+  acknowledgeRegisteredById?: boolean
+  acknowledgeRegisteredAt?: boolean
+  closedAt?: boolean
+  closedById?: boolean
+  closeReason?: boolean
   respondsTo?: boolean | Prisma.Transmittal$respondsToArgs<ExtArgs>
 }, ExtArgs["result"]["transmittal"]>
 
@@ -1151,6 +1464,13 @@ export type TransmittalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   respondsToTransmittalId?: boolean
   issuedById?: boolean
   issuedAt?: boolean
+  acknowledgedBy?: boolean
+  acknowledgedAt?: boolean
+  acknowledgeRegisteredById?: boolean
+  acknowledgeRegisteredAt?: boolean
+  closedAt?: boolean
+  closedById?: boolean
+  closeReason?: boolean
   respondsTo?: boolean | Prisma.Transmittal$respondsToArgs<ExtArgs>
 }, ExtArgs["result"]["transmittal"]>
 
@@ -1167,9 +1487,16 @@ export type TransmittalSelectScalar = {
   respondsToTransmittalId?: boolean
   issuedById?: boolean
   issuedAt?: boolean
+  acknowledgedBy?: boolean
+  acknowledgedAt?: boolean
+  acknowledgeRegisteredById?: boolean
+  acknowledgeRegisteredAt?: boolean
+  closedAt?: boolean
+  closedById?: boolean
+  closeReason?: boolean
 }
 
-export type TransmittalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "updatedById" | "code" | "projectId" | "nature" | "status" | "counterpartyReference" | "respondsToTransmittalId" | "issuedById" | "issuedAt", ExtArgs["result"]["transmittal"]>
+export type TransmittalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "updatedById" | "code" | "projectId" | "nature" | "status" | "counterpartyReference" | "respondsToTransmittalId" | "issuedById" | "issuedAt" | "acknowledgedBy" | "acknowledgedAt" | "acknowledgeRegisteredById" | "acknowledgeRegisteredAt" | "closedAt" | "closedById" | "closeReason", ExtArgs["result"]["transmittal"]>
 export type TransmittalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   items?: boolean | Prisma.Transmittal$itemsArgs<ExtArgs>
   respondsTo?: boolean | Prisma.Transmittal$respondsToArgs<ExtArgs>
@@ -1205,6 +1532,13 @@ export type $TransmittalPayload<ExtArgs extends runtime.Types.Extensions.Interna
     respondsToTransmittalId: number | null
     issuedById: number
     issuedAt: Date | null
+    acknowledgedBy: string | null
+    acknowledgedAt: Date | null
+    acknowledgeRegisteredById: number | null
+    acknowledgeRegisteredAt: Date | null
+    closedAt: Date | null
+    closedById: number | null
+    closeReason: string | null
   }, ExtArgs["result"]["transmittal"]>
   composites: {}
 }
@@ -1644,6 +1978,13 @@ export interface TransmittalFieldRefs {
   readonly respondsToTransmittalId: Prisma.FieldRef<"Transmittal", 'Int'>
   readonly issuedById: Prisma.FieldRef<"Transmittal", 'Int'>
   readonly issuedAt: Prisma.FieldRef<"Transmittal", 'DateTime'>
+  readonly acknowledgedBy: Prisma.FieldRef<"Transmittal", 'String'>
+  readonly acknowledgedAt: Prisma.FieldRef<"Transmittal", 'DateTime'>
+  readonly acknowledgeRegisteredById: Prisma.FieldRef<"Transmittal", 'Int'>
+  readonly acknowledgeRegisteredAt: Prisma.FieldRef<"Transmittal", 'DateTime'>
+  readonly closedAt: Prisma.FieldRef<"Transmittal", 'DateTime'>
+  readonly closedById: Prisma.FieldRef<"Transmittal", 'Int'>
+  readonly closeReason: Prisma.FieldRef<"Transmittal", 'String'>
 }
     
 

@@ -1146,6 +1146,47 @@ type Transmittal @key(fields: "id") {
   issuedAt: DateTime
   "Usuario que emitió el transmittal"
   issuedBy: UserName!
+  """
+  Quién acusó recibo, como texto. El cliente no es usuario del sistema.
+
+  El acuse es del ENVÍO y no del documento: dice que llegó, no qué opina la
+  contraparte. Por eso vive acá y no en el ítem, y no es una calificación.
+  """
+  acknowledgedBy: String
+  "Fecha REAL del acuse"
+  acknowledgedAt: DateTime
+  "Quién registró el acuse"
+  acknowledgeRegisteredBy: UserName
+  "Fecha de registro del acuse"
+  acknowledgeRegisteredAt: DateTime
+  "Fecha de cierre"
+  closedAt: DateTime
+  "Quién lo cerró"
+  closedBy: UserName
+  "Motivo del cierre, si se declaró"
+  closeReason: String
+  """
+  Avance de las respuestas, DERIVADO.
+
+  Cuenta solo los ítems cuyo propósito espera calificación: *faltan 3 de las 5
+  que esperaban respuesta* en lugar de *faltan 3 de 8*. Es lo que el cierre
+  muestra, no lo que lo condiciona.
+  """
+  responseProgress: TransmittalResponseProgress!
+}
+
+"""
+Avance de las respuestas de un transmittal.
+
+Se deriva de los ítems y de su propósito; no se almacena.
+"""
+type TransmittalResponseProgress {
+  "Ítems cuyo propósito espera calificación"
+  expected: Int!
+  "De esos, los que ya tienen respuesta"
+  answered: Int!
+  "Los que faltan contestar"
+  pending: Int!
 }
 
 "Item de un transmittal"
@@ -2365,6 +2406,20 @@ input TransmittalItemInput {
   purposeCode: PurposeCodeInput!
 }
 
+"Input para acusar recibo de una emisión"
+input AcknowledgeTransmittalInput {
+  "Quién acusó, como texto. Omitido cuando lo registra quien acusa"
+  acknowledgedBy: String
+  "Fecha real del acuse. Por defecto, ahora"
+  acknowledgedAt: DateTime
+}
+
+"Input para cerrar un transmittal"
+input CloseTransmittalInput {
+  "Motivo del cierre. Opcional"
+  closeReason: String
+}
+
 "Input para registrar la respuesta de un documento emitido"
 input RegisterItemResponseInput {
   "Calificación del catálogo vigente del proyecto. Único dato obligatorio"
@@ -3124,8 +3179,22 @@ type Mutation {
   """
   correctItemResponse(responseId: Int!, input: CorrectItemResponseInput!): DocTransmittalResponse!
 
-  "Cerrar un transmittal"
-  closeTransmittal(id: Int!): Transmittal!
+  """
+  Acusar recibo de una emisión.
+
+  Solo en modo Emisor, donde la emisión viaja afuera y no se sabe si llegó. No
+  es una calificación y no es precondición de la respuesta.
+  """
+  acknowledgeTransmittal(id: Int!, input: AcknowledgeTransmittalInput): Transmittal!
+
+  """
+  Cerrar un transmittal, como acto documental explícito.
+
+  No exige respuestas completas: las parciales son la práctica normal. Y no
+  impide una respuesta tardía — cerrar declara que se dejó de esperar, no que se
+  dejó de escuchar.
+  """
+  closeTransmittal(id: Int!, input: CloseTransmittalInput): Transmittal!
 
   # ─── Tipos de documento ───
   "Crear un tipo de documento"

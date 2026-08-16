@@ -1,11 +1,15 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 import {
+  DocumentRole,
+  PurposeCode,
   TransmittalNature,
   TransmittalStatus,
 } from "../generated/prisma/enums.js"
 import {
+  canAcknowledge,
   carrierViolation,
+  responseProgress,
   statusAfterResponse,
   wasIssued,
   wasTranscribed,
@@ -86,3 +90,81 @@ test("una respuesta posterior no vuelve a transicionar, y no reabre lo cerrado",
   assert.equal(statusAfterResponse(TransmittalStatus.RESPONDED), null)
   assert.equal(statusAfterResponse(TransmittalStatus.CLOSED), null)
 })
+
+// --- El acuse de recibo (B8) ---
+
+const acuse = (
+  role: DocumentRole,
+  nature: TransmittalNature = TransmittalNature.EMISSION,
+  status: TransmittalStatus = TransmittalStatus.ISSUED,
+) => canAcknowledge(role, nature, status)
+
+test("el acuse solo existe en modo Emisor", () => {
+  // En modo Receptor el contratista carga el transmittal dentro del sistema: no
+  // hay nada que acusar. Declararlo evita implementar un estado que ahí no
+  // significa nada, que es el defecto de H-12 al otro lado.
+  assert.equal(acuse(DocumentRole.ISSUER), null)
+  assert.match(acuse(DocumentRole.RECEIVER) ?? "", /solo existe en modo Emisor/)
+  assert.match(acuse(DocumentRole.INTERNAL) ?? "", /solo existe en modo Emisor/)
+})
+
+test("se acusa recibo de una emisión, no de una respuesta", () => {
+  assert.match(
+    acuse(DocumentRole.ISSUER, TransmittalNature.RESPONSE) ?? "",
+    /no de una respuesta/,
+  )
+})
+
+test("no se acusa lo que no salió, ni lo que ya fue acusado", () => {
+  assert.match(
+    acuse(DocumentRole.ISSUER, TransmittalNature.EMISSION, TransmittalStatus.DRAFT) ?? "",
+    /todavía no se emitió/,
+  )
+  assert.match(
+    acuse(
+      DocumentRole.ISSUER,
+      TransmittalNature.EMISSION,
+      TransmittalStatus.ACKNOWLEDGED,
+    ) ?? "",
+    /ya fue acusado o respondido/,
+  )
+})
+
+// --- El avance de las respuestas (B10) ---
+
+const item = (purposeCode: PurposeCode, hasResponse: boolean) => ({
+  purposeCode,
+  hasResponse,
+})
+
+test("el avance cuenta solo lo que espera calificación", () => {
+  // Faltan 3 de las 5 que esperaban respuesta, no 3 de 8: una lista de
+  // pendientes que incluye lo que nadie va a contestar no sirve para nada.
+  const items = [
+    item(PurposeCode.FOR_APPROVAL, true),
+    item(PurposeCode.FOR_APPROVAL, false),
+    item(PurposeCode.FOR_REVIEW, true),
+    item(PurposeCode.FOR_REVIEW, false),
+    item(PurposeCode.FOR_APPROVAL, false),
+    item(PurposeCode.FOR_INFORMATION, false),
+    item(PurposeCode.FOR_CONSTRUCTION, false),
+    item(PurposeCode.AS_BUILT, false),
+  ]
+
+  assert.deepEqual(responseProgress(items), {
+    expected: 5,
+    answered: 2,
+    pending: 3,
+  })
+})
+
+test("un transmittal enteramente informativo no espera nada", () => {
+  assert.deepEqual(
+    responseProgress([
+      item(PurposeCode.FOR_INFORMATION, false),
+      item(PurposeCode.AS_BUILT, false),
+    ]),
+    { expected: 0, answered: 0, pending: 0 },
+  )
+})
+

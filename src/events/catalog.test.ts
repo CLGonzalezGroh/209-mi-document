@@ -143,5 +143,10 @@ test("el catálogo cubre las escrituras relevadas más lo que agregaron los bloq
   //                           ítems en lote, y pasó a ser un acto sobre el
   //                           DOCUMENTO emitido (B5)
   //   + RegisterItemResponse, CorrectItemResponse
-  assert.equal(AUDIT_ACTIONS.length, 49)
+  //
+  // Y 1 en su fase 5, de 49 a 50: el acuse de recibo, que le da operación al
+  // estado que H-12 denunciaba sin ninguna (B8).
+  //
+  //   + AcknowledgeTransmittal
+  assert.equal(AUDIT_ACTIONS.length, 50)
 })

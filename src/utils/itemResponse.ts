@@ -1,8 +1,12 @@
 import { GraphQLError } from "graphql"
 import {
+  DocumentRole,
+  PurposeCode,
   TransmittalNature,
   TransmittalStatus,
 } from "../generated/prisma/enums.js"
+import { emitsOutward } from "./transmittalCirculation.js"
+import { expectsQualification } from "./emissionPurpose.js"
 
 /**
  * Reglas de la respuesta de la contraparte (BLOQUE 04, B5 y B7).
@@ -103,3 +107,79 @@ export const statusAfterResponse = (
   actual === TransmittalStatus.ACKNOWLEDGED
     ? TransmittalStatus.RESPONDED
     : null
+
+/**
+ * El acuse de recibo es del ENVÍO, no del documento (B8).
+ *
+ * Solo tiene sentido donde la emisión viaja afuera y no se sabe si llegó. En
+ * modo Receptor el contratista carga el transmittal dentro del sistema: no hay
+ * nada que acusar, y el acto equivalente es la confirmación de la recepción, que
+ * pertenece al circuito del rol Receptor.
+ *
+ * Declararlo evita que se implemente un estado que en ese modo no significa
+ * nada — el mismo defecto que H-12 denuncia al otro lado: un valor de
+ * enumeración que ninguna operación asigna.
+ */
+export const canAcknowledge = (
+  role: DocumentRole,
+  nature: TransmittalNature,
+  status: TransmittalStatus,
+): string | null => {
+  if (!emitsOutward(role)) {
+    return "El acuse de recibo solo existe en modo Emisor: acá el transmittal se carga dentro del sistema"
+  }
+
+  if (nature !== TransmittalNature.EMISSION) {
+    return "Se acusa recibo de una emisión, no de una respuesta"
+  }
+
+  if (status !== TransmittalStatus.ISSUED) {
+    return status === TransmittalStatus.DRAFT
+      ? "No se acusa recibo de un transmittal que todavía no se emitió"
+      : "El transmittal ya fue acusado o respondido"
+  }
+
+  return null
+}
+
+export const assertCanAcknowledge = (
+  role: DocumentRole,
+  nature: TransmittalNature,
+  status: TransmittalStatus,
+): void => {
+  const violacion = canAcknowledge(role, nature, status)
+
+  if (violacion) {
+    throw new GraphQLError(violacion, { extensions: { code: "BAD_REQUEST" } })
+  }
+}
+
+/**
+ * Avance de las respuestas de un transmittal (B10).
+ *
+ * Lo que el cierre puede MOSTRAR, no lo que lo condiciona. Con la primera regla
+ * del propósito, el transmittal sabe cuántos de sus ítems esperaban calificación
+ * y cuántos la tienen: *faltan 3 de las 5 que esperaban respuesta* en lugar de
+ * *faltan 3 de 8*.
+ *
+ * Se deriva y no se almacena.
+ */
+export type ResponseProgress = {
+  expected: number
+  answered: number
+  pending: number
+}
+
+export const responseProgress = (
+  items: Array<{ purposeCode: PurposeCode; hasResponse: boolean }>,
+): ResponseProgress => {
+  const esperan = items.filter((i) => expectsQualification(i.purposeCode))
+  const answered = esperan.filter((i) => i.hasResponse).length
+
+  return {
+    expected: esperan.length,
+    answered,
+    pending: esperan.length - answered,
+  }
+}
+

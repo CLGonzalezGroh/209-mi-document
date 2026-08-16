@@ -2999,7 +2999,14 @@ export const TransmittalScalarFieldEnum = {
   counterpartyReference: 'counterpartyReference',
   respondsToTransmittalId: 'respondsToTransmittalId',
   issuedById: 'issuedById',
-  issuedAt: 'issuedAt'
+  issuedAt: 'issuedAt',
+  acknowledgedBy: 'acknowledgedBy',
+  acknowledgedAt: 'acknowledgedAt',
+  acknowledgeRegisteredById: 'acknowledgeRegisteredById',
+  acknowledgeRegisteredAt: 'acknowledgeRegisteredAt',
+  closedAt: 'closedAt',
+  closedById: 'closedById',
+  closeReason: 'closeReason'
 } as const
 
 export type TransmittalScalarFieldEnum = (typeof TransmittalScalarFieldEnum)[keyof typeof TransmittalScalarFieldEnum]

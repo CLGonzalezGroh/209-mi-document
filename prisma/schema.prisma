@@ -725,8 +725,37 @@ model Transmittal {
   // Guardarla por registro permitía que dos transmittals del mismo proyecto
   // declararan destinatarios distintos, que es lo que la unidad contractual
   // considera inválido. Cierra B11 de BLOQUE 02 en la dirección que anticipó.
-  issuedById       Int // Referencia al User del sistema admin
-  issuedAt DateTime?
+  issuedById Int // Referencia al User del sistema admin
+  issuedAt   DateTime?
+
+  // Acuse de recibo (BLOQUE 04, B8). Da operación al ACKNOWLEDGED que hoy
+  // ninguna asigna (H-12).
+  //
+  // NO es una calificación: no dice nada sobre el documento, dice que el envío
+  // llegó. Forzarlo dentro del catálogo de D-22 lo dejaría en la cuarta
+  // combinación de efectos que esa decisión declara inexistente —no habilita
+  // nada y no obliga a nada— y rompería la regla que les da sentido.
+  //
+  // Solo tiene sentido en modo Emisor, donde la emisión viaja afuera y no se
+  // sabe si llegó. En modo Receptor el contratista carga el transmittal dentro
+  // del sistema, y el acto equivalente es la confirmación de la recepción.
+  //
+  // Misma autoría diferenciada que la respuesta, por el mismo motivo de D-12:
+  // quien acusa es el cliente y no es usuario del sistema.
+  acknowledgedBy            String?
+  acknowledgedAt            DateTime? // Fecha real del acuse
+  acknowledgeRegisteredById Int?
+  acknowledgeRegisteredAt   DateTime? // Fecha de registro
+
+  // Cierre (BLOQUE 04, B10). Acto documental EXPLÍCITO y no derivado: las
+  // respuestas parciales son la práctica normal, de modo que un cierre que
+  // esperara a que todos los ítems tuvieran respuesta no ocurriría nunca.
+  //
+  // Cerrar declara que se dejó de esperar, no que se dejó de escuchar: una
+  // calificación tardía se registra igual sobre un transmittal cerrado.
+  closedAt    DateTime?
+  closedById  Int?
+  closeReason String?
 
   // Relaciones
   items TransmittalItem[]

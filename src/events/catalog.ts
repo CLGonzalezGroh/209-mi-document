@@ -103,6 +103,7 @@ export const AuditAction = {
   // un registro más: nadie la firma, de modo que se corrige, y sin evento la
   // diferencia entre lo que el cliente dijo y lo que quedó registrado sería
   // indemostrable.
+  AcknowledgeTransmittal: "AcknowledgeTransmittal",
   RegisterItemResponse: "RegisterItemResponse",
   CorrectItemResponse: "CorrectItemResponse",
 } as const
@@ -174,6 +175,7 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   [AuditAction.UpdateQualification]: DocObjectType.DOC_QUALIFICATION,
   [AuditAction.TerminateQualification]: DocObjectType.DOC_QUALIFICATION,
   [AuditAction.ActivateQualification]: DocObjectType.DOC_QUALIFICATION,
+  [AuditAction.AcknowledgeTransmittal]: DocObjectType.TRANSMITTAL,
   [AuditAction.RegisterItemResponse]: DocObjectType.DOC_TRANSMITTAL_RESPONSE,
   [AuditAction.CorrectItemResponse]: DocObjectType.DOC_TRANSMITTAL_RESPONSE,
 }
@@ -224,6 +226,10 @@ export const WorkflowEvent = {
   // Emisión y respuesta (BLOQUE 04). La baja de una calificación es una
   // transición y no solo una edición: deja de estar disponible para calificar,
   // sin revalidar lo ya calificado.
+  // El acuse es una transición del transmittal, y no solo un registro: el
+  // envío pasa a estar recibido. Es lo que le faltaba a H-12 —el estado existía
+  // y ninguna operación lo asignaba—.
+  TransmittalAcknowledged: "TransmittalAcknowledged",
   QualificationTerminated: "QualificationTerminated",
   QualificationActivated: "QualificationActivated",
 } as const
@@ -259,6 +265,7 @@ export const WORKFLOW_EVENT_OBJECT: Record<WorkflowEvent, DocObjectType> = {
   [WorkflowEvent.StepCompleted]: DocObjectType.REVIEW_STEP,
   [WorkflowEvent.DocumentObsoleted]: DocObjectType.DOCUMENT,
   [WorkflowEvent.VersionRegistered]: DocObjectType.DOCUMENT_VERSION,
+  [WorkflowEvent.TransmittalAcknowledged]: DocObjectType.TRANSMITTAL,
   [WorkflowEvent.QualificationTerminated]: DocObjectType.DOC_QUALIFICATION,
   [WorkflowEvent.QualificationActivated]: DocObjectType.DOC_QUALIFICATION,
 }
