@@ -43,8 +43,6 @@ export type TransmittalItemMinAggregateOutputType = {
   transmittalId: number | null
   documentRevisionId: number | null
   purposeCode: $Enums.PurposeCode | null
-  clientStatus: $Enums.ClientStatus | null
-  clientComments: string | null
 }
 
 export type TransmittalItemMaxAggregateOutputType = {
@@ -52,8 +50,6 @@ export type TransmittalItemMaxAggregateOutputType = {
   transmittalId: number | null
   documentRevisionId: number | null
   purposeCode: $Enums.PurposeCode | null
-  clientStatus: $Enums.ClientStatus | null
-  clientComments: string | null
 }
 
 export type TransmittalItemCountAggregateOutputType = {
@@ -61,8 +57,6 @@ export type TransmittalItemCountAggregateOutputType = {
   transmittalId: number
   documentRevisionId: number
   purposeCode: number
-  clientStatus: number
-  clientComments: number
   _all: number
 }
 
@@ -84,8 +78,6 @@ export type TransmittalItemMinAggregateInputType = {
   transmittalId?: true
   documentRevisionId?: true
   purposeCode?: true
-  clientStatus?: true
-  clientComments?: true
 }
 
 export type TransmittalItemMaxAggregateInputType = {
@@ -93,8 +85,6 @@ export type TransmittalItemMaxAggregateInputType = {
   transmittalId?: true
   documentRevisionId?: true
   purposeCode?: true
-  clientStatus?: true
-  clientComments?: true
 }
 
 export type TransmittalItemCountAggregateInputType = {
@@ -102,8 +92,6 @@ export type TransmittalItemCountAggregateInputType = {
   transmittalId?: true
   documentRevisionId?: true
   purposeCode?: true
-  clientStatus?: true
-  clientComments?: true
   _all?: true
 }
 
@@ -198,8 +186,6 @@ export type TransmittalItemGroupByOutputType = {
   transmittalId: number
   documentRevisionId: number
   purposeCode: $Enums.PurposeCode
-  clientStatus: $Enums.ClientStatus | null
-  clientComments: string | null
   _count: TransmittalItemCountAggregateOutputType | null
   _avg: TransmittalItemAvgAggregateOutputType | null
   _sum: TransmittalItemSumAggregateOutputType | null
@@ -230,10 +216,9 @@ export type TransmittalItemWhereInput = {
   transmittalId?: Prisma.IntFilter<"TransmittalItem"> | number
   documentRevisionId?: Prisma.IntFilter<"TransmittalItem"> | number
   purposeCode?: Prisma.EnumPurposeCodeFilter<"TransmittalItem"> | $Enums.PurposeCode
-  clientStatus?: Prisma.EnumClientStatusNullableFilter<"TransmittalItem"> | $Enums.ClientStatus | null
-  clientComments?: Prisma.StringNullableFilter<"TransmittalItem"> | string | null
   transmittal?: Prisma.XOR<Prisma.TransmittalScalarRelationFilter, Prisma.TransmittalWhereInput>
   documentRevision?: Prisma.XOR<Prisma.DocumentRevisionScalarRelationFilter, Prisma.DocumentRevisionWhereInput>
+  response?: Prisma.XOR<Prisma.DocTransmittalResponseNullableScalarRelationFilter, Prisma.DocTransmittalResponseWhereInput> | null
 }
 
 export type TransmittalItemOrderByWithRelationInput = {
@@ -241,10 +226,9 @@ export type TransmittalItemOrderByWithRelationInput = {
   transmittalId?: Prisma.SortOrder
   documentRevisionId?: Prisma.SortOrder
   purposeCode?: Prisma.SortOrder
-  clientStatus?: Prisma.SortOrderInput | Prisma.SortOrder
-  clientComments?: Prisma.SortOrderInput | Prisma.SortOrder
   transmittal?: Prisma.TransmittalOrderByWithRelationInput
   documentRevision?: Prisma.DocumentRevisionOrderByWithRelationInput
+  response?: Prisma.DocTransmittalResponseOrderByWithRelationInput
 }
 
 export type TransmittalItemWhereUniqueInput = Prisma.AtLeast<{
@@ -255,10 +239,9 @@ export type TransmittalItemWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.TransmittalItemWhereInput | Prisma.TransmittalItemWhereInput[]
   transmittalId?: Prisma.IntFilter<"TransmittalItem"> | number
   purposeCode?: Prisma.EnumPurposeCodeFilter<"TransmittalItem"> | $Enums.PurposeCode
-  clientStatus?: Prisma.EnumClientStatusNullableFilter<"TransmittalItem"> | $Enums.ClientStatus | null
-  clientComments?: Prisma.StringNullableFilter<"TransmittalItem"> | string | null
   transmittal?: Prisma.XOR<Prisma.TransmittalScalarRelationFilter, Prisma.TransmittalWhereInput>
   documentRevision?: Prisma.XOR<Prisma.DocumentRevisionScalarRelationFilter, Prisma.DocumentRevisionWhereInput>
+  response?: Prisma.XOR<Prisma.DocTransmittalResponseNullableScalarRelationFilter, Prisma.DocTransmittalResponseWhereInput> | null
 }, "id" | "documentRevisionId">
 
 export type TransmittalItemOrderByWithAggregationInput = {
@@ -266,8 +249,6 @@ export type TransmittalItemOrderByWithAggregationInput = {
   transmittalId?: Prisma.SortOrder
   documentRevisionId?: Prisma.SortOrder
   purposeCode?: Prisma.SortOrder
-  clientStatus?: Prisma.SortOrderInput | Prisma.SortOrder
-  clientComments?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TransmittalItemCountOrderByAggregateInput
   _avg?: Prisma.TransmittalItemAvgOrderByAggregateInput
   _max?: Prisma.TransmittalItemMaxOrderByAggregateInput
@@ -283,16 +264,13 @@ export type TransmittalItemScalarWhereWithAggregatesInput = {
   transmittalId?: Prisma.IntWithAggregatesFilter<"TransmittalItem"> | number
   documentRevisionId?: Prisma.IntWithAggregatesFilter<"TransmittalItem"> | number
   purposeCode?: Prisma.EnumPurposeCodeWithAggregatesFilter<"TransmittalItem"> | $Enums.PurposeCode
-  clientStatus?: Prisma.EnumClientStatusNullableWithAggregatesFilter<"TransmittalItem"> | $Enums.ClientStatus | null
-  clientComments?: Prisma.StringNullableWithAggregatesFilter<"TransmittalItem"> | string | null
 }
 
 export type TransmittalItemCreateInput = {
   purposeCode: $Enums.PurposeCode
-  clientStatus?: $Enums.ClientStatus | null
-  clientComments?: string | null
   transmittal: Prisma.TransmittalCreateNestedOneWithoutItemsInput
   documentRevision: Prisma.DocumentRevisionCreateNestedOneWithoutTransmittalItemsInput
+  response?: Prisma.DocTransmittalResponseCreateNestedOneWithoutTransmittalItemInput
 }
 
 export type TransmittalItemUncheckedCreateInput = {
@@ -300,16 +278,14 @@ export type TransmittalItemUncheckedCreateInput = {
   transmittalId: number
   documentRevisionId: number
   purposeCode: $Enums.PurposeCode
-  clientStatus?: $Enums.ClientStatus | null
-  clientComments?: string | null
+  response?: Prisma.DocTransmittalResponseUncheckedCreateNestedOneWithoutTransmittalItemInput
 }
 
 export type TransmittalItemUpdateInput = {
   purposeCode?: Prisma.EnumPurposeCodeFieldUpdateOperationsInput | $Enums.PurposeCode
-  clientStatus?: Prisma.NullableEnumClientStatusFieldUpdateOperationsInput | $Enums.ClientStatus | null
-  clientComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   transmittal?: Prisma.TransmittalUpdateOneRequiredWithoutItemsNestedInput
   documentRevision?: Prisma.DocumentRevisionUpdateOneRequiredWithoutTransmittalItemsNestedInput
+  response?: Prisma.DocTransmittalResponseUpdateOneWithoutTransmittalItemNestedInput
 }
 
 export type TransmittalItemUncheckedUpdateInput = {
@@ -317,8 +293,7 @@ export type TransmittalItemUncheckedUpdateInput = {
   transmittalId?: Prisma.IntFieldUpdateOperationsInput | number
   documentRevisionId?: Prisma.IntFieldUpdateOperationsInput | number
   purposeCode?: Prisma.EnumPurposeCodeFieldUpdateOperationsInput | $Enums.PurposeCode
-  clientStatus?: Prisma.NullableEnumClientStatusFieldUpdateOperationsInput | $Enums.ClientStatus | null
-  clientComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  response?: Prisma.DocTransmittalResponseUncheckedUpdateOneWithoutTransmittalItemNestedInput
 }
 
 export type TransmittalItemCreateManyInput = {
@@ -326,14 +301,10 @@ export type TransmittalItemCreateManyInput = {
   transmittalId: number
   documentRevisionId: number
   purposeCode: $Enums.PurposeCode
-  clientStatus?: $Enums.ClientStatus | null
-  clientComments?: string | null
 }
 
 export type TransmittalItemUpdateManyMutationInput = {
   purposeCode?: Prisma.EnumPurposeCodeFieldUpdateOperationsInput | $Enums.PurposeCode
-  clientStatus?: Prisma.NullableEnumClientStatusFieldUpdateOperationsInput | $Enums.ClientStatus | null
-  clientComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TransmittalItemUncheckedUpdateManyInput = {
@@ -341,8 +312,6 @@ export type TransmittalItemUncheckedUpdateManyInput = {
   transmittalId?: Prisma.IntFieldUpdateOperationsInput | number
   documentRevisionId?: Prisma.IntFieldUpdateOperationsInput | number
   purposeCode?: Prisma.EnumPurposeCodeFieldUpdateOperationsInput | $Enums.PurposeCode
-  clientStatus?: Prisma.NullableEnumClientStatusFieldUpdateOperationsInput | $Enums.ClientStatus | null
-  clientComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TransmittalItemListRelationFilter = {
@@ -360,8 +329,6 @@ export type TransmittalItemCountOrderByAggregateInput = {
   transmittalId?: Prisma.SortOrder
   documentRevisionId?: Prisma.SortOrder
   purposeCode?: Prisma.SortOrder
-  clientStatus?: Prisma.SortOrder
-  clientComments?: Prisma.SortOrder
 }
 
 export type TransmittalItemAvgOrderByAggregateInput = {
@@ -375,8 +342,6 @@ export type TransmittalItemMaxOrderByAggregateInput = {
   transmittalId?: Prisma.SortOrder
   documentRevisionId?: Prisma.SortOrder
   purposeCode?: Prisma.SortOrder
-  clientStatus?: Prisma.SortOrder
-  clientComments?: Prisma.SortOrder
 }
 
 export type TransmittalItemMinOrderByAggregateInput = {
@@ -384,14 +349,17 @@ export type TransmittalItemMinOrderByAggregateInput = {
   transmittalId?: Prisma.SortOrder
   documentRevisionId?: Prisma.SortOrder
   purposeCode?: Prisma.SortOrder
-  clientStatus?: Prisma.SortOrder
-  clientComments?: Prisma.SortOrder
 }
 
 export type TransmittalItemSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   transmittalId?: Prisma.SortOrder
   documentRevisionId?: Prisma.SortOrder
+}
+
+export type TransmittalItemScalarRelationFilter = {
+  is?: Prisma.TransmittalItemWhereInput
+  isNot?: Prisma.TransmittalItemWhereInput
 }
 
 export type TransmittalItemCreateNestedManyWithoutDocumentRevisionInput = {
@@ -482,23 +450,31 @@ export type EnumPurposeCodeFieldUpdateOperationsInput = {
   set?: $Enums.PurposeCode
 }
 
-export type NullableEnumClientStatusFieldUpdateOperationsInput = {
-  set?: $Enums.ClientStatus | null
+export type TransmittalItemCreateNestedOneWithoutResponseInput = {
+  create?: Prisma.XOR<Prisma.TransmittalItemCreateWithoutResponseInput, Prisma.TransmittalItemUncheckedCreateWithoutResponseInput>
+  connectOrCreate?: Prisma.TransmittalItemCreateOrConnectWithoutResponseInput
+  connect?: Prisma.TransmittalItemWhereUniqueInput
+}
+
+export type TransmittalItemUpdateOneRequiredWithoutResponseNestedInput = {
+  create?: Prisma.XOR<Prisma.TransmittalItemCreateWithoutResponseInput, Prisma.TransmittalItemUncheckedCreateWithoutResponseInput>
+  connectOrCreate?: Prisma.TransmittalItemCreateOrConnectWithoutResponseInput
+  upsert?: Prisma.TransmittalItemUpsertWithoutResponseInput
+  connect?: Prisma.TransmittalItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TransmittalItemUpdateToOneWithWhereWithoutResponseInput, Prisma.TransmittalItemUpdateWithoutResponseInput>, Prisma.TransmittalItemUncheckedUpdateWithoutResponseInput>
 }
 
 export type TransmittalItemCreateWithoutDocumentRevisionInput = {
   purposeCode: $Enums.PurposeCode
-  clientStatus?: $Enums.ClientStatus | null
-  clientComments?: string | null
   transmittal: Prisma.TransmittalCreateNestedOneWithoutItemsInput
+  response?: Prisma.DocTransmittalResponseCreateNestedOneWithoutTransmittalItemInput
 }
 
 export type TransmittalItemUncheckedCreateWithoutDocumentRevisionInput = {
   id?: number
   transmittalId: number
   purposeCode: $Enums.PurposeCode
-  clientStatus?: $Enums.ClientStatus | null
-  clientComments?: string | null
+  response?: Prisma.DocTransmittalResponseUncheckedCreateNestedOneWithoutTransmittalItemInput
 }
 
 export type TransmittalItemCreateOrConnectWithoutDocumentRevisionInput = {
@@ -535,23 +511,19 @@ export type TransmittalItemScalarWhereInput = {
   transmittalId?: Prisma.IntFilter<"TransmittalItem"> | number
   documentRevisionId?: Prisma.IntFilter<"TransmittalItem"> | number
   purposeCode?: Prisma.EnumPurposeCodeFilter<"TransmittalItem"> | $Enums.PurposeCode
-  clientStatus?: Prisma.EnumClientStatusNullableFilter<"TransmittalItem"> | $Enums.ClientStatus | null
-  clientComments?: Prisma.StringNullableFilter<"TransmittalItem"> | string | null
 }
 
 export type TransmittalItemCreateWithoutTransmittalInput = {
   purposeCode: $Enums.PurposeCode
-  clientStatus?: $Enums.ClientStatus | null
-  clientComments?: string | null
   documentRevision: Prisma.DocumentRevisionCreateNestedOneWithoutTransmittalItemsInput
+  response?: Prisma.DocTransmittalResponseCreateNestedOneWithoutTransmittalItemInput
 }
 
 export type TransmittalItemUncheckedCreateWithoutTransmittalInput = {
   id?: number
   documentRevisionId: number
   purposeCode: $Enums.PurposeCode
-  clientStatus?: $Enums.ClientStatus | null
-  clientComments?: string | null
+  response?: Prisma.DocTransmittalResponseUncheckedCreateNestedOneWithoutTransmittalItemInput
 }
 
 export type TransmittalItemCreateOrConnectWithoutTransmittalInput = {
@@ -580,66 +552,96 @@ export type TransmittalItemUpdateManyWithWhereWithoutTransmittalInput = {
   data: Prisma.XOR<Prisma.TransmittalItemUpdateManyMutationInput, Prisma.TransmittalItemUncheckedUpdateManyWithoutTransmittalInput>
 }
 
+export type TransmittalItemCreateWithoutResponseInput = {
+  purposeCode: $Enums.PurposeCode
+  transmittal: Prisma.TransmittalCreateNestedOneWithoutItemsInput
+  documentRevision: Prisma.DocumentRevisionCreateNestedOneWithoutTransmittalItemsInput
+}
+
+export type TransmittalItemUncheckedCreateWithoutResponseInput = {
+  id?: number
+  transmittalId: number
+  documentRevisionId: number
+  purposeCode: $Enums.PurposeCode
+}
+
+export type TransmittalItemCreateOrConnectWithoutResponseInput = {
+  where: Prisma.TransmittalItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.TransmittalItemCreateWithoutResponseInput, Prisma.TransmittalItemUncheckedCreateWithoutResponseInput>
+}
+
+export type TransmittalItemUpsertWithoutResponseInput = {
+  update: Prisma.XOR<Prisma.TransmittalItemUpdateWithoutResponseInput, Prisma.TransmittalItemUncheckedUpdateWithoutResponseInput>
+  create: Prisma.XOR<Prisma.TransmittalItemCreateWithoutResponseInput, Prisma.TransmittalItemUncheckedCreateWithoutResponseInput>
+  where?: Prisma.TransmittalItemWhereInput
+}
+
+export type TransmittalItemUpdateToOneWithWhereWithoutResponseInput = {
+  where?: Prisma.TransmittalItemWhereInput
+  data: Prisma.XOR<Prisma.TransmittalItemUpdateWithoutResponseInput, Prisma.TransmittalItemUncheckedUpdateWithoutResponseInput>
+}
+
+export type TransmittalItemUpdateWithoutResponseInput = {
+  purposeCode?: Prisma.EnumPurposeCodeFieldUpdateOperationsInput | $Enums.PurposeCode
+  transmittal?: Prisma.TransmittalUpdateOneRequiredWithoutItemsNestedInput
+  documentRevision?: Prisma.DocumentRevisionUpdateOneRequiredWithoutTransmittalItemsNestedInput
+}
+
+export type TransmittalItemUncheckedUpdateWithoutResponseInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  transmittalId?: Prisma.IntFieldUpdateOperationsInput | number
+  documentRevisionId?: Prisma.IntFieldUpdateOperationsInput | number
+  purposeCode?: Prisma.EnumPurposeCodeFieldUpdateOperationsInput | $Enums.PurposeCode
+}
+
 export type TransmittalItemCreateManyDocumentRevisionInput = {
   id?: number
   transmittalId: number
   purposeCode: $Enums.PurposeCode
-  clientStatus?: $Enums.ClientStatus | null
-  clientComments?: string | null
 }
 
 export type TransmittalItemUpdateWithoutDocumentRevisionInput = {
   purposeCode?: Prisma.EnumPurposeCodeFieldUpdateOperationsInput | $Enums.PurposeCode
-  clientStatus?: Prisma.NullableEnumClientStatusFieldUpdateOperationsInput | $Enums.ClientStatus | null
-  clientComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   transmittal?: Prisma.TransmittalUpdateOneRequiredWithoutItemsNestedInput
+  response?: Prisma.DocTransmittalResponseUpdateOneWithoutTransmittalItemNestedInput
 }
 
 export type TransmittalItemUncheckedUpdateWithoutDocumentRevisionInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   transmittalId?: Prisma.IntFieldUpdateOperationsInput | number
   purposeCode?: Prisma.EnumPurposeCodeFieldUpdateOperationsInput | $Enums.PurposeCode
-  clientStatus?: Prisma.NullableEnumClientStatusFieldUpdateOperationsInput | $Enums.ClientStatus | null
-  clientComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  response?: Prisma.DocTransmittalResponseUncheckedUpdateOneWithoutTransmittalItemNestedInput
 }
 
 export type TransmittalItemUncheckedUpdateManyWithoutDocumentRevisionInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   transmittalId?: Prisma.IntFieldUpdateOperationsInput | number
   purposeCode?: Prisma.EnumPurposeCodeFieldUpdateOperationsInput | $Enums.PurposeCode
-  clientStatus?: Prisma.NullableEnumClientStatusFieldUpdateOperationsInput | $Enums.ClientStatus | null
-  clientComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TransmittalItemCreateManyTransmittalInput = {
   id?: number
   documentRevisionId: number
   purposeCode: $Enums.PurposeCode
-  clientStatus?: $Enums.ClientStatus | null
-  clientComments?: string | null
 }
 
 export type TransmittalItemUpdateWithoutTransmittalInput = {
   purposeCode?: Prisma.EnumPurposeCodeFieldUpdateOperationsInput | $Enums.PurposeCode
-  clientStatus?: Prisma.NullableEnumClientStatusFieldUpdateOperationsInput | $Enums.ClientStatus | null
-  clientComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentRevision?: Prisma.DocumentRevisionUpdateOneRequiredWithoutTransmittalItemsNestedInput
+  response?: Prisma.DocTransmittalResponseUpdateOneWithoutTransmittalItemNestedInput
 }
 
 export type TransmittalItemUncheckedUpdateWithoutTransmittalInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   documentRevisionId?: Prisma.IntFieldUpdateOperationsInput | number
   purposeCode?: Prisma.EnumPurposeCodeFieldUpdateOperationsInput | $Enums.PurposeCode
-  clientStatus?: Prisma.NullableEnumClientStatusFieldUpdateOperationsInput | $Enums.ClientStatus | null
-  clientComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  response?: Prisma.DocTransmittalResponseUncheckedUpdateOneWithoutTransmittalItemNestedInput
 }
 
 export type TransmittalItemUncheckedUpdateManyWithoutTransmittalInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   documentRevisionId?: Prisma.IntFieldUpdateOperationsInput | number
   purposeCode?: Prisma.EnumPurposeCodeFieldUpdateOperationsInput | $Enums.PurposeCode
-  clientStatus?: Prisma.NullableEnumClientStatusFieldUpdateOperationsInput | $Enums.ClientStatus | null
-  clientComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -649,10 +651,9 @@ export type TransmittalItemSelect<ExtArgs extends runtime.Types.Extensions.Inter
   transmittalId?: boolean
   documentRevisionId?: boolean
   purposeCode?: boolean
-  clientStatus?: boolean
-  clientComments?: boolean
   transmittal?: boolean | Prisma.TransmittalDefaultArgs<ExtArgs>
   documentRevision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
+  response?: boolean | Prisma.TransmittalItem$responseArgs<ExtArgs>
 }, ExtArgs["result"]["transmittalItem"]>
 
 export type TransmittalItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -660,8 +661,6 @@ export type TransmittalItemSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   transmittalId?: boolean
   documentRevisionId?: boolean
   purposeCode?: boolean
-  clientStatus?: boolean
-  clientComments?: boolean
   transmittal?: boolean | Prisma.TransmittalDefaultArgs<ExtArgs>
   documentRevision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["transmittalItem"]>
@@ -671,8 +670,6 @@ export type TransmittalItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   transmittalId?: boolean
   documentRevisionId?: boolean
   purposeCode?: boolean
-  clientStatus?: boolean
-  clientComments?: boolean
   transmittal?: boolean | Prisma.TransmittalDefaultArgs<ExtArgs>
   documentRevision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["transmittalItem"]>
@@ -682,14 +679,13 @@ export type TransmittalItemSelectScalar = {
   transmittalId?: boolean
   documentRevisionId?: boolean
   purposeCode?: boolean
-  clientStatus?: boolean
-  clientComments?: boolean
 }
 
-export type TransmittalItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "transmittalId" | "documentRevisionId" | "purposeCode" | "clientStatus" | "clientComments", ExtArgs["result"]["transmittalItem"]>
+export type TransmittalItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "transmittalId" | "documentRevisionId" | "purposeCode", ExtArgs["result"]["transmittalItem"]>
 export type TransmittalItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   transmittal?: boolean | Prisma.TransmittalDefaultArgs<ExtArgs>
   documentRevision?: boolean | Prisma.DocumentRevisionDefaultArgs<ExtArgs>
+  response?: boolean | Prisma.TransmittalItem$responseArgs<ExtArgs>
 }
 export type TransmittalItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   transmittal?: boolean | Prisma.TransmittalDefaultArgs<ExtArgs>
@@ -705,14 +701,13 @@ export type $TransmittalItemPayload<ExtArgs extends runtime.Types.Extensions.Int
   objects: {
     transmittal: Prisma.$TransmittalPayload<ExtArgs>
     documentRevision: Prisma.$DocumentRevisionPayload<ExtArgs>
+    response: Prisma.$DocTransmittalResponsePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     transmittalId: number
     documentRevisionId: number
     purposeCode: $Enums.PurposeCode
-    clientStatus: $Enums.ClientStatus | null
-    clientComments: string | null
   }, ExtArgs["result"]["transmittalItem"]>
   composites: {}
 }
@@ -1109,6 +1104,7 @@ export interface Prisma__TransmittalItemClient<T, Null = never, ExtArgs extends 
   readonly [Symbol.toStringTag]: "PrismaPromise"
   transmittal<T extends Prisma.TransmittalDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TransmittalDefaultArgs<ExtArgs>>): Prisma.Prisma__TransmittalClient<runtime.Types.Result.GetResult<Prisma.$TransmittalPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   documentRevision<T extends Prisma.DocumentRevisionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentRevisionDefaultArgs<ExtArgs>>): Prisma.Prisma__DocumentRevisionClient<runtime.Types.Result.GetResult<Prisma.$DocumentRevisionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  response<T extends Prisma.TransmittalItem$responseArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TransmittalItem$responseArgs<ExtArgs>>): Prisma.Prisma__DocTransmittalResponseClient<runtime.Types.Result.GetResult<Prisma.$DocTransmittalResponsePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1142,8 +1138,6 @@ export interface TransmittalItemFieldRefs {
   readonly transmittalId: Prisma.FieldRef<"TransmittalItem", 'Int'>
   readonly documentRevisionId: Prisma.FieldRef<"TransmittalItem", 'Int'>
   readonly purposeCode: Prisma.FieldRef<"TransmittalItem", 'PurposeCode'>
-  readonly clientStatus: Prisma.FieldRef<"TransmittalItem", 'ClientStatus'>
-  readonly clientComments: Prisma.FieldRef<"TransmittalItem", 'String'>
 }
     
 
@@ -1542,6 +1536,25 @@ export type TransmittalItemDeleteManyArgs<ExtArgs extends runtime.Types.Extensio
    * Limit how many TransmittalItems to delete.
    */
   limit?: number
+}
+
+/**
+ * TransmittalItem.response
+ */
+export type TransmittalItem$responseArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocTransmittalResponse
+   */
+  select?: Prisma.DocTransmittalResponseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocTransmittalResponse
+   */
+  omit?: Prisma.DocTransmittalResponseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocTransmittalResponseInclude<ExtArgs> | null
+  where?: Prisma.DocTransmittalResponseWhereInput
 }
 
 /**

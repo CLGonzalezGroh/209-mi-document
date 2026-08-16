@@ -133,16 +133,6 @@ export const PurposeCode = {
 export type PurposeCode = (typeof PurposeCode)[keyof typeof PurposeCode]
 
 
-export const ClientStatus = {
-  APPROVED: 'APPROVED',
-  APPROVED_WITH_COMMENTS: 'APPROVED_WITH_COMMENTS',
-  REJECTED: 'REJECTED',
-  REVIEWED_NO_EXCEPTION: 'REVIEWED_NO_EXCEPTION'
-} as const
-
-export type ClientStatus = (typeof ClientStatus)[keyof typeof ClientStatus]
-
-
 export const LogLevel = {
   INFO: 'INFO',
   WARNING: 'WARNING',
@@ -202,7 +192,8 @@ export const DocObjectType = {
   DOC_WORKFLOW_TEMPLATE: 'DOC_WORKFLOW_TEMPLATE',
   DOC_SETTINGS: 'DOC_SETTINGS',
   DOC_REPLACEMENT: 'DOC_REPLACEMENT',
-  DOC_QUALIFICATION: 'DOC_QUALIFICATION'
+  DOC_QUALIFICATION: 'DOC_QUALIFICATION',
+  DOC_TRANSMITTAL_RESPONSE: 'DOC_TRANSMITTAL_RESPONSE'
 } as const
 
 export type DocObjectType = (typeof DocObjectType)[keyof typeof DocObjectType]

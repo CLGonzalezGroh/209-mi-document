@@ -160,17 +160,6 @@ enum PurposeCode {
 }
 
 "Estado de respuesta del cliente"
-enum ClientStatus {
-  "Aprobado sin comentarios"
-  APPROVED
-  "Aprobado con comentarios"
-  APPROVED_WITH_COMMENTS
-  "Rechazado"
-  REJECTED
-  "Revisado sin objeción"
-  REVIEWED_NO_EXCEPTION
-}
-
 """
 Efecto de una calificación de la contraparte.
 
@@ -291,17 +280,6 @@ enum PurposeCodeInput {
 }
 
 "Estado de respuesta del cliente para inputs"
-enum ClientStatusInput {
-  "Aprobado sin comentarios"
-  APPROVED
-  "Aprobado con comentarios"
-  APPROVED_WITH_COMMENTS
-  "Rechazado"
-  REJECTED
-  "Revisado sin objeción"
-  REVIEWED_NO_EXCEPTION
-}
-
 "Efecto de una calificación de la contraparte, para inputs"
 enum QualificationEffectInput {
   "Habilita usar el documento. No obliga a emitir revisión nueva"
@@ -1168,10 +1146,6 @@ type Transmittal @key(fields: "id") {
   issuedAt: DateTime
   "Usuario que emitió el transmittal"
   issuedBy: UserName!
-  "Fecha de respuesta del cliente"
-  responseAt: DateTime
-  "Comentarios de la respuesta del cliente"
-  responseComments: String
 }
 
 "Item de un transmittal"
@@ -1200,10 +1174,78 @@ type TransmittalItem {
   por otro medio.
   """
   missingFileRoles: [DocFileRole!]!
-  "Estado de respuesta del cliente"
-  clientStatus: ClientStatus
-  "Comentarios del cliente"
-  clientComments: String
+  """
+  La respuesta de la contraparte sobre este documento. Nula mientras no llegó.
+
+  Es un objeto propio y no una versión: el archivo que devuelve la contraparte
+  llega de afuera del circuito, sin paso vigente que lo produzca ni firma que lo
+  acredite.
+  """
+  response: DocTransmittalResponse
+}
+
+"""
+Respuesta de la contraparte sobre un documento emitido.
+
+Cuelga del ítem por el que ese documento salió. Una por ítem: la contraparte
+califica una emisión una sola vez, y corregirla es editar esta.
+"""
+type DocTransmittalResponse {
+  "Identificador único"
+  id: Int!
+  "Fecha de REGISTRO de la respuesta"
+  createdAt: DateTime!
+  "Fecha de la última corrección"
+  updatedAt: DateTime
+  "El ítem por el que ese documento salió"
+  transmittalItem: TransmittalItem!
+  "Calificación con que la contraparte respondió. Único dato obligatorio"
+  qualification: DocQualification!
+  "Comentarios de la contraparte"
+  comments: String
+  """
+  Quién respondió, como texto.
+
+  El cliente que responde por correo o por un repositorio compartido no es
+  usuario del sistema y no tiene `User` que lo represente. Nulo cuando la
+  respuesta la ingresó directamente quien la registra.
+  """
+  respondedBy: String
+  "Fecha REAL de la respuesta, frente a createdAt que es la de registro"
+  respondedAt: DateTime
+  "Quién la registró. En el caso habitual, el control documental"
+  registeredBy: UserName!
+  """
+  ¿La transcribió alguien distinto de quien respondió?
+
+  Se DERIVA de que ambos datos existan, en lugar de almacenarse como indicador.
+  """
+  transcribed: Boolean!
+  "El sobre en que viajó, si vino consolidada. Nulo documento a documento"
+  responseTransmittal: Transmittal
+  "Los archivos marcados que devolvió la contraparte. Pueden no existir"
+  files: [DocResponseFile!]!
+}
+
+"Archivo devuelto por la contraparte junto con su calificación"
+type DocResponseFile {
+  "Identificador único"
+  id: Int!
+  "Fecha de creación"
+  createdAt: DateTime!
+  "Key en el repositorio"
+  fileKey: String!
+  "Nombre original del archivo"
+  fileName: String!
+  "Tamaño en bytes"
+  fileSize: Int!
+  "Tipo MIME"
+  mimeType: String!
+  """
+  Integridad del archivo. Opcional, a diferencia del archivo de una versión:
+  nadie firma la respuesta, de modo que no hay firma que dependa de él.
+  """
+  checksum: String
 }
 
 # ═══════════════════════════════════════════════════════
@@ -2323,22 +2365,51 @@ input TransmittalItemInput {
   purposeCode: PurposeCodeInput!
 }
 
-"Input para responder un transmittal"
-input RespondTransmittalInput {
-  "Comentarios generales de la respuesta"
-  responseComments: String
-  "Respuestas por cada item"
-  items: [TransmittalItemResponseInput!]!
+"Input para registrar la respuesta de un documento emitido"
+input RegisterItemResponseInput {
+  "Calificación del catálogo vigente del proyecto. Único dato obligatorio"
+  qualificationId: Int!
+  "Comentarios de la contraparte"
+  comments: String
+  "Quién respondió, como texto. Omitido cuando responde quien registra"
+  respondedBy: String
+  "Fecha real de la respuesta, si se conoce"
+  respondedAt: DateTime
+  "El sobre en que viajó, si vino consolidada en un transmittal de respuesta"
+  responseTransmittalId: Int
+  "Los archivos marcados que devolvió la contraparte. Pueden no existir"
+  files: [ResponseFileInput!]
 }
 
-"Input de respuesta por item del transmittal"
-input TransmittalItemResponseInput {
-  "ID del item del transmittal"
-  itemId: Int!
-  "Estado de respuesta del cliente"
-  clientStatus: ClientStatusInput!
-  "Comentarios del cliente para este item"
-  clientComments: String
+"Archivo devuelto por la contraparte"
+input ResponseFileInput {
+  "Key en el repositorio"
+  fileKey: String!
+  "Nombre original del archivo"
+  fileName: String!
+  "Tamaño en bytes"
+  fileSize: Int!
+  "Tipo MIME"
+  mimeType: String!
+  "Integridad del archivo, si se calculó"
+  checksum: String
+}
+
+"""
+Input para corregir una respuesta ya registrada.
+
+Nadie la firma, de modo que se corrige en lugar de abrirse otra. Los archivos no
+se editan: agregar o quitar evidencia es otro acto.
+"""
+input CorrectItemResponseInput {
+  "Nueva calificación"
+  qualificationId: Int
+  "Nuevos comentarios"
+  comments: String
+  "Quién respondió"
+  respondedBy: String
+  "Fecha real de la respuesta"
+  respondedAt: DateTime
 }
 
 "Input para crear un adjunto"
@@ -3035,7 +3106,23 @@ type Mutation {
   issueTransmittal(id: Int!): Transmittal!
 
   "Registrar respuesta del cliente en un transmittal"
-  respondTransmittal(id: Int!, input: RespondTransmittalInput!): Transmittal!
+  """
+  Registrar la respuesta de un documento emitido.
+
+  Es la vía documento a documento, que es la práctica actual. Si la respuesta
+  llegó consolidada en un remito, se declara ese sobre y el resultado es el
+  mismo objeto.
+  """
+  registerItemResponse(itemId: Int!, input: RegisterItemResponseInput!): DocTransmittalResponse!
+
+  """
+  Corregir una respuesta ya registrada.
+
+  Nadie la firma —el cliente no participa de nuestro circuito— y siendo
+  transcripta a mano, el error es esperable. La corrección queda auditada con el
+  valor anterior.
+  """
+  correctItemResponse(responseId: Int!, input: CorrectItemResponseInput!): DocTransmittalResponse!
 
   "Cerrar un transmittal"
   closeTransmittal(id: Int!): Transmittal!

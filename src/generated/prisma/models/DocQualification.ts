@@ -288,6 +288,7 @@ export type DocQualificationWhereInput = {
   label?: Prisma.StringFilter<"DocQualification"> | string
   effect?: Prisma.EnumQualificationEffectFilter<"DocQualification"> | $Enums.QualificationEffect
   sortOrder?: Prisma.IntFilter<"DocQualification"> | number
+  responses?: Prisma.DocTransmittalResponseListRelationFilter
 }
 
 export type DocQualificationOrderByWithRelationInput = {
@@ -303,6 +304,7 @@ export type DocQualificationOrderByWithRelationInput = {
   label?: Prisma.SortOrder
   effect?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
+  responses?: Prisma.DocTransmittalResponseOrderByRelationAggregateInput
 }
 
 export type DocQualificationWhereUniqueInput = Prisma.AtLeast<{
@@ -322,6 +324,7 @@ export type DocQualificationWhereUniqueInput = Prisma.AtLeast<{
   label?: Prisma.StringFilter<"DocQualification"> | string
   effect?: Prisma.EnumQualificationEffectFilter<"DocQualification"> | $Enums.QualificationEffect
   sortOrder?: Prisma.IntFilter<"DocQualification"> | number
+  responses?: Prisma.DocTransmittalResponseListRelationFilter
 }, "id" | "code_projectId">
 
 export type DocQualificationOrderByWithAggregationInput = {
@@ -374,6 +377,7 @@ export type DocQualificationCreateInput = {
   label: string
   effect: $Enums.QualificationEffect
   sortOrder?: number
+  responses?: Prisma.DocTransmittalResponseCreateNestedManyWithoutQualificationInput
 }
 
 export type DocQualificationUncheckedCreateInput = {
@@ -389,6 +393,7 @@ export type DocQualificationUncheckedCreateInput = {
   label: string
   effect: $Enums.QualificationEffect
   sortOrder?: number
+  responses?: Prisma.DocTransmittalResponseUncheckedCreateNestedManyWithoutQualificationInput
 }
 
 export type DocQualificationUpdateInput = {
@@ -403,6 +408,7 @@ export type DocQualificationUpdateInput = {
   label?: Prisma.StringFieldUpdateOperationsInput | string
   effect?: Prisma.EnumQualificationEffectFieldUpdateOperationsInput | $Enums.QualificationEffect
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  responses?: Prisma.DocTransmittalResponseUpdateManyWithoutQualificationNestedInput
 }
 
 export type DocQualificationUncheckedUpdateInput = {
@@ -418,6 +424,7 @@ export type DocQualificationUncheckedUpdateInput = {
   label?: Prisma.StringFieldUpdateOperationsInput | string
   effect?: Prisma.EnumQualificationEffectFieldUpdateOperationsInput | $Enums.QualificationEffect
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  responses?: Prisma.DocTransmittalResponseUncheckedUpdateManyWithoutQualificationNestedInput
 }
 
 export type DocQualificationCreateManyInput = {
@@ -530,10 +537,132 @@ export type DocQualificationSumOrderByAggregateInput = {
   sortOrder?: Prisma.SortOrder
 }
 
+export type DocQualificationScalarRelationFilter = {
+  is?: Prisma.DocQualificationWhereInput
+  isNot?: Prisma.DocQualificationWhereInput
+}
+
 export type EnumQualificationEffectFieldUpdateOperationsInput = {
   set?: $Enums.QualificationEffect
 }
 
+export type DocQualificationCreateNestedOneWithoutResponsesInput = {
+  create?: Prisma.XOR<Prisma.DocQualificationCreateWithoutResponsesInput, Prisma.DocQualificationUncheckedCreateWithoutResponsesInput>
+  connectOrCreate?: Prisma.DocQualificationCreateOrConnectWithoutResponsesInput
+  connect?: Prisma.DocQualificationWhereUniqueInput
+}
+
+export type DocQualificationUpdateOneRequiredWithoutResponsesNestedInput = {
+  create?: Prisma.XOR<Prisma.DocQualificationCreateWithoutResponsesInput, Prisma.DocQualificationUncheckedCreateWithoutResponsesInput>
+  connectOrCreate?: Prisma.DocQualificationCreateOrConnectWithoutResponsesInput
+  upsert?: Prisma.DocQualificationUpsertWithoutResponsesInput
+  connect?: Prisma.DocQualificationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocQualificationUpdateToOneWithWhereWithoutResponsesInput, Prisma.DocQualificationUpdateWithoutResponsesInput>, Prisma.DocQualificationUncheckedUpdateWithoutResponsesInput>
+}
+
+export type DocQualificationCreateWithoutResponsesInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  projectId?: number | null
+  code: string
+  label: string
+  effect: $Enums.QualificationEffect
+  sortOrder?: number
+}
+
+export type DocQualificationUncheckedCreateWithoutResponsesInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  projectId?: number | null
+  code: string
+  label: string
+  effect: $Enums.QualificationEffect
+  sortOrder?: number
+}
+
+export type DocQualificationCreateOrConnectWithoutResponsesInput = {
+  where: Prisma.DocQualificationWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocQualificationCreateWithoutResponsesInput, Prisma.DocQualificationUncheckedCreateWithoutResponsesInput>
+}
+
+export type DocQualificationUpsertWithoutResponsesInput = {
+  update: Prisma.XOR<Prisma.DocQualificationUpdateWithoutResponsesInput, Prisma.DocQualificationUncheckedUpdateWithoutResponsesInput>
+  create: Prisma.XOR<Prisma.DocQualificationCreateWithoutResponsesInput, Prisma.DocQualificationUncheckedCreateWithoutResponsesInput>
+  where?: Prisma.DocQualificationWhereInput
+}
+
+export type DocQualificationUpdateToOneWithWhereWithoutResponsesInput = {
+  where?: Prisma.DocQualificationWhereInput
+  data: Prisma.XOR<Prisma.DocQualificationUpdateWithoutResponsesInput, Prisma.DocQualificationUncheckedUpdateWithoutResponsesInput>
+}
+
+export type DocQualificationUpdateWithoutResponsesInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  effect?: Prisma.EnumQualificationEffectFieldUpdateOperationsInput | $Enums.QualificationEffect
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+}
+
+export type DocQualificationUncheckedUpdateWithoutResponsesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  effect?: Prisma.EnumQualificationEffectFieldUpdateOperationsInput | $Enums.QualificationEffect
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+}
+
+
+/**
+ * Count Type DocQualificationCountOutputType
+ */
+
+export type DocQualificationCountOutputType = {
+  responses: number
+}
+
+export type DocQualificationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  responses?: boolean | DocQualificationCountOutputTypeCountResponsesArgs
+}
+
+/**
+ * DocQualificationCountOutputType without action
+ */
+export type DocQualificationCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocQualificationCountOutputType
+   */
+  select?: Prisma.DocQualificationCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * DocQualificationCountOutputType without action
+ */
+export type DocQualificationCountOutputTypeCountResponsesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocTransmittalResponseWhereInput
+}
 
 
 export type DocQualificationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -549,6 +678,8 @@ export type DocQualificationSelect<ExtArgs extends runtime.Types.Extensions.Inte
   label?: boolean
   effect?: boolean
   sortOrder?: boolean
+  responses?: boolean | Prisma.DocQualification$responsesArgs<ExtArgs>
+  _count?: boolean | Prisma.DocQualificationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["docQualification"]>
 
 export type DocQualificationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -597,10 +728,18 @@ export type DocQualificationSelectScalar = {
 }
 
 export type DocQualificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "projectId" | "code" | "label" | "effect" | "sortOrder", ExtArgs["result"]["docQualification"]>
+export type DocQualificationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  responses?: boolean | Prisma.DocQualification$responsesArgs<ExtArgs>
+  _count?: boolean | Prisma.DocQualificationCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type DocQualificationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type DocQualificationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $DocQualificationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DocQualification"
-  objects: {}
+  objects: {
+    responses: Prisma.$DocTransmittalResponsePayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     createdAt: Date
@@ -1008,6 +1147,7 @@ readonly fields: DocQualificationFieldRefs;
  */
 export interface Prisma__DocQualificationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  responses<T extends Prisma.DocQualification$responsesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocQualification$responsesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocTransmittalResponsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1066,6 +1206,10 @@ export type DocQualificationFindUniqueArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.DocQualificationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocQualificationInclude<ExtArgs> | null
+  /**
    * Filter, which DocQualification to fetch.
    */
   where: Prisma.DocQualificationWhereUniqueInput
@@ -1084,6 +1228,10 @@ export type DocQualificationFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.DocQualificationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocQualificationInclude<ExtArgs> | null
+  /**
    * Filter, which DocQualification to fetch.
    */
   where: Prisma.DocQualificationWhereUniqueInput
@@ -1101,6 +1249,10 @@ export type DocQualificationFindFirstArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the DocQualification
    */
   omit?: Prisma.DocQualificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocQualificationInclude<ExtArgs> | null
   /**
    * Filter, which DocQualification to fetch.
    */
@@ -1150,6 +1302,10 @@ export type DocQualificationFindFirstOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.DocQualificationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocQualificationInclude<ExtArgs> | null
+  /**
    * Filter, which DocQualification to fetch.
    */
   where?: Prisma.DocQualificationWhereInput
@@ -1197,6 +1353,10 @@ export type DocQualificationFindManyArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the DocQualification
    */
   omit?: Prisma.DocQualificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocQualificationInclude<ExtArgs> | null
   /**
    * Filter, which DocQualifications to fetch.
    */
@@ -1246,6 +1406,10 @@ export type DocQualificationCreateArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.DocQualificationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocQualificationInclude<ExtArgs> | null
+  /**
    * The data needed to create a DocQualification.
    */
   data: Prisma.XOR<Prisma.DocQualificationCreateInput, Prisma.DocQualificationUncheckedCreateInput>
@@ -1293,6 +1457,10 @@ export type DocQualificationUpdateArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the DocQualification
    */
   omit?: Prisma.DocQualificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocQualificationInclude<ExtArgs> | null
   /**
    * The data needed to update a DocQualification.
    */
@@ -1360,6 +1528,10 @@ export type DocQualificationUpsertArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.DocQualificationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocQualificationInclude<ExtArgs> | null
+  /**
    * The filter to search for the DocQualification to update in case it exists.
    */
   where: Prisma.DocQualificationWhereUniqueInput
@@ -1386,6 +1558,10 @@ export type DocQualificationDeleteArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.DocQualificationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocQualificationInclude<ExtArgs> | null
+  /**
    * Filter which DocQualification to delete.
    */
   where: Prisma.DocQualificationWhereUniqueInput
@@ -1406,6 +1582,30 @@ export type DocQualificationDeleteManyArgs<ExtArgs extends runtime.Types.Extensi
 }
 
 /**
+ * DocQualification.responses
+ */
+export type DocQualification$responsesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocTransmittalResponse
+   */
+  select?: Prisma.DocTransmittalResponseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocTransmittalResponse
+   */
+  omit?: Prisma.DocTransmittalResponseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocTransmittalResponseInclude<ExtArgs> | null
+  where?: Prisma.DocTransmittalResponseWhereInput
+  orderBy?: Prisma.DocTransmittalResponseOrderByWithRelationInput | Prisma.DocTransmittalResponseOrderByWithRelationInput[]
+  cursor?: Prisma.DocTransmittalResponseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocTransmittalResponseScalarFieldEnum | Prisma.DocTransmittalResponseScalarFieldEnum[]
+}
+
+/**
  * DocQualification without action
  */
 export type DocQualificationDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1417,4 +1617,8 @@ export type DocQualificationDefaultArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the DocQualification
    */
   omit?: Prisma.DocQualificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocQualificationInclude<ExtArgs> | null
 }

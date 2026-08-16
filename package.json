@@ -1,6 +1,6 @@
 {
   "name": "209-mi-document",
-  "version": "2.6.2",
+  "version": "2.6.3",
   "description": "María Ingeniería API de Gestión Documental",
   "type": "module",
   "main": "index.js",
@@ -44,7 +44,8 @@
     "test:qualifications": "node --import tsx --test src/utils/qualifications.test.ts",
     "test:transmittal-circulation": "node --import tsx --test src/utils/transmittalCirculation.test.ts",
     "test:emission-purpose": "node --import tsx --test src/utils/emissionPurpose.test.ts",
-    "test:block04": "npm run test:block03b && npm run test:qualifications && npm run test:transmittal-circulation && npm run test:emission-purpose",
+    "test:item-response": "node --import tsx --test src/utils/itemResponse.test.ts",
+    "test:block04": "npm run test:block03b && npm run test:qualifications && npm run test:transmittal-circulation && npm run test:emission-purpose && npm run test:item-response",
     "test:block04-db": "npm run test:block04 && npm run test:events-db && npm run test:project-scope-db && npm run test:object-context-db && npm run test:model-constraints-db",
     "test:block04-integration": "node --import tsx --test src/resolvers/circulation.integration.test.ts",
     "test:block04-all": "npm run test:block04-db && npm run test:block02-integration && npm run test:block03-integration && npm run test:block04-integration"

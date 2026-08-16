@@ -136,13 +136,6 @@ enum PurposeCode {
   AS_BUILT // Documentación as-built
 }
 
-enum ClientStatus {
-  APPROVED // Aprobado sin comentarios
-  APPROVED_WITH_COMMENTS // Aprobado con comentarios
-  REJECTED // Rechazado
-  REVIEWED_NO_EXCEPTION // Revisado sin objeción
-}
-
 enum LogLevel {
   INFO
   WARNING
@@ -733,15 +726,18 @@ model Transmittal {
   // declararan destinatarios distintos, que es lo que la unidad contractual
   // considera inválido. Cierra B11 de BLOQUE 02 en la dirección que anticipó.
   issuedById       Int // Referencia al User del sistema admin
-  issuedAt         DateTime?
-  responseAt       DateTime?
-  responseComments String?
+  issuedAt DateTime?
 
   // Relaciones
   items TransmittalItem[]
 
   respondsTo Transmittal?  @relation("TransmittalResponse", fields: [respondsToTransmittalId], references: [id])
   responses  Transmittal[] @relation("TransmittalResponse")
+
+  // Las respuestas que este transmittal transportó, cuando es de naturaleza
+  // RESPONSE. No son ítems propios: son las respuestas de los ítems de la
+  // emisión que contesta (B5).
+  carriedResponses DocTransmittalResponse[] @relation("CarriedResponses")
 
   @@unique([projectId, code])
   @@index([projectId])
@@ -767,12 +763,15 @@ model TransmittalItem {
   // Quitar el ítem, posible solo en borrador, libera la revisión.
   documentRevisionId Int         @unique
   purposeCode        PurposeCode
-  clientStatus       ClientStatus?
-  clientComments     String?
 
   // Relaciones
-  transmittal      Transmittal      @relation(fields: [transmittalId], references: [id], onDelete: Cascade)
-  documentRevision DocumentRevision @relation(fields: [documentRevisionId], references: [id])
+  //
+  // `clientStatus` y `clientComments` se retiran (BLOQUE 04, B5): la respuesta
+  // dejó de ser dos columnas del ítem y pasó a ser un objeto propio, con sus
+  // archivos, su autoría diferenciada y su fecha real.
+  transmittal      Transmittal             @relation(fields: [transmittalId], references: [id], onDelete: Cascade)
+  documentRevision DocumentRevision        @relation(fields: [documentRevisionId], references: [id])
+  response         DocTransmittalResponse?
 
   @@index([transmittalId])
   @@map("transmittal_items")
@@ -1026,9 +1025,102 @@ model DocQualification {
   // Unicidad del código dentro de su alcance, recreada con NULLS NOT DISTINCT en
   // la migración: sin la cláusula, dos calificaciones del despliegue con el mismo
   // código no chocarían, que es el defecto de H-19.
+  // Relaciones
+  responses DocTransmittalResponse[]
+
   @@unique([code, projectId], map: "doc_qualifications_code_scope_key") // NULLS NOT DISTINCT en la base
   @@index([projectId])
   @@map("doc_qualifications")
+}
+
+// Respuesta de la contraparte sobre un documento emitido (BLOQUE 04, B5).
+//
+// Objeto propio del ÍTEM y no una versión de la revisión. La regla que lo decide
+// vale para los dos modos con un solo enunciado (B6): un archivo producido
+// DENTRO del circuito, por quien tiene el paso vigente, es una versión; un
+// archivo que llega de AFUERA del circuito es evidencia de una respuesta.
+//
+// En modo Emisor el cliente no tiene paso ni firma nuestra, de modo que lo que
+// vuelve es evidencia. En modo Receptor la misma regla da el resultado
+// contrario, y las marcas de la planta sí son versiones: el revisor está
+// adentro.
+//
+// Colgar del ítem hace que H-14 desaparezca por construcción: no existe la
+// operación que actualizaba ítems por identificador sin verificar a qué
+// transmittal pertenecían.
+model DocTransmittalResponse {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  // Una respuesta por ítem: la contraparte califica una emisión UNA vez.
+  // Corregirla es editar esta, no abrir otra.
+  transmittalItemId Int @unique
+
+  // Único dato obligatorio. El archivo es opcional —un rechazo trae el plano
+  // marcado, un sello de aprobado no trae nada— pero una respuesta sin
+  // calificación y sin archivo no registra ningún hecho.
+  qualificationId Int
+
+  comments String?
+
+  // Quién respondió, COMO TEXTO. Lo exige el caso habitual de D-12: el cliente
+  // que responde por correo o por un repositorio compartido no es usuario del
+  // sistema y no tiene User que lo represente.
+  respondedBy String?
+
+  // Fecha real de la respuesta, frente a `createdAt` que es la de registro. La
+  // transcripción es siempre posterior (H-33). Nula cuando no se conoce.
+  respondedAt DateTime?
+
+  // Quién la registró, ese sí como referencia a User: en el caso habitual es el
+  // control documental de la ingeniería. La divergencia con `respondedBy` se
+  // DERIVA de que ambos existan, en lugar de almacenarse como indicador (D-04).
+  registeredById Int
+  updatedById    Int @default(1)
+
+  // El sobre en que viajó, si vino consolidada (D-18). Nulo en la vía documento
+  // a documento, que es la práctica actual. Es lo que unifica las dos formas con
+  // un solo objeto: la respuesta es siempre del documento, y el transmittal de
+  // respuesta es apenas el sobre.
+  responseTransmittalId Int?
+
+  // Relaciones
+  transmittalItem     TransmittalItem  @relation(fields: [transmittalItemId], references: [id], onDelete: Cascade)
+  qualification       DocQualification @relation(fields: [qualificationId], references: [id])
+  responseTransmittal Transmittal?     @relation("CarriedResponses", fields: [responseTransmittalId], references: [id])
+  files               DocResponseFile[]
+
+  @@index([qualificationId])
+  @@index([responseTransmittalId])
+  @@map("doc_transmittal_responses")
+}
+
+// Archivos que devuelve la contraparte (BLOQUE 04, B5 y B6).
+//
+// No son ninguno de los tres roles de D-25 —no son entregable, ni fuente, ni
+// respaldo— porque no integran la entrega: son lo que la contraparte dijo SOBRE
+// la entrega. Por eso cuelgan de la respuesta y no de la versión.
+//
+// `checksum` es opcional, a diferencia del archivo de una versión: nadie firma
+// la respuesta, de modo que no hay firma cuya verificabilidad dependa de él.
+model DocResponseFile {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  responseId Int
+
+  fileKey  String
+  fileName String
+  fileSize Int
+  mimeType String
+  checksum String?
+
+  response DocTransmittalResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  @@unique([responseId, fileKey])
+  @@index([responseId])
+  @@map("doc_response_files")
 }
 
 // ================================
@@ -1065,7 +1157,11 @@ enum DocObjectType {
   // Emisión y respuesta (BLOQUE 04). El catálogo de calificaciones tiene traza
   // propia: es configuración del contrato, y quién agregó o dio de baja una
   // calificación explica por qué una respuesta pudo registrarse con ese valor.
+  //
+  // La respuesta también, y no cuelga del transmittal: es de un documento
+  // concreto, y su traza describe ese documento y no la carpeta en que salió.
   DOC_QUALIFICATION
+  DOC_TRANSMITTAL_RESPONSE
 }
 
 // Transición de estado de un objeto del dominio documental.

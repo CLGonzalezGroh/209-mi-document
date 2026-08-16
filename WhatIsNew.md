@@ -719,3 +719,22 @@ El adelanto tiene un motivo y no es solo comodidad: `B3` formula la puerta **al 
 
 **292 pruebas, 0 fallos.**
 
+### Fase 4 — La respuesta como objeto propio del ítem
+
+Cierra **H-30**, **H-33** y **H-14**, y retira `ClientStatus` en favor del catálogo que incorporó la fase 1.
+
+- **`DocTransmittalResponse`, una por ítem.** La respuesta deja de ser dos columnas del ítem y pasa a ser un objeto, con un solo dato obligatorio —la calificación— y todo lo demás opcional. **H-14 desaparece por construcción**: ya no existe la operación que actualizaba ítems por identificador sin verificar a qué transmittal pertenecían.
+- **El archivo que devuelve la contraparte no es una versión.** La regla vale para los dos modos con un solo enunciado: *un archivo producido dentro del circuito, por quien tiene el paso vigente, es una versión; un archivo que llega de afuera es evidencia de una respuesta*. En modo Emisor el cliente no tiene paso ni firma nuestra; en modo Receptor la misma regla da el resultado contrario, y las marcas de la planta sí son versiones. Los archivos devueltos no son ninguno de los tres roles de `DocFileRole` porque no integran la entrega, y su `checksum` es opcional: nadie firma la respuesta.
+- **Autoría diferenciada.** Quién respondió va como **texto** —el cliente que contesta por correo no es usuario del sistema y no tiene `User` que lo represente—, quién la registró como referencia a `User`, y la fecha real frente a la de registro. La divergencia se **deriva** de que ambos existan, en lugar de almacenarse como indicador, con el criterio de D-04 sobre la firma delegada.
+- **Las dos vías de D-18 con un solo objeto.** Si la respuesta llegó consolidada en un remito, la respuesta declara ese sobre; si llegó documento a documento —la práctica actual— va nulo. El sobre debe contestar **la emisión por la que ese documento salió**: sin esa condición, un remito podría transportar la calificación de documentos que nunca contestó.
+- **La calificación debe pertenecer al catálogo vigente del proyecto.** El alcance de la fase 1 deja de ser decorativo: una lista mezclada admite calificar con un valor que la contraparte no usa.
+- **La respuesta no cambia el estado de la revisión**, y `currentRevision` devuelve lo mismo antes y después. Es lo que D-26 resolvió al eliminar `RevisionStatus.OBSOLETE`: la respuesta no es un estado de la revisión, y dos máquinas de estados sobre el mismo hecho es el defecto que el §1 previene. Lo que sí acompaña es el transmittal, que pasa a respondido con la primera respuesta — parciales y sin bloquear, según D-18.
+- **La respuesta se corrige, con auditoría.** Nadie la firma, de modo que la inmutabilidad de la versión no le aplica; y siendo transcripta a mano, el error es esperable. El evento conserva **el valor anterior**: sin él, la corrección registraría que algo cambió sin decir desde qué.
+- **Solo se responde lo que salió** (D-18). Un transmittal cerrado sí admite respuesta tardía: cerrar declara que se dejó de esperar, no que se dejó de escuchar.
+
+> **Cambios incompatibles**, sin consumidores: se retiran `respondTransmittal` y `RespondTransmittalInput`, la enumeración `ClientStatus` en sus dos formas, `TransmittalItem.clientStatus` y `clientComments`, y `Transmittal.responseAt` y `responseComments`. Las reemplazan `registerItemResponse` y `correctItemResponse`.
+
+> **Atención al migrar**: `20260816160000_item_response` crea las dos tablas y **elimina el tipo `ClientStatus`** junto con las columnas que lo usaban. `20260816180000_response_object_type` agrega el valor a `DocObjectType`, aparte por lo mismo de siempre.
+
+**312 pruebas, 0 fallos.**
+

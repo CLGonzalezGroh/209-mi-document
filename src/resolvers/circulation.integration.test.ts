@@ -648,3 +648,276 @@ test("el transmittal de respuesta no lleva ítems propios", async () => {
   )
 })
 
+// ════════════════════════════════════════════════════════════
+// FASE 4 — La respuesta como objeto propio del ítem
+// ════════════════════════════════════════════════════════════
+
+/** Emisión ya salida, lista para recibir respuesta. */
+const emitido = async (sufijo: string, purpose = PurposeCode.FOR_APPROVAL) => {
+  const revision = await documento(EMISOR, sufijo)
+  await versionCon(revision.id, [DocFileRole.DELIVERABLE])
+  await aprobar(revision.id)
+
+  const transmittal = await conItem(EMISOR, revision.id, purpose)
+  const emitidoTx = (await transmittalResolvers.Mutation.issueTransmittal(
+    null,
+    { id: transmittal.id },
+    context,
+  )) as any
+
+  return { revision, transmittal: emitidoTx, item: emitidoTx.items[0] }
+}
+
+const calificacion = async (code: string) =>
+  prisma.docQualification.findFirstOrThrow({
+    where: { code, projectId: null },
+    select: { id: true },
+  })
+
+const responder = (itemId: number, input: Record<string, unknown>) =>
+  transmittalResolvers.Mutation.registerItemResponse(
+    null,
+    { itemId, input: input as any },
+    context,
+  ) as Promise<any>
+
+// --- La respuesta cuelga del ítem (B5) ---
+
+test("la respuesta se registra sobre el ítem por el que el documento salió", async () => {
+  const { item } = await emitido("RESP-A")
+  const aprobado = await calificacion("APPROVED")
+
+  const respuesta = await responder(item.id, {
+    qualificationId: aprobado.id,
+    comments: "Sin observaciones",
+  })
+
+  assert.equal(respuesta.transmittalItemId, item.id)
+  assert.equal(respuesta.qualificationId, aprobado.id)
+})
+
+test("la calificación es el único dato obligatorio; el archivo es opcional", async () => {
+  // Un rechazo trae el plano marcado, un sello de aprobado no trae nada.
+  const { item } = await emitido("RESP-B")
+  const aprobado = await calificacion("APPROVED")
+
+  const respuesta = await responder(item.id, { qualificationId: aprobado.id })
+
+  assert.equal(respuesta.files.length, 0)
+})
+
+test("el archivo devuelto cuelga de la respuesta y no es una versión", async () => {
+  // B6: un archivo que llega de AFUERA del circuito es evidencia de una
+  // respuesta. El cliente no tiene paso vigente ni firma nuestra.
+  const { revision, item } = await emitido("RESP-C")
+  const rechazado = await calificacion("REJECTED")
+
+  const versionesAntes = await prisma.documentVersion.count({
+    where: { revisionId: revision.id },
+  })
+
+  const respuesta = await responder(item.id, {
+    qualificationId: rechazado.id,
+    files: [
+      {
+        fileKey: "marcado-1",
+        fileName: "plano-marcado.pdf",
+        fileSize: 99,
+        mimeType: "application/pdf",
+      },
+    ],
+  })
+
+  assert.equal(respuesta.files.length, 1)
+  assert.equal(respuesta.files[0].checksum, null)
+
+  const versionesDespues = await prisma.documentVersion.count({
+    where: { revisionId: revision.id },
+  })
+  assert.equal(versionesDespues, versionesAntes)
+})
+
+test("un documento se responde una sola vez", async () => {
+  const { item } = await emitido("RESP-D")
+  const aprobado = await calificacion("APPROVED")
+
+  await responder(item.id, { qualificationId: aprobado.id })
+
+  await assert.rejects(
+    () => responder(item.id, { qualificationId: aprobado.id }),
+    /ya fue respondido/,
+  )
+})
+
+test("no se responde un documento que todavía no fue emitido", async () => {
+  // D-18: si falta la emisión, se registra primero.
+  const revision = await documento(EMISOR, "RESP-E")
+  await versionCon(revision.id, [DocFileRole.DELIVERABLE])
+  await aprobar(revision.id)
+
+  const borrador = await conItem(EMISOR, revision.id, PurposeCode.FOR_APPROVAL)
+  const aprobado = await calificacion("APPROVED")
+
+  await assert.rejects(
+    () => responder(borrador.items[0].id, { qualificationId: aprobado.id }),
+    /todavía no fue emitido/,
+  )
+})
+
+test("la calificación debe pertenecer al catálogo vigente del proyecto", async () => {
+  const { item } = await emitido("RESP-F")
+
+  const ajena = await prisma.docQualification.create({
+    data: {
+      projectId: -424499,
+      code: "AJENA",
+      label: "De otro proyecto",
+      effect: "ACCEPTED",
+      createdById: USER_ID,
+    },
+  })
+
+  await assert.rejects(
+    () => responder(item.id, { qualificationId: ajena.id }),
+    /no pertenece al catálogo vigente/,
+  )
+
+  await prisma.docQualification.delete({ where: { id: ajena.id } })
+})
+
+// --- Autoría diferenciada (H-33, D-12) ---
+
+test("distingue quién respondió de quién registró, y lo deriva", async () => {
+  const { item } = await emitido("RESP-G")
+  const aprobado = await calificacion("APPROVED")
+
+  const transcripta = await responder(item.id, {
+    qualificationId: aprobado.id,
+    respondedBy: "Ing. Pérez, del cliente",
+    respondedAt: new Date("2026-08-01T10:00:00Z"),
+  })
+
+  assert.equal(transcripta.registeredById, USER_ID)
+  assert.equal(
+    resolverTypes.DocTransmittalResponse.transcribed(transcripta),
+    true,
+  )
+  // La fecha real es anterior a la de registro: la transcripción siempre lo es.
+  assert.ok(transcripta.respondedAt < transcripta.createdAt)
+
+  const { item: otro } = await emitido("RESP-H")
+  const directa = await responder(otro.id, { qualificationId: aprobado.id })
+  assert.equal(resolverTypes.DocTransmittalResponse.transcribed(directa), false)
+})
+
+// --- El sobre, cuando la respuesta vino consolidada (D-18) ---
+
+test("la respuesta consolidada declara el remito en que viajó", async () => {
+  const { transmittal, item } = await emitido("RESP-I")
+  const aprobado = await calificacion("APPROVED")
+
+  const sobre = await crear(EMISOR, TransmittalNature.RESPONSE, {
+    respondsToTransmittalId: transmittal.id,
+    counterpartyReference: "TX-CLI-500",
+  })
+
+  const respuesta = await responder(item.id, {
+    qualificationId: aprobado.id,
+    responseTransmittalId: sobre.id,
+  })
+
+  assert.equal(respuesta.responseTransmittalId, sobre.id)
+})
+
+test("el sobre debe contestar la emisión por la que ese documento salió", async () => {
+  const { transmittal } = await emitido("RESP-J")
+  const { item: itemDeOtra } = await emitido("RESP-K")
+  const aprobado = await calificacion("APPROVED")
+
+  const sobre = await crear(EMISOR, TransmittalNature.RESPONSE, {
+    respondsToTransmittalId: transmittal.id,
+  })
+
+  await assert.rejects(
+    () =>
+      responder(itemDeOtra.id, {
+        qualificationId: aprobado.id,
+        responseTransmittalId: sobre.id,
+      }),
+    /no contesta la emisión/,
+  )
+})
+
+// --- La respuesta no mueve la revisión (B7) ---
+
+test("la respuesta no cambia el estado de la revisión ni la vigente", async () => {
+  // D-26: la respuesta de la contraparte no es un estado de la revisión. Dos
+  // máquinas de estados sobre el mismo hecho es el defecto que el §1 previene.
+  const { revision, item } = await emitido("RESP-L")
+  const rechazado = await calificacion("REJECTED")
+
+  const documentoAntes = await prisma.document.findFirstOrThrow({
+    where: { revisions: { some: { id: revision.id } } },
+    include: { revisions: true },
+  })
+  const vigenteAntes = await resolverTypes.Document.currentRevision(documentoAntes)
+
+  await responder(item.id, { qualificationId: rechazado.id })
+
+  const despues = await prisma.documentRevision.findUniqueOrThrow({
+    where: { id: revision.id },
+  })
+  assert.equal(despues.status, RevisionStatus.APPROVED)
+
+  const vigenteDespues = await resolverTypes.Document.currentRevision(documentoAntes)
+  assert.equal((vigenteDespues as any)?.id, (vigenteAntes as any)?.id)
+})
+
+test("la primera respuesta lleva el transmittal a respondido", async () => {
+  const { transmittal, item } = await emitido("RESP-M")
+  const aprobado = await calificacion("APPROVED")
+
+  await responder(item.id, { qualificationId: aprobado.id })
+
+  const despues = await prisma.transmittal.findUniqueOrThrow({
+    where: { id: transmittal.id },
+  })
+  assert.equal(despues.status, "RESPONDED")
+})
+
+// --- La corrección (B5) ---
+
+test("la respuesta se corrige, y la traza conserva el valor anterior", async () => {
+  // Nadie la firma: la inmutabilidad de la versión no le aplica. Y siendo
+  // transcripta a mano, el error es esperable.
+  const { item } = await emitido("RESP-N")
+  const aprobado = await calificacion("APPROVED")
+  const conComentarios = await calificacion("APPROVED_WITH_COMMENTS")
+
+  const respuesta = await responder(item.id, {
+    qualificationId: aprobado.id,
+    comments: "Error de transcripción",
+  })
+
+  const corregida = (await transmittalResolvers.Mutation.correctItemResponse(
+    null,
+    {
+      responseId: respuesta.id,
+      input: { qualificationId: conComentarios.id, comments: "Con observaciones" },
+    },
+    context,
+  )) as any
+
+  assert.equal(corregida.qualificationId, conComentarios.id)
+
+  const evento = await prisma.docAuditEvent.findFirstOrThrow({
+    where: {
+      action: AuditAction.CorrectItemResponse,
+      objectId: respuesta.id,
+    },
+  })
+  const meta = evento.meta as any
+  assert.equal(meta.antes.qualificationId, aprobado.id)
+  assert.equal(meta.antes.comments, "Error de transcripción")
+})
+

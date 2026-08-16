@@ -18,7 +18,6 @@ import { buildTransmittalOrderBy } from "../utils/orderByHelper.js"
 import {
   TransmittalStatus,
   TransmittalNature,
-  ClientStatus,
   SysLogModule,
 } from "../generated/prisma/enums.js"
 import {
@@ -31,6 +30,13 @@ import {
   assertApprovedForEmission,
   missingFileRoles,
 } from "../utils/emissionPurpose.js"
+import {
+  assertCarrier,
+  assertIssued,
+  statusAfterResponse,
+  wasTranscribed,
+} from "../utils/itemResponse.js"
+import { resolveScope } from "../utils/qualifications.js"
 import { AuditAction, WorkflowEvent } from "../events/catalog.js"
 import { emitAuditEvent, emitWorkflowEvent } from "../events/emit.js"
 import { Transmittal } from "../generated/prisma/client.js"
@@ -125,6 +131,35 @@ const assertDraft = (status: TransmittalStatus, accion: string): void => {
     throw new GraphQLError(
       `Solo se pueden ${accion} mientras el transmittal está en borrador`,
       { extensions: { code: "BAD_REQUEST" } },
+    )
+  }
+}
+
+/**
+ * La calificación elegida debe ser una de las que el proyecto resuelve (B11).
+ *
+ * El alcance no es decorativo: una lista mezclada admite calificar con un valor
+ * que la contraparte no usa, que es justamente lo que el catálogo por proyecto
+ * viene a impedir.
+ */
+const assertQualificationInScope = async (
+  context: ResolverContext,
+  projectId: number,
+  qualificationId: number,
+): Promise<void> => {
+  const catalogo = await context.orm.docQualification.findMany({
+    where: { OR: [{ projectId }, { projectId: null }] },
+    select: { id: true, projectId: true, terminatedAt: true },
+  })
+
+  const vigentes = resolveScope(catalogo, projectId).filter(
+    (q) => q.terminatedAt === null,
+  )
+
+  if (!vigentes.some((q) => q.id === qualificationId)) {
+    throw new GraphQLError(
+      "Esa calificación no pertenece al catálogo vigente del proyecto",
+      { extensions: { code: "BAD_USER_INPUT" } },
     )
   }
 }
@@ -850,19 +885,37 @@ export const transmittalResolvers = {
       }
     },
 
-    respondTransmittal: async (
+    /**
+     * Registrar la respuesta de un documento emitido (B5).
+     *
+     * Es la vía **documento a documento**, que es la práctica actual: los
+     * sistemas de los clientes distribuyen por matriz de responsabilidad y cada
+     * revisor califica y devuelve a medida que trata cada documento.
+     *
+     * La respuesta cuelga del ítem por el que ese documento salió, de modo que
+     * H-14 desaparece por construcción: ya no existe la operación que
+     * actualizaba ítems por identificador sin verificar a qué transmittal
+     * pertenecían.
+     */
+    registerItemResponse: async (
       _: any,
       {
-        id,
+        itemId,
         input,
       }: {
-        id: number
+        itemId: number
         input: {
-          responseComments?: string
-          items: Array<{
-            itemId: number
-            clientStatus: ClientStatus
-            clientComments?: string
+          qualificationId: number
+          comments?: string
+          respondedBy?: string
+          respondedAt?: Date
+          responseTransmittalId?: number
+          files?: Array<{
+            fileKey: string
+            fileName: string
+            fileSize: number
+            mimeType: string
+            checksum?: string
           }>
         }
       },
@@ -872,91 +925,225 @@ export const transmittalResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_UPDATE],
         context,
       })
-      logger.info("respondTransmittal", { userId })
+      logger.info("registerItemResponse", { userId })
 
-      // Fuera del try: un rechazo de autorización no es un error del servicio.
-      // El transmittal lleva su propio projectId, y nunca es nulo.
+      const item = await context.orm.transmittalItem.findUnique({
+        where: { id: itemId },
+        select: {
+          id: true,
+          transmittal: { select: { id: true, projectId: true, status: true } },
+        },
+      })
+
+      if (!item) {
+        throw new GraphQLError("El ítem no existe", {
+          extensions: { code: "NOT_FOUND" },
+        })
+      }
+
+      // Fuera del try, y sobre el transmittal: el ítem no lleva proyecto propio.
       await assertObjectAccess({
         userId,
         objectType: DocObjectType.TRANSMITTAL,
-        objectId: id,
+        objectId: item.transmittal.id,
         context,
         notFoundMessage: "Transmittal no encontrado",
       })
 
       try {
-        const transmittal = await context.orm.transmittal.findFirst({
-          where: { id },
-        })
+        assertIssued(item.transmittal.status)
 
-        if (!transmittal) {
-          throw new GraphQLError("Transmittal no encontrado", {
-            extensions: { code: "NOT_FOUND" },
+        await assertQualificationInScope(
+          context,
+          item.transmittal.projectId,
+          input.qualificationId,
+        )
+
+        if (input.responseTransmittalId) {
+          const sobre = await context.orm.transmittal.findUnique({
+            where: { id: input.responseTransmittalId },
+            select: { nature: true, respondsToTransmittalId: true },
           })
-        }
 
-        if (
-          transmittal.status !== TransmittalStatus.ISSUED &&
-          transmittal.status !== TransmittalStatus.ACKNOWLEDGED
-        ) {
-          throw new GraphQLError(
-            "Solo se puede responder transmittals en estado ISSUED o ACKNOWLEDGED.",
-            { extensions: { code: "BAD_REQUEST" } },
-          )
-        }
-
-        const result = await context.orm.$transaction(async (tx) => {
-          // Actualizar cada item con la respuesta del cliente
-          for (const itemResponse of input.items) {
-            await tx.transmittalItem.update({
-              where: { id: itemResponse.itemId },
-              data: {
-                clientStatus: itemResponse.clientStatus,
-                clientComments: itemResponse.clientComments,
-              },
+          if (!sobre) {
+            throw new GraphQLError("El transmittal de respuesta no existe", {
+              extensions: { code: "NOT_FOUND" },
             })
           }
 
-          // Actualizar transmittal
-          const updated = await tx.transmittal.update({
-            where: { id },
+          assertCarrier(sobre, item.transmittal.id)
+        }
+
+        return await context.orm.$transaction(async (tx) => {
+          const respuesta = await tx.docTransmittalResponse.create({
             data: {
-              status: TransmittalStatus.RESPONDED,
-              responseAt: new Date(),
-              responseComments: input.responseComments,
+              transmittalItemId: itemId,
+              qualificationId: input.qualificationId,
+              comments: input.comments,
+              respondedBy: input.respondedBy,
+              respondedAt: input.respondedAt,
+              responseTransmittalId: input.responseTransmittalId,
+              registeredById: userId,
               updatedById: userId,
+              ...(input.files?.length && {
+                files: { create: input.files },
+              }),
             },
-            include: transmittalIncludes,
+            include: { files: true, qualification: true },
           })
 
           await emitAuditEvent(tx, {
-            action: AuditAction.RespondTransmittal,
-            objectId: id,
+            action: AuditAction.RegisterItemResponse,
+            objectId: respuesta.id,
             actorId: userId,
-            meta: { code: transmittal.code, itemsCount: input.items.length },
-          })
-          await emitWorkflowEvent(tx, {
-            name: WorkflowEvent.TransmittalResponded,
-            objectId: id,
-            fromState: transmittal.status,
-            toState: TransmittalStatus.RESPONDED,
-            actorId: userId,
+            meta: {
+              itemId,
+              qualificationCode: respuesta.qualification.code,
+              effect: respuesta.qualification.effect,
+              transcripta: wasTranscribed(input.respondedBy),
+              filesCount: respuesta.files.length,
+            },
           })
 
-          return updated
+          // Las respuestas son parciales y no bloquean (D-18): el transmittal
+          // acompaña el hecho de que empezó a contestarse, sin esperar al resto.
+          const siguiente = statusAfterResponse(item.transmittal.status)
+
+          if (siguiente) {
+            await tx.transmittal.update({
+              where: { id: item.transmittal.id },
+              data: { status: siguiente, updatedById: userId },
+            })
+            await emitWorkflowEvent(tx, {
+              name: WorkflowEvent.TransmittalResponded,
+              objectId: item.transmittal.id,
+              fromState: item.transmittal.status,
+              toState: siguiente,
+              actorId: userId,
+            })
+          }
+
+          return respuesta
         })
-
-        return result
       } catch (error) {
         return handleError({
           error,
           userId,
           context,
-          logName: "RESPOND_TRANSMITTAL",
+          logName: "REGISTER_ITEM_RESPONSE",
           module: SysLogModule.PROJECTS,
           messages: {
-            notFound: "El transmittal o uno de sus items no existe.",
-            default: "Error al registrar la respuesta del transmittal.",
+            notFound: "El ítem o la calificación no existen.",
+            uniqueConstraint:
+              "Ese documento ya fue respondido: la contraparte califica una emisión una sola vez. Corrija la respuesta existente.",
+            default: "Error al registrar la respuesta.",
+          },
+        })
+      }
+    },
+
+    /**
+     * Corregir una respuesta ya registrada (B5).
+     *
+     * **Nadie la firma**: el cliente no participa de nuestro circuito, de modo
+     * que la inmutabilidad que D-05 impone a la versión y a la firma no le
+     * aplica. Y siendo transcripta a mano en el caso habitual, el error de
+     * transcripción es esperable.
+     *
+     * Lo que la corrección no puede hacer es borrar que existió: la auditoría de
+     * `BLOQUE 01` conserva quién la registró y quién la corrigió, con sus
+     * valores.
+     */
+    correctItemResponse: async (
+      _: any,
+      {
+        responseId,
+        input,
+      }: {
+        responseId: number
+        input: {
+          qualificationId?: number
+          comments?: string
+          respondedBy?: string
+          respondedAt?: Date
+        }
+      },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_UPDATE],
+        context,
+      })
+      logger.info("correctItemResponse", { userId })
+
+      // Fuera del try: el contexto de la respuesta sale del transmittal por el
+      // que el documento salió, a través de su ítem.
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOC_TRANSMITTAL_RESPONSE,
+        objectId: responseId,
+        context,
+        notFoundMessage: "Respuesta no encontrada",
+      })
+
+      try {
+        const previa = await context.orm.docTransmittalResponse.findUniqueOrThrow({
+          where: { id: responseId },
+          select: {
+            qualificationId: true,
+            comments: true,
+            respondedBy: true,
+            respondedAt: true,
+            transmittalItem: {
+              select: { transmittal: { select: { projectId: true } } },
+            },
+          },
+        })
+
+        if (input.qualificationId) {
+          await assertQualificationInScope(
+            context,
+            previa.transmittalItem.transmittal.projectId,
+            input.qualificationId,
+          )
+        }
+
+        return await context.orm.$transaction(async (tx) => {
+          const corregida = await tx.docTransmittalResponse.update({
+            where: { id: responseId },
+            data: { ...input, updatedById: userId },
+            include: { files: true, qualification: true },
+          })
+
+          await emitAuditEvent(tx, {
+            action: AuditAction.CorrectItemResponse,
+            objectId: responseId,
+            actorId: userId,
+            meta: {
+              // El valor anterior queda en la traza: sin él, la corrección
+              // registraría que algo cambió sin decir desde qué.
+              antes: {
+                qualificationId: previa.qualificationId,
+                comments: previa.comments,
+                respondedBy: previa.respondedBy,
+                respondedAt: previa.respondedAt,
+              },
+              ahora: input,
+            },
+          })
+
+          return corregida
+        })
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "CORRECT_ITEM_RESPONSE",
+          module: SysLogModule.PROJECTS,
+          messages: {
+            notFound: "La respuesta no existe.",
+            default: "Error al corregir la respuesta.",
           },
         })
       }

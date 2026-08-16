@@ -157,6 +157,16 @@ export type DocProjectMember = Prisma.DocProjectMemberModel
  */
 export type DocQualification = Prisma.DocQualificationModel
 /**
+ * Model DocTransmittalResponse
+ * 
+ */
+export type DocTransmittalResponse = Prisma.DocTransmittalResponseModel
+/**
+ * Model DocResponseFile
+ * 
+ */
+export type DocResponseFile = Prisma.DocResponseFileModel
+/**
  * Model DocWorkflowEvent
  * 
  */

@@ -135,5 +135,13 @@ test("el catálogo cubre las escrituras relevadas más lo que agregaron los bloq
   // y sin registro esa liberación sería inexplicable después.
   //
   //   + AddTransmittalItem, RemoveTransmittalItem
-  assert.equal(AUDIT_ACTIONS.length, 48)
+  //
+  // Y en su fase 4 retira 1 y suma 2, de 48 a 49:
+  //
+  //   − RespondTransmittal    la operación desaparece: responder dejó de ser un
+  //                           acto sobre el transmittal, que actualizaba sus
+  //                           ítems en lote, y pasó a ser un acto sobre el
+  //                           DOCUMENTO emitido (B5)
+  //   + RegisterItemResponse, CorrectItemResponse
+  assert.equal(AUDIT_ACTIONS.length, 49)
 })

@@ -253,6 +253,26 @@ const derivadores: Record<
     })
     return qualification && { projectId: qualification.projectId, module: null }
   },
+
+  // La respuesta toma el contexto del transmittal por el que el documento salió,
+  // a través de su ítem. Es la misma cadena que el transmittal recorre, un nivel
+  // más abajo, y por eso su módulo es también PROJECTS.
+  [DocObjectType.DOC_TRANSMITTAL_RESPONSE]: async (client, id) => {
+    const respuesta = await client.docTransmittalResponse.findUnique({
+      where: { id },
+      select: {
+        transmittalItem: {
+          select: { transmittal: { select: { projectId: true } } },
+        },
+      },
+    })
+    return (
+      respuesta && {
+        projectId: respuesta.transmittalItem.transmittal.projectId,
+        module: ModuleType.PROJECTS,
+      }
+    )
+  },
 }
 
 /**

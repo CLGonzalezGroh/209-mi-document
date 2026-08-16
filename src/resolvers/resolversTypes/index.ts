@@ -26,6 +26,7 @@ import {
 import { lastLiveRevision } from "../../utils/revisionScheme.js"
 import { enablesUse, requiresNewRevision } from "../../utils/qualifications.js"
 import { directionOf } from "../../utils/transmittalCirculation.js"
+import { wasTranscribed } from "../../utils/itemResponse.js"
 import {
   expectsQualification,
   missingFileRoles,
@@ -309,10 +310,57 @@ export const resolverTypes = {
     },
   },
 
+  DocTransmittalResponse: {
+    registeredBy: (parent: { registeredById: number }) => ({
+      __typename: "UserName",
+      id: parent.registeredById,
+    }),
+    /**
+     * La divergencia entre quién respondió y quién registró se DERIVA de que
+     * ambos datos existan (BLOQUE 04, B5). Es el criterio de D-04 sobre la firma
+     * delegada, aplicado a la respuesta.
+     */
+    transcribed: (parent: { respondedBy: string | null }) =>
+      wasTranscribed(parent.respondedBy),
+    files: async (parent: any) => {
+      if (Array.isArray(parent.files)) return parent.files
+      return prisma.docResponseFile.findMany({
+        where: { responseId: parent.id },
+        orderBy: { id: "asc" },
+      })
+    },
+    qualification: async (parent: any) =>
+      parent.qualification ??
+      prisma.docQualification.findUnique({
+        where: { id: parent.qualificationId },
+      }),
+    transmittalItem: async (parent: any) =>
+      parent.transmittalItem ??
+      prisma.transmittalItem.findUnique({
+        where: { id: parent.transmittalItemId },
+      }),
+    responseTransmittal: async (parent: any) => {
+      if (parent.responseTransmittal !== undefined) {
+        return parent.responseTransmittal
+      }
+      if (parent.responseTransmittalId === null) return null
+      return prisma.transmittal.findUnique({
+        where: { id: parent.responseTransmittalId },
+      })
+    },
+  },
+
   TransmittalItem: {
     /** Expectativa y no permiso: gobierna qué figura como pendiente. */
     expectsQualification: (parent: { purposeCode: PurposeCode }) =>
       expectsQualification(parent.purposeCode),
+
+    response: async (parent: any) => {
+      if (parent.response !== undefined) return parent.response
+      return prisma.docTransmittalResponse.findUnique({
+        where: { transmittalItemId: parent.id },
+      })
+    },
 
     missingFileRoles: async (parent: any) => {
       const revision =

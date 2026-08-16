@@ -31,7 +31,6 @@ export const AuditAction = {
   CancelWorkflow: "CancelWorkflow",
   CreateTransmittal: "CreateTransmittal",
   IssueTransmittal: "IssueTransmittal",
-  RespondTransmittal: "RespondTransmittal",
   CloseTransmittal: "CloseTransmittal",
   CreateDocumentClass: "CreateDocumentClass",
   UpdateDocumentClass: "UpdateDocumentClass",
@@ -89,12 +88,23 @@ export const AuditAction = {
   // Emisión y respuesta (BLOQUE 04). El catálogo de calificaciones es
   // configuración del contrato: quién agregó o dio de baja una calificación
   // explica por qué una respuesta pudo registrarse con ese valor.
+  // `RespondTransmittal` se retira con su operación (BLOQUE 04, B5): responder
+  // dejó de ser un acto sobre el transmittal —que actualizaba sus ítems en
+  // lote— y pasó a ser un acto sobre el DOCUMENTO emitido. Las reemplazan
+  // `RegisterItemResponse` y `CorrectItemResponse`.
   AddTransmittalItem: "AddTransmittalItem",
   RemoveTransmittalItem: "RemoveTransmittalItem",
   CreateQualification: "CreateQualification",
   UpdateQualification: "UpdateQualification",
   TerminateQualification: "TerminateQualification",
   ActivateQualification: "ActivateQualification",
+
+  // La respuesta de la contraparte (B5). Corregirla tiene acción propia y no es
+  // un registro más: nadie la firma, de modo que se corrige, y sin evento la
+  // diferencia entre lo que el cliente dijo y lo que quedó registrado sería
+  // indemostrable.
+  RegisterItemResponse: "RegisterItemResponse",
+  CorrectItemResponse: "CorrectItemResponse",
 } as const
 
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
@@ -112,7 +122,6 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   [AuditAction.CancelWorkflow]: DocObjectType.REVIEW_WORKFLOW,
   [AuditAction.CreateTransmittal]: DocObjectType.TRANSMITTAL,
   [AuditAction.IssueTransmittal]: DocObjectType.TRANSMITTAL,
-  [AuditAction.RespondTransmittal]: DocObjectType.TRANSMITTAL,
   [AuditAction.CloseTransmittal]: DocObjectType.TRANSMITTAL,
   [AuditAction.CreateDocumentClass]: DocObjectType.DOCUMENT_CLASS,
   [AuditAction.UpdateDocumentClass]: DocObjectType.DOCUMENT_CLASS,
@@ -165,6 +174,8 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   [AuditAction.UpdateQualification]: DocObjectType.DOC_QUALIFICATION,
   [AuditAction.TerminateQualification]: DocObjectType.DOC_QUALIFICATION,
   [AuditAction.ActivateQualification]: DocObjectType.DOC_QUALIFICATION,
+  [AuditAction.RegisterItemResponse]: DocObjectType.DOC_TRANSMITTAL_RESPONSE,
+  [AuditAction.CorrectItemResponse]: DocObjectType.DOC_TRANSMITTAL_RESPONSE,
 }
 
 // ================================
@@ -286,4 +297,7 @@ export const DOC_OBJECT_READ_PERMISSION: Record<DocObjectType, string> = {
   // El catálogo de calificaciones tiene recurso propio: administrarlo es
   // configurar el contrato, distinto de operar los documentos que califica.
   [DocObjectType.DOC_QUALIFICATION]: PERMISSIONS.DOCUMENTS_QUALIFICATION_READ,
+  // La respuesta se lee con el transmittal por el que el documento salió: la
+  // traza forma parte del objeto.
+  [DocObjectType.DOC_TRANSMITTAL_RESPONSE]: PERMISSIONS.DOCUMENTS_TRANSMITTAL_READ,
 }

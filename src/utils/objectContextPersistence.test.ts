@@ -7,6 +7,7 @@ import {
   DocProjectSide,
   DocumentRole,
   ModuleType,
+  PurposeCode,
   QualificationEffect,
   TransmittalNature,
   RevisionScheme,
@@ -45,6 +46,7 @@ const creados: {
   templateId: number
   settingsId: number
   qualificationId: number
+  responseId: number
   memberId: number
   transmittalId: number
   classId: number
@@ -210,6 +212,24 @@ before(async () => {
     },
   })
 
+  // La respuesta cuelga del ítem, y el ítem del transmittal: es la cadena por
+  // la que su contexto se deriva (BLOQUE 04, B5).
+  const item = await prisma.transmittalItem.create({
+    data: {
+      transmittalId: transmittal.id,
+      documentRevisionId: revision.id,
+      purposeCode: PurposeCode.FOR_APPROVAL,
+    },
+  })
+
+  const respuesta = await prisma.docTransmittalResponse.create({
+    data: {
+      transmittalItemId: item.id,
+      qualificationId: calificacion.id,
+      registeredById: 1,
+    },
+  })
+
   Object.assign(creados, {
     documentId: documento.id,
     publicadoId: publicado.id,
@@ -221,6 +241,7 @@ before(async () => {
     templateId: plantilla.id,
     settingsId: settings.id,
     qualificationId: calificacion.id,
+    responseId: respuesta.id,
     projectSettingsId: projectSettings.id,
     memberId: miembro.id,
     transmittalId: transmittal.id,
@@ -394,7 +415,16 @@ test("el acto de reemplazo toma el contexto de los documentos que agrupa", async
   await prisma.docReplacement.delete({ where: { id: acto.id } })
 })
 
-test("los quince tipos de objeto tienen derivador", async () => {
+test("la respuesta toma el contexto del transmittal por el que el documento salió", async () => {
+  // La cadena es respuesta ▸ ítem ▸ transmittal, un nivel más abajo que el
+  // transmittal, y por eso su módulo es también PROJECTS (BLOQUE 04, B5).
+  assert.deepEqual(
+    await contextoDe(DocObjectType.DOC_TRANSMITTAL_RESPONSE, creados.responseId),
+    { projectId: PROYECTO, module: ModuleType.PROJECTS },
+  )
+})
+
+test("los dieciséis tipos de objeto tienen derivador", async () => {
   // Ninguno queda sin regla: es la prueba que BLOQUE 01 exige y que cada tipo
   // nuevo debe seguir pasando.
   for (const objectType of Object.values(DocObjectType)) {
@@ -403,5 +433,5 @@ test("los quince tipos de objeto tienen derivador", async () => {
       `${objectType} no tiene derivador de contexto`,
     )
   }
-  assert.equal(Object.values(DocObjectType).length, 15)
+  assert.equal(Object.values(DocObjectType).length, 16)
 })

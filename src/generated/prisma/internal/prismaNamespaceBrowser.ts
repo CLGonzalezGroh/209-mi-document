@@ -74,6 +74,8 @@ export const ModelName = {
   DocWorkflowTemplateStep: 'DocWorkflowTemplateStep',
   DocProjectMember: 'DocProjectMember',
   DocQualification: 'DocQualification',
+  DocTransmittalResponse: 'DocTransmittalResponse',
+  DocResponseFile: 'DocResponseFile',
   DocWorkflowEvent: 'DocWorkflowEvent',
   DocAuditEvent: 'DocAuditEvent',
   ScannedFile: 'ScannedFile',
@@ -330,9 +332,7 @@ export const TransmittalScalarFieldEnum = {
   counterpartyReference: 'counterpartyReference',
   respondsToTransmittalId: 'respondsToTransmittalId',
   issuedById: 'issuedById',
-  issuedAt: 'issuedAt',
-  responseAt: 'responseAt',
-  responseComments: 'responseComments'
+  issuedAt: 'issuedAt'
 } as const
 
 export type TransmittalScalarFieldEnum = (typeof TransmittalScalarFieldEnum)[keyof typeof TransmittalScalarFieldEnum]
@@ -342,9 +342,7 @@ export const TransmittalItemScalarFieldEnum = {
   id: 'id',
   transmittalId: 'transmittalId',
   documentRevisionId: 'documentRevisionId',
-  purposeCode: 'purposeCode',
-  clientStatus: 'clientStatus',
-  clientComments: 'clientComments'
+  purposeCode: 'purposeCode'
 } as const
 
 export type TransmittalItemScalarFieldEnum = (typeof TransmittalItemScalarFieldEnum)[keyof typeof TransmittalItemScalarFieldEnum]
@@ -459,6 +457,37 @@ export const DocQualificationScalarFieldEnum = {
 } as const
 
 export type DocQualificationScalarFieldEnum = (typeof DocQualificationScalarFieldEnum)[keyof typeof DocQualificationScalarFieldEnum]
+
+
+export const DocTransmittalResponseScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  transmittalItemId: 'transmittalItemId',
+  qualificationId: 'qualificationId',
+  comments: 'comments',
+  respondedBy: 'respondedBy',
+  respondedAt: 'respondedAt',
+  registeredById: 'registeredById',
+  updatedById: 'updatedById',
+  responseTransmittalId: 'responseTransmittalId'
+} as const
+
+export type DocTransmittalResponseScalarFieldEnum = (typeof DocTransmittalResponseScalarFieldEnum)[keyof typeof DocTransmittalResponseScalarFieldEnum]
+
+
+export const DocResponseFileScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  responseId: 'responseId',
+  fileKey: 'fileKey',
+  fileName: 'fileName',
+  fileSize: 'fileSize',
+  mimeType: 'mimeType',
+  checksum: 'checksum'
+} as const
+
+export type DocResponseFileScalarFieldEnum = (typeof DocResponseFileScalarFieldEnum)[keyof typeof DocResponseFileScalarFieldEnum]
 
 
 export const DocWorkflowEventScalarFieldEnum = {

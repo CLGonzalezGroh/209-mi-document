@@ -396,13 +396,6 @@ export type EnumPurposeCodeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumPurposeCodeFilter<$PrismaModel> | $Enums.PurposeCode
 }
 
-export type EnumClientStatusNullableFilter<$PrismaModel = never> = {
-  equals?: $Enums.ClientStatus | Prisma.EnumClientStatusFieldRefInput<$PrismaModel> | null
-  in?: $Enums.ClientStatus[] | Prisma.ListEnumClientStatusFieldRefInput<$PrismaModel> | null
-  notIn?: $Enums.ClientStatus[] | Prisma.ListEnumClientStatusFieldRefInput<$PrismaModel> | null
-  not?: Prisma.NestedEnumClientStatusNullableFilter<$PrismaModel> | $Enums.ClientStatus | null
-}
-
 export type EnumPurposeCodeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.PurposeCode | Prisma.EnumPurposeCodeFieldRefInput<$PrismaModel>
   in?: $Enums.PurposeCode[] | Prisma.ListEnumPurposeCodeFieldRefInput<$PrismaModel>
@@ -411,16 +404,6 @@ export type EnumPurposeCodeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumPurposeCodeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumPurposeCodeFilter<$PrismaModel>
-}
-
-export type EnumClientStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.ClientStatus | Prisma.EnumClientStatusFieldRefInput<$PrismaModel> | null
-  in?: $Enums.ClientStatus[] | Prisma.ListEnumClientStatusFieldRefInput<$PrismaModel> | null
-  notIn?: $Enums.ClientStatus[] | Prisma.ListEnumClientStatusFieldRefInput<$PrismaModel> | null
-  not?: Prisma.NestedEnumClientStatusNullableWithAggregatesFilter<$PrismaModel> | $Enums.ClientStatus | null
-  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumClientStatusNullableFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumClientStatusNullableFilter<$PrismaModel>
 }
 
 export type EnumDocumentRoleFilter<$PrismaModel = never> = {
@@ -1039,13 +1022,6 @@ export type NestedEnumPurposeCodeFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumPurposeCodeFilter<$PrismaModel> | $Enums.PurposeCode
 }
 
-export type NestedEnumClientStatusNullableFilter<$PrismaModel = never> = {
-  equals?: $Enums.ClientStatus | Prisma.EnumClientStatusFieldRefInput<$PrismaModel> | null
-  in?: $Enums.ClientStatus[] | Prisma.ListEnumClientStatusFieldRefInput<$PrismaModel> | null
-  notIn?: $Enums.ClientStatus[] | Prisma.ListEnumClientStatusFieldRefInput<$PrismaModel> | null
-  not?: Prisma.NestedEnumClientStatusNullableFilter<$PrismaModel> | $Enums.ClientStatus | null
-}
-
 export type NestedEnumPurposeCodeWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.PurposeCode | Prisma.EnumPurposeCodeFieldRefInput<$PrismaModel>
   in?: $Enums.PurposeCode[] | Prisma.ListEnumPurposeCodeFieldRefInput<$PrismaModel>
@@ -1054,16 +1030,6 @@ export type NestedEnumPurposeCodeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumPurposeCodeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumPurposeCodeFilter<$PrismaModel>
-}
-
-export type NestedEnumClientStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.ClientStatus | Prisma.EnumClientStatusFieldRefInput<$PrismaModel> | null
-  in?: $Enums.ClientStatus[] | Prisma.ListEnumClientStatusFieldRefInput<$PrismaModel> | null
-  notIn?: $Enums.ClientStatus[] | Prisma.ListEnumClientStatusFieldRefInput<$PrismaModel> | null
-  not?: Prisma.NestedEnumClientStatusNullableWithAggregatesFilter<$PrismaModel> | $Enums.ClientStatus | null
-  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumClientStatusNullableFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumClientStatusNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumDocumentRoleFilter<$PrismaModel = never> = {
