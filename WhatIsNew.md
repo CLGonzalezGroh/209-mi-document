@@ -674,3 +674,21 @@ La respuesta de la contraparte se expresaba con `ClientStatus`, **enumeración f
 
 **247 pruebas, 0 fallos.**
 
+### Fase 2 — Naturaleza, sentido derivado y código por proyecto
+
+Cierra **H-29** y **H-16**, y resuelve `B11` de `BLOQUE 02` en la dirección que aquel bloque anticipó.
+
+- **`TransmittalNature`** con dos valores, `EMISSION` y `RESPONSE`. La clasificación relevante no es la dirección sino el **propósito**, que es lo que determina qué reglas lo gobiernan.
+- **El sentido no se almacena: se deriva** del rol del proyecto y de la naturaleza, y se expone resuelto en el contrato como `direction`. Un dato guardado puede contradecir a los hechos y obliga a inventar una precondición que tape la incoherencia — es el criterio con que `BLOQUE 03` retiró el esquema de revisión del documento.
+- **Tres invariantes salen de esa misma tabla**, sin configuración: un proyecto interno no admite transmittals de ninguna naturaleza; en modo Receptor no existe el de respuesta; y una respuesta referencia **necesariamente** una emisión del mismo proyecto. Hay una prueba que recorre las seis combinaciones y verifica que el sentido sea nulo exactamente donde la naturaleza es inválida: un sentido nulo sin violación dejaría un transmittal creable cuyo sentido nadie puede establecer.
+- **`issuedTo` se retira.** El destinatario de una emisión es la contraparte del proyecto, que es única y ya vive en `DocProjectSettings.counterpartyName`. Guardarla por registro permitía que dos transmittals del mismo proyecto declararan destinatarios distintos, que es lo que la unidad contractual considera inválido.
+- **`counterpartyReference`**: cómo la contraparte nombra el transmittal en su sistema. Aplica a los dos casos entrantes y es un dato del remito ajeno, no un remito propio.
+- **El código es único por proyecto y se calcula dentro de la transacción**, con el índice `[projectId, code]` como árbitro y reintento acotado. Eran los dos defectos de H-16 en el mismo lugar: numeración global —cuando el proyecto es la unidad contractual— y cálculo fuera de la transacción, de modo que dos emisiones simultáneas obtenían el mismo número. La prueba de concurrencia crea cinco a la vez y verifica que salgan `TR-001` a `TR-005`.
+- **El proyecto debe haber declarado su rol** para que circule documentación. El rol se declara y no se deduce (D-19): es el rol el que dice si el transmittal sale, si entra, o si no existe.
+
+> **Atención al migrar**: `20260816120000_transmittal_nature_and_code` agrega `nature` con default `EMISSION` para poblar lo existente y **retira el default enseguida** —la naturaleza debe informarse al crear—, elimina la columna `issuedTo` y reemplaza la unicidad global de `code` por `[projectId, code]`.
+
+> **Cambios incompatibles**, sin consumidores: `Transmittal.issuedTo` desaparece del tipo y del input, `CreateTransmittalInput` exige `nature`, y la búsqueda del listado pasa de buscar en el destinatario a buscar en la referencia de la contraparte.
+
+**269 pruebas, 0 fallos**, con una suite de integración nueva para la circulación.
+

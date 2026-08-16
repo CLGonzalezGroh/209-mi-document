@@ -15,7 +15,17 @@ import {
 import { DocObjectType } from "../generated/prisma/enums.js"
 import { handleError } from "../utils/handleError.js"
 import { buildTransmittalOrderBy } from "../utils/orderByHelper.js"
-import { TransmittalStatus, ClientStatus, SysLogModule } from "../generated/prisma/enums.js"
+import {
+  TransmittalStatus,
+  TransmittalNature,
+  ClientStatus,
+  SysLogModule,
+} from "../generated/prisma/enums.js"
+import {
+  assertNature,
+  generateTransmittalCode,
+  responseLinkViolation,
+} from "../utils/transmittalCirculation.js"
 import { AuditAction, WorkflowEvent } from "../events/catalog.js"
 import { emitAuditEvent, emitWorkflowEvent } from "../events/emit.js"
 import { Transmittal } from "../generated/prisma/client.js"
@@ -29,6 +39,7 @@ interface TransmittalFilterInput {
   query?: string
   projectId?: number
   status?: TransmittalStatus
+  nature?: TransmittalNature
 }
 
 const transmittalIncludes = {
@@ -47,30 +58,64 @@ const transmittalIncludes = {
   },
 }
 
-/**
- * Genera el próximo código de transmittal.
- * Formato: TR-001, TR-002, TR-003...
- */
-async function generateTransmittalCode(
-  orm: ResolverContext["orm"],
-): Promise<string> {
-  const lastTransmittal = await orm.transmittal.findFirst({
-    orderBy: { id: "desc" },
-    select: { code: true },
-  })
-
-  if (!lastTransmittal) {
-    return "TR-001"
-  }
-
-  const match = lastTransmittal.code.match(/TR-(\d+)/)
-  const nextNumber = match ? parseInt(match[1]) + 1 : 1
-  return `TR-${nextNumber.toString().padStart(3, "0")}`
-}
-
 import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
 
 const logger = createLogger("transmittals")
+
+/**
+ * Reintento acotado ante colisión de código (BLOQUE 04, B2).
+ *
+ * El código se propone leyendo el último del proyecto y el índice único es el
+ * árbitro. Dos creaciones simultáneas pueden proponer el mismo, y la segunda
+ * falla con `P2002`: se repite la transacción **entera**, porque una violación
+ * de unicidad aborta la transacción en PostgreSQL y reintentar adentro no es
+ * posible.
+ *
+ * Solo reintenta la colisión de código: cualquier otra unicidad —un ítem
+ * repetido, por ejemplo— es un error del pedido y debe llegarle a quien lo hizo.
+ */
+//
+// El tope acompaña a la concurrencia real: con N creaciones simultáneas sobre el
+// mismo proyecto, todas leen el mismo último código y avanzan de a una por
+// vuelta, de modo que la última necesita N intentos.
+const INTENTOS = 10
+
+/**
+ * Qué restricción se violó.
+ *
+ * El cliente no lo expone en un solo lugar: `meta.target` en unas versiones, y
+ * `meta.driverAdapterError.cause.constraint` en las que usan adaptador de
+ * driver, que es el caso de este módulo. Se juntan las formas conocidas, porque
+ * mirar una sola deja el reintento inerte sin que la compilación lo advierta
+ * —fue exactamente lo que pasó al escribirlo—.
+ */
+const restriccionViolada = (error: any): string => {
+  const meta = error?.meta ?? {}
+  const constraint = meta?.driverAdapterError?.cause?.constraint ?? {}
+
+  return [
+    Array.isArray(meta.target) ? meta.target.join(",") : meta.target,
+    Array.isArray(constraint.fields) ? constraint.fields.join(",") : undefined,
+    constraint.index,
+    meta?.driverAdapterError?.cause?.originalMessage,
+  ]
+    .filter(Boolean)
+    .join(" ")
+}
+
+const esColisionDeCodigo = (error: any): boolean =>
+  error?.code === "P2002" && restriccionViolada(error).includes("code")
+
+const withCodeRetry = async <T>(operacion: () => Promise<T>): Promise<T> => {
+  for (let intento = 1; ; intento++) {
+    try {
+      return await operacion()
+    } catch (error) {
+      if (intento >= INTENTOS || !esColisionDeCodigo(error)) throw error
+      logger.warn("colisión de código de transmittal, reintentando", { intento })
+    }
+  }
+}
 
 export const transmittalResolvers = {
   Query: {
@@ -155,7 +200,12 @@ export const transmittalResolvers = {
         if (filter?.query) {
           where.OR = [
             { code: { contains: filter.query, mode: "insensitive" as const } },
-            { issuedTo: { contains: filter.query, mode: "insensitive" as const } },
+            {
+              counterpartyReference: {
+                contains: filter.query,
+                mode: "insensitive" as const,
+              },
+            },
           ]
         }
 
@@ -165,6 +215,10 @@ export const transmittalResolvers = {
 
         if (filter?.status) {
           where.status = filter.status
+        }
+
+        if (filter?.nature) {
+          where.nature = filter.nature
         }
 
         const orderByClause = buildTransmittalOrderBy(orderBy)
@@ -283,7 +337,9 @@ export const transmittalResolvers = {
       }: {
         input: {
           projectId: number
-          issuedTo: string
+          nature: TransmittalNature
+          counterpartyReference?: string
+          respondsToTransmittalId?: number
           items: Array<{
             documentRevisionId: number
             purposeCode: string
@@ -301,46 +357,98 @@ export const transmittalResolvers = {
       logger.info("createTransmittal", { userId })
 
       try {
-        const code = await generateTransmittalCode(context.orm)
-
-        const transmittal = await context.orm.$transaction(async (tx) => {
-          const created = await tx.transmittal.create({
-            data: {
-              code,
-              projectId: input.projectId,
-              issuedTo: input.issuedTo,
-              issuedById: userId,
-              updatedById: userId,
-              items: {
-                create: input.items.map((item) => ({
-                  documentRevisionId: item.documentRevisionId,
-                  purposeCode: item.purposeCode as any,
-                })),
-              },
-            },
-            include: transmittalIncludes,
-          })
-
-          await emitAuditEvent(tx, {
-            action: AuditAction.CreateTransmittal,
-            objectId: created.id,
-            actorId: userId,
-            meta: {
-              code: created.code,
-              projectId: input.projectId,
-              issuedTo: input.issuedTo,
-              itemsCount: input.items.length,
-            },
-          })
-          await emitWorkflowEvent(tx, {
-            name: WorkflowEvent.TransmittalCreated,
-            objectId: created.id,
-            toState: TransmittalStatus.DRAFT,
-            actorId: userId,
-          })
-
-          return created
+        // El rol se DECLARA y no se deduce (D-19). Sin declaración no hay
+        // circulación posible: es el rol el que dice si el transmittal sale, si
+        // entra, o si no existe.
+        const settings = await context.orm.docProjectSettings.findUnique({
+          where: { projectId: input.projectId },
+          select: { documentRole: true },
         })
+
+        if (!settings) {
+          throw new GraphQLError(
+            "El proyecto no declaró su rol documental: no puede circular documentación",
+            { extensions: { code: "BAD_USER_INPUT" } },
+          )
+        }
+
+        // Un proyecto interno no admite transmittals de ninguna naturaleza, y
+        // en modo Receptor no existe el de respuesta (B1).
+        assertNature(settings.documentRole, input.nature)
+
+        const respondsTo = input.respondsToTransmittalId
+          ? await context.orm.transmittal.findUnique({
+              where: { id: input.respondsToTransmittalId },
+              select: { projectId: true, nature: true },
+            })
+          : null
+
+        if (input.respondsToTransmittalId && !respondsTo) {
+          throw new GraphQLError("El transmittal que se contesta no existe", {
+            extensions: { code: "NOT_FOUND" },
+          })
+        }
+
+        const vinculo = responseLinkViolation(
+          input.nature,
+          respondsTo,
+          input.projectId,
+        )
+
+        if (vinculo) {
+          throw new GraphQLError(vinculo, {
+            extensions: { code: "BAD_USER_INPUT" },
+          })
+        }
+
+        // El código se calcula DENTRO de la transacción y el índice único
+        // `[projectId, code]` es el árbitro (B2). El reintento repite la
+        // transacción entera, porque una violación de unicidad la aborta en
+        // PostgreSQL y continuar adentro no es posible.
+        const transmittal = await withCodeRetry(() =>
+          context.orm.$transaction(async (tx) => {
+            const code = await generateTransmittalCode(tx, input.projectId)
+
+            const created = await tx.transmittal.create({
+              data: {
+                code,
+                projectId: input.projectId,
+                nature: input.nature,
+                counterpartyReference: input.counterpartyReference,
+                respondsToTransmittalId: input.respondsToTransmittalId,
+                issuedById: userId,
+                updatedById: userId,
+                items: {
+                  create: input.items.map((item) => ({
+                    documentRevisionId: item.documentRevisionId,
+                    purposeCode: item.purposeCode as any,
+                  })),
+                },
+              },
+              include: transmittalIncludes,
+            })
+
+            await emitAuditEvent(tx, {
+              action: AuditAction.CreateTransmittal,
+              objectId: created.id,
+              actorId: userId,
+              meta: {
+                code: created.code,
+                projectId: input.projectId,
+                nature: created.nature,
+                itemsCount: input.items.length,
+              },
+            })
+            await emitWorkflowEvent(tx, {
+              name: WorkflowEvent.TransmittalCreated,
+              objectId: created.id,
+              toState: TransmittalStatus.DRAFT,
+              actorId: userId,
+            })
+
+            return created
+          }),
+        )
 
         return transmittal
       } catch (error) {
@@ -359,7 +467,6 @@ export const transmittalResolvers = {
         })
       }
     },
-
     issueTransmittal: async (
       _: any,
       { id }: { id: number },

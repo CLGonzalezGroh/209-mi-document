@@ -1,6 +1,6 @@
 {
   "name": "209-mi-document",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "description": "María Ingeniería API de Gestión Documental",
   "type": "module",
   "main": "index.js",
@@ -42,9 +42,11 @@
     "test:block03-db": "npm run test:block03 && npm run test:events-db && npm run test:project-scope-db && npm run test:object-context-db && npm run test:model-constraints-db",
     "test:block03-all": "npm run test:block03-db && npm run test:block02-integration && npm run test:block03-integration",
     "test:qualifications": "node --import tsx --test src/utils/qualifications.test.ts",
-    "test:block04": "npm run test:block03b && npm run test:qualifications",
+    "test:transmittal-circulation": "node --import tsx --test src/utils/transmittalCirculation.test.ts",
+    "test:block04": "npm run test:block03b && npm run test:qualifications && npm run test:transmittal-circulation",
     "test:block04-db": "npm run test:block04 && npm run test:events-db && npm run test:project-scope-db && npm run test:object-context-db && npm run test:model-constraints-db",
-    "test:block04-all": "npm run test:block04-db && npm run test:block02-integration && npm run test:block03-integration"
+    "test:block04-integration": "node --import tsx --test src/resolvers/circulation.integration.test.ts",
+    "test:block04-all": "npm run test:block04-db && npm run test:block02-integration && npm run test:block03-integration && npm run test:block04-integration"
   },
   "keywords": [],
   "author": "César González Groh",

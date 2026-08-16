@@ -8,6 +8,7 @@ import {
   DocumentRole,
   ModuleType,
   QualificationEffect,
+  TransmittalNature,
   RevisionScheme,
   StepStatus,
   StepType,
@@ -194,7 +195,7 @@ before(async () => {
     data: {
       code: `${CODIGO}-TR`,
       projectId: PROYECTO,
-      issuedTo: "Cliente",
+      nature: TransmittalNature.EMISSION,
       issuedById: 1,
     },
   })

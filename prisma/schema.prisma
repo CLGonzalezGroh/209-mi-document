@@ -103,6 +103,23 @@ enum StepStatus {
   SKIPPED // Saltado por rechazo o por cancelación del circuito
 }
 
+// Naturaleza del transmittal (BLOQUE 04, B1).
+//
+// La clasificación relevante NO es la dirección sino el propósito (D-18), que
+// determina qué reglas lo gobiernan. El sentido —saliente o entrante— se DERIVA
+// del rol del proyecto y de la naturaleza, y no se almacena: un dato guardado
+// que puede contradecir a los hechos obliga a inventar una precondición que
+// tape la incoherencia, que es el criterio con que D-13 retiró el esquema de
+// revisión del documento.
+//
+// La información de partida NO es una naturaleza: D-20 la trasladó a un objeto
+// propio, porque su contenido son archivos sin catalogar y no revisiones. Las
+// dos que quedan operan ambas sobre revisiones, con una sola clase de ítem.
+enum TransmittalNature {
+  EMISSION // Entrega de documentación producida
+  RESPONSE // Calificación consolidada de una emisión. Solo en modo Emisor
+}
+
 enum TransmittalStatus {
   DRAFT // En preparación
   ISSUED // Enviado al cliente
@@ -688,10 +705,33 @@ model Transmittal {
   updatedAt   DateTime? @updatedAt
   updatedById Int       @default(1)
 
-  code             String            @unique // "TR-001"
-  projectId        Int // Referencia externa al subgraph projects
-  status           TransmittalStatus @default(DRAFT)
-  issuedTo         String // Nombre del cliente/destinatario
+  // Código propio, único POR PROYECTO (BLOQUE 04, B2). La numeración global era
+  // la mitad de H-16: el transmittal pertenece a un proyecto, que es la unidad
+  // contractual. La otra mitad —el cálculo fuera de la transacción— la cierra
+  // el resolver, con este índice como árbitro.
+  code      String // "TR-001", por proyecto
+  projectId Int // Referencia externa al subgraph projects
+
+  nature TransmittalNature
+  status TransmittalStatus @default(DRAFT)
+
+  // Cómo la contraparte nombra este transmittal en SU sistema. Aplica a los dos
+  // casos entrantes —la emisión del contratista en modo Receptor y la respuesta
+  // del cliente en modo Emisor— y es un dato del remito ajeno, no un remito
+  // propio: el mismo criterio con que D-20 conserva la referencia externa del
+  // paquete de información de entrada.
+  counterpartyReference String?
+
+  // La emisión que esta respuesta contesta (B1). Nulo en las emisiones, y
+  // exigido en las respuestas: es lo que vuelve inequívoca la naturaleza sin
+  // necesidad de marcarla de otro modo.
+  respondsToTransmittalId Int?
+
+  // `issuedTo` se retira: el destinatario de una emisión es la contraparte del
+  // proyecto, que es única (D-15) y vive en DocProjectSettings.counterpartyName.
+  // Guardarla por registro permitía que dos transmittals del mismo proyecto
+  // declararan destinatarios distintos, que es lo que la unidad contractual
+  // considera inválido. Cierra B11 de BLOQUE 02 en la dirección que anticipó.
   issuedById       Int // Referencia al User del sistema admin
   issuedAt         DateTime?
   responseAt       DateTime?
@@ -700,7 +740,12 @@ model Transmittal {
   // Relaciones
   items TransmittalItem[]
 
+  respondsTo Transmittal?  @relation("TransmittalResponse", fields: [respondsToTransmittalId], references: [id])
+  responses  Transmittal[] @relation("TransmittalResponse")
+
+  @@unique([projectId, code])
   @@index([projectId])
+  @@index([respondsToTransmittalId])
   @@map("transmittals")
 }
 

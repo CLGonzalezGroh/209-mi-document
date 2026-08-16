@@ -355,11 +355,28 @@ export type EnumStepStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumStepStatusFilter<$PrismaModel>
 }
 
+export type EnumTransmittalNatureFilter<$PrismaModel = never> = {
+  equals?: $Enums.TransmittalNature | Prisma.EnumTransmittalNatureFieldRefInput<$PrismaModel>
+  in?: $Enums.TransmittalNature[] | Prisma.ListEnumTransmittalNatureFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TransmittalNature[] | Prisma.ListEnumTransmittalNatureFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTransmittalNatureFilter<$PrismaModel> | $Enums.TransmittalNature
+}
+
 export type EnumTransmittalStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.TransmittalStatus | Prisma.EnumTransmittalStatusFieldRefInput<$PrismaModel>
   in?: $Enums.TransmittalStatus[] | Prisma.ListEnumTransmittalStatusFieldRefInput<$PrismaModel>
   notIn?: $Enums.TransmittalStatus[] | Prisma.ListEnumTransmittalStatusFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumTransmittalStatusFilter<$PrismaModel> | $Enums.TransmittalStatus
+}
+
+export type EnumTransmittalNatureWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TransmittalNature | Prisma.EnumTransmittalNatureFieldRefInput<$PrismaModel>
+  in?: $Enums.TransmittalNature[] | Prisma.ListEnumTransmittalNatureFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TransmittalNature[] | Prisma.ListEnumTransmittalNatureFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTransmittalNatureWithAggregatesFilter<$PrismaModel> | $Enums.TransmittalNature
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTransmittalNatureFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTransmittalNatureFilter<$PrismaModel>
 }
 
 export type EnumTransmittalStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -981,11 +998,28 @@ export type NestedEnumStepStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumStepStatusFilter<$PrismaModel>
 }
 
+export type NestedEnumTransmittalNatureFilter<$PrismaModel = never> = {
+  equals?: $Enums.TransmittalNature | Prisma.EnumTransmittalNatureFieldRefInput<$PrismaModel>
+  in?: $Enums.TransmittalNature[] | Prisma.ListEnumTransmittalNatureFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TransmittalNature[] | Prisma.ListEnumTransmittalNatureFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTransmittalNatureFilter<$PrismaModel> | $Enums.TransmittalNature
+}
+
 export type NestedEnumTransmittalStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.TransmittalStatus | Prisma.EnumTransmittalStatusFieldRefInput<$PrismaModel>
   in?: $Enums.TransmittalStatus[] | Prisma.ListEnumTransmittalStatusFieldRefInput<$PrismaModel>
   notIn?: $Enums.TransmittalStatus[] | Prisma.ListEnumTransmittalStatusFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumTransmittalStatusFilter<$PrismaModel> | $Enums.TransmittalStatus
+}
+
+export type NestedEnumTransmittalNatureWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TransmittalNature | Prisma.EnumTransmittalNatureFieldRefInput<$PrismaModel>
+  in?: $Enums.TransmittalNature[] | Prisma.ListEnumTransmittalNatureFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TransmittalNature[] | Prisma.ListEnumTransmittalNatureFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTransmittalNatureWithAggregatesFilter<$PrismaModel> | $Enums.TransmittalNature
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTransmittalNatureFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTransmittalNatureFilter<$PrismaModel>
 }
 
 export type NestedEnumTransmittalStatusWithAggregatesFilter<$PrismaModel = never> = {

@@ -23,6 +23,7 @@ import {
 } from "../../generated/prisma/enums.js"
 import { lastLiveRevision } from "../../utils/revisionScheme.js"
 import { enablesUse, requiresNewRevision } from "../../utils/qualifications.js"
+import { directionOf } from "../../utils/transmittalCirculation.js"
 import { obsolescenceCause } from "../../utils/documentMetadata.js"
 
 /** Detalle que ambas lecturas devuelven cuando tienen que ir a la base. */
@@ -449,6 +450,40 @@ export const resolverTypes = {
     },
     issuedBy: (parent: Transmittal) => {
       return { __typename: "UserName", id: parent.issuedById }
+    },
+    /**
+     * El sentido se DERIVA del rol del proyecto y de la naturaleza (BLOQUE 04,
+     * B1), y se expone resuelto en lugar de que cada consumidor lo deduzca.
+     *
+     * Nulo mientras el proyecto no haya declarado su rol: es la única situación
+     * en que el sentido no puede establecerse, y no debe confundirse con las
+     * combinaciones imposibles, que ningún transmittal llega a tener.
+     */
+    direction: async (parent: Transmittal) => {
+      const settings = await prisma.docProjectSettings.findUnique({
+        where: { projectId: parent.projectId },
+        select: { documentRole: true },
+      })
+
+      return settings
+        ? directionOf(settings.documentRole, parent.nature)
+        : null
+    },
+    respondsTo: async (parent: any) => {
+      if (parent.respondsTo !== undefined) return parent.respondsTo
+      if (parent.respondsToTransmittalId === null) return null
+
+      return prisma.transmittal.findUnique({
+        where: { id: parent.respondsToTransmittalId },
+      })
+    },
+    responses: async (parent: any) => {
+      if (Array.isArray(parent.responses)) return parent.responses
+
+      return prisma.transmittal.findMany({
+        where: { respondsToTransmittalId: parent.id },
+        orderBy: { id: "asc" },
+      })
     },
   },
 

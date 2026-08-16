@@ -3,7 +3,12 @@ import test, { after, before } from "node:test"
 import jwt from "jsonwebtoken"
 import { prisma } from "../lib/prisma.js"
 import { ResolverContext } from "../types.js"
-import { DocProjectSide, DocumentRole, ModuleType } from "../generated/prisma/enums.js"
+import {
+  DocProjectSide,
+  DocumentRole,
+  ModuleType,
+  TransmittalNature,
+} from "../generated/prisma/enums.js"
 import { documentResolvers } from "./documents.js"
 import { transmittalResolvers } from "./transmittals.js"
 import { projectSettingsResolvers } from "./projectSettings.js"
@@ -86,7 +91,7 @@ before(async () => {
     data: {
       code: `${CODIGO}-TR`,
       projectId: PROYECTO_SIN_MEMBRESIA,
-      issuedTo: "Cliente de prueba",
+      nature: TransmittalNature.EMISSION,
       issuedById: USER_ID,
     },
   })

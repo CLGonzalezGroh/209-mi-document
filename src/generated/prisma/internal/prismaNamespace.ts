@@ -2844,8 +2844,10 @@ export const TransmittalScalarFieldEnum = {
   updatedById: 'updatedById',
   code: 'code',
   projectId: 'projectId',
+  nature: 'nature',
   status: 'status',
-  issuedTo: 'issuedTo',
+  counterpartyReference: 'counterpartyReference',
+  respondsToTransmittalId: 'respondsToTransmittalId',
   issuedById: 'issuedById',
   issuedAt: 'issuedAt',
   responseAt: 'responseAt',
@@ -3293,6 +3295,20 @@ export type EnumStepStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
  * Reference to a field of type 'StepStatus[]'
  */
 export type ListEnumStepStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StepStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'TransmittalNature'
+ */
+export type EnumTransmittalNatureFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TransmittalNature'>
+    
+
+
+/**
+ * Reference to a field of type 'TransmittalNature[]'
+ */
+export type ListEnumTransmittalNatureFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TransmittalNature[]'>
     
 
 

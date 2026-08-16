@@ -105,6 +105,33 @@ enum StepStatus {
 }
 
 "Estado del transmittal"
+"""
+Naturaleza del transmittal.
+
+La clasificación relevante no es la dirección sino el propósito, que determina
+qué reglas lo gobiernan. El sentido se deriva del rol del proyecto y de la
+naturaleza, y no se declara.
+"""
+enum TransmittalNature {
+  "Entrega de documentación producida"
+  EMISSION
+  "Calificación consolidada de una emisión. Solo en modo Emisor"
+  RESPONSE
+}
+
+"""
+Sentido de la circulación. DERIVADO del rol del proyecto y de la naturaleza.
+
+Nulo solo en las combinaciones que ningún transmittal puede tener, que el
+sistema impide crear.
+"""
+enum TransmittalDirection {
+  "Sale del sistema hacia la contraparte"
+  OUTGOING
+  "Llega al sistema desde la contraparte"
+  INCOMING
+}
+
 enum TransmittalStatus {
   "En preparación"
   DRAFT
@@ -242,6 +269,14 @@ enum TransmittalStatusInput {
 }
 
 "Código de propósito para inputs"
+"Naturaleza del transmittal, para inputs"
+enum TransmittalNatureInput {
+  "Entrega de documentación producida"
+  EMISSION
+  "Calificación consolidada de una emisión. Solo en modo Emisor"
+  RESPONSE
+}
+
 enum PurposeCodeInput {
   "Para aprobación del cliente"
   FOR_APPROVAL
@@ -1096,10 +1131,27 @@ type Transmittal @key(fields: "id") {
   projectId: Int!
   "Estado actual del transmittal"
   status: TransmittalStatus!
+  "Naturaleza: entrega de documentación o calificación de una emisión"
+  nature: TransmittalNature!
+  """
+  Sentido de la circulación. Se DERIVA del rol del proyecto y de la naturaleza,
+  y no se almacena. Nulo si el proyecto todavía no declaró su rol.
+  """
+  direction: TransmittalDirection
   "Items incluidos en el transmittal"
   items: [TransmittalItem!]!
-  "Destinatario del transmittal"
-  issuedTo: String!
+  """
+  Cómo la contraparte nombra este transmittal en su sistema.
+
+  Un dato del remito ajeno, no un remito propio. Aplica a los dos casos
+  entrantes: la emisión del contratista en modo Receptor y la respuesta del
+  cliente en modo Emisor.
+  """
+  counterpartyReference: String
+  "La emisión que esta respuesta contesta. Nula en las emisiones"
+  respondsTo: Transmittal
+  "Las respuestas que contestan a esta emisión"
+  responses: [Transmittal!]!
   "Fecha de emisión"
   issuedAt: DateTime
   "Usuario que emitió el transmittal"
@@ -1800,12 +1852,14 @@ enum DocumentClassOrderFieldInput {
 
 "Filtro de transmittals"
 input TransmittalFilterInput {
-  "Búsqueda en código o destinatario"
+  "Búsqueda en el código propio o en la referencia de la contraparte"
   query: String
   "Filtrar por proyecto"
   projectId: Int
   "Filtrar por estado"
   status: TransmittalStatusInput
+  "Filtrar por naturaleza"
+  nature: TransmittalNatureInput
 }
 
 "Filtro de áreas"
@@ -2186,8 +2240,17 @@ input UpdateDocumentClassInput {
 input CreateTransmittalInput {
   "ID del proyecto asociado"
   projectId: Int!
-  "Nombre del destinatario"
-  issuedTo: String!
+  """
+  Naturaleza del transmittal.
+
+  El destinatario no se declara: es la contraparte del proyecto, que es única y
+  vive en su configuración documental.
+  """
+  nature: TransmittalNatureInput!
+  "Cómo la contraparte nombra este transmittal en su sistema"
+  counterpartyReference: String
+  "La emisión que se contesta. Exigida en una respuesta, prohibida en una emisión"
+  respondsToTransmittalId: Int
   "Items a incluir en el transmittal"
   items: [TransmittalItemInput!]!
 }

@@ -103,6 +103,14 @@ export const StepStatus = {
 export type StepStatus = (typeof StepStatus)[keyof typeof StepStatus]
 
 
+export const TransmittalNature = {
+  EMISSION: 'EMISSION',
+  RESPONSE: 'RESPONSE'
+} as const
+
+export type TransmittalNature = (typeof TransmittalNature)[keyof typeof TransmittalNature]
+
+
 export const TransmittalStatus = {
   DRAFT: 'DRAFT',
   ISSUED: 'ISSUED',
