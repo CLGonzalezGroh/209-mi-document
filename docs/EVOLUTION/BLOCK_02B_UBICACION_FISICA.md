@@ -1,7 +1,7 @@
 # Bloque 02B — Ubicación física del documento
 
 **Estado:** `PROMOVIDO_A_SFS`
-**Versión:** 1.6
+**Versión:** 1.7
 **Depende de:** `BLOCK_02`, que dejó creada `DocProjectSettings`.
 **Decisiones que ejecuta:** D-14.
 **Decisiones que construye para otro bloque:** el mecanismo de alcance por proyecto de D-21, que `BLOCK_02C` reutiliza sobre clase y tipo.
@@ -319,9 +319,11 @@ El ámbito es propio y no un agregado al ciclo interno por el mismo criterio con
 
 Dos documentos existentes se actualizaron por lo que el bloque les cambió: `Document` incorpora la ubicación y su snapshot, con la regla de que se edita siempre; y `DocProjectSettings`, la configuración del atributo, con la distinción de que ahí viven los **valores** y no los **conjuntos**.
 
-**Desplegado y verificado en testing** —`rbb`, `optimal`, `proion`—, con las cinco migraciones aplicadas y los permisos sembrados. El contrato servido por la imagen desplegada da verde en los dos bloques, y los seis permisos de ubicación están repartidos por rol en los tres clientes: `doc-basic` con tres, `doc-full` con seis.
+**Desplegado y verificado en testing** —`rbb`, `optimal`, `proion`— **y en producción** —`optimal`, `proion`—, con las cinco migraciones aplicadas y los permisos sembrados. El contrato servido por la imagen desplegada da verde en los dos bloques en los cinco despliegues, y los seis permisos de ubicación están repartidos por rol: `doc-basic` con tres, `doc-full` con seis.
 
-**La línea base del subsistema legado de `optimal` quedó intacta**: 9 archivos escaneados, 3 áreas y 32 registros de log, con el subsistema documental en cero. Las cinco migraciones no mencionan `scanned_files` ni `areas` **ni una sola vez**, verificado sobre el texto de las migraciones y no por declaración.
+**La línea base del subsistema legado quedó intacta, y esta vez medida.** En `optimal` de producción —el único cliente con uso real de `ScannedFile`— se comparó la misma consulta antes y después de migrar y **la diferencia es vacía**: 3.289 archivos escaneados, 52 áreas y 5.124 registros de log, idénticos. `proion` no usa el subsistema legado y da cero en las tres.
+
+Es el criterio 10 **medido** y no argumentado, que es lo que en testing había quedado pendiente. Lo respalda además que las cinco migraciones no mencionan `scanned_files` ni `areas` **ni una sola vez**, verificado sobre su texto.
 
 **Dos controles nuevos quedaron en `210-mi-deploy`**, y los dos por defectos reales de esta sesión:
 
