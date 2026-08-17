@@ -969,3 +969,32 @@ Es el criterio 10 **medido** y no argumentado, que es lo que en testing había q
 
 
 
+
+---
+
+# What's new in María Ingeniería API Documents 2.8.2
+
+2026-08-17
+
+## Definiciones del BLOQUE 02C, y el plan saldado
+
+Sin cambios de código. El bloque queda definido y el plan al día antes de implementarlo.
+
+### Alcance por proyecto de clase y tipo (BLOQUE 02C)
+
+El mecanismo ya existe: `BLOQUE 02B` lo construyó y lo probó sobre el caso difícil —una jerarquía, con vínculos de padre y recálculo de rutas—. Lo que este bloque agrega es aplicarlo al **par de la clasificación**, que es el caso fácil salvo en un punto.
+
+- **Clase y tipo declaran su alcance juntos.** El tipo cuelga de la clase, de modo que declararlos por separado admite un estado que no describe ninguna práctica: un proyecto con clasificación propia heredando tipos que apuntan a clases que no ve. Los catálogos documentales pasan a ser **dos y no tres** —clasificación y ubicación—, y `DocCatalogKind` queda en `{ LOCATION, CLASSIFICATION }`. Retirar los dos valores no cuesta migración de datos: nunca se les escribió una fila, que es la misma corrección que el módulo ya hizo con `WorkflowStatus.PENDING` y `RevisionStatus.OBSOLETE`.
+- **La siembra es conjunta, y la identidad es el código dentro de su clase.** Un catálogo plano no tiene ruta completa, que es con lo que la siembra del árbol identifica un nodo. Sembrar un tipo **arrastra su clase** cuando falta en el destino, que es la consecuencia directa de lo anterior.
+- **El cruce de alcance va en un solo sentido.** Un tipo del proyecto puede colgar de una clase del despliegue —eso **es** ampliar—; uno del despliegue no puede colgar de una clase de proyecto. Alcanza también a `DocWorkflowTemplate`: sin eso, la plantilla global quedaría dependiendo de un catálogo privado.
+- **La ausencia de ámbito nombra el despliegue.** Sin argumento de proyecto, la consulta devuelve `projectId` nulo y no todo: un filtro que no encuentra no se desactiva solo. Es lo único que sostiene que la webapp no se toque, porque devolver todo dejaría la pantalla de catálogos mostrando las entradas privadas de cada cliente mezcladas con el estándar de la organización.
+- **El alcance se declara con los mismos dos ejes que la entrada.** `DocCatalogScope` pasa a llevar `module` obligatorio y `projectId` anulable, de modo que calidad, comercial y activos puedan declarar su modo sin migrar estructura. No son dos columnas anulables con exclusión mutua: un proyecto siempre pertenece al módulo de proyectos, así que los ejes conviven en lugar de excluirse.
+- **La deriva de claves foráneas se corrige acá.** De las seis referencias a los dos catálogos, **una diverge de verdad**: `document_revisions.documentClassId` está en `RESTRICT` en la base y el modelo implica `SET NULL`, que es el default de Prisma en una relación opcional. La consecuencia es peor que en la ubicación, porque **la clase integra el payload de la firma**: borrar una clase habría vaciado en silencio la clasificación de revisiones firmadas, que es lo que la firma existe para impedir. Las dos de `documents` solo arrastran el nombre de constraint previo al renombre a `current*`.
+
+**Es el primer bloque sobre objetos con datos e interfaz en producción** —7 clases y 57 tipos en `optimal`, pantallas vivas de ambos catálogos y `ScannedFile` referenciándolos—, y por eso es enteramente de backend: las pantallas existentes se **verifican** y no se tocan, y la administración del catálogo por proyecto se construye con la interfaz, ya en su ubicación definitiva.
+
+### El plan saldado
+
+- **La trazabilidad cierra su último pendiente.** Los campos de fecha de las entidades —`approvedAt`, `issuedAt`, `completedAt`— **complementan al evento y no lo reemplazan**, con la fórmula que la ubicación fijó para el snapshot de la ruta: son denormalización de conveniencia y no evidencia. No pueden separarse del evento, porque se emite dentro de la transacción del cambio; son campos del contrato que cada listado va a mostrar; y `issuedAt` además ordena. De ahí la regla que vuelve legítima la redundancia: **si divergen, gana el evento**. Lo que se descarta es el estado intermedio —conservarlos sin declarar qué son—, que es el que mantuvo este pendiente abierto tres bloques.
+- **El ámbito determina dónde vive la pantalla.** Los mismos objetos existen en tres ámbitos y el usuario debe saber en cuál está parado sin deducirlo: el despliegue en `documents/`, el módulo en `<modulo>/documents/`, el proyecto en `projects/[projectId]/documents/`. No es una preferencia de navegación — el ámbito gobierna la resolución de los catálogos, el alcance de acceso y la precedencia de la configuración, y una pantalla fuera de su ámbito obliga a pasarlo por parámetro y a que cada consumidor decida cuál rige. La bandeja de trabajo es transversal y su filtro por proyecto es una vista: `pendingReviewSteps` ya es transversal por construcción, de modo que falta el filtro y no la consulta.
+- **La interfaz nacerá en su ubicación definitiva.** La ruta implementada hoy invierte el orden, y construir sobre ella para mudar después es levantar dos veces las mismas pantallas y sus enlaces. Queda declarada la dependencia externa: la reorganización del módulo de proyectos por workspace, con su plan propio, y el precedente construido en digitalización.

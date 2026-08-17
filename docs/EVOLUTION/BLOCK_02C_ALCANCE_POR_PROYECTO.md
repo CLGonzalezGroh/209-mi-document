@@ -1,0 +1,234 @@
+# Bloque 02C — Alcance por proyecto de clase y tipo
+
+**Estado:** `APROBADO_PENDIENTE` — definiciones cerradas, listo para implementar
+**Versión:** 1.1
+**Depende de:** `BLOCK_02B`, que construyó el mecanismo de alcance; `BLOCK_03`, por la unicidad con nulos.
+**Decisiones que ejecuta:** D-21.
+**Decisiones que aplica sin modificar:** D-06, D-13, D-15.
+
+## Objetivo
+
+Llevar el alcance por proyecto a `DocumentClass` y `DocumentType`, aplicando el mecanismo que `BLOCK_02B` construyó y probó sobre la ubicación.
+
+El bloque es chico en definiciones y **caro en cuidado**, y conviene enunciar de entrada por qué: es el primer bloque del plan que altera objetos con **datos e interfaz en producción**. `optimal` tiene 7 clases y 57 tipos, la webapp tiene pantallas vivas de ambos catálogos, y `ScannedFile` —el único subsistema con uso real— los referencia. Nada de eso puede degradarse.
+
+Lo que hace barato el bloque es que el trabajo conceptual ya está hecho: el mecanismo existe, se probó en el caso difícil —una jerarquía, con vínculos de padre y recálculo de rutas— y clase y tipo son el caso fácil.
+
+## Línea base confirmada
+
+Verificada sobre el código después de `BLOCK_02B`.
+
+- **`DocCatalogScope` existe y es genérico.** Una fila por proyecto y catálogo, con `mode` en `INHERIT` u `OWN`, y `projectId Int` **obligatorio**, con clave `[projectId, catalog]`.
+- **`DocCatalogKind` ya declara los tres valores** —`LOCATION`, `DOCUMENT_CLASS`, `DOCUMENT_TYPE`— y **los dos últimos no los asigna ninguna operación**: solo existen filas de ubicación.
+- **`catalogScope.ts` no sabe de árboles.** `effectiveMode`, `visibleEntries`, `entryVisible` y `scopeWhere` reciben entradas con alcance; lo específico de la jerarquía son las dos invariantes de cruce del final. Se reutiliza sin tocarlo.
+- **`catalogSeed.ts` sí es del árbol.** Identifica un nodo por su **ruta completa**, que es lo que un catálogo plano no tiene.
+- **Los dos catálogos resuelven hoy por `module` anulable**, con `NULLS NOT DISTINCT` en sus cuatro índices únicos desde `BLOCK_03`, B15: `[name, module]` y `[code, module]` en la clase, `[name, classId, module]` y `[code, classId, module]` en el tipo.
+- **Sus consultas no tienen noción de proyecto.** `documentClasses` y `documentTypes` filtran, paginan y ordenan; los selectores son `documentClassesSelectList(module)` y `documentTypesSelectList(module, classId)`.
+- **Cada catálogo ya tiene sus seis permisos** —`LIST`, `READ`, `SELECT`, `CREATE`, `UPDATE`, `DELETE`— repartidos por rol.
+- **Cinco tablas referencian los dos catálogos**: `documents` (por la copia `current*` de `BLOCK_03B`), `document_revisions` (por el dato, D-23), `doc_workflow_templates`, `scanned_files` y `transmittal_items`.
+- **Existe una deriva declarada por `BLOCK_02B` y sin dueño**, detallada en B5.
+- **Ningún documento productivo.** El subsistema documental sigue sin uso: lo que hay en producción son las **entradas de catálogo** y su consumo desde `ScannedFile`.
+
+## Decisiones ya aprobadas que aplican
+
+- **D-21** — un catálogo es un conjunto y no un valor: el proyecto hereda y amplía, o tiene el suyo. El alcance por proyecto solo tiene sentido con `module = PROJECTS`.
+- **D-13** — la validación ocurre solo en escritura: cambiar la configuración nunca revalida ni invalida lo existente.
+- **D-15** — la membresía determina qué alcanza el usuario, no qué puede hacer. La autorización es en dos capas.
+- **D-06** — la unicidad se resuelve con índices parciales o con `NULLS NOT DISTINCT`, y no con tuplas anulables sueltas.
+- **`BLOCK_02B`, B1 y B2** — los dos modos, la siembra puntual por copia, la ausencia de mecanismo de exclusión, y el cambio de modo admitido con documentos ya clasificados.
+
+## Definiciones del bloque
+
+### B1 — Clase y tipo declaran su alcance juntos
+
+**Planteo.** `BLOCK_02B`, B1 fijó que la declaración es **por catálogo** y no una sola por proyecto, con un caso concreto: un cliente puede dictar los tipos de documento y no tener nomenclatura formal de áreas. Al aplicarlo a clase y tipo aparece la pregunta que la ubicación no tenía, porque su padre vive en el mismo catálogo: **¿clase y tipo son dos catálogos o uno?**
+
+La combinación que lo fuerza es clase `OWN` con tipo `INHERIT`. El proyecto no ve ninguna clase del despliegue, pero hereda tipos que cuelgan de esas clases: tipos huérfanos, que apuntan a una clase que el proyecto no puede nombrar. La combinación inversa —clase `INHERIT`, tipo `OWN`— no rompe nada, pero deja el sistema de clasificación partido en dos convenciones.
+
+**Resolución. Se heredan ambos o ninguno.** Clase y tipo son **un solo sistema de clasificación**, no dos catálogos que coinciden en pantalla: el tipo cuelga de la clase, de modo que declararlos por separado admite estados que no describen ninguna práctica real.
+
+Esto **no contradice a B1 de `BLOCK_02B`, lo precisa**: la declaración sigue siendo por catálogo, y lo que este bloque establece es que los catálogos son **dos y no tres** —clasificación y ubicación—. El caso que B1 defendía se conserva entero: el cliente que dicta la clasificación y no tiene nomenclatura de áreas declara `OWN` en una y `INHERIT` en la otra.
+
+**Forma en el modelo: `DocCatalogKind` pasa a `{ LOCATION, CLASSIFICATION }`.** Los valores `DOCUMENT_CLASS` y `DOCUMENT_TYPE` se retiran. Sostener dos filas obligadas a coincidir sería una segunda fuente de verdad sobre un solo hecho, con la pregunta inevitable de cuál gana ante una divergencia.
+
+Es además la corrección que el módulo ya hizo dos veces: `WorkflowStatus.PENDING` y `RevisionStatus.OBSOLETE` se retiraron por estar declarados sin que ninguna operación los asignara (H-08), que es exactamente el estado de estos dos hoy. Retirarlos ahora **no cuesta migración de datos**: nunca se les escribió una fila.
+
+**Alternativa descartada:** dos filas con invariante de coincidencia. Se descarta por lo anterior — expresa como restricción algo que la estructura puede impedir.
+
+**Alternativa descartada:** admitir las cuatro combinaciones y ocultar los tipos huérfanos al resolver. Se descarta porque la ocultación es silenciosa: el proyecto declara heredar tipos y no ve ninguno, sin que nada explique por qué.
+
+### B2 — La siembra es conjunta, y la identidad es el código dentro de su clase
+
+**Planteo.** `catalogSeed.ts` identifica un nodo por su ruta completa, porque copiar un árbol no es copiar una lista. Un catálogo plano no tiene ruta, y hay que decir con qué se reconoce una entrada ya presente en el destino.
+
+**Resolución.** La siembra copia **clase y tipo en un acto**, coherente con B1, y la identidad es el **código**:
+
+- una **clase** ya está presente si su código está presente en el destino;
+- un **tipo** ya está presente si su código está presente **dentro de su clase**. El mismo código de tipo puede repetirse bajo dos clases distintas, y son entradas distintas.
+
+Es la identidad que la base ya declara —`[code, module]` en la clase, `[code, classId, module]` en el tipo— y no una convención nueva.
+
+**Se conservan las cuatro reglas de `BLOCK_02B`, B2**, que no son del árbol sino de la siembra: la fuente es lo que la fuente **ve**, con su alcance resuelto; el destino se compara por lo que **ve**, de modo que sembrar en un proyecto que hereda no agrega nada; solo se copia lo vigente; y sembrar es **incremental e idempotente**.
+
+**Sembrar un tipo arrastra su clase**, cuando esa clase todavía no está en el destino. Es la consecuencia directa de B1: un tipo sin su clase es el huérfano que ese punto descarta. La clase se copia primero, y el tipo cuelga de la copia.
+
+**La fuente admite el despliegue o un proyecto existente**, con la misma regla de `BLOCK_02B`: los proyectos ofrecidos son los que el usuario alcanza por membresía, y solo los que tienen catálogo propio. De dónde salió el catálogo queda en `DocAuditEvent` y no en un atributo de linaje.
+
+### B3 — `ScannedFile` no participa del alcance
+
+**Planteo.** `ScannedFile` referencia clase y tipo, tiene `projectId` propio y es el único subsistema con uso productivo. Podría resolver sus selectores por el alcance de su proyecto.
+
+**Resolución. No se toca.** Sus selectores siguen viendo el catálogo del despliegue, exactamente como hoy.
+
+El motivo es que **sale del módulo**: su migración a `212-mi-digitalization` es un bloque diferido con su propio análisis, y hacerlo participar del alcance es trabajo que se tira. Es además la única parte del sistema con datos y operación real de un cliente, de modo que el cambio más barato es el que no existe.
+
+Con las entradas existentes en alcance de despliegue —`projectId` nulo— el comportamiento observable de `ScannedFile` es **idéntico** antes y después del bloque, y eso se mide, no se argumenta.
+
+### B4 — El bloque es de backend, y no rompe las pantallas del despliegue
+
+**Planteo.** `BLOCK_02B` fue enteramente de backend porque la ubicación no tenía pantallas. Acá las hay: `documents/document-classes` y `documents/document-types` están en producción.
+
+**Resolución.** El bloque construye el backend y **verifica** que las pantallas existentes sigan funcionando sin modificarlas. La administración del catálogo propio de un proyecto se construye en `BLOCK_05`.
+
+Lo que lo hace posible es que la migración sea **aditiva**: toda entrada existente queda con `projectId` nulo, o sea en alcance de despliegue, que es el ámbito que esas pantallas administran. Un argumento nuevo y opcional en las consultas no cambia lo que la webapp pide hoy.
+
+Y lo que lo hace conveniente es la ubicación definitiva: el catálogo del proyecto se administra en `projects/[projectId]/documents/`, ruta que todavía no existe. Construirla acá obligaría a levantarla dos veces o a estrenarla en la ruta vieja.
+
+**Las pantallas globales pasan a administrar explícitamente el ámbito del despliegue**, que es lo que ya hacen sin decirlo. Nombrarlo es de `BLOCK_05`.
+
+### B5 — La deriva de las claves foráneas se corrige acá
+
+**Planteo.** `BLOCK_02B` dejó declarada una deriva entre el modelo y la base que no le correspondía tocar, y quedó sin dueño. Este bloque abre migración sobre esas mismas tablas.
+
+**Situación verificada** sobre las seis referencias a los dos catálogos:
+
+| Tabla | Columna | Base | Modelo | |
+| ----- | ------- | ---- | ------ | - |
+| `documents` | `currentDocumentTypeId` | `RESTRICT` | `RESTRICT` | nombre de constraint viejo |
+| `documents` | `currentDocumentClassId` | `SET NULL` | `SET NULL` | nombre de constraint viejo |
+| `document_revisions` | `documentTypeId` | `RESTRICT` | `RESTRICT` | — |
+| `document_revisions` | `documentClassId` | `RESTRICT` | **`SET NULL`** | **divergencia real** |
+| `doc_workflow_templates` | ambas | `SET NULL` | `SET NULL` | — |
+| `scanned_files` | ambas | `SET NULL` | `SET NULL` | — |
+
+**Resolución.**
+
+- **`document_revisions.documentClassId` se declara `onDelete: Restrict`**, que es lo que la base ya hace. La relación es opcional y Prisma pone `SetNull` por defecto cuando nadie lo declara: un `prisma migrate dev` habría "corregido" la base en la dirección equivocada. Y acá la consecuencia es peor que en la ubicación, porque **la clase integra el payload de la firma** (D-05, D-23): borrar una clase habría vaciado en silencio la clasificación de revisiones firmadas, que es lo que la firma existe para impedir.
+- **Los dos nombres de constraint de `documents` se renombran** a `currentDocumentTypeId` y `currentDocumentClassId`. PostgreSQL no renombra las constraints al renombrar la columna, y `BLOCK_03B` renombró las columnas. Es cosmético y no cambia comportamiento, pero es deriva que el diff sigue reportando.
+
+Es el mismo hallazgo que `BLOCK_02B` encontró con `prisma migrate diff` y **no** con la compilación, que es la razón por la que la verificación de la ruta de migración es una fase y no un paso.
+
+### B6 — El alcance se declara con los mismos dos ejes que la entrada
+
+**Planteo.** `DocCatalogScope` tiene hoy `projectId Int` obligatorio, con clave `[projectId, catalog]`: solo un proyecto puede declarar su modo. Pero comercial, calidad y activos van a tener catálogo propio, administrado en `<modulo>/documents/`, y ninguno tiene proyecto. Con la tabla así, la ausencia de proyecto equivale al despliegue, que es exactamente lo que el plan advierte que no debe construirse.
+
+**Resolución. El terreno se prepara acá**, aunque el escalón de módulo en configuración y plantilla siga diferido.
+
+La forma es la que el propio catálogo ya usa: **`module` más `projectId`**, los mismos dos ejes con que se alcanza una entrada, ahora sobre la declaración.
+
+| Fila | `module` | `projectId` | Qué declara |
+| ---- | -------- | ----------- | ----------- |
+| Proyecto | `PROJECTS` | 5 | Cómo resuelve el proyecto 5 |
+| Módulo | `QUALITY` | nulo | Cómo resuelve calidad |
+
+Un proyecto siempre pertenece al módulo de proyectos, de modo que **`module` está siempre presente** y `projectId` es la única columna anulable. La clave pasa a `[module, projectId, catalog]`, con `NULLS NOT DISTINCT`.
+
+**No se usan dos columnas anulables con exclusión mutua**, que es la forma que D-20 descarta por ser *"la misma familia de defecto que D-06 retira al eliminar `entityType`/`entityId`"*. Acá no hace falta: los dos ejes conviven en lugar de excluirse, y el eje de módulo del alcance dice lo mismo que el eje de módulo de la entrada.
+
+**Consecuencia sobre el significado del eje de módulo, que conviene enunciar.** Hoy `module = null` en una entrada significa *disponible para todos los módulos*, sin condición. Cuando un módulo declare `OWN`, significará que ese módulo **no ve** las entradas sin módulo. Es la misma generalización que el proyecto recibe en este bloque, aplicada un escalón más arriba, y es lo que vuelve al mecanismo uno solo en lugar de dos.
+
+**Este bloque no construye la administración por módulo**: prepara la estructura y deja la resolución escrita en términos de ámbito. Mientras ningún módulo declare nada, rige `INHERIT`, que es el comportamiento actual.
+
+### B7 — El cruce de alcance va en un solo sentido
+
+**Planteo.** En la ubicación, un nodo del proyecto puede colgar de uno del despliegue —eso **es** ampliar— y nunca al revés, porque volvería el árbol global dependiente de un proyecto. Acá el vínculo equivalente es `DocumentType.classId`, con la diferencia de que el padre vive en el otro catálogo del par.
+
+**Resolución. La misma regla, y no se cruza al revés.**
+
+- un **tipo de un proyecto** puede colgar de una **clase del despliegue**: es ampliar la clasificación heredada;
+- un **tipo del despliegue** no puede colgar de una **clase de proyecto**. Se rechaza.
+
+**Alcanza también a `DocWorkflowTemplate`**, cuyo alcance combina proyecto con clase y tipo: una plantilla del despliegue no puede referenciar una clase o un tipo de proyecto. Es el mismo enunciado sobre otro objeto, y sin él la plantilla global de un despliegue quedaría dependiendo de un catálogo privado.
+
+Como en `BLOCK_02B`, la invariante **no es expresable en un `CHECK`** —exige mirar la entrada referenciada— y vive en la operación, con su prueba.
+
+### B8 — La ausencia de ámbito nombra el despliegue
+
+**Planteo.** Los tres ejes —`module`, `projectId`, y `classId` en el tipo— ya funcionan igual entre sí: nulo significa *para todos*, y este bloque no lo cambia. Lo que falta declarar es qué devuelve `documentClasses()` **sin** argumento de ámbito, que es exactamente como la webapp la llama hoy.
+
+**Resolución. Sin ámbito rige el del despliegue**, o sea `projectId` nulo. Para ver el catálogo de un proyecto hay que pedirlo por su proyecto.
+
+**La ausencia de argumento nombra un ámbito; no apaga un filtro.** Es la orientación que `BLOCK_02B` ya fijó con otras palabras —*"una rama inexistente devuelve vacío y no devuelve todo"*—: un filtro que no encuentra no se desactiva solo.
+
+Es además lo único que sostiene el criterio 9. Devolver todo dejaría la pantalla de catálogos de `optimal` mostrando las entradas privadas de cada cliente mezcladas con el estándar de la organización, sin que nadie lo hubiera pedido y sin una línea de código modificada que lo explicara.
+
+**Alternativa descartada:** el proyecto como un filtro más, donde sin filtro no se filtra. Se descarta por lo anterior: es un cambio de comportamiento en producción disfrazado de argumento opcional.
+
+**Alternativa descartada — por ahora:** un modo explícito de ver todos los ámbitos, para una administración transversal. No se descarta el caso sino su momento: no existe la pantalla que lo pediría, y `BLOCK_05` puede agregarlo sin migrar nada. Lo que este bloque fija es el valor por defecto, que es lo que no conviene cambiar dos veces.
+
+**El precio, declarado:** no hay forma de ver de un vistazo todas las entradas de todos los ámbitos. Con esta resolución eso es una consulta por ámbito, y no una pantalla.
+
+## Alcance incluido
+
+- `projectId Int?` en `DocumentClass` y `DocumentType`, referencia externa sin FK, con el invariante de D-21: con valor, exige `module = PROJECTS`.
+- Los cuatro índices únicos recreados con el eje nuevo y `NULLS NOT DISTINCT`.
+- `DocCatalogKind` a `{ LOCATION, CLASSIFICATION }` (B1).
+- `DocCatalogScope` con los dos ejes: `module` obligatorio, `projectId` anulable, clave `[module, projectId, catalog]` con `NULLS NOT DISTINCT` (B6). Las filas de ubicación existentes se migran a `module = PROJECTS`.
+- Las dos invariantes de cruce, en `DocumentType.classId` y en `DocWorkflowTemplate` (B7).
+- Resolución de alcance en `documentClasses`, `documentTypes` y los dos selectores, con argumento de proyecto **opcional**: sin él rige el ámbito del despliegue, que es lo que la webapp pide hoy.
+- Autorización en dos capas: los seis permisos existentes de cada catálogo, más membresía cuando la operación es de ámbito de proyecto, con el precedente de `locations.ts`.
+- Siembra conjunta por copia, y la consulta de fuentes disponibles, con el precedente de `locationSeedSources`.
+- Validación al clasificar: la clase y el tipo elegidos deben estar dentro del alcance del proyecto del documento, con `entryVisible`.
+- Corrección de la deriva de claves foráneas (B5).
+- Control de precondición en `prisma/checks/`, y línea base contada por despliegue.
+- Pruebas puras del caso plano y de integración de la resolución, la siembra y la autorización.
+
+## Fuera de alcance
+
+- **Toda pantalla.** Las existentes se verifican y no se modifican; las del catálogo por proyecto son de `BLOCK_05` (B4).
+- **`ScannedFile` y `Area`** (B3).
+- **El escalón de módulo en configuración y plantilla** —`DocProjectSettings` y `DocWorkflowTemplate`—, que sigue diferido con su propio análisis. Este bloque prepara el eje **solo en la declaración de alcance del catálogo** (B6).
+- **La administración del catálogo por módulo**, que vive en `<modulo>/documents/` y es de la interfaz.
+- **La traducción de la clasificación al promover a la biblioteca de planta**, que D-21 dejó anotada como nota prospectiva.
+- **El alcance de `DocWorkflowTemplate`** por proyecto, clase y tipo, que ya existe y no cambia. Lo único que el bloque le agrega es la invariante de cruce de B7.
+
+## Pendiente de definición
+
+**Ninguna.** Las tres cuestiones que quedaron abiertas al redactar el bloque se resolvieron antes de escribir código, que es la condición que el propio bloque se puso: el terreno del escalón de módulo en B6, el sentido único del cruce de alcance en B7, y el ámbito por defecto de la consulta en B8.
+
+Lo que se difiere está en **Fuera de alcance**, y es distinto de lo que falta definir.
+
+## Criterios de aceptación
+
+1. Una entrada creada sin proyecto la ven todos los proyectos que heredan, y ninguno de los que declara catálogo propio.
+2. Un proyecto con clasificación propia ve solo sus clases y sus tipos, y puede crear entradas con códigos que el despliegue ya usa.
+3. La declaración de clasificación gobierna clase y tipo a la vez: no existe estado en que una herede y el otro no (B1).
+4. La siembra conjunta es idempotente: dos ejecuciones producen el mismo catálogo, y una fuente parcialmente solapada agrega solo lo que falta.
+5. Sembrar un tipo cuya clase no está en el destino copia primero la clase.
+6. Un documento no puede clasificarse con una entrada fuera del alcance de su proyecto.
+7. Un proyecto que cambia de modo con documentos ya clasificados no invalida ninguno: la validación es solo en escritura (D-13).
+8. Administrar el catálogo de un proyecto exige el permiso global **y** membresía vigente; el del despliegue, solo el permiso.
+9. **Las pantallas de catálogo de la webapp funcionan sin una sola línea modificada**, y el contrato que consumen no cambia de forma incompatible.
+10. **`ScannedFile` no registra ninguna diferencia observable**: misma consulta antes y después de migrar, en `optimal` de producción, con diferencia vacía (B3).
+11. Un tipo de proyecto puede colgar de una clase del despliegue; un tipo del despliegue no puede colgar de una clase de proyecto, y una plantilla del despliegue no puede referenciar entradas de proyecto (B7).
+12. Las filas de alcance existentes —todas de ubicación— quedan migradas a `module = PROJECTS` sin cambiar el comportamiento de ningún proyecto, y una declaración de módulo es registrable aunque ninguna operación la produzca todavía (B6).
+13. El diff del modelo contra la base queda limpio, incluida la deriva de B5, verificado con `prisma migrate diff` en los dos sentidos.
+14. El control de precondición detecta la aplicación parcial previa y no cancela por ningún otro motivo.
+
+## Fases
+
+1. **Modelo y migración** — `projectId` en los dos catálogos, los cuatro índices, `DocCatalogKind`, los dos ejes de `DocCatalogScope` (B6), y la corrección de la deriva de B5.
+2. **Resolución de alcance** — consultas y selectores, con el argumento opcional de ámbito y la autorización en dos capas.
+3. **Siembra conjunta** — util puro del caso plano, operación y consulta de fuentes.
+4. **Validación al clasificar** — las dos invariantes de cruce de B7 y el alcance de la entrada elegida.
+5. **Ruta de migración verificada** — los dos sentidos, control de precondición, línea base contada por despliegue, y la medición de `ScannedFile` en `optimal`.
+6. **Promoción a la SFS** — el ámbito `domain/20_classification/` que `BLOCK_02B` ya creó.
+
+## Referencias
+
+- `DOCUMENT_EVOLUTION_PLAN.md` — D-21, D-13, D-15, D-06; H-19
+- `BLOCK_02B_UBICACION_FISICA.md` — B1 y B2, el mecanismo de alcance y la siembra por copia
+- `BLOCK_03_CICLO_INTERNO.md` — B15, unicidad con nulos
+- `BLOCK_03B_TITULARIDAD_POR_NIVEL.md` — B1 y B2, la identificación en la revisión y su copia en el documento
+- `../../src/utils/catalogScope.ts`, `../../src/utils/catalogSeed.ts`
+- `../../src/resolvers/locations.ts` — precedente de autorización en dos capas sobre un catálogo

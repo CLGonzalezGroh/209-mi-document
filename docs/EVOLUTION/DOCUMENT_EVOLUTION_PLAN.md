@@ -1,7 +1,7 @@
 # Plan de evolución funcional — OperMask Documents
 
 **Estado:** Decisiones aprobadas — en ejecución por bloques
-**Versión:** 1.2
+**Versión:** 1.3
 **Alcance:** subsistema de Gestión Documental (`Document`, `DocumentRevision`, `DocumentVersion`, `ReviewWorkflow`, `ReviewStep`, `Transmittal`, `TransmittalItem`, catálogos, adjuntos y vínculo con tareas de proyecto).
 
 ## Objetivo
@@ -130,7 +130,7 @@ Los siguientes puntos requieren revisión antes de convertirse en reglas aprobad
 
 | # | Tema | Situación actual observada | Estado |
 | - | ---- | -------------------------- | ------ |
-| H-25 | Subsistema sin interfaz | Ninguna pantalla consume documentos, revisiones, versiones, workflows ni transmittals. El hub de documentos de proyecto enlaza a rutas cuyos directorios están vacíos. | `IMPLEMENTADO_CON_BRECHA` |
+| H-25 | Subsistema sin interfaz | Ninguna pantalla consume documentos, revisiones, versiones, workflows ni transmittals. El hub de documentos de proyecto enlaza a rutas cuyos directorios están vacíos. D-28 fija dónde se construye cada pantalla, y con ello que `BLOCK_05` nazca en la ubicación definitiva y no en la ruta actual. | `IMPLEMENTADO_CON_BRECHA` |
 | H-26 | Sin pruebas automatizadas | El módulo no tenía marco de pruebas ni script `test`. `BLOCK_01` incorporó la base con `node:test`, sin dependencias nuevas: 28 pruebas en tres suites, incluida la verificación de la garantía transaccional contra la base. Resta la cobertura de integración de los resolvers, diferida al end-to-end con la webapp (`BLOCK_05`). | `IMPLEMENTADO_CON_BRECHA` |
 
 ## Decisiones del plan
@@ -151,7 +151,19 @@ Alternativa descartada: enriquecer `DocumentSysLog` con tipo de objeto y estados
 
 Resuelto en `BLOCK_01`: nomenclatura de los objetos y de las acciones (B1 y B5), emisión dentro de la transacción del cambio (B3) y relación de una acción con varias transiciones (B4). `BLOCK_02` incorpora a ambos eventos el contexto del objeto afectado —`projectId`, que aquel bloque había diferido, y `module`, que resuelve H-24— derivado y no informado por quien emite (B9).
 
-Pendiente de definición: si el evento de workflow reemplaza o complementa a los campos de fecha ya presentes en las entidades (`approvedAt`, `issuedAt`, `completedAt`). `BLOCK_01` los conservó sin decidirlo, y la definición corresponde al bloque que altere esas transiciones.
+**Los campos de fecha de las entidades complementan al evento y no lo reemplazan.** Era el último pendiente de esta decisión —`approvedAt`, `issuedAt`, `completedAt`—, que `BLOCK_01` conservó sin definir y que `BLOCK_03` y `BLOCK_04` alteraron sin resolver.
+
+Se conservan con la fórmula que `BLOCK_02B` fijó para el snapshot de la ruta: **son denormalización de conveniencia y no evidencia**. El evento es la fuente de verdad, y estos campos existen para no pagar un recorrido de eventos cada vez que hay que mostrar u ordenar por una fecha.
+
+Tres hechos lo sostienen:
+
+- **no pueden separarse del evento**, porque `BLOCK_01` ya exige emitirlo dentro de la transacción del cambio (`B3`). La fecha y su evento se escriben juntos o no se escribe ninguno;
+- **son campos del contrato que la interfaz va a mostrar en cada fila de cada listado.** Derivarlos del evento es un recorrido por fila para pintar una fecha;
+- **`issuedAt` además ordena** hoy, y ordenar por un dato derivado obliga a materializarlo igual.
+
+De ahí la regla que vuelve legítima la redundancia: **si alguna vez divergen, gana el evento.** Un campo de fecha se corrige contra la traza; la traza no se corrige contra el campo.
+
+Lo que se descarta es el estado intermedio, que es el que había: conservarlos sin declarar qué son. Es lo que mantuvo este pendiente abierto tres bloques, y es la misma clase de ambigüedad que `BLOCK_02B` retiró al declarar que el snapshot no era evidencia.
 
 ### D-02 — El rechazo es terminal para la revisión
 
@@ -589,7 +601,7 @@ Definido al abrir `BLOCK_02B`:
 Pendientes de definición, que el usuario dejó explícitamente abiertos:
 
 - **si el sitio es además un espacio de trabajo** y no solo un atributo de filtrado. Como el proyecto puede abarcar varios sitios, un espacio de trabajo por sitio **cortaría transversalmente** a los proyectos en lugar de contenerlos. Eso lo vuelve viable como vista, pero no como límite estructural: el alcance de acceso se resuelve por membresía de proyecto (D-15), no por sitio;
-- **bandeja de emisiones entre proyectos**: recibir en una sola vista las emisiones de varios proyectos y filtrar después por proyecto. Mientras el documento lleve proyecto y ubicación, es una consulta y no una estructura nueva; lo que ve cada usuario en esa bandeja lo determina D-15.
+- **bandeja de emisiones entre proyectos**: recibir en una sola vista las emisiones de varios proyectos y filtrar después por proyecto. Mientras el documento lleve proyecto y ubicación, es una consulta y no una estructura nueva; lo que ve cada usuario en esa bandeja lo determina D-15. **Contestado por la organización por ámbito de la interfaz**, que confirma la lectura y le da lugar: la bandeja transversal vive en el módulo de proyectos y la acotada, en el workspace de cada uno. `pendingReviewSteps` ya es transversal por construcción —no toma proyecto y devuelve los pasos del usuario autenticado acotados por membresía—, de modo que lo que falta es el filtro por proyecto y no la consulta.
 
 **Cardinalidad entre proyecto y sitio: un proyecto puede abarcar varios sitios.** Aunque lo habitual es un proyecto por sitio, limitarlo traería problemas cuando las locaciones son cercanas y una misma intervención las alcanza a todas.
 
@@ -752,7 +764,7 @@ Pendientes de definición al abrir el bloque:
 
 ### D-21 — El catálogo documental admite alcance por proyecto
 
-**Estado:** Aprobada. **Su mecanismo está construido y promovido** con `BLOCK_02B`, sobre el catálogo de ubicación; `BLOCK_02C` lo aplica a clase y tipo, que son los que tienen datos e interfaz en producción.
+**Estado:** Aprobada. **Su mecanismo está construido y promovido** con `BLOCK_02B`, sobre el catálogo de ubicación; `BLOCK_02C` lo aplica a clase y tipo, que son los que tienen datos e interfaz en producción, y tiene sus definiciones cerradas.
 
 `DocumentClass` y `DocumentType` son hoy catálogos **globales del despliegue**, con `module` opcional donde nulo significa disponible para todos los módulos. Eso ya resuelve dos de los tres alcances que el negocio necesita:
 
@@ -781,7 +793,13 @@ Definido al abrir `BLOCK_02B`, y vale para los tres catálogos:
 - **excluir una entrada heredada deja de hacer falta.** Si hay que podar, se declara *propio* y se siembra. Un mecanismo de exclusión sería una tercera forma de decir lo mismo, con la ambigüedad de qué ocurre cuando el global agrega una entrada nueva (`B2`);
 - **cambiar de modo con documentos ya clasificados se admite**, con la orientación de D-13: la validación ocurre solo en escritura y nunca revalida lo existente. No se le impone la inmutabilidad que D-09 exige al rol documental, porque acá no hay semántica que cambie de significado (`B1`).
 
-Pendiente de definición al abrir `BLOCK_02C`:
+Definido al abrir `BLOCK_02C`, y precisa el mecanismo para el par de la clasificación:
+
+- **clase y tipo declaran su alcance juntos** (`B1`). El tipo cuelga de la clase, de modo que declararlos por separado admite un estado que no describe ninguna práctica: un proyecto con clasificación propia que hereda tipos apuntando a clases que no ve. Los catálogos pasan a ser **dos y no tres** —clasificación y ubicación—, y el caso que `BLOCK_02B` defendía se conserva entero: el cliente que dicta la clasificación y no tiene nomenclatura de áreas declara distinto en cada uno;
+- **el cruce de alcance va en un solo sentido** (`B7`): lo del proyecto cuelga de lo del despliegue y nunca al revés, alcanzando también a `DocWorkflowTemplate`;
+- **la ausencia de ámbito nombra el despliegue** (`B8`). Es lo que permite que la migración sea aditiva sin cambiar lo que las pantallas existentes muestran.
+
+Pendiente de definición:
 
 - cómo se traduce la clasificación al promover un documento a la biblioteca de planta, donde el catálogo es el del activo y no el del proyecto (nota prospectiva del cierre de proyecto).
 
@@ -816,11 +834,11 @@ Definido al abrir `BLOCK_04`: **la calificación se registra en la respuesta del
 
 **La calificación es el único dato obligatorio de la respuesta.** El archivo es opcional: un rechazo trae el plano marcado, un sello de aprobado para construcción no trae nada. Una respuesta sin calificación y sin archivo no registra ningún hecho.
 
-Pendientes de definición:
+**Los tres pendientes que esta decisión dejaba abiertos los cerró `BLOCK_04` en `B11`:**
 
-- si el catálogo reemplaza a `ClientStatus` o convive con él durante alguna etapa;
-- si el efecto se expresa como dos indicadores o como una enumeración de tres valores, dado que solo tres combinaciones son válidas;
-- cómo se ordena y se presenta la lista, y si admite baja lógica cuando ya fue usada.
+- **reemplaza a `ClientStatus` sin etapa de convivencia.** No hay datos productivos, de modo que convivir solo obligaría a sostener dos vocabularios y a decidir cuál gana. El despliegue se siembra con las cuatro entradas actuales;
+- **el efecto es una enumeración de tres valores y no dos indicadores.** Con dos indicadores, la cuarta combinación que esta decisión declara inexistente **puede escribirse en la base** y hay que impedirla por validación; con la enumeración no puede expresarse. Es el criterio de D-13 aplicado a otro atributo: sin atributo, la incoherencia no puede existir. Las dos preguntas se conservan como lectura derivada, que es lo que explica por qué *aprobado con comentarios* no es ni una cosa ni la otra;
+- **orden explícito y baja lógica.** El orden lo declara la entrada, porque es el de la lista del cliente y no el alfabético. Una calificación usada no se elimina, y lo ya calificado no se revalida.
 
 ### D-23 — La metadata de identificación pertenece a la revisión
 
@@ -928,6 +946,34 @@ Es la práctica de *check-out / check-in* de la gestión documental, con dos dif
 
 Se descartó que abrir cree la versión y confirmar la sobrescriba: volvería mutable a la entidad cuya razón de ser es no serlo, y una apertura abandonada dejaría una versión consumiendo un número en la secuencia — lo mismo que el módulo evitó un nivel más arriba al decidir que la revisión abandonada no consume código.
 
+### D-28 — El ámbito determina dónde vive la pantalla
+
+**Estado:** Aprobada.
+
+La expansión transversal confirmada más abajo tiene una consecuencia sobre la interfaz que conviene fijar antes de construirla: los mismos objetos —catálogos, documentos, bandejas de trabajo— existen en tres ámbitos, y el usuario tiene que saber en cuál está parado sin deducirlo.
+
+**El ámbito se expresa en la ruta**, con una regla y no con un criterio caso por caso:
+
+| Ámbito | Ruta | Qué vive ahí |
+| ------ | ---- | ------------ |
+| Despliegue | `documents/` | Catálogo global, configuración por defecto, auditoría |
+| Módulo | `<modulo>/documents/` | Catálogo y documentos de calidad, comercial y activos |
+| Proyecto | `projects/[projectId]/documents/` | Catálogo propio del proyecto y sus documentos |
+
+**No es una preferencia de navegación.** El ámbito es lo que gobierna la resolución de los catálogos (D-21), el alcance de acceso (D-15) y la precedencia de la configuración. Una pantalla ubicada fuera de su ámbito obliga a pasarlo por parámetro y a que cada consumidor decida cuál rige, que es exactamente lo que `BLOCK_02C` evita en el contrato al declarar que la ausencia de ámbito nombra el despliegue (`B8`).
+
+**Es la contracara de los dos regímenes** descritos en la cuestión de fondo: lo que circula vive en el proyecto y se acota por membresía; lo publicado vive en su módulo y se gobierna por permiso global y clasificación.
+
+**La bandeja de trabajo es transversal, y su filtro por proyecto es una vista.** Lo que una persona tiene para elaborar, revisar o aprobar lo ve en el módulo de proyectos, con todos sus proyectos juntos, y acotado dentro de cada workspace cuando quiere mirar uno solo. No requiere estructura nueva: `pendingReviewSteps` **ya es transversal por construcción** —no toma proyecto y devuelve los pasos del usuario autenticado acotados por membresía—, de modo que lo que falta es el filtro y no la consulta. Es la misma lectura que D-14 anticipó para la bandeja de emisiones entre proyectos.
+
+**`BLOCK_05` nace en la ubicación definitiva.** Hoy la ruta implementada es `projects/documents/[projectId]/` —módulo primero, identificador después— y la de esta decisión la invierte. Construir la interfaz documental en la ruta vieja para mudarla después es levantar dos veces las mismas pantallas y sus enlaces.
+
+**Dependencia externa declarada:** la reorganización del módulo de proyectos por workspace, que tiene su propio plan en curso y no pertenece a este módulo. El precedente construido es OperMask Digitalization, donde el workspace es `digitalization/[projectId]/` por fase y los catálogos del despliegue viven en `digitalization/settings/`.
+
+Alternativa descartada: construir `BLOCK_05` sobre la ruta actual y mudarla al reorganizarse el módulo de proyectos. Se descarta porque la interfaz documental es el bloque más grande que queda, y sería el que más superficie tendría que mudar.
+
+Alternativa descartada: administrar el catálogo de cada proyecto desde la pantalla global, con un selector de proyecto. Se descarta porque vuelve al ámbito un filtro dentro de una pantalla en lugar de un lugar donde se está parado, y obliga a que la misma pantalla resuelva permisos de despliegue y membresías de proyecto a la vez.
+
 ## Cuestión de fondo pendiente
 
 Una definición atraviesa varias decisiones de este plan y conviene enunciarla por separado, porque no se resuelve dentro de ningún bloque:
@@ -1007,6 +1053,12 @@ Con un solo subsistema sin proyecto el hueco no se nota; con tres, cada uno nece
 Lo que se anticipa es **un escalón de módulo entre el proyecto y el despliegue**, con el mecanismo que el alcance ya tiene: documento → proyecto **o módulo** → despliegue. No hace falta decidirlo ahora, pero conviene no construir nada que lo impida — en particular, no tratar la ausencia de proyecto como equivalente al despliegue.
 
 **El hueco es más acotado de lo que parece a primera vista.** El eje de módulo **ya existe para los catálogos**: `DocumentClass` y `DocumentType` llevan `module` anulable, y D-21 lo describe como uno de los tres alcances que el negocio necesita. Lo que no lo tiene es la **configuración y la plantilla**.
+
+**Y se acotó otra vez al abrir `BLOCK_02C`**, que deja preparado el eje en la **declaración de alcance del catálogo** (`B6`): `DocCatalogScope` pasa a llevar los mismos dos ejes que la entrada —`module` obligatorio, `projectId` anulable—, de modo que un módulo puede declarar su modo sin migrar estructura. Es la aplicación literal de lo que esta orientación pedía: no tratar la ausencia de proyecto como equivalente al despliegue.
+
+De ahí se desprende algo que conviene enunciar antes de que ocurra: cuando un módulo declare **propio**, el `module` nulo de una entrada dejará de significar *disponible para todos* de forma incondicional, y pasará a significar *disponible para los módulos que heredan*. Es la misma generalización que el proyecto recibe, un escalón más arriba.
+
+Lo que sigue diferido es la **configuración y la plantilla** con alcance de módulo, que es donde el argumento de esperar a después de `BLOCK_04` conserva toda su fuerza.
 
 **No bloquea a `BLOCK_04`**, que es enteramente sobre documentos con contraparte y por lo tanto de proyecto. Registrado entre los bloques diferidos, con el argumento de por qué conviene abrirlo **después**: `BLOCK_04` va a cargar `DocProjectSettings` de configuración específica de contraparte —el catálogo de calificaciones, la matriz de responsabilidad, los documentos esperados—, y después de eso será evidente que el escalón de módulo no puede ser esa misma tabla con `projectId` anulable, porque la mitad de sus columnas no aplicarían. Decidirlo ahora, con la tabla todavía chica, arriesga elegir esa forma.
 
@@ -1103,15 +1155,15 @@ Orden propuesto. Cada bloque se abre con su propio documento, con línea base co
 
 | Bloque | Contenido | Depende de |
 | ------ | --------- | ---------- |
-| `BLOCK_01` | Trazabilidad funcional: eventos de workflow y auditoría (D-01) | — |
-| `BLOCK_02` | Contexto de proyecto y rol documental: `projectId`, modo Emisor / Receptor, membresía y alcance de acceso, unicidad del código, retiro de `entityType`/`entityId`, contexto de los eventos (D-06, D-09, D-15; H-17, H-24, H-28, H-32; cierra H-19 para `Document`) | `BLOCK_01` |
-| `BLOCK_03` | Ciclo interno: revisión externa y versión interna, versiones durante el circuito, circuito instanciado con la revisión —con armado y elaboración—, circuitos sucesivos por revisión, esquema de revisión configurable, delegación y reasignación, abandono de la revisión y cancelación con identidad propia, y firma verificable (D-03, D-04, D-05, D-10, D-11, D-13, D-17; H-01 a H-10, H-27, H-34) | `BLOCK_02` |
-| `BLOCK_03B` | Titularidad por nivel: metadata de identificación en la revisión, código inmutable con acto de reemplazo N:M entre documentos, la versión como conjunto de archivos con rol producido por copia de trabajo, y una palabra por nivel para los estados terminales (D-23 a D-27). Revisa `B4` y `B6` de `BLOCK_03` | `BLOCK_03` |
-| `BLOCK_04` | Emisión y respuesta: circulación asimétrica por modo, **circuito del rol Receptor y catálogo de calificaciones**, puerta de emisión, respuesta como objeto propio del ítem con archivos y autoría diferenciada, acuse de recibo, propósito de la emisión y documento pendiente derivado (D-12, D-18, D-22; H-11 a H-16, H-29 a H-31, H-33) | `BLOCK_03B` |
+| `BLOCK_01` ✔ | Trazabilidad funcional: eventos de workflow y auditoría (D-01) | — |
+| `BLOCK_02` ✔ | Contexto de proyecto y rol documental: `projectId`, modo Emisor / Receptor, membresía y alcance de acceso, unicidad del código, retiro de `entityType`/`entityId`, contexto de los eventos (D-06, D-09, D-15; H-17, H-24, H-28, H-32; cierra H-19 para `Document`) | `BLOCK_01` |
+| `BLOCK_03` ✔ | Ciclo interno: revisión externa y versión interna, versiones durante el circuito, circuito instanciado con la revisión —con armado y elaboración—, circuitos sucesivos por revisión, esquema de revisión configurable, delegación y reasignación, abandono de la revisión y cancelación con identidad propia, y firma verificable (D-03, D-04, D-05, D-10, D-11, D-13, D-17; H-01 a H-10, H-27, H-34) | `BLOCK_02` |
+| `BLOCK_03B` ✔ | Titularidad por nivel: metadata de identificación en la revisión, código inmutable con acto de reemplazo N:M entre documentos, la versión como conjunto de archivos con rol producido por copia de trabajo, y una palabra por nivel para los estados terminales (D-23 a D-27). Revisa `B4` y `B6` de `BLOCK_03` | `BLOCK_03` |
+| `BLOCK_04` ✔ | Emisión y respuesta: circulación asimétrica por modo, **circuito del rol Receptor y catálogo de calificaciones**, puerta de emisión, respuesta como objeto propio del ítem con archivos y autoría diferenciada, acuse de recibo, propósito de la emisión y documento pendiente derivado (D-12, D-18, D-22; H-11 a H-16, H-29 a H-31, H-33) | `BLOCK_03B` |
 | `BLOCK_04B` | Paquete de información de entrada y promoción a documento controlado (D-16, D-20) | `BLOCK_02` |
 | `BLOCK_02B` ✔ | Ubicación física jerárquica del documento, y **el mecanismo de alcance por proyecto** que los tres catálogos comparten (D-14; construye D-21; descarta H-36). **Promovido a la SFS y desplegado en testing** | `BLOCK_02` |
-| `BLOCK_02C` | Alcance por proyecto de clase y tipo, aplicando el mecanismo que construye `BLOCK_02B` (D-21) | `BLOCK_02`, `BLOCK_03` por la unicidad, `BLOCK_02B` por el mecanismo |
-| `BLOCK_05` | Interfaz de usuario del subsistema (H-25) | `BLOCK_03`, `BLOCK_04`, `BLOCK_02B` |
+| `BLOCK_02C` | Alcance por proyecto de clase y tipo, aplicando el mecanismo que construye `BLOCK_02B`: clase y tipo declaran juntos, siembra conjunta, cruce en un solo sentido, y el eje de módulo preparado en la declaración de alcance (D-21). **Definiciones cerradas** | `BLOCK_02`, `BLOCK_03` por la unicidad, `BLOCK_02B` por el mecanismo |
+| `BLOCK_05` | Interfaz de usuario del subsistema, en la organización por ámbito de D-28 (H-25) | `BLOCK_03`, `BLOCK_04`, `BLOCK_02B`, `BLOCK_02C` |
 
 El rol documental (D-09) gobierna el ciclo completo, por lo que el contexto de proyecto pasa a ser el primer bloque funcional: ya no puede quedar detrás del ciclo de revisión.
 
