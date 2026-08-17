@@ -1078,7 +1078,7 @@ Copiar el catálogo de un ámbito a otro, con clase y tipo en un acto.
 
 ---
 
-# What's new in María Ingeniería API Documents 2.9.3
+# What's new in María Ingeniería API Documents 2.9.4
 
 2026-08-18
 
@@ -1095,4 +1095,6 @@ El alcance deja de ser solo una vista y pasa a ser un límite.
 
 **516 pruebas, 0 fallos**, con siete de integración nuevas. Dos fallaron al escribirse y tenían razón: el control del alta del tipo no se había insertado —el de la edición sí—, y la prueba negativa lo encontró enseguida.
 
-**Queda una asimetría anotada y no resuelta**: clasificar con una entrada dada de baja se admite, mientras que la ubicación lo rechaza. No se incorporó porque sería una regla funcional que ninguna definición del bloque aprobó.
+**Y una asimetría con la ubicación, resuelta aparte: una entrada dada de baja no se elige.** El catálogo declaraba la baja lógica sin efecto sobre lo que se podía elegir, de modo que la entrada seguía siendo elegible por quien conociera su identificador. Rige ahora la misma regla que la ubicación, con el límite que la vuelve compatible con la orientación del módulo: **se valida solo lo que se escribe**. Lo ya clasificado conserva su entrada aunque se dé de baja después, y editar el título de una revisión cuya clase caducó no se rechaza — es lo que distingue *no se elige* de *deja de valer*.
+
+**519 pruebas, 0 fallos.**

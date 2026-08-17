@@ -23,6 +23,8 @@ import {
 export type ClassificationRejection =
   | "CLASS_OUT_OF_SCOPE"
   | "TYPE_OUT_OF_SCOPE"
+  | "CLASS_TERMINATED"
+  | "TYPE_TERMINATED"
   | "CLASS_SCOPE_CROSSING"
 
 /** El mensaje de cada rechazo, en un solo lugar. */
@@ -31,6 +33,10 @@ export const CLASSIFICATION_MESSAGE: Record<ClassificationRejection, string> = {
     "La clase elegida no pertenece al catálogo que este ámbito resuelve.",
   TYPE_OUT_OF_SCOPE:
     "El tipo elegido no pertenece al catálogo que este ámbito resuelve.",
+  CLASS_TERMINATED:
+    "La clase elegida está dada de baja: elija otra vigente. Los documentos que ya la tenían la conservan.",
+  TYPE_TERMINATED:
+    "El tipo elegido está dado de baja: elija otro vigente. Los documentos que ya lo tenían lo conservan.",
   CLASS_SCOPE_CROSSING:
     "Un tipo del despliegue no puede colgar de una clase de proyecto: el catálogo global quedaría dependiendo de un proyecto. Al revés sí, que es lo que significa ampliar.",
 }
@@ -89,9 +95,11 @@ export const visibleClassificationWhere = async (
  * que resuelve el catálogo del despliegue **y solo él**: no hereda de ningún
  * proyecto porque no pertenece a ninguno.
  *
- * No valida que la entrada esté vigente. Es deliberado y no un olvido: lo ya
- * clasificado no se revalida (D-13), y rechazar una entrada dada de baja sería
- * una regla nueva que este bloque no definió.
+ * **Una entrada dada de baja no se elige** (B9), con la misma regla que la
+ * ubicación: lo ya clasificado la conserva, y lo que se escriba de ahora en más
+ * no puede tomarla. Se valida **solo lo que se escribe** — editar el título de
+ * una revisión cuya clase se dio de baja después no se rechaza, porque lo ya
+ * clasificado no se revalida (D-13).
  */
 export const assertClassificationInScope = async (
   client: Prisma.TransactionClient,
@@ -123,11 +131,17 @@ export const assertClassificationInScope = async (
   if (documentClassId !== undefined && documentClassId !== null) {
     const clase = await client.documentClass.findUnique({
       where: { id: documentClassId },
-      select: { projectId: true },
+      select: { projectId: true, terminatedAt: true },
     })
 
     if (!clase || !alcanza(clase.projectId)) {
       throw new GraphQLError(CLASSIFICATION_MESSAGE.CLASS_OUT_OF_SCOPE, {
+        extensions: { code: "BAD_USER_INPUT" },
+      })
+    }
+
+    if (clase.terminatedAt !== null) {
+      throw new GraphQLError(CLASSIFICATION_MESSAGE.CLASS_TERMINATED, {
         extensions: { code: "BAD_USER_INPUT" },
       })
     }
@@ -136,11 +150,17 @@ export const assertClassificationInScope = async (
   if (documentTypeId !== undefined && documentTypeId !== null) {
     const tipo = await client.documentType.findUnique({
       where: { id: documentTypeId },
-      select: { projectId: true },
+      select: { projectId: true, terminatedAt: true },
     })
 
     if (!tipo || !alcanza(tipo.projectId)) {
       throw new GraphQLError(CLASSIFICATION_MESSAGE.TYPE_OUT_OF_SCOPE, {
+        extensions: { code: "BAD_USER_INPUT" },
+      })
+    }
+
+    if (tipo.terminatedAt !== null) {
+      throw new GraphQLError(CLASSIFICATION_MESSAGE.TYPE_TERMINATED, {
         extensions: { code: "BAD_USER_INPUT" },
       })
     }

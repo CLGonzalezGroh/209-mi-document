@@ -1,7 +1,7 @@
 # Bloque 02C — Alcance por proyecto de clase y tipo
 
 **Estado:** `APROBADO_PENDIENTE` — fases 1 a 4 de 6 completadas
-**Versión:** 1.5
+**Versión:** 1.6
 **Depende de:** `BLOCK_02B`, que construyó el mecanismo de alcance; `BLOCK_03`, por la unicidad con nulos.
 **Decisiones que ejecuta:** D-21.
 **Decisiones que aplica sin modificar:** D-06, D-13, D-15.
@@ -168,6 +168,16 @@ Es además lo único que sostiene el criterio 9. Devolver todo dejaría la panta
 
 **El precio, declarado:** no hay forma de ver de un vistazo todas las entradas de todos los ámbitos. Con esta resolución eso es una consulta por ámbito, y no una pantalla.
 
+### B9 — Una entrada dada de baja no se elige
+
+**Planteo.** Apareció al implementar la fase 4, y no en la definición del bloque: la ubicación rechaza clasificar con un nodo dado de baja —`BLOCK_02B`, B3: *"un nodo dado de baja no se elige, aunque los documentos que ya lo tienen lo conserven"*— y clase y tipo no tenían la regla equivalente, ni antes de este bloque ni después. Un catálogo con la baja lógica declarada y sin efecto sobre lo que se puede elegir deja la baja sin sentido: la entrada sigue siendo elegible por quien conozca su identificador.
+
+**Resolución. La misma regla que la ubicación**, en los mismos puntos donde se valida el alcance.
+
+Su límite es lo que la vuelve compatible con D-13: **se valida solo lo que se escribe**. Lo ya clasificado conserva su entrada aunque se dé de baja después, y editar el título de una revisión cuya clase caducó no se rechaza. Es lo que distingue *no se elige* de *deja de valer*.
+
+**Es una regla funcional que las definiciones del bloque no traían**, y por eso se registró primero como observación en lugar de incorporarse durante la implementación. Se decidió aparte y se documenta acá.
+
 ## Alcance incluido
 
 - `projectId Int?` en `DocumentClass` y `DocumentType`, referencia externa sin FK, con el invariante de D-21: con valor, exige `module = PROJECTS`.
@@ -178,7 +188,7 @@ Es además lo único que sostiene el criterio 9. Devolver todo dejaría la panta
 - Resolución de alcance en `documentClasses`, `documentTypes` y los dos selectores, con argumento de proyecto **opcional**: sin él rige el ámbito del despliegue, que es lo que la webapp pide hoy.
 - Autorización en dos capas: los seis permisos existentes de cada catálogo, más membresía cuando la operación es de ámbito de proyecto, con el precedente de `locations.ts`.
 - Siembra conjunta por copia, y la consulta de fuentes disponibles, con el precedente de `locationSeedSources`.
-- Validación al clasificar: la clase y el tipo elegidos deben estar dentro del alcance del proyecto del documento, con `entryVisible`.
+- Validación al clasificar: la clase y el tipo elegidos deben estar dentro del alcance del proyecto del documento —con `entryVisible`— y vigentes (B9).
 - Corrección de la deriva de claves foráneas (B5).
 - Control de precondición en `prisma/checks/`, y línea base contada por despliegue.
 - Pruebas puras del caso plano y de integración de la resolución, la siembra y la autorización.
@@ -205,7 +215,7 @@ Lo que se difiere está en **Fuera de alcance**, y es distinto de lo que falta d
 3. La declaración de clasificación gobierna clase y tipo a la vez: no existe estado en que una herede y el otro no (B1).
 4. La siembra conjunta es idempotente: dos ejecuciones producen el mismo catálogo, y una fuente parcialmente solapada agrega solo lo que falta.
 5. Sembrar un tipo cuya clase no está en el destino copia primero la clase.
-6. Un documento no puede clasificarse con una entrada fuera del alcance de su proyecto.
+6. Un documento no puede clasificarse con una entrada fuera del alcance de su proyecto, ni con una dada de baja; lo ya clasificado conserva la suya (B9).
 7. Un proyecto que cambia de modo con documentos ya clasificados no invalida ninguno: la validación es solo en escritura (D-13).
 8. Administrar el catálogo de un proyecto exige el permiso global **y** membresía vigente; el del despliegue, solo el permiso.
 9. **Las pantallas de catálogo de la webapp funcionan sin una sola línea modificada**, y el contrato que consumen no cambia de forma incompatible.
@@ -299,15 +309,9 @@ Las invariantes de cruce y el alcance de la entrada elegida. Quedaron **cuatro**
 
 **El documento se clasifica solo con lo que su ámbito ve**, en los dos caminos por los que una clase o un tipo entran a una revisión: el alta del documento y la edición de la identificación. Sin esto el selector sería una sugerencia y no un límite — quien conoce un identificador clasificaría con una entrada que su proyecto no ve.
 
-**Lo que deliberadamente no se agregó.** La ubicación rechaza clasificar con un nodo **dado de baja**; la clasificación no lo hace hoy y este bloque no lo incorpora, porque sería una regla funcional que ninguna definición aprobó. Queda anotado abajo como observación.
+**Y una asimetría con la ubicación que quedó planteada acá y resuelta en `B9`**: clasificar con una entrada dada de baja se admitía.
 
 **7 pruebas de integración nuevas, 516 en total, 0 fallos.** Dos fallaron al escribirse y tenían razón: el control del alta del tipo **no se había insertado** —la edición sí— y las pruebas lo encontraron enseguida. Es exactamente para lo que la prueba negativa existe.
-
-## Observación para decidir
-
-**Clasificar con una entrada dada de baja se admite.** La ubicación lo rechaza —`BLOCK_02B`, B3: *"un nodo dado de baja no se elige, aunque los documentos que ya lo tienen lo conserven"*— y clase y tipo no tienen la regla equivalente, ni antes de este bloque ni después.
-
-No se incorporó porque no está en ninguna definición y cambiaría comportamiento vigente del catálogo del despliegue. Es una decisión funcional chica y probablemente deseable, y corresponde tomarla explícitamente: incorporarla acá, dejarla para `BLOCK_05` con la interfaz a la vista, o declarar que la asimetría con la ubicación es deliberada.
 
 ## Referencias
 

@@ -636,3 +636,103 @@ test("una plantilla del despliegue no referencia entradas de proyecto", async ()
     /no pertenece al catálogo que este ámbito resuelve/,
   )
 })
+
+// --- Lo dado de baja no se elige (B9) ---
+
+test("un documento no se clasifica con una clase dada de baja", async () => {
+  const clase = await crearClase({ code: "BAJA-C", name: `${CODIGO} Baja` })
+  const tipo = await crearTipo({
+    code: "BAJA-VIG",
+    name: `${CODIGO} Tipo vigente`,
+    classId: clase.id,
+  })
+  await documentClassResolvers.Mutation.terminateDocumentClass(
+    null,
+    { id: clase.id },
+    context,
+  )
+
+  await assert.rejects(
+    () =>
+      documentResolvers.Mutation.createDocument(
+        null,
+        {
+          input: {
+            code: `${CODIGO}-DOC-BAJA`,
+            title: "Con clase dada de baja",
+            projectId: HEREDA,
+            module: ModuleType.PROJECTS,
+            documentTypeId: tipo.id,
+            documentClassId: clase.id,
+          },
+        } as any,
+        context,
+      ) as Promise<any>,
+    /dada de baja/,
+  )
+})
+
+test("un documento no se clasifica con un tipo dado de baja", async () => {
+  const tipo = await crearTipo({ code: "BAJA-T2", name: `${CODIGO} Tipo baja` })
+  await documentTypeResolvers.Mutation.terminateDocumentType(
+    null,
+    { id: tipo.id },
+    context,
+  )
+
+  await assert.rejects(
+    () =>
+      documentResolvers.Mutation.createDocument(
+        null,
+        {
+          input: {
+            code: `${CODIGO}-DOC-BAJA-T`,
+            title: "Con tipo dado de baja",
+            projectId: HEREDA,
+            module: ModuleType.PROJECTS,
+            documentTypeId: tipo.id,
+          },
+        } as any,
+        context,
+      ) as Promise<any>,
+    /dado de baja/,
+  )
+})
+
+test("lo ya clasificado conserva su entrada aunque se dé de baja después", async () => {
+  // D-13: la validación ocurre solo en escritura y nunca revalida lo existente.
+  // Es lo que distingue "no se elige" de "deja de valer".
+  const clase = await crearClase({ code: "VIVE", name: `${CODIGO} Vive` })
+  const tipo = await crearTipo({
+    code: "VIVE-T",
+    name: `${CODIGO} Tipo vive`,
+    classId: clase.id,
+  })
+
+  const doc = (await documentResolvers.Mutation.createDocument(
+    null,
+    {
+      input: {
+        code: `${CODIGO}-DOC-VIVE`,
+        title: "Clasificado antes de la baja",
+        projectId: HEREDA,
+        module: ModuleType.PROJECTS,
+        documentTypeId: tipo.id,
+        documentClassId: clase.id,
+      },
+    } as any,
+    context,
+  )) as any
+
+  await documentTypeResolvers.Mutation.terminateDocumentType(
+    null,
+    { id: tipo.id },
+    context,
+  )
+
+  const despues = await prisma.document.findUniqueOrThrow({
+    where: { id: doc.id },
+    select: { currentDocumentTypeId: true },
+  })
+  assert.equal(despues.currentDocumentTypeId, tipo.id)
+})
