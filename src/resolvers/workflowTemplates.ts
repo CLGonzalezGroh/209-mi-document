@@ -3,6 +3,7 @@ import { ResolverContext } from "../types.js"
 import { PERMISSIONS } from "@CLGonzalezGroh/mi-common"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
+import { assertClassificationInScope } from "../utils/classificationScope.js"
 import { StepType } from "../generated/prisma/enums.js"
 import { AuditAction } from "../events/catalog.js"
 import { emitAuditEvent } from "../events/emit.js"
@@ -171,6 +172,16 @@ export const workflowTemplateResolvers = {
 
       try {
         return await context.orm.$transaction(async (tx) => {
+          // El alcance de la plantilla acota lo que puede referenciar
+          // (BLOQUE 02C, B7): una plantilla del despliegue con una clase de
+          // proyecto dejaría al catálogo global dependiendo de un proyecto, y
+          // una de proyecto no ve las entradas de otro.
+          await assertClassificationInScope(tx, {
+            projectId: input.projectId ?? null,
+            documentClassId: input.documentClassId ?? null,
+            documentTypeId: input.documentTypeId ?? null,
+          })
+
           const created = await tx.docWorkflowTemplate.create({
             data: {
               name: input.name,

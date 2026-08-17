@@ -1,7 +1,7 @@
 # Bloque 02C — Alcance por proyecto de clase y tipo
 
-**Estado:** `APROBADO_PENDIENTE` — fases 1 a 3 de 6 completadas
-**Versión:** 1.4
+**Estado:** `APROBADO_PENDIENTE` — fases 1 a 4 de 6 completadas
+**Versión:** 1.5
 **Depende de:** `BLOCK_02B`, que construyó el mecanismo de alcance; `BLOCK_03`, por la unicidad con nulos.
 **Decisiones que ejecuta:** D-21.
 **Decisiones que aplica sin modificar:** D-06, D-13, D-15.
@@ -286,6 +286,28 @@ La siembra conjunta, con su util puro, su operación y la consulta de fuentes.
 **`SeedClassification` es acción propia y no reúso de `SeedLocations`**: una sola acción para las dos dejaría la traza sin decir qué catálogo se sembró.
 
 **14 pruebas puras y 9 de integración nuevas. 509 en total, 0 fallos.** Una de ellas falló al escribirse y tenía razón el código: el tipo del despliegue se había creado sin clase, de modo que la prueba de la resolución por código no probaba nada. Se le dio una clase.
+
+### Fase 4 — completada
+
+Las invariantes de cruce y el alcance de la entrada elegida. Quedaron **cuatro** puntos de control y no dos, y el que faltaba lo delató el precedente.
+
+**El cruce entre catálogos, en las dos escrituras del tipo.** Al crear y al editar: mover un tipo a otra clase lo cruza igual que crearlo ahí. La regla se reutiliza tal cual de `parentScopeAdmitted`, que **no es del árbol** aunque haya nacido ahí — compara dos alcances, no dos nodos.
+
+**Declarar catálogo propio se rechaza con tipos colgando del despliegue.** Es el punto que las definiciones no habían enunciado, y sale de mirar qué hizo la ubicación: allá, declarar `OWN` se rechaza mientras algún nodo del proyecto cuelgue del árbol global. Acá el vínculo cruza un catálogo más allá —el tipo del proyecto cuelga de una clase del despliegue— y el efecto es el mismo: al dejar de heredar, esos tipos apuntarían a una clase que el proyecto ya no ve. Se rechaza nombrándolos, en lugar de dejarlos sin clase por decisión del sistema.
+
+**La plantilla del despliegue no referencia entradas de proyecto**, que es la segunda invariante que `B7` pedía.
+
+**El documento se clasifica solo con lo que su ámbito ve**, en los dos caminos por los que una clase o un tipo entran a una revisión: el alta del documento y la edición de la identificación. Sin esto el selector sería una sugerencia y no un límite — quien conoce un identificador clasificaría con una entrada que su proyecto no ve.
+
+**Lo que deliberadamente no se agregó.** La ubicación rechaza clasificar con un nodo **dado de baja**; la clasificación no lo hace hoy y este bloque no lo incorpora, porque sería una regla funcional que ninguna definición aprobó. Queda anotado abajo como observación.
+
+**7 pruebas de integración nuevas, 516 en total, 0 fallos.** Dos fallaron al escribirse y tenían razón: el control del alta del tipo **no se había insertado** —la edición sí— y las pruebas lo encontraron enseguida. Es exactamente para lo que la prueba negativa existe.
+
+## Observación para decidir
+
+**Clasificar con una entrada dada de baja se admite.** La ubicación lo rechaza —`BLOCK_02B`, B3: *"un nodo dado de baja no se elige, aunque los documentos que ya lo tienen lo conserven"*— y clase y tipo no tienen la regla equivalente, ni antes de este bloque ni después.
+
+No se incorporó porque no está en ninguna definición y cambiaría comportamiento vigente del catálogo del despliegue. Es una decisión funcional chica y probablemente deseable, y corresponde tomarla explícitamente: incorporarla acá, dejarla para `BLOCK_05` con la interfaz a la vista, o declarar que la asimetría con la ubicación es deliberada.
 
 ## Referencias
 

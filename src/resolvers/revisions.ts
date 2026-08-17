@@ -4,6 +4,7 @@ import { PERMISSIONS } from "@CLGonzalezGroh/mi-common"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { assertObjectAccess } from "../utils/projectAuthorization.js"
 import { handleError } from "../utils/handleError.js"
+import { assertClassificationInScope } from "../utils/classificationScope.js"
 import {
   DocObjectType,
   RevisionStatus,
@@ -395,6 +396,21 @@ export const revisionResolvers = {
               { extensions: { code: "CONFLICT" } },
             )
           }
+
+          // La clasificación nueva, contra el alcance del proyecto del documento
+          // (BLOQUE 02C, B7). Se valida acá y no solo al crear, porque editar la
+          // identificación es el otro camino por el que una clase o un tipo
+          // entran a una revisión.
+          const documento = await tx.document.findUniqueOrThrow({
+            where: { id: revision.documentId },
+            select: { projectId: true },
+          })
+
+          await assertClassificationInScope(tx, {
+            projectId: documento.projectId,
+            documentClassId: input.documentClassId,
+            documentTypeId: input.documentTypeId,
+          })
 
           const antes = {
             title: revision.title,

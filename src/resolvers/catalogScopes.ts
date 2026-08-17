@@ -109,6 +109,34 @@ export const catalogScopeResolvers = {
 
       try {
         return await context.orm.$transaction(async (tx) => {
+          // La clasificación tiene el mismo problema que el árbol, con el
+          // vínculo un catálogo más allá: los tipos del proyecto que cuelgan de
+          // una clase del despliegue quedarían apuntando a una clase que el
+          // proyecto ya no ve. Se rechaza y se nombran, en lugar de dejarlos sin
+          // clase por decisión del sistema — eso reclasificaría entradas que
+          // nadie tocó, por un cambio de configuración.
+          if (
+            input.catalog === DocCatalogKind.CLASSIFICATION &&
+            input.mode === DocScopeMode.OWN
+          ) {
+            const colgados = await tx.documentType.findMany({
+              where: {
+                projectId: input.projectId,
+                class: { projectId: null },
+              },
+              select: { code: true },
+            })
+
+            if (colgados.length > 0) {
+              throw new GraphQLError(
+                `No se puede declarar catálogo propio: ${colgados.length} tipo(s) del proyecto cuelgan de una clase del despliegue. Muévalos a una clase propia primero: ${colgados
+                  .map((t) => t.code)
+                  .join("; ")}`,
+                { extensions: { code: "BAD_USER_INPUT" } },
+              )
+            }
+          }
+
           if (
             input.catalog === DocCatalogKind.LOCATION &&
             input.mode === DocScopeMode.OWN

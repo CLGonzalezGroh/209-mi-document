@@ -9,6 +9,7 @@ import {
   DocScopeMode,
   DocumentRole,
   ModuleType,
+  StepType,
 } from "../generated/prisma/enums.js"
 import { documentClassResolvers } from "./documentClasses.js"
 import { documentTypeResolvers } from "./documentTypes.js"
@@ -17,6 +18,8 @@ import { classificationResolvers } from "./classification.js"
 import { projectSettingsResolvers } from "./projectSettings.js"
 import { projectMemberResolvers } from "./projectMembers.js"
 import { AuditAction } from "../events/catalog.js"
+import { documentResolvers } from "./documents.js"
+import { workflowTemplateResolvers } from "./workflowTemplates.js"
 
 /**
  * Alcance por proyecto de clase y tipo, contra la base y el resolver
@@ -49,6 +52,10 @@ const CODIGO = "TEST-B02C"
 let context: ResolverContext
 
 const limpiar = async () => {
+  await prisma.docWorkflowTemplate.deleteMany({
+    where: { name: { startsWith: CODIGO } },
+  })
+  await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
   await prisma.documentType.deleteMany({
     where: { code: { startsWith: CODIGO } },
   })
@@ -499,4 +506,133 @@ test("una clase dada de baja no viaja, y su tipo tampoco", async () => {
 
   assert.equal(copiadas.length, 0)
   assert.equal(copiados.length, 0)
+})
+
+// --- Las invariantes de cruce (B7) ---
+
+test("un tipo del proyecto puede colgar de una clase del despliegue", async () => {
+  // Es lo que significa ampliar: el proyecto agrega un tipo dentro de una clase
+  // que ya existe.
+  const tipo = await crearTipo({
+    code: "AMPLIA",
+    name: `${CODIGO} Amplía`,
+    projectId: HEREDA,
+    classId: global1.id,
+  })
+
+  assert.equal(tipo.projectId, HEREDA)
+  assert.equal(tipo.classId, global1.id)
+})
+
+test("un tipo del despliegue no puede colgar de una clase de proyecto", async () => {
+  const delProyecto = await crearClase({
+    code: "SOLO-P",
+    name: `${CODIGO} Solo del proyecto`,
+    projectId: HEREDA,
+  })
+
+  await assert.rejects(
+    () =>
+      crearTipo({
+        code: "CRUZA",
+        name: `${CODIGO} Cruza`,
+        classId: delProyecto.id,
+      }),
+    /no puede colgar de una clase de proyecto/,
+  )
+})
+
+test("un tipo de un proyecto no puede colgar de una clase de otro", async () => {
+  const deOtro = await prisma.documentClass.findFirstOrThrow({
+    where: { projectId: PROPIO, code: `${CODIGO}-CIVIL-P` },
+  })
+
+  await assert.rejects(
+    () =>
+      crearTipo({
+        code: "CRUZA-2",
+        name: `${CODIGO} Cruza entre proyectos`,
+        projectId: HEREDA,
+        classId: deOtro.id,
+      }),
+    /no puede colgar de una clase de proyecto/,
+  )
+})
+
+test("mover un tipo del despliegue a una clase de proyecto se rechaza al editar", async () => {
+  // El cruce se verifica también al editar: mover cruza igual que crear ahí.
+  const delDespliegue = await crearTipo({
+    code: "MUEVE",
+    name: `${CODIGO} Se mueve`,
+  })
+  const delProyecto = await prisma.documentClass.findFirstOrThrow({
+    where: { projectId: HEREDA, code: `${CODIGO}-SOLO-P` },
+  })
+
+  await assert.rejects(
+    () =>
+      documentTypeResolvers.Mutation.updateDocumentType(
+        null,
+        { id: delDespliegue.id, input: { classId: delProyecto.id } },
+        context,
+      ) as Promise<any>,
+    /no puede colgar de una clase de proyecto/,
+  )
+})
+
+test("declarar catálogo propio se rechaza con tipos colgando del despliegue", async () => {
+  // Al dejar de heredar, el tipo que agregó HEREDA quedaría apuntando a una
+  // clase que el proyecto ya no ve.
+  await assert.rejects(
+    () => declararAlcance(HEREDA, DocScopeMode.OWN),
+    /cuelgan de una clase del despliegue/,
+  )
+})
+
+// --- El alcance de la entrada elegida (B7) ---
+
+test("un documento no se clasifica con una entrada fuera de su alcance", async () => {
+  const tipoAjeno = await prisma.documentType.findFirstOrThrow({
+    where: { projectId: PROPIO, code: `${CODIGO}-PLANO-P` },
+  })
+
+  await assert.rejects(
+    () =>
+      documentResolvers.Mutation.createDocument(
+        null,
+        {
+          input: {
+            code: `${CODIGO}-DOC-1`,
+            title: "Documento fuera de alcance",
+            projectId: HEREDA,
+            module: ModuleType.PROJECTS,
+            documentTypeId: tipoAjeno.id,
+          },
+        } as any,
+        context,
+      ) as Promise<any>,
+    /no pertenece al catálogo que este ámbito resuelve/,
+  )
+})
+
+test("una plantilla del despliegue no referencia entradas de proyecto", async () => {
+  const claseDeProyecto = await prisma.documentClass.findFirstOrThrow({
+    where: { projectId: PROPIO, code: `${CODIGO}-CIVIL-P` },
+  })
+
+  await assert.rejects(
+    () =>
+      workflowTemplateResolvers.Mutation.createDocWorkflowTemplate(
+        null,
+        {
+          input: {
+            name: `${CODIGO} plantilla global`,
+            documentClassId: claseDeProyecto.id,
+            steps: [{ stepOrder: 1, stepType: StepType.APPROVE }],
+          },
+        } as any,
+        context,
+      ) as Promise<any>,
+    /no pertenece al catálogo que este ámbito resuelve/,
+  )
 })

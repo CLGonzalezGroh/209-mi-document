@@ -17,6 +17,7 @@ import {
 } from "../utils/projectAuthorization.js"
 import { assertDocumentContext } from "../utils/documentContext.js"
 import { resolveDocumentLocation } from "../utils/documentLocation.js"
+import { assertClassificationInScope } from "../utils/classificationScope.js"
 import { subtreeIds } from "../utils/locationPath.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentOrderBy } from "../utils/orderByHelper.js"
@@ -557,6 +558,16 @@ export const documentResolvers = {
             })
           }
           const { revisionCode, organizerId, templateId } = planned.plan
+
+          // La clase y el tipo, contra el alcance que el proyecto resuelve
+          // (BLOQUE 02C, B7). Sin esto el selector sería una sugerencia y no un
+          // límite: quien conoce un identificador clasificaría con una entrada
+          // que su proyecto no ve.
+          await assertClassificationInScope(tx, {
+            projectId: input.projectId ?? null,
+            documentClassId: input.documentClassId ?? null,
+            documentTypeId: input.documentTypeId,
+          })
 
           // La ubicación se valida contra el alcance que el proyecto resuelve, y
           // su ruta se guarda como snapshot (BLOQUE 02B, B3).

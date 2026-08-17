@@ -1075,3 +1075,24 @@ Copiar el catálogo de un ámbito a otro, con clase y tipo en un acto.
 **El resultado es el del mecanismo y el desglose vive en la traza.** El tipo del resultado sirve a los tres catálogos, de modo que sus números no se abren por clase y tipo; el evento del acto sí los lleva. La siembra emite además la creación de cada entrada, y el acto una vez —sin objeto— por el caso que las creaciones no cubren: una siembra que no agrega nada no dejaría rastro.
 
 **509 pruebas, 0 fallos**, con 14 puras y 9 de integración nuevas.
+
+---
+
+# What's new in María Ingeniería API Documents 2.9.3
+
+2026-08-18
+
+## Alcance por proyecto de clase y tipo (BLOQUE 02C)
+
+### Fase 4 — Las invariantes de cruce, y el alcance al clasificar
+
+El alcance deja de ser solo una vista y pasa a ser un límite.
+
+- **El cruce va en un solo sentido, y se verifica en las dos escrituras del tipo.** Un tipo del proyecto puede colgar de una clase del despliegue —eso **es** ampliar—; uno del despliegue no puede colgar de una clase de proyecto, porque el catálogo global quedaría dependiendo de un proyecto. Se verifica al crear **y al editar**: mover un tipo a otra clase lo cruza igual que crearlo ahí. La regla se reutiliza de la del árbol, que no era del árbol: compara dos alcances y no dos nodos.
+- **Declarar catálogo propio se rechaza mientras haya tipos del proyecto colgando de una clase del despliegue.** Al dejar de heredar quedarían apuntando a una clase que el proyecto ya no ve. Se rechaza nombrándolos, en lugar de dejarlos sin clase por decisión del sistema: eso reclasificaría entradas que nadie tocó, por un cambio de configuración. Es el mismo tratamiento que la ubicación ya le daba a sus nodos.
+- **Una plantilla de circuito del despliegue no referencia entradas de proyecto**, por el mismo motivo.
+- **El documento se clasifica solo con lo que su ámbito ve**, en los dos caminos por los que una clase o un tipo entran a una revisión: el alta del documento y la edición de la identificación. Sin esto el selector sería una sugerencia y no un límite — quien conoce un identificador clasificaría con una entrada que su proyecto no ve.
+
+**516 pruebas, 0 fallos**, con siete de integración nuevas. Dos fallaron al escribirse y tenían razón: el control del alta del tipo no se había insertado —el de la edición sí—, y la prueba negativa lo encontró enseguida.
+
+**Queda una asimetría anotada y no resuelta**: clasificar con una entrada dada de baja se admite, mientras que la ubicación lo rechaza. No se incorporó porque sería una regla funcional que ninguna definición del bloque aprobó.

@@ -14,7 +14,10 @@ import {
   assertObjectAccess,
   projectAuthorization,
 } from "../utils/projectAuthorization.js"
-import { visibleClassificationWhere } from "../utils/classificationScope.js"
+import {
+  assertClassScopeAdmitted,
+  visibleClassificationWhere,
+} from "../utils/classificationScope.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentTypeOrderBy } from "../utils/orderByHelper.js"
 import {
@@ -337,6 +340,14 @@ export const documentTypeResolvers = {
 
       try {
         const documentType = await context.orm.$transaction(async (tx) => {
+          // El cruce va en un solo sentido (BLOQUE 02C, B7): un tipo del
+          // proyecto cuelga de una clase del despliegue —eso es ampliar—, y uno
+          // del despliegue no cuelga de una clase de proyecto.
+          await assertClassScopeAdmitted(tx, {
+            typeScope: scope,
+            classId: input.classId ?? null,
+          })
+
           const created = await tx.documentType.create({
             data: {
               name: input.name,
@@ -412,6 +423,20 @@ export const documentTypeResolvers = {
 
       try {
         const documentType = await context.orm.$transaction(async (tx) => {
+          // El cruce se verifica también al editar: mover un tipo a otra clase
+          // puede cruzarlo igual que crearlo ahí. El alcance del tipo no cambia
+          // —no se edita—, de modo que se lee del propio registro.
+          if (input.classId !== undefined) {
+            const actual = await tx.documentType.findUniqueOrThrow({
+              where: { id },
+              select: { projectId: true },
+            })
+            await assertClassScopeAdmitted(tx, {
+              typeScope: actual.projectId,
+              classId: input.classId ?? null,
+            })
+          }
+
           const updated = await tx.documentType.update({
             where: { id },
             data: {
