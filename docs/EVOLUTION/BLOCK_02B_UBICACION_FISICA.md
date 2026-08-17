@@ -1,7 +1,7 @@
 # Bloque 02B — Ubicación física del documento
 
 **Estado:** `APROBADO_PENDIENTE`
-**Versión:** 1.3
+**Versión:** 1.4
 **Depende de:** `BLOCK_02`, que dejó creada `DocProjectSettings`.
 **Decisiones que ejecuta:** D-14.
 **Decisiones que construye para otro bloque:** el mecanismo de alcance por proyecto de D-21, que `BLOCK_02C` reutiliza sobre clase y tipo.
@@ -272,7 +272,23 @@ El atributo en `Document` con su snapshot de ruta, y la configuración de habili
 
 **457 pruebas, 0 fallos.** Once puras nuevas y once casos de integración más.
 
-Quedan las fases 5 a 7: las consultas de listado y filtrado con sus eventos, la migración con permisos y pruebas de las tres capas, y la promoción a la SFS con el descarte de la matriz.
+### Fase 5 — completada
+
+El filtrado, que es para lo que el atributo existe. Tres formas de preguntar sobre el documento —nodo exacto, rama y no clasificados— y la rama también sobre el catálogo, con el mismo `branchOf`.
+
+**Lo que la fase decidió:**
+
+- **la rama se resuelve como conjunto de identificadores y no por prefijo de la ruta**, aunque el snapshot invitara a lo segundo. Dos nodos de alcances distintos pueden tener la misma ruta —el propio de un proyecto y el del despliegue del que salió, después de una siembra— y un filtro por prefijo los mezclaría. El recorrido reutiliza la travesía que ya calcula las rutas: una implementación, una batería de pruebas;
+- **la precedencia se declara y no se descubre.** `withoutLocation` gana sobre los otros dos, con la misma forma que `rootsOnly` sobre `parentId` —es el caso especial de *"sin nodo"*—, y la rama gana sobre el nodo exacto porque lo contiene. Enunciada en un solo lugar del código y en el contrato;
+- **una rama inexistente devuelve vacío y no devuelve todo**, que es la diferencia entre un filtro que no encuentra y un filtro que se desactiva solo.
+
+El snapshot conserva su razón de ser, que era otra: mostrar y ordenar sin un join, y agrupar cada rama con su descendencia en un listado plano.
+
+**No hubo eventos nuevos.** El alcance de la fase los anticipaba, pero cambiar la ubicación de un documento es una edición ordinaria y `UpdateDocument` ya la registra con su input; el ciclo del catálogo y la siembra los cubrieron las fases 1 a 3.
+
+**467 pruebas, 0 fallos.** Cuatro puras nuevas y seis casos de integración más.
+
+Quedan las fases 6 y 7: la migración con permisos y pruebas de las tres capas, y la promoción a la SFS con el descarte de la matriz.
 
 ## Referencias
 

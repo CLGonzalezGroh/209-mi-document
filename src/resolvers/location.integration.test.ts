@@ -632,3 +632,86 @@ test("la ubicación se edita con revisión aprobada, porque clasifica y no ident
   assert.equal(sinUbicacion.locationId, null)
   assert.equal(sinUbicacion.locationPath, null)
 })
+
+// --- Filtrado por ubicación y por rama (fase 5) ---
+
+const codigosFiltrados = async (filter: Record<string, unknown>) => {
+  const res = (await documentResolvers.Query.documents(
+    null,
+    { filter: { ...filter, module: ModuleType.PROJECTS }, pagination: { skip: 0, take: 100 } } as any,
+    context,
+  )) as any
+  return (res.items as any[])
+    .filter((d) => d.code.startsWith(CODIGO))
+    .map((d) => d.code)
+    .sort()
+}
+
+test("filtrar por la ubicación exacta devuelve solo lo clasificado ahí", async () => {
+  // `area` quedó movida bajo "Planta Amoníaco" y renombrada, y D1 quedó sin
+  // ubicación al final de la fase 4: se rearma el escenario del filtro.
+  const unidadA = await crear({ code: "F1", name: "Unidad F1", parentId: area.id })
+  const unidadB = await crear({ code: "F2", name: "Unidad F2", parentId: area.id })
+
+  const enArea = await crearDocumento("F-AREA", PLANTA, area.id)
+  const enA = await crearDocumento("F-A", PLANTA, unidadA.id)
+  await crearDocumento("F-B", PLANTA, unidadB.id)
+  await crearDocumento("F-SIN", PLANTA)
+
+  assert.deepEqual(await codigosFiltrados({ locationId: unidadA.id }), [
+    `${CODIGO}-F-A`,
+  ])
+  assert.ok(enArea.id && enA.id)
+})
+
+test("filtrar por rama incluye la descendencia", async () => {
+  // Quien pregunta por el área pregunta por lo que hay dentro.
+  const codigos = await codigosFiltrados({ locationBranchId: area.id })
+
+  assert.ok(codigos.includes(`${CODIGO}-F-AREA`))
+  assert.ok(codigos.includes(`${CODIGO}-F-A`))
+  assert.ok(codigos.includes(`${CODIGO}-F-B`))
+  assert.equal(codigos.includes(`${CODIGO}-F-SIN`), false)
+})
+
+test("la rama gana sobre la ubicación exacta, porque la contiene", async () => {
+  const unidadA = await prisma.docLocation.findFirstOrThrow({
+    where: { code: `${CODIGO}-F1` },
+  })
+
+  const codigos = await codigosFiltrados({
+    locationBranchId: area.id,
+    locationId: unidadA.id,
+  })
+
+  assert.ok(codigos.length > 1, "la ubicación exacta acotó la rama")
+})
+
+test("el filtro sin ubicación devuelve los no clasificados, y gana sobre los otros", async () => {
+  const codigos = await codigosFiltrados({
+    withoutLocation: true,
+    locationBranchId: area.id,
+  })
+
+  assert.ok(codigos.includes(`${CODIGO}-F-SIN`))
+  assert.equal(codigos.includes(`${CODIGO}-F-A`), false)
+})
+
+test("una rama inexistente no devuelve nada, y no devuelve todo", async () => {
+  assert.deepEqual(await codigosFiltrados({ locationBranchId: -1 }), [])
+})
+
+test("el catálogo también se lista por rama", async () => {
+  const rama = (await locationResolvers.Query.locations(
+    null,
+    { filter: { branchOf: area.id } },
+    context,
+  )) as any[]
+
+  const nombres = rama.map((n) => n.name).sort()
+  assert.ok(nombres.includes("Área 100 - Síntesis"))
+  assert.ok(nombres.includes("Unidad F1"))
+  assert.ok(nombres.includes("Unidad F2"))
+  // La raíz de la que cuelga el área queda afuera: es su ascendencia, no su rama.
+  assert.equal(nombres.includes("Planta Amoníaco"), false)
+})

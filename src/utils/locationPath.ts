@@ -93,6 +93,26 @@ export const subtreePaths = ({
 }
 
 /**
+ * El nodo indicado y toda su descendencia, como conjunto de identificadores.
+ *
+ * Es lo que necesita filtrar **por rama**: los documentos de un área incluyen los
+ * de sus unidades, porque quien pregunta por el área pregunta por lo que hay
+ * dentro. Devuelve el conjunto vacío si el nodo no existe, para que un filtro con
+ * un identificador inválido no devuelva todo.
+ *
+ * Comparte la travesía de `subtreePaths` en lugar de repetirla: las rutas que
+ * calcula se descartan, y a cambio hay una sola implementación del recorrido y
+ * una sola batería de pruebas sobre él. Filtrar por prefijo de la ruta habría
+ * evitado la lectura del catálogo, pero dos nodos de alcances distintos pueden
+ * tener la misma ruta —el propio de un proyecto y el del despliegue del que
+ * salió— y el filtro los mezclaría.
+ */
+export const subtreeIds = (
+  nodes: LocationNode[],
+  rootId: number,
+): number[] => [...subtreePaths({ rootId, parentPath: null, nodes }).keys()]
+
+/**
  * ¿Mover `nodeId` bajo `newParentId` crearía un ciclo?
  *
  * Sin esta verificación, colgar un nodo de su propio descendiente produce un

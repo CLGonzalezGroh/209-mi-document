@@ -17,6 +17,7 @@ import {
 } from "../utils/projectAuthorization.js"
 import { assertDocumentContext } from "../utils/documentContext.js"
 import { resolveDocumentLocation } from "../utils/documentLocation.js"
+import { subtreeIds } from "../utils/locationPath.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentOrderBy } from "../utils/orderByHelper.js"
 import {
@@ -56,6 +57,12 @@ interface DocumentFilterInput {
   documentClassId?: number
   status?: RevisionStatus
   terminatedFilter?: TerminatedFilter
+  // Ubicación física (BLOQUE 02B, fase 5). Tres formas de preguntar, y solo una
+  // rige por consulta: el nodo exacto, la RAMA —el nodo y su descendencia— y los
+  // documentos sin clasificar.
+  locationId?: number
+  locationBranchId?: number
+  withoutLocation?: boolean
 }
 
 // Las revisiones se ordenan por CREACIÓN y nunca por código (BLOQUE 03, B12 y
@@ -200,6 +207,26 @@ export const documentResolvers = {
               status: filter.status,
             },
           }
+        }
+
+        // Ubicación física (BLOQUE 02B, fase 5). La precedencia se declara acá y
+        // en un solo lugar, con la misma forma que `rootsOnly` sobre `parentId` en
+        // el catálogo: `withoutLocation` es el caso especial de "sin nodo", de modo
+        // que gana sobre los otros dos, y la rama gana sobre el nodo exacto porque
+        // lo contiene.
+        if (filter?.withoutLocation) {
+          where.locationId = null
+        } else if (filter?.locationBranchId !== undefined) {
+          // La rama se resuelve como conjunto de identificadores y no por prefijo
+          // de la ruta: dos nodos de alcances distintos pueden tener la misma ruta
+          // —el propio de un proyecto y el del despliegue del que salió— y el
+          // filtro los mezclaría.
+          const nodes = await context.orm.docLocation.findMany({
+            select: { id: true, parentId: true, name: true },
+          })
+          where.locationId = { in: subtreeIds(nodes, filter.locationBranchId) }
+        } else if (filter?.locationId !== undefined) {
+          where.locationId = filter.locationId
         }
 
         // Construir ordenamiento

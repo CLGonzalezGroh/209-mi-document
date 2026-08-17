@@ -911,5 +911,22 @@ Un proyecto que declara catálogo propio arranca vacío, y con clase y tipo obli
 
 **457 pruebas, 0 fallos**, con once puras nuevas sobre la regla del atributo y once casos de integración más, hasta veintinueve en su suite.
 
+### Fase 5 — Listado y filtrado por ubicación
+
+Es la fase donde el atributo empieza a servir para lo que existe: **filtrar**.
+
+- **Tres formas de preguntar por la ubicación de un documento**, y una sola rige por consulta: el **nodo exacto**, la **rama** —el nodo y toda su descendencia— y los **no clasificados**.
+- **La rama es la pregunta que el negocio hace.** Quien pregunta por un área pregunta por lo que hay dentro, de modo que los documentos de sus unidades cuentan.
+- **La precedencia se declara y no se descubre**: `withoutLocation` gana sobre los otros dos, con la misma forma que `rootsOnly` sobre `parentId` en el catálogo —es el caso especial de *"sin nodo"*—, y la rama gana sobre el nodo exacto porque lo contiene. Está enunciada en un solo lugar del código y en el contrato.
+- **El catálogo también se lista por rama**, con el mismo `branchOf`: es lo que una pantalla necesita para abrir un sector sin recorrer el árbol.
+- **Una rama inexistente devuelve vacío y no devuelve todo.** Es la diferencia entre un filtro que no encuentra y un filtro que se desactiva solo, que es la clase de defecto que aparece cuando un identificador inválido produce un criterio vacío.
+
+**La rama se resuelve como conjunto de identificadores y no por prefijo de la ruta**, aunque el snapshot invitara a lo segundo. El motivo es concreto: dos nodos de alcances distintos pueden tener **la misma ruta** —el propio de un proyecto y el del despliegue del que salió, después de una siembra— y un filtro por prefijo los mezclaría. El recorrido reutiliza la travesía que ya calcula las rutas, de modo que hay una sola implementación y una sola batería de pruebas sobre ella.
+
+El snapshot conserva su razón de ser, que era otra: mostrar y ordenar sin un join, y agrupar cada rama con su descendencia en un listado plano.
+
+**467 pruebas, 0 fallos**, con cuatro puras nuevas sobre la rama y seis casos de integración más.
+
+
 
 

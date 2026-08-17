@@ -2087,6 +2087,22 @@ input PaginationInput {
 
 "Filtro de documentos"
 input DocumentFilterInput {
+  "Documentos clasificados exactamente en esa ubicación"
+  locationId: Int
+  """
+  Documentos de la rama de una ubicación: la de ese nodo y la de su descendencia.
+
+  Quien pregunta por un área pregunta por lo que hay dentro, de modo que los
+  documentos de sus unidades cuentan. Gana sobre locationId, porque lo contiene.
+  """
+  locationBranchId: Int
+  """
+  Documentos sin ubicación declarada.
+
+  Gana sobre los otros dos, con la misma forma que rootsOnly sobre parentId en el
+  catálogo: es el caso especial de "sin nodo".
+  """
+  withoutLocation: Boolean
   "Búsqueda en code + title"
   query: String
   "Filtrar por módulo"
@@ -2452,6 +2468,13 @@ input DocLocationFilterInput {
   parentId: Int
   "Solo los nodos raíz. Gana sobre parentId"
   rootsOnly: Boolean
+  """
+  La rama de un nodo: él y toda su descendencia.
+
+  Gana sobre parentId y rootsOnly, porque los contiene: pedir la rama de un nodo
+  es pedir ese nodo y todo lo que cuelga de él.
+  """
+  branchOf: Int
   "Estado de los registros a devolver"
   terminatedFilter: TerminatedFilterInput
 }

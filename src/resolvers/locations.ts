@@ -22,7 +22,12 @@ import {
   projectAuthorization,
 } from "../utils/projectAuthorization.js"
 import { handleError } from "../utils/handleError.js"
-import { composePath, subtreePaths, wouldCycle } from "../utils/locationPath.js"
+import {
+  composePath,
+  subtreeIds,
+  subtreePaths,
+  wouldCycle,
+} from "../utils/locationPath.js"
 import {
   effectiveMode,
   parentScopeAdmitted,
@@ -53,6 +58,7 @@ interface LocationFilterInput {
   query?: string
   parentId?: number
   rootsOnly?: boolean
+  branchOf?: number
   terminatedFilter?: TerminatedFilter
 }
 
@@ -82,6 +88,30 @@ type UpdateLocationInput = {
   sortOrder?: number
   externalOrigin?: DocLocationOrigin | null
   externalRef?: string | null
+}
+
+/**
+ * Filtro del catálogo, con la rama ya resuelta si se pidió.
+ *
+ * `branchOf` exige leer el catálogo para recorrerlo, de modo que el armado del
+ * criterio deja de ser sincrónico. Se resuelve una vez acá en lugar de repetirse
+ * en cada consulta.
+ */
+const buildScopedWhere = async (
+  client: Prisma.TransactionClient,
+  filter?: LocationFilterInput,
+): Promise<Prisma.DocLocationWhereInput> => {
+  const where = buildWhere(filter)
+
+  if (filter?.branchOf === undefined) return where
+
+  const nodes = await client.docLocation.findMany({
+    select: { id: true, parentId: true, name: true },
+  })
+
+  // La rama gana sobre `parentId` y sobre `rootsOnly`, porque los contiene:
+  // pedir la rama de un nodo es pedir ese nodo y todo lo que cuelga de él.
+  return { ...where, parentId: undefined, id: { in: subtreeIds(nodes, filter.branchOf) } }
 }
 
 const buildWhere = (
@@ -310,7 +340,10 @@ export const locationResolvers = {
 
       try {
         return await context.orm.docLocation.findMany({
-          where: { ...buildWhere(filter), projectId: projectId ?? null },
+          where: {
+            ...(await buildScopedWhere(context.orm, filter)),
+            projectId: projectId ?? null,
+          },
           orderBy: [{ path: "asc" }],
         })
       } catch (error) {
@@ -350,7 +383,10 @@ export const locationResolvers = {
         const mode = await locationScopeMode(context.orm, projectId)
 
         return await context.orm.docLocation.findMany({
-          where: { ...buildWhere(filter), ...scopeWhere({ projectId, mode }) },
+          where: {
+            ...(await buildScopedWhere(context.orm, filter)),
+            ...scopeWhere({ projectId, mode }),
+          },
           orderBy: [{ path: "asc" }],
         })
       } catch (error) {
@@ -495,7 +531,10 @@ export const locationResolvers = {
 
         const items = await context.orm.docLocation.findMany({
           where: {
-            ...buildWhere({ ...filter, terminatedFilter: TerminatedFilter.ACTIVE }),
+            ...(await buildScopedWhere(context.orm, {
+              ...filter,
+              terminatedFilter: TerminatedFilter.ACTIVE,
+            })),
             ...alcance,
           },
           orderBy: [{ path: "asc" }],

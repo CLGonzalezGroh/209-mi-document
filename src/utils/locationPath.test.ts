@@ -3,6 +3,7 @@ import test from "node:test"
 import {
   PATH_SEPARATOR,
   composePath,
+  subtreeIds,
   subtreePaths,
   wouldCycle,
   type LocationNode,
@@ -169,4 +170,28 @@ test("el recálculo tampoco cuelga con un ciclo preexistente", () => {
 
   assert.equal(rutas.get(10), "A")
   assert.equal(rutas.get(11), "A / B")
+})
+
+// --- La rama, como conjunto de identificadores ---
+
+test("la rama incluye el nodo y toda su descendencia", () => {
+  // Quien pregunta por un área pregunta por lo que hay dentro: los documentos de
+  // sus unidades cuentan.
+  assert.deepEqual(subtreeIds(arbol, 2).sort(), [2, 4, 5])
+})
+
+test("una hoja es su propia rama", () => {
+  assert.deepEqual(subtreeIds(arbol, 4), [4])
+})
+
+test("la rama de la raíz es su árbol y no el catálogo entero", () => {
+  assert.deepEqual(subtreeIds(arbol, 1).sort(), [1, 2, 3, 4, 5])
+  // La otra raíz queda afuera.
+  assert.equal(subtreeIds(arbol, 1).includes(6), false)
+})
+
+test("un nodo inexistente no devuelve nada, y no devuelve todo", () => {
+  // Es la diferencia entre un filtro que no encuentra y un filtro que se
+  // desactiva solo.
+  assert.deepEqual(subtreeIds(arbol, 99), [])
 })
