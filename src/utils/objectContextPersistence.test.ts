@@ -256,6 +256,7 @@ before(async () => {
   })
   const alcance = await prisma.docCatalogScope.create({
     data: {
+      module: ModuleType.PROJECTS,
       projectId: PROYECTO,
       catalog: DocCatalogKind.LOCATION,
       mode: DocScopeMode.INHERIT,

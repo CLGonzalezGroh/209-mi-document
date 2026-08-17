@@ -30,12 +30,14 @@ export type DocumentTypeAvgAggregateOutputType = {
   id: number | null
   updatedById: number | null
   classId: number | null
+  projectId: number | null
 }
 
 export type DocumentTypeSumAggregateOutputType = {
   id: number | null
   updatedById: number | null
   classId: number | null
+  projectId: number | null
 }
 
 export type DocumentTypeMinAggregateOutputType = {
@@ -51,6 +53,7 @@ export type DocumentTypeMinAggregateOutputType = {
   classId: number | null
   description: string | null
   requiresFormalReview: boolean | null
+  projectId: number | null
 }
 
 export type DocumentTypeMaxAggregateOutputType = {
@@ -66,6 +69,7 @@ export type DocumentTypeMaxAggregateOutputType = {
   classId: number | null
   description: string | null
   requiresFormalReview: boolean | null
+  projectId: number | null
 }
 
 export type DocumentTypeCountAggregateOutputType = {
@@ -81,6 +85,7 @@ export type DocumentTypeCountAggregateOutputType = {
   classId: number
   description: number
   requiresFormalReview: number
+  projectId: number
   _all: number
 }
 
@@ -89,12 +94,14 @@ export type DocumentTypeAvgAggregateInputType = {
   id?: true
   updatedById?: true
   classId?: true
+  projectId?: true
 }
 
 export type DocumentTypeSumAggregateInputType = {
   id?: true
   updatedById?: true
   classId?: true
+  projectId?: true
 }
 
 export type DocumentTypeMinAggregateInputType = {
@@ -110,6 +117,7 @@ export type DocumentTypeMinAggregateInputType = {
   classId?: true
   description?: true
   requiresFormalReview?: true
+  projectId?: true
 }
 
 export type DocumentTypeMaxAggregateInputType = {
@@ -125,6 +133,7 @@ export type DocumentTypeMaxAggregateInputType = {
   classId?: true
   description?: true
   requiresFormalReview?: true
+  projectId?: true
 }
 
 export type DocumentTypeCountAggregateInputType = {
@@ -140,6 +149,7 @@ export type DocumentTypeCountAggregateInputType = {
   classId?: true
   description?: true
   requiresFormalReview?: true
+  projectId?: true
   _all?: true
 }
 
@@ -242,6 +252,7 @@ export type DocumentTypeGroupByOutputType = {
   classId: number | null
   description: string | null
   requiresFormalReview: boolean
+  projectId: number | null
   _count: DocumentTypeCountAggregateOutputType | null
   _avg: DocumentTypeAvgAggregateOutputType | null
   _sum: DocumentTypeSumAggregateOutputType | null
@@ -280,6 +291,7 @@ export type DocumentTypeWhereInput = {
   classId?: Prisma.IntNullableFilter<"DocumentType"> | number | null
   description?: Prisma.StringNullableFilter<"DocumentType"> | string | null
   requiresFormalReview?: Prisma.BoolFilter<"DocumentType"> | boolean
+  projectId?: Prisma.IntNullableFilter<"DocumentType"> | number | null
   class?: Prisma.XOR<Prisma.DocumentClassNullableScalarRelationFilter, Prisma.DocumentClassWhereInput> | null
   documents?: Prisma.DocumentListRelationFilter
   revisions?: Prisma.DocumentRevisionListRelationFilter
@@ -300,6 +312,7 @@ export type DocumentTypeOrderByWithRelationInput = {
   classId?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   requiresFormalReview?: Prisma.SortOrder
+  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
   class?: Prisma.DocumentClassOrderByWithRelationInput
   documents?: Prisma.DocumentOrderByRelationAggregateInput
   revisions?: Prisma.DocumentRevisionOrderByRelationAggregateInput
@@ -309,8 +322,8 @@ export type DocumentTypeOrderByWithRelationInput = {
 
 export type DocumentTypeWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  name_classId_module?: Prisma.DocumentTypeNameClassIdModuleCompoundUniqueInput
-  code_classId_module?: Prisma.DocumentTypeCodeClassIdModuleCompoundUniqueInput
+  name_classId_module_projectId?: Prisma.DocumentTypeNameClassIdModuleProjectIdCompoundUniqueInput
+  code_classId_module_projectId?: Prisma.DocumentTypeCodeClassIdModuleProjectIdCompoundUniqueInput
   AND?: Prisma.DocumentTypeWhereInput | Prisma.DocumentTypeWhereInput[]
   OR?: Prisma.DocumentTypeWhereInput[]
   NOT?: Prisma.DocumentTypeWhereInput | Prisma.DocumentTypeWhereInput[]
@@ -325,12 +338,13 @@ export type DocumentTypeWhereUniqueInput = Prisma.AtLeast<{
   classId?: Prisma.IntNullableFilter<"DocumentType"> | number | null
   description?: Prisma.StringNullableFilter<"DocumentType"> | string | null
   requiresFormalReview?: Prisma.BoolFilter<"DocumentType"> | boolean
+  projectId?: Prisma.IntNullableFilter<"DocumentType"> | number | null
   class?: Prisma.XOR<Prisma.DocumentClassNullableScalarRelationFilter, Prisma.DocumentClassWhereInput> | null
   documents?: Prisma.DocumentListRelationFilter
   revisions?: Prisma.DocumentRevisionListRelationFilter
   scannedFiles?: Prisma.ScannedFileListRelationFilter
   workflowTemplates?: Prisma.DocWorkflowTemplateListRelationFilter
-}, "id" | "name_classId_module" | "code_classId_module">
+}, "id" | "name_classId_module_projectId" | "code_classId_module_projectId">
 
 export type DocumentTypeOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -345,6 +359,7 @@ export type DocumentTypeOrderByWithAggregationInput = {
   classId?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   requiresFormalReview?: Prisma.SortOrder
+  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DocumentTypeCountOrderByAggregateInput
   _avg?: Prisma.DocumentTypeAvgOrderByAggregateInput
   _max?: Prisma.DocumentTypeMaxOrderByAggregateInput
@@ -368,6 +383,7 @@ export type DocumentTypeScalarWhereWithAggregatesInput = {
   classId?: Prisma.IntNullableWithAggregatesFilter<"DocumentType"> | number | null
   description?: Prisma.StringNullableWithAggregatesFilter<"DocumentType"> | string | null
   requiresFormalReview?: Prisma.BoolWithAggregatesFilter<"DocumentType"> | boolean
+  projectId?: Prisma.IntNullableWithAggregatesFilter<"DocumentType"> | number | null
 }
 
 export type DocumentTypeCreateInput = {
@@ -381,6 +397,7 @@ export type DocumentTypeCreateInput = {
   module?: $Enums.ModuleType | null
   description?: string | null
   requiresFormalReview?: boolean
+  projectId?: number | null
   class?: Prisma.DocumentClassCreateNestedOneWithoutDocumentTypesInput
   documents?: Prisma.DocumentCreateNestedManyWithoutCurrentDocumentTypeInput
   revisions?: Prisma.DocumentRevisionCreateNestedManyWithoutDocumentTypeInput
@@ -401,6 +418,7 @@ export type DocumentTypeUncheckedCreateInput = {
   classId?: number | null
   description?: string | null
   requiresFormalReview?: boolean
+  projectId?: number | null
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutCurrentDocumentTypeInput
   revisions?: Prisma.DocumentRevisionUncheckedCreateNestedManyWithoutDocumentTypeInput
   scannedFiles?: Prisma.ScannedFileUncheckedCreateNestedManyWithoutDocumentTypeInput
@@ -418,6 +436,7 @@ export type DocumentTypeUpdateInput = {
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresFormalReview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   class?: Prisma.DocumentClassUpdateOneWithoutDocumentTypesNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutCurrentDocumentTypeNestedInput
   revisions?: Prisma.DocumentRevisionUpdateManyWithoutDocumentTypeNestedInput
@@ -438,6 +457,7 @@ export type DocumentTypeUncheckedUpdateInput = {
   classId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresFormalReview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutCurrentDocumentTypeNestedInput
   revisions?: Prisma.DocumentRevisionUncheckedUpdateManyWithoutDocumentTypeNestedInput
   scannedFiles?: Prisma.ScannedFileUncheckedUpdateManyWithoutDocumentTypeNestedInput
@@ -457,6 +477,7 @@ export type DocumentTypeCreateManyInput = {
   classId?: number | null
   description?: string | null
   requiresFormalReview?: boolean
+  projectId?: number | null
 }
 
 export type DocumentTypeUpdateManyMutationInput = {
@@ -470,6 +491,7 @@ export type DocumentTypeUpdateManyMutationInput = {
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresFormalReview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type DocumentTypeUncheckedUpdateManyInput = {
@@ -485,6 +507,7 @@ export type DocumentTypeUncheckedUpdateManyInput = {
   classId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresFormalReview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type DocumentTypeListRelationFilter = {
@@ -497,16 +520,18 @@ export type DocumentTypeOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type DocumentTypeNameClassIdModuleCompoundUniqueInput = {
+export type DocumentTypeNameClassIdModuleProjectIdCompoundUniqueInput = {
   name: string
   classId: number
   module: $Enums.ModuleType
+  projectId: number
 }
 
-export type DocumentTypeCodeClassIdModuleCompoundUniqueInput = {
+export type DocumentTypeCodeClassIdModuleProjectIdCompoundUniqueInput = {
   code: string
   classId: number
   module: $Enums.ModuleType
+  projectId: number
 }
 
 export type DocumentTypeCountOrderByAggregateInput = {
@@ -522,12 +547,14 @@ export type DocumentTypeCountOrderByAggregateInput = {
   classId?: Prisma.SortOrder
   description?: Prisma.SortOrder
   requiresFormalReview?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
 }
 
 export type DocumentTypeAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   classId?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
 }
 
 export type DocumentTypeMaxOrderByAggregateInput = {
@@ -543,6 +570,7 @@ export type DocumentTypeMaxOrderByAggregateInput = {
   classId?: Prisma.SortOrder
   description?: Prisma.SortOrder
   requiresFormalReview?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
 }
 
 export type DocumentTypeMinOrderByAggregateInput = {
@@ -558,12 +586,14 @@ export type DocumentTypeMinOrderByAggregateInput = {
   classId?: Prisma.SortOrder
   description?: Prisma.SortOrder
   requiresFormalReview?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
 }
 
 export type DocumentTypeSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   classId?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
 }
 
 export type DocumentTypeScalarRelationFilter = {
@@ -616,14 +646,6 @@ export type DocumentTypeUncheckedUpdateManyWithoutClassNestedInput = {
   update?: Prisma.DocumentTypeUpdateWithWhereUniqueWithoutClassInput | Prisma.DocumentTypeUpdateWithWhereUniqueWithoutClassInput[]
   updateMany?: Prisma.DocumentTypeUpdateManyWithWhereWithoutClassInput | Prisma.DocumentTypeUpdateManyWithWhereWithoutClassInput[]
   deleteMany?: Prisma.DocumentTypeScalarWhereInput | Prisma.DocumentTypeScalarWhereInput[]
-}
-
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
 }
 
 export type DocumentTypeCreateNestedOneWithoutDocumentsInput = {
@@ -697,6 +719,7 @@ export type DocumentTypeCreateWithoutClassInput = {
   module?: $Enums.ModuleType | null
   description?: string | null
   requiresFormalReview?: boolean
+  projectId?: number | null
   documents?: Prisma.DocumentCreateNestedManyWithoutCurrentDocumentTypeInput
   revisions?: Prisma.DocumentRevisionCreateNestedManyWithoutDocumentTypeInput
   scannedFiles?: Prisma.ScannedFileCreateNestedManyWithoutDocumentTypeInput
@@ -715,6 +738,7 @@ export type DocumentTypeUncheckedCreateWithoutClassInput = {
   module?: $Enums.ModuleType | null
   description?: string | null
   requiresFormalReview?: boolean
+  projectId?: number | null
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutCurrentDocumentTypeInput
   revisions?: Prisma.DocumentRevisionUncheckedCreateNestedManyWithoutDocumentTypeInput
   scannedFiles?: Prisma.ScannedFileUncheckedCreateNestedManyWithoutDocumentTypeInput
@@ -763,6 +787,7 @@ export type DocumentTypeScalarWhereInput = {
   classId?: Prisma.IntNullableFilter<"DocumentType"> | number | null
   description?: Prisma.StringNullableFilter<"DocumentType"> | string | null
   requiresFormalReview?: Prisma.BoolFilter<"DocumentType"> | boolean
+  projectId?: Prisma.IntNullableFilter<"DocumentType"> | number | null
 }
 
 export type DocumentTypeCreateWithoutDocumentsInput = {
@@ -776,6 +801,7 @@ export type DocumentTypeCreateWithoutDocumentsInput = {
   module?: $Enums.ModuleType | null
   description?: string | null
   requiresFormalReview?: boolean
+  projectId?: number | null
   class?: Prisma.DocumentClassCreateNestedOneWithoutDocumentTypesInput
   revisions?: Prisma.DocumentRevisionCreateNestedManyWithoutDocumentTypeInput
   scannedFiles?: Prisma.ScannedFileCreateNestedManyWithoutDocumentTypeInput
@@ -795,6 +821,7 @@ export type DocumentTypeUncheckedCreateWithoutDocumentsInput = {
   classId?: number | null
   description?: string | null
   requiresFormalReview?: boolean
+  projectId?: number | null
   revisions?: Prisma.DocumentRevisionUncheckedCreateNestedManyWithoutDocumentTypeInput
   scannedFiles?: Prisma.ScannedFileUncheckedCreateNestedManyWithoutDocumentTypeInput
   workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocumentTypeInput
@@ -827,6 +854,7 @@ export type DocumentTypeUpdateWithoutDocumentsInput = {
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresFormalReview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   class?: Prisma.DocumentClassUpdateOneWithoutDocumentTypesNestedInput
   revisions?: Prisma.DocumentRevisionUpdateManyWithoutDocumentTypeNestedInput
   scannedFiles?: Prisma.ScannedFileUpdateManyWithoutDocumentTypeNestedInput
@@ -846,6 +874,7 @@ export type DocumentTypeUncheckedUpdateWithoutDocumentsInput = {
   classId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresFormalReview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisions?: Prisma.DocumentRevisionUncheckedUpdateManyWithoutDocumentTypeNestedInput
   scannedFiles?: Prisma.ScannedFileUncheckedUpdateManyWithoutDocumentTypeNestedInput
   workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocumentTypeNestedInput
@@ -862,6 +891,7 @@ export type DocumentTypeCreateWithoutRevisionsInput = {
   module?: $Enums.ModuleType | null
   description?: string | null
   requiresFormalReview?: boolean
+  projectId?: number | null
   class?: Prisma.DocumentClassCreateNestedOneWithoutDocumentTypesInput
   documents?: Prisma.DocumentCreateNestedManyWithoutCurrentDocumentTypeInput
   scannedFiles?: Prisma.ScannedFileCreateNestedManyWithoutDocumentTypeInput
@@ -881,6 +911,7 @@ export type DocumentTypeUncheckedCreateWithoutRevisionsInput = {
   classId?: number | null
   description?: string | null
   requiresFormalReview?: boolean
+  projectId?: number | null
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutCurrentDocumentTypeInput
   scannedFiles?: Prisma.ScannedFileUncheckedCreateNestedManyWithoutDocumentTypeInput
   workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocumentTypeInput
@@ -913,6 +944,7 @@ export type DocumentTypeUpdateWithoutRevisionsInput = {
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresFormalReview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   class?: Prisma.DocumentClassUpdateOneWithoutDocumentTypesNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutCurrentDocumentTypeNestedInput
   scannedFiles?: Prisma.ScannedFileUpdateManyWithoutDocumentTypeNestedInput
@@ -932,6 +964,7 @@ export type DocumentTypeUncheckedUpdateWithoutRevisionsInput = {
   classId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresFormalReview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutCurrentDocumentTypeNestedInput
   scannedFiles?: Prisma.ScannedFileUncheckedUpdateManyWithoutDocumentTypeNestedInput
   workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocumentTypeNestedInput
@@ -948,6 +981,7 @@ export type DocumentTypeCreateWithoutWorkflowTemplatesInput = {
   module?: $Enums.ModuleType | null
   description?: string | null
   requiresFormalReview?: boolean
+  projectId?: number | null
   class?: Prisma.DocumentClassCreateNestedOneWithoutDocumentTypesInput
   documents?: Prisma.DocumentCreateNestedManyWithoutCurrentDocumentTypeInput
   revisions?: Prisma.DocumentRevisionCreateNestedManyWithoutDocumentTypeInput
@@ -967,6 +1001,7 @@ export type DocumentTypeUncheckedCreateWithoutWorkflowTemplatesInput = {
   classId?: number | null
   description?: string | null
   requiresFormalReview?: boolean
+  projectId?: number | null
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutCurrentDocumentTypeInput
   revisions?: Prisma.DocumentRevisionUncheckedCreateNestedManyWithoutDocumentTypeInput
   scannedFiles?: Prisma.ScannedFileUncheckedCreateNestedManyWithoutDocumentTypeInput
@@ -999,6 +1034,7 @@ export type DocumentTypeUpdateWithoutWorkflowTemplatesInput = {
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresFormalReview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   class?: Prisma.DocumentClassUpdateOneWithoutDocumentTypesNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutCurrentDocumentTypeNestedInput
   revisions?: Prisma.DocumentRevisionUpdateManyWithoutDocumentTypeNestedInput
@@ -1018,6 +1054,7 @@ export type DocumentTypeUncheckedUpdateWithoutWorkflowTemplatesInput = {
   classId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresFormalReview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutCurrentDocumentTypeNestedInput
   revisions?: Prisma.DocumentRevisionUncheckedUpdateManyWithoutDocumentTypeNestedInput
   scannedFiles?: Prisma.ScannedFileUncheckedUpdateManyWithoutDocumentTypeNestedInput
@@ -1034,6 +1071,7 @@ export type DocumentTypeCreateWithoutScannedFilesInput = {
   module?: $Enums.ModuleType | null
   description?: string | null
   requiresFormalReview?: boolean
+  projectId?: number | null
   class?: Prisma.DocumentClassCreateNestedOneWithoutDocumentTypesInput
   documents?: Prisma.DocumentCreateNestedManyWithoutCurrentDocumentTypeInput
   revisions?: Prisma.DocumentRevisionCreateNestedManyWithoutDocumentTypeInput
@@ -1053,6 +1091,7 @@ export type DocumentTypeUncheckedCreateWithoutScannedFilesInput = {
   classId?: number | null
   description?: string | null
   requiresFormalReview?: boolean
+  projectId?: number | null
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutCurrentDocumentTypeInput
   revisions?: Prisma.DocumentRevisionUncheckedCreateNestedManyWithoutDocumentTypeInput
   workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocumentTypeInput
@@ -1085,6 +1124,7 @@ export type DocumentTypeUpdateWithoutScannedFilesInput = {
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresFormalReview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   class?: Prisma.DocumentClassUpdateOneWithoutDocumentTypesNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutCurrentDocumentTypeNestedInput
   revisions?: Prisma.DocumentRevisionUpdateManyWithoutDocumentTypeNestedInput
@@ -1104,6 +1144,7 @@ export type DocumentTypeUncheckedUpdateWithoutScannedFilesInput = {
   classId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresFormalReview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutCurrentDocumentTypeNestedInput
   revisions?: Prisma.DocumentRevisionUncheckedUpdateManyWithoutDocumentTypeNestedInput
   workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocumentTypeNestedInput
@@ -1121,6 +1162,7 @@ export type DocumentTypeCreateManyClassInput = {
   module?: $Enums.ModuleType | null
   description?: string | null
   requiresFormalReview?: boolean
+  projectId?: number | null
 }
 
 export type DocumentTypeUpdateWithoutClassInput = {
@@ -1134,6 +1176,7 @@ export type DocumentTypeUpdateWithoutClassInput = {
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresFormalReview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documents?: Prisma.DocumentUpdateManyWithoutCurrentDocumentTypeNestedInput
   revisions?: Prisma.DocumentRevisionUpdateManyWithoutDocumentTypeNestedInput
   scannedFiles?: Prisma.ScannedFileUpdateManyWithoutDocumentTypeNestedInput
@@ -1152,6 +1195,7 @@ export type DocumentTypeUncheckedUpdateWithoutClassInput = {
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresFormalReview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutCurrentDocumentTypeNestedInput
   revisions?: Prisma.DocumentRevisionUncheckedUpdateManyWithoutDocumentTypeNestedInput
   scannedFiles?: Prisma.ScannedFileUncheckedUpdateManyWithoutDocumentTypeNestedInput
@@ -1170,6 +1214,7 @@ export type DocumentTypeUncheckedUpdateManyWithoutClassInput = {
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresFormalReview?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 
@@ -1243,6 +1288,7 @@ export type DocumentTypeSelect<ExtArgs extends runtime.Types.Extensions.Internal
   classId?: boolean
   description?: boolean
   requiresFormalReview?: boolean
+  projectId?: boolean
   class?: boolean | Prisma.DocumentType$classArgs<ExtArgs>
   documents?: boolean | Prisma.DocumentType$documentsArgs<ExtArgs>
   revisions?: boolean | Prisma.DocumentType$revisionsArgs<ExtArgs>
@@ -1264,6 +1310,7 @@ export type DocumentTypeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   classId?: boolean
   description?: boolean
   requiresFormalReview?: boolean
+  projectId?: boolean
   class?: boolean | Prisma.DocumentType$classArgs<ExtArgs>
 }, ExtArgs["result"]["documentType"]>
 
@@ -1280,6 +1327,7 @@ export type DocumentTypeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   classId?: boolean
   description?: boolean
   requiresFormalReview?: boolean
+  projectId?: boolean
   class?: boolean | Prisma.DocumentType$classArgs<ExtArgs>
 }, ExtArgs["result"]["documentType"]>
 
@@ -1296,9 +1344,10 @@ export type DocumentTypeSelectScalar = {
   classId?: boolean
   description?: boolean
   requiresFormalReview?: boolean
+  projectId?: boolean
 }
 
-export type DocumentTypeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "name" | "code" | "module" | "classId" | "description" | "requiresFormalReview", ExtArgs["result"]["documentType"]>
+export type DocumentTypeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "name" | "code" | "module" | "classId" | "description" | "requiresFormalReview" | "projectId", ExtArgs["result"]["documentType"]>
 export type DocumentTypeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   class?: boolean | Prisma.DocumentType$classArgs<ExtArgs>
   documents?: boolean | Prisma.DocumentType$documentsArgs<ExtArgs>
@@ -1336,6 +1385,7 @@ export type $DocumentTypePayload<ExtArgs extends runtime.Types.Extensions.Intern
     classId: number | null
     description: string | null
     requiresFormalReview: boolean
+    projectId: number | null
   }, ExtArgs["result"]["documentType"]>
   composites: {}
 }
@@ -1776,6 +1826,7 @@ export interface DocumentTypeFieldRefs {
   readonly classId: Prisma.FieldRef<"DocumentType", 'Int'>
   readonly description: Prisma.FieldRef<"DocumentType", 'String'>
   readonly requiresFormalReview: Prisma.FieldRef<"DocumentType", 'Boolean'>
+  readonly projectId: Prisma.FieldRef<"DocumentType", 'Int'>
 }
     
 

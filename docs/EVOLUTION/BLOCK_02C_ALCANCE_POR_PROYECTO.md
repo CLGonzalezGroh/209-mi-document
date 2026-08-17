@@ -1,7 +1,7 @@
 # Bloque 02C — Alcance por proyecto de clase y tipo
 
-**Estado:** `APROBADO_PENDIENTE` — definiciones cerradas, listo para implementar
-**Versión:** 1.1
+**Estado:** `APROBADO_PENDIENTE` — fase 1 de 6 completada
+**Versión:** 1.2
 **Depende de:** `BLOCK_02B`, que construyó el mecanismo de alcance; `BLOCK_03`, por la unicidad con nulos.
 **Decisiones que ejecuta:** D-21.
 **Decisiones que aplica sin modificar:** D-06, D-13, D-15.
@@ -223,6 +223,26 @@ Lo que se difiere está en **Fuera de alcance**, y es distinto de lo que falta d
 4. **Validación al clasificar** — las dos invariantes de cruce de B7 y el alcance de la entrada elegida.
 5. **Ruta de migración verificada** — los dos sentidos, control de precondición, línea base contada por despliegue, y la medición de `ScannedFile` en `optimal`.
 6. **Promoción a la SFS** — el ámbito `domain/20_classification/` que `BLOCK_02B` ya creó.
+
+## Ejecución
+
+### Fase 1 — completada
+
+El modelo y la migración, sin nada de resolución todavía.
+
+- **`projectId` en los dos catálogos**, con el `CHECK` que exige `module = PROJECTS` cuando hay proyecto. A diferencia del cruce entre clase y tipo, este invariante **sí** es expresable: mira dos columnas de la propia fila.
+- **Los cuatro índices únicos incorporan el alcance**, recreados con `NULLS NOT DISTINCT`, que es lo que los vuelve efectivos con tres o cuatro columnas anulables.
+- **`DocCatalogKind` queda en `{ LOCATION, CLASSIFICATION }`.** El `USING` de la conversión es además **la precondición que se verifica sola**: si alguna fila tuviera uno de los dos valores retirados, la migración se detiene en lugar de perder el dato. No la tuvo ninguna, que es lo que `B1` anticipaba —nunca se les escribió una fila—.
+- **`DocCatalogScope` pasa a los dos ejes**, con las filas existentes migradas a `module = PROJECTS`: todas eran declaraciones de proyecto, que es lo único que la estructura anterior admitía.
+- **La deriva de `B5` corregida donde estaba el defecto.** `document_revisions.documentClassId` **no se toca en la base**: ya estaba en `RESTRICT`, que es lo correcto. Lo que estaba mal era el modelo, que al no declarar `onDelete` en una relación opcional dejaba a Prisma suponiendo `SetNull`. La migración solo renombra las dos constraints de `documents` que quedaron con el nombre previo a `current*`.
+
+**El diff volvió a encontrar lo que la compilación no ve**, y es la segunda vez en dos bloques: los cuatro índices recreados conservaban su nombre anterior, que declaraba dos columnas cuando ya cubrían tres o cuatro. Es la misma deriva que `B5` corrige un párrafo más arriba, y se habría creado en la misma migración que la repara. Se adopta el nombre que la convención genera.
+
+**Verificado en los dos sentidos**: el diff contra la base local queda vacío, y las **28 migraciones replicadas desde cero** producen exactamente el modelo.
+
+**474 pruebas, 0 fallos** — una nueva, que fija que el eje de módulo ya admite una declaración sin proyecto y que la unicidad la alcanza con `NULLS NOT DISTINCT`, aunque todavía no exista operación que la produzca.
+
+**Lo que esta fase no trae, y es deliberado:** las consultas siguen resolviendo como antes —el alcance existe en el modelo y todavía no lo lee nadie—, no hay siembra, y la invariante de cruce de `B7` es de la fase 4. La webapp no registra una sola línea modificada, que es lo que `B4` sostiene.
 
 ## Referencias
 

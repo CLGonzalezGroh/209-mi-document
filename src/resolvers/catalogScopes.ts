@@ -5,6 +5,7 @@ import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
 import {
   DocCatalogKind,
   DocScopeMode,
+  ModuleType,
   SysLogModule,
 } from "../generated/prisma/enums.js"
 import { AuditAction } from "../events/catalog.js"
@@ -50,7 +51,10 @@ export const catalogScopeResolvers = {
 
       try {
         return await context.orm.docCatalogScope.findMany({
-          where: { projectId },
+          // El módulo se declara además del proyecto (BLOQUE 02C, B6): un
+          // `projectId` suelto alcanzaría hoy, pero dejaría la consulta
+          // dependiendo de que ninguna otra fila lo repita.
+          where: { module: ModuleType.PROJECTS, projectId },
           orderBy: { catalog: "asc" },
         })
       } catch (error) {
@@ -126,12 +130,18 @@ export const catalogScopeResolvers = {
 
           const declarado = await tx.docCatalogScope.upsert({
             where: {
-              projectId_catalog: {
+              module_projectId_catalog: {
+                module: ModuleType.PROJECTS,
                 projectId: input.projectId,
                 catalog: input.catalog,
               },
             },
             create: {
+              // La operación declara el alcance de un PROYECTO, y un proyecto
+              // pertenece siempre al módulo de proyectos (BLOQUE 02C, B6). La
+              // declaración por módulo tendrá su propia operación cuando exista
+              // quién la administre; la estructura ya la admite.
+              module: ModuleType.PROJECTS,
               projectId: input.projectId,
               catalog: input.catalog,
               mode: input.mode,

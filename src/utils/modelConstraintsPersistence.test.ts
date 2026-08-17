@@ -79,6 +79,17 @@ const limpiar = async () => {
   await prisma.docCatalogScope.deleteMany({
     where: { projectId: { in: [-424406, -424407, -424408, -424409] } },
   })
+  // La declaración de MÓDULO no tiene proyecto, de modo que la limpieza de
+  // arriba no la alcanza (BLOQUE 02C, B6). Se borra por su forma exacta y no
+  // por el módulo suelto: hoy ninguna operación produce filas de módulo, y el
+  // día que exista esta prueba no debe barrer las suyas.
+  await prisma.docCatalogScope.deleteMany({
+    where: {
+      projectId: null,
+      module: ModuleType.QUALITY,
+      catalog: DocCatalogKind.CLASSIFICATION,
+    },
+  })
   await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
   await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: PROYECTO } })
   await prisma.documentType.deleteMany({
@@ -620,12 +631,13 @@ test("un nodo de proyecto cuelga de uno del despliegue: eso es ampliar", async (
   assert.equal(ampliacion.projectId, -424408)
 })
 
-test("el alcance de un catálogo se declara una sola vez por proyecto", async () => {
+test("el alcance de un catálogo se declara una sola vez por ámbito", async () => {
   const proyecto = -424409
 
   const declarar = (mode: DocScopeMode) =>
     prisma.docCatalogScope.create({
       data: {
+        module: ModuleType.PROJECTS,
         projectId: proyecto,
         catalog: DocCatalogKind.LOCATION,
         mode,
@@ -636,16 +648,51 @@ test("el alcance de un catálogo se declara una sola vez por proyecto", async ()
   await declarar(DocScopeMode.OWN)
   assert.equal(await rechazaPorUnicidad(() => declarar(DocScopeMode.INHERIT)), true)
 
-  // Otro catálogo del mismo proyecto sí entra: la unicidad es por el par.
+  // El otro catálogo del mismo proyecto sí entra: la unicidad es por el ámbito
+  // y el catálogo. Son dos y no tres —clasificación y ubicación— porque clase y
+  // tipo declaran juntos (BLOQUE 02C, B1).
   const otro = await prisma.docCatalogScope.create({
     data: {
+      module: ModuleType.PROJECTS,
       projectId: proyecto,
-      catalog: DocCatalogKind.DOCUMENT_CLASS,
+      catalog: DocCatalogKind.CLASSIFICATION,
       mode: DocScopeMode.OWN,
       createdById: 1,
     },
   })
-  assert.equal(otro.catalog, DocCatalogKind.DOCUMENT_CLASS)
+  assert.equal(otro.catalog, DocCatalogKind.CLASSIFICATION)
+})
+
+test("el módulo declara su alcance sin proyecto, y no choca con el de un proyecto", async () => {
+  // El eje de módulo es lo que impide que la ausencia de proyecto equivalga al
+  // despliegue (BLOQUE 02C, B6). Todavía no hay operación que lo produzca: lo
+  // que esta prueba fija es que la estructura ya lo admite.
+  const calidad = await prisma.docCatalogScope.create({
+    data: {
+      module: ModuleType.QUALITY,
+      catalog: DocCatalogKind.CLASSIFICATION,
+      mode: DocScopeMode.OWN,
+      createdById: 1,
+    },
+  })
+
+  assert.equal(calidad.projectId, null)
+
+  // Y la unicidad lo alcanza con NULLS NOT DISTINCT: sin la cláusula, dos
+  // declaraciones de módulo no se considerarían duplicadas.
+  assert.equal(
+    await rechazaPorUnicidad(() =>
+      prisma.docCatalogScope.create({
+        data: {
+          module: ModuleType.QUALITY,
+          catalog: DocCatalogKind.CLASSIFICATION,
+          mode: DocScopeMode.INHERIT,
+          createdById: 1,
+        },
+      }),
+    ),
+    true,
+  )
 })
 
 test("el mismo código bajo otro padre sí se admite", async () => {

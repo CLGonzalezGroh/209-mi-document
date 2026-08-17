@@ -192,6 +192,15 @@ model DocumentClass {
   description String?
   sortOrder   Int         @default(0)
 
+  // Alcance por proyecto (BLOQUE 02C, B1). Nulo = catálogo del despliegue, del
+  // que los proyectos heredan. Con valor, la entrada la agregó ese proyecto.
+  // Referencia externa sin FK: Project vive en mi-project.
+  //
+  // Un CHECK exige `module = PROJECTS` cuando hay proyecto, con la forma del
+  // invariante que D-06 fija para `Document`: el proyecto solo tiene sentido
+  // como alcance dentro del módulo que lo tiene.
+  projectId Int?
+
   // Relaciones
   documentTypes     DocumentType[]
   documents         Document[] // Por la COPIA del documento (BLOQUE 03B, B2)
@@ -205,8 +214,13 @@ model DocumentClass {
   // no se lea como deriva. Cierra H-19 en el catálogo: sin la cláusula, dos
   // entradas sin módulo —el caso más frecuente en un catálogo recién sembrado—
   // no se consideraban duplicadas.
-  @@unique([name, module]) // NULLS NOT DISTINCT en la base
-  @@unique([code, module]) // NULLS NOT DISTINCT en la base
+  //
+  // BLOQUE 02C incorpora el alcance a la tupla: dos proyectos pueden nombrar
+  // igual su propia clase, y un proyecto puede agregar un código que el
+  // despliegue no tiene sin chocar con otro proyecto.
+  @@unique([name, module, projectId]) // NULLS NOT DISTINCT en la base
+  @@unique([code, module, projectId]) // NULLS NOT DISTINCT en la base
+  @@index([projectId])
   @@map("document_classes")
 }
 
@@ -230,6 +244,17 @@ model DocumentType {
   // Es SUGERENCIA y no invariante: propone el armado, no lo impone.
   requiresFormalReview Boolean @default(false)
 
+  // Alcance por proyecto (BLOQUE 02C, B1), con el mismo tratamiento que la
+  // clase y su mismo CHECK. Clase y tipo declaran su alcance JUNTOS —son un
+  // solo sistema de clasificación y no dos catálogos—, de modo que no existe
+  // un proyecto que herede uno y no el otro.
+  //
+  // El cruce va en un solo sentido (B7): un tipo del proyecto puede colgar de
+  // una clase del despliegue —eso es ampliar—, y uno del despliegue no puede
+  // colgar de una clase de proyecto. No es expresable en un CHECK, porque exige
+  // mirar la clase referenciada, y vive en la operación con su prueba.
+  projectId Int?
+
   // Relaciones
   class             DocumentClass?        @relation(fields: [classId], references: [id])
   documents         Document[] // Por la COPIA del documento (BLOQUE 03B, B2)
@@ -239,10 +264,12 @@ model DocumentType {
 
   // Mismo tratamiento que en DocumentClass (B15): los dos índices se recrean
   // con NULLS NOT DISTINCT en la migración. Con classId o module nulos la
-  // restricción anterior no impedía el duplicado.
-  @@unique([name, classId, module]) // NULLS NOT DISTINCT en la base
-  @@unique([code, classId, module]) // NULLS NOT DISTINCT en la base
+  // restricción anterior no impedía el duplicado. BLOQUE 02C agrega el alcance
+  // a la tupla, que es la tercera columna anulable de la misma clave.
+  @@unique([name, classId, module, projectId]) // NULLS NOT DISTINCT en la base
+  @@unique([code, classId, module, projectId]) // NULLS NOT DISTINCT en la base
   @@index([classId])
+  @@index([projectId])
   @@map("document_types")
 }
 
@@ -429,8 +456,15 @@ model DocumentRevision {
 
   // Relaciones
   document         Document           @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  documentType     DocumentType       @relation(fields: [documentTypeId], references: [id])
-  documentClass    DocumentClass?     @relation(fields: [documentClassId], references: [id])
+  documentType DocumentType @relation(fields: [documentTypeId], references: [id])
+  // `Restrict` explícito y NO el `SetNull` que Prisma pone por defecto en una
+  // relación opcional (BLOQUE 02C, B5). La base ya lo declara así desde
+  // BLOQUE 03B; lo que estaba mal era el modelo, de modo que un
+  // `prisma migrate dev` la habría "corregido" en la dirección equivocada.
+  // Acá la consecuencia es peor que en la ubicación: la clase integra el
+  // payload de la firma (D-05, D-23), y borrarla habría vaciado en silencio la
+  // clasificación de revisiones firmadas.
+  documentClass DocumentClass? @relation(fields: [documentClassId], references: [id], onDelete: Restrict)
   versions         DocumentVersion[]
   workflows        ReviewWorkflow[] // Varios circuitos sucesivos (D-11, B2)
   transmittalItems TransmittalItem[]
@@ -1210,10 +1244,17 @@ model DocResponseFile {
 // El mecanismo es UNO para los tres. `LOCATION` lo estrena BLOQUE 02B, sobre el
 // catálogo que no tiene datos ni interfaz en producción; `BLOCK_02C` incorpora
 // los otros dos, y no le cuesta una columna sino un valor de esta enumeración.
+// Los catálogos documentales son DOS y no tres (BLOQUE 02C, B1).
+//
+// `CLASSIFICATION` cubre clase y tipo juntos: el tipo cuelga de la clase, de
+// modo que declararlos por separado admitiría un estado que no describe ninguna
+// práctica —un proyecto con clasificación propia heredando tipos que apuntan a
+// clases que no ve—. Reemplaza a `DOCUMENT_CLASS` y `DOCUMENT_TYPE`, que
+// quedaron declarados sin que ninguna operación los asignara: es la misma
+// corrección que el módulo hizo con `WorkflowStatus.PENDING` (H-08).
 enum DocCatalogKind {
   LOCATION
-  DOCUMENT_CLASS
-  DOCUMENT_TYPE
+  CLASSIFICATION
 }
 
 // Cómo resuelve un proyecto un catálogo (BLOQUE 02B, B1).
@@ -1248,13 +1289,23 @@ model DocCatalogScope {
   updatedAt   DateTime? @updatedAt
   updatedById Int       @default(1)
 
-  // Referencia externa sin FK: Project vive en mi-project.
-  projectId Int
+  // El ámbito que declara, con los MISMOS DOS EJES que la entrada del catálogo
+  // (BLOQUE 02C, B6): `module` siempre presente, `projectId` anulable.
+  //
+  //   PROJECTS + 5    → cómo resuelve el proyecto 5
+  //   QUALITY  + null → cómo resuelve el módulo de calidad
+  //
+  // No son dos columnas anulables con exclusión mutua —la forma que D-20
+  // descarta— porque un proyecto siempre pertenece al módulo de proyectos: los
+  // ejes conviven en lugar de excluirse. Referencia externa sin FK: Project
+  // vive en mi-project.
+  module    ModuleType
+  projectId Int?
 
   catalog DocCatalogKind
   mode    DocScopeMode
 
-  @@unique([projectId, catalog])
+  @@unique([module, projectId, catalog]) // NULLS NOT DISTINCT en la base
   @@index([projectId])
   @@map("doc_catalog_scopes")
 }

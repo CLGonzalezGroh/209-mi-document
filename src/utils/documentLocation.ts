@@ -1,6 +1,10 @@
 import { GraphQLError } from "graphql"
 import type { Prisma } from "../generated/prisma/client.js"
-import { DocCatalogKind, DocScopeMode } from "../generated/prisma/enums.js"
+import {
+  DocCatalogKind,
+  DocScopeMode,
+  ModuleType,
+} from "../generated/prisma/enums.js"
 import { effectiveMode, entryVisible } from "./catalogScope.js"
 
 /**
@@ -140,7 +144,11 @@ export const resolveDocumentLocation = async (
       ? null
       : await client.docCatalogScope.findUnique({
           where: {
-            projectId_catalog: { projectId, catalog: DocCatalogKind.LOCATION },
+            module_projectId_catalog: {
+              module: ModuleType.PROJECTS,
+              projectId,
+              catalog: DocCatalogKind.LOCATION,
+            },
           },
           select: { mode: true },
         })

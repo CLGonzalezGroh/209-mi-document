@@ -2928,7 +2928,8 @@ export const DocumentClassScalarFieldEnum = {
   code: 'code',
   module: 'module',
   description: 'description',
-  sortOrder: 'sortOrder'
+  sortOrder: 'sortOrder',
+  projectId: 'projectId'
 } as const
 
 export type DocumentClassScalarFieldEnum = (typeof DocumentClassScalarFieldEnum)[keyof typeof DocumentClassScalarFieldEnum]
@@ -2946,7 +2947,8 @@ export const DocumentTypeScalarFieldEnum = {
   module: 'module',
   classId: 'classId',
   description: 'description',
-  requiresFormalReview: 'requiresFormalReview'
+  requiresFormalReview: 'requiresFormalReview',
+  projectId: 'projectId'
 } as const
 
 export type DocumentTypeScalarFieldEnum = (typeof DocumentTypeScalarFieldEnum)[keyof typeof DocumentTypeScalarFieldEnum]
@@ -3325,6 +3327,7 @@ export const DocCatalogScopeScalarFieldEnum = {
   createdById: 'createdById',
   updatedAt: 'updatedAt',
   updatedById: 'updatedById',
+  module: 'module',
   projectId: 'projectId',
   catalog: 'catalog',
   mode: 'mode'

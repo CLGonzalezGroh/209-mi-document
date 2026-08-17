@@ -180,8 +180,7 @@ export type QualificationEffect = (typeof QualificationEffect)[keyof typeof Qual
 
 export const DocCatalogKind = {
   LOCATION: 'LOCATION',
-  DOCUMENT_CLASS: 'DOCUMENT_CLASS',
-  DOCUMENT_TYPE: 'DOCUMENT_TYPE'
+  CLASSIFICATION: 'CLASSIFICATION'
 } as const
 
 export type DocCatalogKind = (typeof DocCatalogKind)[keyof typeof DocCatalogKind]

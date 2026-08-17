@@ -12,6 +12,7 @@ import {
   DocLocationOrigin,
   DocObjectType,
   DocScopeMode,
+  ModuleType,
   SysLogModule,
 } from "../generated/prisma/enums.js"
 import { AuditAction, WorkflowEvent } from "../events/catalog.js"
@@ -187,7 +188,11 @@ const locationScopeMode = async (
 ): Promise<DocScopeMode> => {
   const declarado = await client.docCatalogScope.findUnique({
     where: {
-      projectId_catalog: { projectId, catalog: DocCatalogKind.LOCATION },
+      module_projectId_catalog: {
+        module: ModuleType.PROJECTS,
+        projectId,
+        catalog: DocCatalogKind.LOCATION,
+      },
     },
     select: { mode: true },
   })

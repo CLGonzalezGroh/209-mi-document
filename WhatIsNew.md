@@ -998,3 +998,29 @@ El mecanismo ya existe: `BLOQUE 02B` lo construyó y lo probó sobre el caso dif
 - **La trazabilidad cierra su último pendiente.** Los campos de fecha de las entidades —`approvedAt`, `issuedAt`, `completedAt`— **complementan al evento y no lo reemplazan**, con la fórmula que la ubicación fijó para el snapshot de la ruta: son denormalización de conveniencia y no evidencia. No pueden separarse del evento, porque se emite dentro de la transacción del cambio; son campos del contrato que cada listado va a mostrar; y `issuedAt` además ordena. De ahí la regla que vuelve legítima la redundancia: **si divergen, gana el evento**. Lo que se descarta es el estado intermedio —conservarlos sin declarar qué son—, que es el que mantuvo este pendiente abierto tres bloques.
 - **El ámbito determina dónde vive la pantalla.** Los mismos objetos existen en tres ámbitos y el usuario debe saber en cuál está parado sin deducirlo: el despliegue en `documents/`, el módulo en `<modulo>/documents/`, el proyecto en `projects/[projectId]/documents/`. No es una preferencia de navegación — el ámbito gobierna la resolución de los catálogos, el alcance de acceso y la precedencia de la configuración, y una pantalla fuera de su ámbito obliga a pasarlo por parámetro y a que cada consumidor decida cuál rige. La bandeja de trabajo es transversal y su filtro por proyecto es una vista: `pendingReviewSteps` ya es transversal por construcción, de modo que falta el filtro y no la consulta.
 - **La interfaz nacerá en su ubicación definitiva.** La ruta implementada hoy invierte el orden, y construir sobre ella para mudar después es levantar dos veces las mismas pantallas y sus enlaces. Queda declarada la dependencia externa: la reorganización del módulo de proyectos por workspace, con su plan propio, y el precedente construido en digitalización.
+
+---
+
+# What's new in María Ingeniería API Documents 2.9.0
+
+2026-08-18
+
+## Alcance por proyecto de clase y tipo (BLOQUE 02C)
+
+Bloque en curso. Esta sección se extiende con cada fase.
+
+### Fase 1 — El modelo y la migración
+
+El mecanismo de alcance ya existía: `BLOQUE 02B` lo construyó y lo probó sobre el catálogo de ubicación, que no tenía datos ni interfaz en producción. Esta fase lo lleva a los dos que sí los tienen.
+
+- **`projectId` en `DocumentClass` y `DocumentType`.** Nulo es el catálogo del despliegue, del que los proyectos heredan; con valor, la entrada la agregó ese proyecto. Un `CHECK` exige `module = PROJECTS` cuando hay proyecto, con la forma del invariante que D-06 fija para `Document`. A diferencia del cruce entre clase y tipo, este **sí** es expresable: mira dos columnas de la propia fila.
+- **Los cuatro índices únicos incorporan el alcance**, con `NULLS NOT DISTINCT`, que es lo que los vuelve efectivos sobre tres y cuatro columnas anulables. Dos proyectos pueden nombrar igual su propia clase, y un proyecto puede agregar un código que el despliegue no tiene sin chocar con otro proyecto.
+- **Los catálogos documentales son dos y no tres.** `DocCatalogKind` queda en `LOCATION` y `CLASSIFICATION`: clase y tipo son **un solo sistema de clasificación** —el tipo cuelga de la clase—, de modo que declararlos por separado admitiría un proyecto con clasificación propia heredando tipos que apuntan a clases que no ve. Los dos valores retirados estaban declarados sin que ninguna operación los asignara, que es la corrección que el módulo ya hizo con `WorkflowStatus.PENDING`. La conversión del tipo es además **la precondición que se verifica sola**: con una sola fila de los valores retirados, la migración se detiene en lugar de perder el dato.
+- **El alcance se declara con los mismos dos ejes que la entrada.** `DocCatalogScope` pasa a llevar `module` obligatorio y `projectId` anulable, de modo que calidad, comercial y activos puedan declarar el suyo sin migrar estructura. No son dos columnas anulables con exclusión mutua: un proyecto siempre pertenece al módulo de proyectos, así que los ejes conviven en lugar de excluirse. Hasta acá, la ausencia de proyecto equivalía al despliegue — exactamente lo que el plan advierte que no debe construirse.
+- **La deriva de claves foráneas, corregida donde estaba el defecto.** `document_revisions.documentClassId` **no se toca en la base**: ya estaba en `RESTRICT`, que es lo correcto, porque la clase integra el payload de la firma y borrarla no puede vaciar en silencio la clasificación de una revisión firmada. Lo que estaba mal era el modelo, que al no declarar `onDelete` en una relación opcional dejaba a Prisma suponiendo `SetNull` — un `prisma migrate dev` la habría "corregido" en la dirección equivocada. La migración solo renombra las dos constraints de `documents` que conservaban el nombre previo al renombre a `current*`.
+
+**El diff volvió a encontrar lo que la compilación no ve**, y van dos bloques seguidos: los cuatro índices recreados conservaban su nombre anterior, que declaraba dos columnas cuando ya cubrían tres o cuatro. Es la misma deriva que esta migración repara en `documents`, y se habría creado en el mismo archivo que la corrige.
+
+**Verificado en los dos sentidos** —el diff contra la base queda vacío, y las 28 migraciones replicadas desde cero producen exactamente el modelo—, con **474 pruebas y 0 fallos**.
+
+**La migración es aditiva y no cambia el comportamiento de nada existente.** Toda entrada ya cargada queda en el alcance del despliegue, que es el único que hoy existe y el que las pantallas administran; la ausencia de fila de alcance sigue siendo heredar. Las consultas todavía resuelven como antes: el alcance está en el modelo y aún no lo lee nadie. La webapp no registra una sola línea modificada.
