@@ -339,7 +339,10 @@ model Document {
   // Relaciones
   currentDocumentType  DocumentType            @relation(fields: [currentDocumentTypeId], references: [id])
   currentDocumentClass DocumentClass?          @relation(fields: [currentDocumentClassId], references: [id])
-  location             DocLocation?            @relation(fields: [locationId], references: [id])
+  // `Restrict` explícito, por el mismo motivo: con `SetNull` eliminar un nodo
+  // vaciaría en silencio la clasificación de cada documento que lo usaba, que es
+  // exactamente lo que la migración declara que no debe pasar.
+  location             DocLocation?            @relation(fields: [locationId], references: [id], onDelete: Restrict)
   revisions            DocumentRevision[]
   taskDocumentRefs     TaskDocumentReference[]
   replacementItems     DocReplacementItem[]
@@ -1330,7 +1333,11 @@ model DocLocation {
   externalRef    String?
 
   // Relaciones
-  parent    DocLocation?  @relation("DocLocationTree", fields: [parentId], references: [id])
+  // `Restrict` explícito y NO el `SetNull` que Prisma pone por defecto en una
+  // relación opcional: eliminar un nodo con descendencia se rechaza, y la base no
+  // debe resolverlo desprendiendo la rama en silencio. La operación lo verifica
+  // antes para dar mensaje; esto es la garantía.
+  parent    DocLocation?  @relation("DocLocationTree", fields: [parentId], references: [id], onDelete: Restrict)
   children  DocLocation[] @relation("DocLocationTree")
   documents Document[]
 

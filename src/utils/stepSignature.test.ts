@@ -259,3 +259,19 @@ test("una firma en el formato anterior sigue verificándose", () => {
     { valid: true },
   )
 })
+
+// --- BLOQUE 02B, criterio 6: la ubicación no se firma ---
+
+test("el payload de la firma no contiene la ubicación del documento", () => {
+  // La ubicación CLASIFICA y no identifica (BLOQUE 02B, B3): se edita siempre, y
+  // por eso no puede integrar lo que la firma acredita — una firma que la
+  // incluyera quedaría inválida por una corrección de filtrado.
+  //
+  // Hoy es estructuralmente imposible, porque `SignatureInput.document` solo
+  // lleva identificador y código. La prueba fija esa forma: si alguien agrega la
+  // ubicación al payload, falla acá y no en una verificación de firma futura.
+  const payload = buildSignaturePayload(input())
+
+  assert.doesNotMatch(payload, /location/i)
+  assert.deepEqual(Object.keys(JSON.parse(payload).document).sort(), ["code", "id"])
+})

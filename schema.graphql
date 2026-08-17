@@ -1698,6 +1698,23 @@ type DocCatalogScope {
 }
 
 """
+Proyecto del que este usuario puede copiar el catálogo de ubicación.
+
+Los que alcanza por membresía vigente y que tienen catálogo propio: la
+nomenclatura de un cliente es información de ese cliente. El árbol del despliegue
+es siempre una fuente posible y no figura acá, porque no es un proyecto.
+
+El nombre del proyecto lo resuelve quien consulta: vive en mi-project y este
+módulo no lo duplica.
+"""
+type DocSeedSource {
+  "Proyecto fuente"
+  projectId: Int!
+  "Cuántos nodos aportaría"
+  nodeCount: Int!
+}
+
+"""
 Resultado de sembrar un catálogo por copia.
 
 Los tres números dicen cosas distintas: lo que se agregó, lo que el destino ya
@@ -3166,6 +3183,14 @@ type Query {
   puede ser nada, y quien arma una pantalla necesita el modo que rige.
   """
   locationScope(projectId: Int!): DocScopeMode!
+
+  """
+  De qué proyectos puede este usuario copiar el catálogo hacia el indicado.
+
+  Los que alcanza por membresía vigente y que tienen catálogo propio, sin el
+  destino. Evita ofrecer proyectos cuya siembra no agregaría nada.
+  """
+  locationSeedSources(projectId: Int!): [DocSeedSource!]!
 
   "Un nodo de ubicación por su identificador"
   locationById(id: Int!): DocLocation!

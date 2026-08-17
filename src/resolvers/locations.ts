@@ -437,6 +437,72 @@ export const locationResolvers = {
       }
     },
 
+    /**
+     * De qué proyectos puede este usuario copiar el catálogo (B2).
+     *
+     * Los que alcanza por **membresía vigente** y que tienen catálogo propio, sin
+     * el destino. La nomenclatura de un cliente es información de ese cliente, de
+     * modo que la lista no es "todos los proyectos" sino los que ya podía leer
+     * (D-15).
+     *
+     * Existe para que la pantalla no tenga que cruzar la membresía con "¿tiene
+     * catálogo?" por su cuenta: sin eso ofrecería proyectos cuya siembra no
+     * agregaría nada. El árbol del despliegue es siempre una fuente posible y no
+     * figura acá, porque no es un proyecto.
+     *
+     * Devuelve el identificador y cuántos nodos aporta; el nombre del proyecto lo
+     * resuelve quien consulta, con el criterio del módulo de no duplicar lo que
+     * vive en `mi-project`.
+     */
+    locationSeedSources: async (
+      _: any,
+      { projectId }: { projectId: number },
+      context: ResolverContext,
+    ) => {
+      const userId = await projectAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
+        projectId,
+        context,
+      })
+      logger.info("locationSeedSources", { userId })
+
+      try {
+        const membresias = await context.orm.docProjectMember.findMany({
+          where: { userId, isActive: true, revokedAt: null },
+          select: { projectId: true },
+        })
+
+        const candidatos = membresias
+          .map((m) => m.projectId)
+          .filter((p) => p !== projectId)
+
+        if (candidatos.length === 0) return []
+
+        // Un solo agrupamiento en lugar de una consulta por proyecto: la lista
+        // alimenta un selector y no debe costar una lectura por opción.
+        const conNodos = await context.orm.docLocation.groupBy({
+          by: ["projectId"],
+          where: { projectId: { in: candidatos } },
+          _count: { _all: true },
+        })
+
+        return conNodos
+          .map((g) => ({ projectId: g.projectId as number, nodeCount: g._count._all }))
+          .sort((a, b) => a.projectId - b.projectId)
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "GET_LOCATION_SEED_SOURCES",
+          module: SysLogModule.DOCUMENT,
+          messages: {
+            default: "Error al obtener las fuentes de siembra disponibles.",
+          },
+        })
+      }
+    },
+
     locationById: async (
       _: any,
       { id }: { id: number },

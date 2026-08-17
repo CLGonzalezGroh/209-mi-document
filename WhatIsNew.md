@@ -927,6 +927,28 @@ El snapshot conserva su razón de ser, que era otra: mostrar y ordenar sin un jo
 
 **467 pruebas, 0 fallos**, con cuatro puras nuevas sobre la rama y seis casos de integración más.
 
+### Fase 6 — Migración, contrato y auditoría de los criterios
+
+- **La ruta completa de migración se verificó de punta a punta**, en los dos sentidos: reconstruyendo el estado **previo a todo el bloque** en una base limpia —veintitrés migraciones— y aplicando encima las cinco del bloque, y también aplicando las veintiocho de una sola vez sobre una base vacía. Aplican limpio y en orden en los dos caminos.
+- **`prisma/checks/block02b_precondicion.sql`**, de solo lectura, para correr contra cada cliente antes de migrar. **Es el primer control del módulo que no tiene ningún veredicto capaz de cancelar la migración**, y se conserva igual para dejar por escrito *por qué*: el bloque no retira ni renombra nada, ninguna columna existente cambia de tipo ni de obligatoriedad, y el atributo nace opcional. Lo único que bloquea es una aplicación parcial previa —tabla o columna ya creada sin la marca en el registro de migraciones—. Probado en los dos sentidos: **verde sobre una base pre-bloque, y detectando el estado ya aplicado sobre la local**.
+- **El diff del modelo es 206 líneas agregadas y ninguna eliminada**, que es la evidencia de la afirmación anterior y no una promesa.
+
+**Dos discrepancias entre las migraciones y el modelo, encontradas por `prisma migrate diff` y no por la compilación:**
+
+**Las dos claves nuevas quedaban declaradas con `SET NULL`.** Las migraciones dicen `ON DELETE RESTRICT` —eliminar un nodo con descendencia, o con documentos clasificados, se rechaza— pero el modelo no lo declaraba, y Prisma pone `SetNull` por defecto en una relación opcional. Con eso, un `prisma migrate dev` habría "corregido" la base en la dirección equivocada, y borrar un nodo habría **vaciado en silencio la clasificación de cada documento que lo usaba** — exactamente lo que el comentario de la migración dice que no debe pasar. Se declara `onDelete: Restrict` en las dos relaciones, y el diff queda limpio de lo que este bloque agrega.
+
+**Queda declarada una deriva anterior que este bloque no toca**: `documents_documentClassId_fkey` y `documents_documentTypeId_fkey` conservan el nombre viejo de las columnas que `BLOQUE 03B` renombró a `current*`, y `document_revisions.documentClassId` tiene la misma diferencia de `onDelete` que se corrige acá. Son de otro bloque, ya promovido, y corregirlas es una migración con su propia decisión.
+
+**La auditoría de los once criterios cerró cuatro que estaban cubiertos a medias:**
+
+- **el criterio 4 pedía una lista que no existía.** Las pruebas verificaban que sembrar de un proyecto ajeno se rechace, pero *"no aparece como fuente"* es una consulta, y no la había. Se incorpora **`locationSeedSources`**: los proyectos que el usuario alcanza por membresía vigente **y que tienen catálogo propio**, sin el destino, con cuántos nodos aportaría cada uno. El segundo filtro es lo que evita ofrecer una siembra que no agregaría nada;
+- **el criterio 6 tenía una mitad sin verificar.** Que el payload de la firma no contenga la ubicación era cierto por construcción y por eso no estaba probado; ahora lo fija una prueba, para que agregarla al payload falle acá y no en una verificación de firma futura. Y que la ubicación se edite con la revisión **aprobada** se prueba de verdad, aprobando la revisión por la base a propósito: lo que se verifica es la ausencia de precondición en la operación, no el circuito, que tiene su propia suite;
+- **el criterio 7 se probaba en un solo rol.** Ahora los tres atraviesan el alta sin declarar ubicación, que es lo que sostiene que el atributo sea opcional en los tres y no solo en el interno;
+- **el criterio 2 comparaba cada siembra por separado** y no que las dos fuentes produjeran el mismo árbol. Ahora se comparan las jerarquías resultantes, que es lo que afirma que el mecanismo es uno.
+
+**473 pruebas, 0 fallos**, con cinco casos de integración más y uno puro sobre la firma.
+
+
 
 
 

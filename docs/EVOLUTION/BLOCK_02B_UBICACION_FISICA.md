@@ -1,7 +1,7 @@
 # Bloque 02B — Ubicación física del documento
 
 **Estado:** `APROBADO_PENDIENTE`
-**Versión:** 1.4
+**Versión:** 1.5
 **Depende de:** `BLOCK_02`, que dejó creada `DocProjectSettings`.
 **Decisiones que ejecuta:** D-14.
 **Decisiones que construye para otro bloque:** el mecanismo de alcance por proyecto de D-21, que `BLOCK_02C` reutiliza sobre clase y tipo.
@@ -288,7 +288,30 @@ El snapshot conserva su razón de ser, que era otra: mostrar y ordenar sin un jo
 
 **467 pruebas, 0 fallos.** Cuatro puras nuevas y seis casos de integración más.
 
-Quedan las fases 6 y 7: la migración con permisos y pruebas de las tres capas, y la promoción a la SFS con el descarte de la matriz.
+### Fase 6 — completada
+
+La ruta de migración verificada, el control de precondición y la auditoría de los once criterios.
+
+**La migración se verificó en los dos sentidos**: reconstruyendo el estado previo a todo el bloque en una base limpia —veintitrés migraciones— y aplicando encima las cinco del bloque, y también las veintiocho de una sola vez sobre una base vacía. El diff del modelo es **206 líneas agregadas y ninguna eliminada**, que es la evidencia de que el bloque es aditivo y no una promesa.
+
+**`prisma/checks/block02b_precondicion.sql` es el primer control del módulo sin ningún veredicto capaz de cancelar la migración**, y se conserva igual para dejar por escrito por qué: nada se retira ni se renombra, ninguna columna existente cambia de tipo ni de obligatoriedad, y el atributo nace opcional. Lo único que bloquea es una aplicación parcial previa. Probado verde sobre una base pre-bloque y detectando el estado ya aplicado sobre la local.
+
+**Dos discrepancias que encontró `prisma migrate diff` y no la compilación.** Las dos claves nuevas quedaban declaradas con `SetNull` —el default de Prisma en una relación opcional— mientras las migraciones dicen `RESTRICT`. Un `prisma migrate dev` habría "corregido" la base en la dirección equivocada, y borrar un nodo habría **vaciado en silencio la clasificación de cada documento que lo usaba**, que es exactamente lo que el comentario de la migración dice que no debe pasar. Se declara `onDelete: Restrict` en las dos relaciones.
+
+Queda declarada una **deriva anterior** que este bloque no toca: dos claves de `documents` conservan el nombre de las columnas que `BLOCK_03B` renombró a `current*`, y `document_revisions.documentClassId` tiene la misma diferencia de `onDelete`. Son de un bloque ya promovido, y corregirlas es una migración con su propia decisión.
+
+**La auditoría cerró cuatro criterios cubiertos a medias:**
+
+- **el 4 pedía una consulta que no existía.** Se incorpora `locationSeedSources`: los proyectos que el usuario alcanza por membresía vigente **y que tienen catálogo propio**, sin el destino. El segundo filtro evita ofrecer una siembra que no agregaría nada;
+- **el 6 tenía una mitad sin probar.** Que el payload de la firma no contenga la ubicación era cierto por construcción; ahora lo fija una prueba. Y la edición con revisión aprobada se prueba de verdad, aprobando la revisión por la base: lo que se verifica es la ausencia de precondición, no el circuito;
+- **el 7 se probaba en un solo rol**, y ahora en los tres, que es lo que sostiene que el atributo sea opcional en todos;
+- **el 2 comparaba cada siembra por separado** y no que las dos fuentes produjeran el mismo árbol.
+
+Los criterios 10 y 11 quedan del lado del despliegue y del diff: `Area` y `ScannedFile` no registran una sola línea modificada —solo se los menciona en comentarios que explican por qué no se reutilizan— y la línea base de `optimal` se compara con el control de precondición antes y después de migrar.
+
+**473 pruebas, 0 fallos.**
+
+Queda la fase 7: la promoción a la SFS, con el descarte de la matriz de responsabilidad.
 
 ## Referencias
 

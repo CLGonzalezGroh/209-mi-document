@@ -715,3 +715,133 @@ test("el catálogo también se lista por rama", async () => {
   // La raíz de la que cuelga el área queda afuera: es su ascendencia, no su rama.
   assert.equal(nombres.includes("Planta Amoníaco"), false)
 })
+
+// --- Cierre de los criterios de aceptación (fase 6) ---
+
+test("las dos fuentes producen el mismo árbol en el destino (criterio 2)", async () => {
+  // `INGENIERIA` se sembró del despliegue y `OTRO_CLIENTE` de `INGENIERIA`: si el
+  // mecanismo es uno, los dos catálogos deben coincidir en rutas y en jerarquía.
+  const arbolDe = async (projectId: number) => {
+    const nodos = await prisma.docLocation.findMany({
+      where: { projectId },
+      include: { parent: { select: { path: true } } },
+      orderBy: { path: "asc" },
+    })
+    return nodos.map((n) => `${n.parent?.path ?? "—"} ▸ ${n.path}`)
+  }
+
+  const desdeElDespliegue = await arbolDe(INGENIERIA)
+  const desdeOtroProyecto = await arbolDe(OTRO_CLIENTE)
+
+  // `INGENIERIA` recibió después "Área 200" en una siembra posterior; se compara
+  // la intersección, que es lo que las dos fuentes aportaron.
+  const comunes = desdeElDespliegue.filter((r) => desdeOtroProyecto.includes(r))
+  assert.equal(comunes.length, desdeOtroProyecto.length)
+  assert.ok(comunes.length >= 3, "las dos siembras no coinciden en la jerarquía")
+})
+
+test("solo se ofrecen como fuente los proyectos que el usuario alcanza (criterio 4)", async () => {
+  const fuentes = (await locationResolvers.Query.locationSeedSources(
+    null,
+    { projectId: PLANTA },
+    context,
+  )) as any[]
+
+  const ids = fuentes.map((f) => f.projectId)
+
+  // `AJENO` no tiene membresía del usuario: no figura, aunque tuviera catálogo.
+  assert.equal(ids.includes(AJENO), false)
+  // El destino tampoco se ofrece a sí mismo.
+  assert.equal(ids.includes(PLANTA), false)
+  // Los que sí alcanza y tienen catálogo propio, con su aporte.
+  assert.ok(ids.includes(INGENIERIA))
+  assert.ok(fuentes.find((f) => f.projectId === INGENIERIA).nodeCount >= 3)
+})
+
+test("un proyecto sin catálogo propio no se ofrece como fuente", async () => {
+  // Sembrar de él no agregaría nada, y ofrecerlo sería ofrecer una operación
+  // vacía. `PLANTA` heredó y tiene nodos propios, así que se usa uno recién
+  // declarado sin ninguno.
+  const VACIO = -424424
+  await declarar(VACIO)
+
+  const fuentes = (await locationResolvers.Query.locationSeedSources(
+    null,
+    { projectId: PLANTA },
+    context,
+  )) as any[]
+
+  assert.equal(
+    fuentes.some((f) => f.projectId === VACIO),
+    false,
+  )
+
+  await prisma.docProjectMember.deleteMany({ where: { projectId: VACIO } })
+  await prisma.docProjectSettings.deleteMany({ where: { projectId: VACIO } })
+})
+
+test("con revisión aprobada la ubicación se sigue editando (criterio 6)", async () => {
+  // La metadata de identificación se congela con la revisión aprobada (D-05); la
+  // ubicación NO, porque clasifica y no identifica. La revisión se aprueba por la
+  // base a propósito: lo que se prueba es la ausencia de precondición en la
+  // operación, no el circuito, que tiene su propia suite.
+  const doc = await crearDocumento("APROB", PLANTA, area.id)
+  await prisma.documentRevision.updateMany({
+    where: { documentId: doc.id },
+    data: { status: "APPROVED", approvedAt: new Date(), approvedById: USER_ID },
+  })
+
+  const otra = await crear({ code: "APR-L", name: "Área aprobada", parentId: area.id })
+
+  const actualizado = (await documentResolvers.Mutation.updateDocument(
+    null,
+    { id: doc.id, input: { locationId: otra.id } },
+    context,
+  )) as any
+
+  assert.equal(actualizado.locationId, otra.id)
+  assert.equal(actualizado.locationPath, otra.path)
+})
+
+test("los tres roles atraviesan el alta sin declarar ubicación (criterio 7)", async () => {
+  // Es lo que sostiene que el atributo sea opcional en los tres, y no solo en el
+  // interno con que se probó el resto.
+  const EMISOR = -424425
+  const RECEPTOR = -424426
+
+  for (const [projectId, rol] of [
+    [EMISOR, DocumentRole.ISSUER],
+    [RECEPTOR, DocumentRole.RECEIVER],
+  ] as const) {
+    await projectSettingsResolvers.Mutation.declareDocProjectSettings(
+      null,
+      {
+        input: {
+          projectId,
+          documentRole: rol,
+          counterpartyName: "Contraparte de prueba",
+          defaultOrganizerId: USER_ID,
+        },
+      },
+      context,
+    )
+    await projectMemberResolvers.Mutation.assignDocProjectMember(
+      null,
+      { input: { projectId, userId: USER_ID, side: DocProjectSide.HOST } },
+      context,
+    )
+
+    const doc = await crearDocumento(`ROL-${rol}`, projectId)
+    assert.equal(doc.locationId, null, `el rol ${rol} exigió ubicación`)
+  }
+
+  await prisma.document.deleteMany({
+    where: { projectId: { in: [EMISOR, RECEPTOR] } },
+  })
+  await prisma.docProjectMember.deleteMany({
+    where: { projectId: { in: [EMISOR, RECEPTOR] } },
+  })
+  await prisma.docProjectSettings.deleteMany({
+    where: { projectId: { in: [EMISOR, RECEPTOR] } },
+  })
+})
