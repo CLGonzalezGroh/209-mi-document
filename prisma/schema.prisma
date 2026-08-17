@@ -1165,6 +1165,60 @@ model DocResponseFile {
 // UBICACIÓN FÍSICA — BLOQUE 02B
 // ================================
 
+// Los catálogos documentales cuyo alcance el proyecto declara (BLOQUE 02B, B1).
+//
+// El mecanismo es UNO para los tres. `LOCATION` lo estrena BLOQUE 02B, sobre el
+// catálogo que no tiene datos ni interfaz en producción; `BLOCK_02C` incorpora
+// los otros dos, y no le cuesta una columna sino un valor de esta enumeración.
+enum DocCatalogKind {
+  LOCATION
+  DOCUMENT_CLASS
+  DOCUMENT_TYPE
+}
+
+// Cómo resuelve un proyecto un catálogo (BLOQUE 02B, B1).
+//
+// `INHERIT` es vínculo vivo: las entradas del despliegue aparecen siempre, más
+// las que el proyecto agregue. `OWN` es sin vínculo: el proyecto no ve nada del
+// despliegue. La siembra por copia (B2) es puntual y no un tercer modo — una
+// copia permanente ES herencia.
+enum DocScopeMode {
+  INHERIT
+  OWN
+}
+
+// Cómo resuelve un proyecto cada catálogo documental (BLOQUE 02B, B1).
+//
+// UNA FILA POR PROYECTO Y CATÁLOGO, y no columnas en `DocProjectSettings`: B1
+// sostiene que el mecanismo es uno para los tres catálogos, y esta es la única
+// forma en que eso es cierto en el modelo. `BLOCK_02C` lo reutiliza agregando
+// valores a `DocCatalogKind`, sin migrar estructura.
+//
+// Es además la distinción que D-21 ya había hecho: las demás configuraciones por
+// proyecto —el rol, el esquema de revisión, el armador por defecto— son VALORES
+// donde lo específico reemplaza a lo general, y viven en `DocProjectSettings`.
+// Un catálogo es un CONJUNTO, y lo que se declara es si se hereda o no.
+//
+// LA AUSENCIA DE FILA ES `INHERIT`. No se exige declarar nada para operar, y es
+// lo que vuelve aditiva la migración: todo proyecto existente hereda.
+model DocCatalogScope {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  createdById Int
+  updatedAt   DateTime? @updatedAt
+  updatedById Int       @default(1)
+
+  // Referencia externa sin FK: Project vive en mi-project.
+  projectId Int
+
+  catalog DocCatalogKind
+  mode    DocScopeMode
+
+  @@unique([projectId, catalog])
+  @@index([projectId])
+  @@map("doc_catalog_scopes")
+}
+
 // De dónde viene el objeto que un nodo describe, cuando describe uno (B7).
 //
 // `ASSETS` es el registro de activos de OperMask, dueño del árbol cuando ese
@@ -1191,9 +1245,6 @@ enum DocLocationOrigin {
 //
 // NO reutiliza `Area`, que es plana, obligatoriamente atada al proyecto y
 // pertenece al subsistema de `ScannedFile` que sale del módulo.
-//
-// El ALCANCE por proyecto llega en la fase 2. Esta fase deja el árbol del
-// despliegue, que es el escalón del que ese mecanismo hereda.
 model DocLocation {
   id           Int       @id @default(autoincrement())
   createdAt    DateTime  @default(now())
@@ -1202,6 +1253,17 @@ model DocLocation {
   updatedById  Int       @default(1)
   terminatedAt DateTime?
   isSys        Boolean   @default(false)
+
+  // Alcance (BLOQUE 02B, B1). Nulo = árbol del despliegue, del que los proyectos
+  // heredan. Con valor, el nodo lo agregó ese proyecto. Referencia externa sin
+  // FK: Project vive en mi-project.
+  //
+  // La relación de padre puede CRUZAR alcances en un solo sentido: un nodo del
+  // proyecto cuelga de uno del despliegue, que es lo que significa *ampliar*. Al
+  // revés no, porque volvería el árbol global dependiente de un proyecto. La
+  // invariante no es expresable en un CHECK —exige mirar el padre— y vive en la
+  // operación, con su prueba.
+  projectId Int?
 
   // Jerarquía. Nulo = nodo raíz.
   parentId Int?
@@ -1234,13 +1296,18 @@ model DocLocation {
   parent   DocLocation?  @relation("DocLocationTree", fields: [parentId], references: [id])
   children DocLocation[] @relation("DocLocationTree")
 
-  // Unicidad del código dentro de su nivel, recreada con NULLS NOT DISTINCT en
-  // la migración: sin la cláusula los nodos RAÍZ —donde `parentId` es nulo, y
-  // que son todos los de un catálogo plano— no se considerarían duplicados, que
-  // es el defecto de H-19. La fase 2 la recrea incorporando el alcance.
-  @@unique([code, parentId], map: "doc_locations_code_level_key") // NULLS NOT DISTINCT en la base
+  // Unicidad del código dentro de su nivel Y de su alcance, recreada con NULLS
+  // NOT DISTINCT en la migración: sin la cláusula los nodos RAÍZ del despliegue
+  // —donde las dos columnas son nulas, y que son todos los de un catálogo plano—
+  // no se considerarían duplicados, que es el defecto de H-19.
+  //
+  // El alcance entra en la tupla porque dos proyectos pueden nombrar igual su
+  // propio nodo, y porque un proyecto puede agregar un código que el despliegue
+  // no tiene sin chocar con otro proyecto.
+  @@unique([code, parentId, projectId], map: "doc_locations_code_level_key") // NULLS NOT DISTINCT en la base
   @@index([parentId])
   @@index([path])
+  @@index([projectId])
   @@map("doc_locations")
 }
 
@@ -1288,7 +1355,12 @@ enum DocObjectType {
   // renombró, movió o dio de baja una ubicación explica por qué un documento
   // quedó clasificado donde está, y el recálculo de rutas alcanza a nodos que
   // nadie tocó.
+  //
+  // El alcance del catálogo también: declarar que un proyecto deja de heredar
+  // cambia qué entradas tiene disponibles sin tocar ninguna entrada, y sin
+  // registro ese cambio sería inexplicable después.
   DOC_LOCATION
+  DOC_CATALOG_SCOPE
 }
 
 // Transición de estado de un objeto del dominio documental.

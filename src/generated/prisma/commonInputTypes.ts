@@ -491,6 +491,40 @@ export type EnumQualificationEffectWithAggregatesFilter<$PrismaModel = never> = 
   _max?: Prisma.NestedEnumQualificationEffectFilter<$PrismaModel>
 }
 
+export type EnumDocCatalogKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocCatalogKind | Prisma.EnumDocCatalogKindFieldRefInput<$PrismaModel>
+  in?: $Enums.DocCatalogKind[] | Prisma.ListEnumDocCatalogKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocCatalogKind[] | Prisma.ListEnumDocCatalogKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocCatalogKindFilter<$PrismaModel> | $Enums.DocCatalogKind
+}
+
+export type EnumDocScopeModeFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocScopeMode | Prisma.EnumDocScopeModeFieldRefInput<$PrismaModel>
+  in?: $Enums.DocScopeMode[] | Prisma.ListEnumDocScopeModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocScopeMode[] | Prisma.ListEnumDocScopeModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocScopeModeFilter<$PrismaModel> | $Enums.DocScopeMode
+}
+
+export type EnumDocCatalogKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocCatalogKind | Prisma.EnumDocCatalogKindFieldRefInput<$PrismaModel>
+  in?: $Enums.DocCatalogKind[] | Prisma.ListEnumDocCatalogKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocCatalogKind[] | Prisma.ListEnumDocCatalogKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocCatalogKindWithAggregatesFilter<$PrismaModel> | $Enums.DocCatalogKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocCatalogKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocCatalogKindFilter<$PrismaModel>
+}
+
+export type EnumDocScopeModeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocScopeMode | Prisma.EnumDocScopeModeFieldRefInput<$PrismaModel>
+  in?: $Enums.DocScopeMode[] | Prisma.ListEnumDocScopeModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocScopeMode[] | Prisma.ListEnumDocScopeModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocScopeModeWithAggregatesFilter<$PrismaModel> | $Enums.DocScopeMode
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocScopeModeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocScopeModeFilter<$PrismaModel>
+}
+
 export type EnumDocLocationOriginNullableFilter<$PrismaModel = never> = {
   equals?: $Enums.DocLocationOrigin | Prisma.EnumDocLocationOriginFieldRefInput<$PrismaModel> | null
   in?: $Enums.DocLocationOrigin[] | Prisma.ListEnumDocLocationOriginFieldRefInput<$PrismaModel> | null
@@ -1132,6 +1166,40 @@ export type NestedEnumQualificationEffectWithAggregatesFilter<$PrismaModel = nev
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumQualificationEffectFilter<$PrismaModel>
   _max?: Prisma.NestedEnumQualificationEffectFilter<$PrismaModel>
+}
+
+export type NestedEnumDocCatalogKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocCatalogKind | Prisma.EnumDocCatalogKindFieldRefInput<$PrismaModel>
+  in?: $Enums.DocCatalogKind[] | Prisma.ListEnumDocCatalogKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocCatalogKind[] | Prisma.ListEnumDocCatalogKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocCatalogKindFilter<$PrismaModel> | $Enums.DocCatalogKind
+}
+
+export type NestedEnumDocScopeModeFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocScopeMode | Prisma.EnumDocScopeModeFieldRefInput<$PrismaModel>
+  in?: $Enums.DocScopeMode[] | Prisma.ListEnumDocScopeModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocScopeMode[] | Prisma.ListEnumDocScopeModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocScopeModeFilter<$PrismaModel> | $Enums.DocScopeMode
+}
+
+export type NestedEnumDocCatalogKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocCatalogKind | Prisma.EnumDocCatalogKindFieldRefInput<$PrismaModel>
+  in?: $Enums.DocCatalogKind[] | Prisma.ListEnumDocCatalogKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocCatalogKind[] | Prisma.ListEnumDocCatalogKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocCatalogKindWithAggregatesFilter<$PrismaModel> | $Enums.DocCatalogKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocCatalogKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocCatalogKindFilter<$PrismaModel>
+}
+
+export type NestedEnumDocScopeModeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocScopeMode | Prisma.EnumDocScopeModeFieldRefInput<$PrismaModel>
+  in?: $Enums.DocScopeMode[] | Prisma.ListEnumDocScopeModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocScopeMode[] | Prisma.ListEnumDocScopeModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocScopeModeWithAggregatesFilter<$PrismaModel> | $Enums.DocScopeMode
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocScopeModeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocScopeModeFilter<$PrismaModel>
 }
 
 export type NestedEnumDocLocationOriginNullableFilter<$PrismaModel = never> = {

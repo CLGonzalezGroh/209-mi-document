@@ -24,6 +24,7 @@ import { docSettingsResolvers } from "./docSettings.js"
 import { workflowTemplateResolvers } from "./workflowTemplates.js"
 import { qualificationResolvers } from "./qualifications.js"
 import { locationResolvers } from "./locations.js"
+import { catalogScopeResolvers } from "./catalogScopes.js"
 
 export const resolvers: GraphQLResolverMap<ResolverContext> = {
   ...scalars,
@@ -46,6 +47,7 @@ export const resolvers: GraphQLResolverMap<ResolverContext> = {
     ...workflowTemplateResolvers.Query,
     ...qualificationResolvers.Query,
     ...locationResolvers.Query,
+    ...catalogScopeResolvers.Query,
   },
   Mutation: {
     ...projectSettingsResolvers.Mutation,
@@ -68,6 +70,7 @@ export const resolvers: GraphQLResolverMap<ResolverContext> = {
     ...workflowTemplateResolvers.Mutation,
     ...qualificationResolvers.Mutation,
     ...locationResolvers.Mutation,
+    ...catalogScopeResolvers.Mutation,
   },
   ...resolverTypes,
 }

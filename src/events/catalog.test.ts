@@ -161,5 +161,10 @@ test("el catálogo cubre las escrituras relevadas más lo que agregaron los bloq
   //
   //   + CreateLocation, UpdateLocation, MoveLocation
   //   + TerminateLocation, ActivateLocation, DeleteLocation
-  assert.equal(AUDIT_ACTIONS.length, 56)
+  //
+  // Y 1 en su fase 2, de 56 a 57: declarar el alcance de un catálogo, que cambia
+  // qué entradas tiene disponibles un proyecto SIN TOCAR ninguna entrada (B1).
+  //
+  //   + DeclareCatalogScope
+  assert.equal(AUDIT_ACTIONS.length, 57)
 })

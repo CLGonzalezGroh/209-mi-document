@@ -254,19 +254,32 @@ const derivadores: Record<
     return qualification && { projectId: qualification.projectId, module: null }
   },
 
-  // El catálogo de ubicación es del despliegue en esta fase: no pertenece a
-  // ningún proyecto ni a ningún módulo. El módulo es nulo porque el árbol no es
-  // documentación sino la descripción de la instalación, con la misma forma que
-  // la plantilla del circuito y el catálogo de calificaciones.
+  // El nodo de ubicación lleva su proyecto en el alcance, y puede no tener
+  // ninguno: el de alcance nulo es el del árbol del despliegue, del que los
+  // proyectos heredan (B1). El módulo es nulo porque el árbol no es documentación
+  // sino la descripción de la instalación, con la misma forma que la plantilla
+  // del circuito y el catálogo de calificaciones.
   //
-  // La fase 2 le incorpora el alcance por proyecto, y entonces `projectId` sale
-  // del propio nodo como en `DOC_QUALIFICATION`.
+  // De acá sale además la segunda capa de autorización: un nodo del despliegue se
+  // resuelve con el permiso global, y uno de proyecto exige membresía. Sale
+  // gratis, sin una regla propia en cada operación.
   [DocObjectType.DOC_LOCATION]: async (client, id) => {
     const location = await client.docLocation.findUnique({
       where: { id },
-      select: { id: true },
+      select: { projectId: true },
     })
-    return location && { projectId: null, module: null }
+    return location && { projectId: location.projectId, module: null }
+  },
+
+  // La declaración de alcance pertenece a un proyecto por definición: es cómo
+  // ESE proyecto resuelve un catálogo. Sin proyecto no hay nada que declarar,
+  // porque el árbol del despliegue es el que se hereda.
+  [DocObjectType.DOC_CATALOG_SCOPE]: async (client, id) => {
+    const scope = await client.docCatalogScope.findUnique({
+      where: { id },
+      select: { projectId: true },
+    })
+    return scope && { projectId: scope.projectId, module: null }
   },
 
   // La respuesta toma el contexto del transmittal por el que el documento salió,

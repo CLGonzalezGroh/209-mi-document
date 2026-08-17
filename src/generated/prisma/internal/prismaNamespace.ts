@@ -409,6 +409,7 @@ export const ModelName = {
   DocQualification: 'DocQualification',
   DocTransmittalResponse: 'DocTransmittalResponse',
   DocResponseFile: 'DocResponseFile',
+  DocCatalogScope: 'DocCatalogScope',
   DocLocation: 'DocLocation',
   DocWorkflowEvent: 'DocWorkflowEvent',
   DocAuditEvent: 'DocAuditEvent',
@@ -431,7 +432,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "documentClass" | "documentType" | "document" | "taskDocumentReference" | "documentRevision" | "documentVersion" | "docVersionFile" | "docWorkingCopy" | "docWorkingCopyFile" | "docReplacement" | "docReplacementItem" | "reviewWorkflow" | "reviewStep" | "docStepSignature" | "transmittal" | "transmittalItem" | "attachment" | "docProjectSettings" | "docSettings" | "docWorkflowTemplate" | "docWorkflowTemplateStep" | "docProjectMember" | "docQualification" | "docTransmittalResponse" | "docResponseFile" | "docLocation" | "docWorkflowEvent" | "docAuditEvent" | "scannedFile" | "area" | "documentSysLog" | "documentSysLogArchive"
+    modelProps: "documentClass" | "documentType" | "document" | "taskDocumentReference" | "documentRevision" | "documentVersion" | "docVersionFile" | "docWorkingCopy" | "docWorkingCopyFile" | "docReplacement" | "docReplacementItem" | "reviewWorkflow" | "reviewStep" | "docStepSignature" | "transmittal" | "transmittalItem" | "attachment" | "docProjectSettings" | "docSettings" | "docWorkflowTemplate" | "docWorkflowTemplateStep" | "docProjectMember" | "docQualification" | "docTransmittalResponse" | "docResponseFile" | "docCatalogScope" | "docLocation" | "docWorkflowEvent" | "docAuditEvent" | "scannedFile" | "area" | "documentSysLog" | "documentSysLogArchive"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2285,6 +2286,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DocCatalogScope: {
+      payload: Prisma.$DocCatalogScopePayload<ExtArgs>
+      fields: Prisma.DocCatalogScopeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocCatalogScopeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocCatalogScopePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocCatalogScopeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocCatalogScopePayload>
+        }
+        findFirst: {
+          args: Prisma.DocCatalogScopeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocCatalogScopePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocCatalogScopeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocCatalogScopePayload>
+        }
+        findMany: {
+          args: Prisma.DocCatalogScopeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocCatalogScopePayload>[]
+        }
+        create: {
+          args: Prisma.DocCatalogScopeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocCatalogScopePayload>
+        }
+        createMany: {
+          args: Prisma.DocCatalogScopeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocCatalogScopeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocCatalogScopePayload>[]
+        }
+        delete: {
+          args: Prisma.DocCatalogScopeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocCatalogScopePayload>
+        }
+        update: {
+          args: Prisma.DocCatalogScopeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocCatalogScopePayload>
+        }
+        deleteMany: {
+          args: Prisma.DocCatalogScopeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocCatalogScopeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocCatalogScopeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocCatalogScopePayload>[]
+        }
+        upsert: {
+          args: Prisma.DocCatalogScopeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocCatalogScopePayload>
+        }
+        aggregate: {
+          args: Prisma.DocCatalogScopeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocCatalogScope>
+        }
+        groupBy: {
+          args: Prisma.DocCatalogScopeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocCatalogScopeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocCatalogScopeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocCatalogScopeCountAggregateOutputType> | number
+        }
+      }
+    }
     DocLocation: {
       payload: Prisma.$DocLocationPayload<ExtArgs>
       fields: Prisma.DocLocationFieldRefs
@@ -3239,6 +3314,20 @@ export const DocResponseFileScalarFieldEnum = {
 export type DocResponseFileScalarFieldEnum = (typeof DocResponseFileScalarFieldEnum)[keyof typeof DocResponseFileScalarFieldEnum]
 
 
+export const DocCatalogScopeScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  projectId: 'projectId',
+  catalog: 'catalog',
+  mode: 'mode'
+} as const
+
+export type DocCatalogScopeScalarFieldEnum = (typeof DocCatalogScopeScalarFieldEnum)[keyof typeof DocCatalogScopeScalarFieldEnum]
+
+
 export const DocLocationScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -3247,6 +3336,7 @@ export const DocLocationScalarFieldEnum = {
   updatedById: 'updatedById',
   terminatedAt: 'terminatedAt',
   isSys: 'isSys',
+  projectId: 'projectId',
   parentId: 'parentId',
   code: 'code',
   name: 'name',
@@ -3676,6 +3766,34 @@ export type ListEnumQualificationEffectFieldRefInput<$PrismaModel> = FieldRefInp
 
 
 /**
+ * Reference to a field of type 'DocCatalogKind'
+ */
+export type EnumDocCatalogKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocCatalogKind'>
+    
+
+
+/**
+ * Reference to a field of type 'DocCatalogKind[]'
+ */
+export type ListEnumDocCatalogKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocCatalogKind[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DocScopeMode'
+ */
+export type EnumDocScopeModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocScopeMode'>
+    
+
+
+/**
+ * Reference to a field of type 'DocScopeMode[]'
+ */
+export type ListEnumDocScopeModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocScopeMode[]'>
+    
+
+
+/**
  * Reference to a field of type 'DocLocationOrigin'
  */
 export type EnumDocLocationOriginFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocLocationOrigin'>
@@ -3921,6 +4039,7 @@ export type GlobalOmitConfig = {
   docQualification?: Prisma.DocQualificationOmit
   docTransmittalResponse?: Prisma.DocTransmittalResponseOmit
   docResponseFile?: Prisma.DocResponseFileOmit
+  docCatalogScope?: Prisma.DocCatalogScopeOmit
   docLocation?: Prisma.DocLocationOmit
   docWorkflowEvent?: Prisma.DocWorkflowEventOmit
   docAuditEvent?: Prisma.DocAuditEventOmit

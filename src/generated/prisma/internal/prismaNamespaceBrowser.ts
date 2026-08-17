@@ -76,6 +76,7 @@ export const ModelName = {
   DocQualification: 'DocQualification',
   DocTransmittalResponse: 'DocTransmittalResponse',
   DocResponseFile: 'DocResponseFile',
+  DocCatalogScope: 'DocCatalogScope',
   DocLocation: 'DocLocation',
   DocWorkflowEvent: 'DocWorkflowEvent',
   DocAuditEvent: 'DocAuditEvent',
@@ -498,6 +499,20 @@ export const DocResponseFileScalarFieldEnum = {
 export type DocResponseFileScalarFieldEnum = (typeof DocResponseFileScalarFieldEnum)[keyof typeof DocResponseFileScalarFieldEnum]
 
 
+export const DocCatalogScopeScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  updatedAt: 'updatedAt',
+  updatedById: 'updatedById',
+  projectId: 'projectId',
+  catalog: 'catalog',
+  mode: 'mode'
+} as const
+
+export type DocCatalogScopeScalarFieldEnum = (typeof DocCatalogScopeScalarFieldEnum)[keyof typeof DocCatalogScopeScalarFieldEnum]
+
+
 export const DocLocationScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -506,6 +521,7 @@ export const DocLocationScalarFieldEnum = {
   updatedById: 'updatedById',
   terminatedAt: 'terminatedAt',
   isSys: 'isSys',
+  projectId: 'projectId',
   parentId: 'parentId',
   code: 'code',
   name: 'name',

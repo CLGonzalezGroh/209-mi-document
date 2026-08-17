@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import test, { after, before } from "node:test"
 import { prisma } from "../lib/prisma.js"
 import {
+  DocCatalogKind,
   DocFileRole,
   DocObjectType,
   DocProjectSide,
@@ -10,6 +11,7 @@ import {
   PurposeCode,
   QualificationEffect,
   TransmittalNature,
+  DocScopeMode,
   RevisionScheme,
   StepStatus,
   StepType,
@@ -52,9 +54,20 @@ const creados: {
   classId: number
   typeId: number
   publicadoId: number
+  locationId: number
+  ampliacionId: number
+  scopeId: number
 } = {} as any
 
 const limpiar = async () => {
+  // La ampliación antes que su padre: la clave del árbol es RESTRICT.
+  await prisma.docLocation.deleteMany({
+    where: { code: { startsWith: `${CODIGO}-L` }, parentId: { not: null } },
+  })
+  await prisma.docLocation.deleteMany({
+    where: { code: { startsWith: `${CODIGO}-L` } },
+  })
+  await prisma.docCatalogScope.deleteMany({ where: { projectId: PROYECTO } })
   await prisma.transmittal.deleteMany({ where: { projectId: PROYECTO } })
   await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
   await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: PROYECTO } })
@@ -222,6 +235,34 @@ before(async () => {
     },
   })
 
+  // Ubicación: un nodo del despliegue y una ampliación del proyecto colgada de él
+  const ubicacion = await prisma.docLocation.create({
+    data: {
+      code: `${CODIGO}-L`,
+      name: "Planta de contexto",
+      path: "Planta de contexto",
+      createdById: 1,
+    },
+  })
+  const ampliacion = await prisma.docLocation.create({
+    data: {
+      code: `${CODIGO}-LA`,
+      name: "Unidad del proyecto",
+      path: "Planta de contexto / Unidad del proyecto",
+      parentId: ubicacion.id,
+      projectId: PROYECTO,
+      createdById: 1,
+    },
+  })
+  const alcance = await prisma.docCatalogScope.create({
+    data: {
+      projectId: PROYECTO,
+      catalog: DocCatalogKind.LOCATION,
+      mode: DocScopeMode.INHERIT,
+      createdById: 1,
+    },
+  })
+
   const respuesta = await prisma.docTransmittalResponse.create({
     data: {
       transmittalItemId: item.id,
@@ -247,6 +288,9 @@ before(async () => {
     transmittalId: transmittal.id,
     classId: clase.id,
     typeId: tipo.id,
+    locationId: ubicacion.id,
+    ampliacionId: ampliacion.id,
+    scopeId: alcance.id,
   })
 })
 
@@ -424,15 +468,38 @@ test("la respuesta toma el contexto del transmittal por el que el documento sali
   )
 })
 
-test("los diecisiete tipos de objeto tienen derivador", async () => {
+test("el nodo de ubicación aporta su alcance, y el del despliegue no tiene proyecto", async () => {
+  // De acá sale la segunda capa de autorización sin una regla por operación: el
+  // nodo del despliegue se resuelve con el permiso global, el de proyecto exige
+  // membresía (BLOQUE 02B, B1).
+  assert.deepEqual(
+    await contextoDe(DocObjectType.DOC_LOCATION, creados.locationId),
+    { projectId: null, module: null },
+  )
+  assert.deepEqual(
+    await contextoDe(DocObjectType.DOC_LOCATION, creados.ampliacionId),
+    { projectId: PROYECTO, module: null },
+  )
+})
+
+test("la declaración de alcance pertenece a un proyecto por definición", async () => {
+  // Sin proyecto no hay nada que declarar: el árbol del despliegue es el que se
+  // hereda. El módulo es nulo porque no es documentación.
+  assert.deepEqual(
+    await contextoDe(DocObjectType.DOC_CATALOG_SCOPE, creados.scopeId),
+    { projectId: PROYECTO, module: null },
+  )
+})
+
+test("los dieciocho tipos de objeto tienen derivador", async () => {
   // Ninguno queda sin regla: es la prueba que BLOQUE 01 exige y que cada tipo
-  // nuevo debe seguir pasando. El decimoséptimo es `DOC_LOCATION`, que BLOQUE
-  // 02B incorpora.
+  // nuevo debe seguir pasando. Los dos últimos los incorpora BLOQUE 02B:
+  // `DOC_LOCATION` en su fase 1 y `DOC_CATALOG_SCOPE` en su fase 2.
   for (const objectType of Object.values(DocObjectType)) {
     await assert.doesNotReject(
       () => contextoDe(objectType, -999999),
       `${objectType} no tiene derivador de contexto`,
     )
   }
-  assert.equal(Object.values(DocObjectType).length, 17)
+  assert.equal(Object.values(DocObjectType).length, 18)
 })

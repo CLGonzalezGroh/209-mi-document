@@ -7,21 +7,41 @@ import {
 } from "@CLGonzalezGroh/mi-common"
 import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
 import type { Prisma } from "../generated/prisma/client.js"
-import { DocLocationOrigin, SysLogModule } from "../generated/prisma/enums.js"
+import {
+  DocCatalogKind,
+  DocLocationOrigin,
+  DocObjectType,
+  DocScopeMode,
+  SysLogModule,
+} from "../generated/prisma/enums.js"
 import { AuditAction, WorkflowEvent } from "../events/catalog.js"
 import { emitAuditEvent, emitWorkflowEvent } from "../events/emit.js"
 import { userAuthorization } from "../utils/userAuthorization.js"
+import {
+  assertObjectAccess,
+  projectAuthorization,
+} from "../utils/projectAuthorization.js"
 import { handleError } from "../utils/handleError.js"
 import { composePath, subtreePaths, wouldCycle } from "../utils/locationPath.js"
+import {
+  effectiveMode,
+  parentScopeAdmitted,
+  scopeWhere,
+} from "../utils/catalogScope.js"
 
 const logger = createLogger("locations")
 
 /**
- * Catálogo jerárquico de ubicación física (BLOQUE 02B, fase 1).
+ * Catálogo jerárquico de ubicación física (BLOQUE 02B).
  *
- * Sitio ▸ planta ▸ área ▸ unidad, con profundidad libre. En esta fase el
- * catálogo es **del despliegue** y la autorización es global: el alcance por
- * proyecto —y con él la segunda capa de B7 de BLOQUE 02— llega en la fase 2.
+ * Sitio ▸ planta ▸ área ▸ unidad, con profundidad libre y **alcance por
+ * proyecto**: el árbol del despliegue, que los proyectos heredan y amplían, o el
+ * propio del proyecto (B1).
+ *
+ * La autorización es la de dos capas de B7 de BLOQUE 02, y sale del alcance del
+ * propio nodo: uno del despliegue se resuelve con el permiso global, uno de
+ * proyecto exige membresía. No hay una regla por operación — la da el derivador
+ * de contexto.
  *
  * La ubicación no tiene ningún consumidor de comportamiento: ninguna regla del
  * módulo la lee. Es clasificación y filtrado, y el atributo del documento lo
@@ -46,6 +66,7 @@ type ExternalReferenceInput = {
  * infiere la firma de índice que eso exige para un tipo literal de objeto.
  */
 type CreateLocationInput = {
+  projectId?: number | null
   parentId?: number | null
   code: string
   name: string
@@ -62,7 +83,9 @@ type UpdateLocationInput = {
   externalRef?: string | null
 }
 
-const buildWhere = (filter?: LocationFilterInput): Prisma.DocLocationWhereInput => {
+const buildWhere = (
+  filter?: LocationFilterInput,
+): Prisma.DocLocationWhereInput => {
   const where: Prisma.DocLocationWhereInput = {}
 
   if (filter?.terminatedFilter === TerminatedFilter.ACTIVE) {
@@ -90,6 +113,21 @@ const buildWhere = (filter?: LocationFilterInput): Prisma.DocLocationWhereInput 
   return where
 }
 
+/** El modo con que un proyecto resuelve el catálogo de ubicación. */
+const locationScopeMode = async (
+  client: Prisma.TransactionClient,
+  projectId: number,
+): Promise<DocScopeMode> => {
+  const declarado = await client.docCatalogScope.findUnique({
+    where: {
+      projectId_catalog: { projectId, catalog: DocCatalogKind.LOCATION },
+    },
+    select: { mode: true },
+  })
+
+  return effectiveMode(declarado?.mode)
+}
+
 /**
  * La referencia externa se declara completa o no se declara (B7).
  *
@@ -110,12 +148,58 @@ const assertExternalReference = (input: ExternalReferenceInput) => {
 }
 
 /**
+ * El padre existe y su alcance admite al hijo (B1).
+ *
+ * El cruce se admite en un solo sentido: un nodo del proyecto cuelga de uno del
+ * despliegue, que es lo que significa *ampliar*. Al revés volvería el árbol
+ * global dependiente de un proyecto.
+ *
+ * Devuelve la ruta del padre, o nula si el nodo es raíz, porque es lo que se
+ * necesita a continuación para componer la propia.
+ */
+const assertParentAdmitted = async (
+  tx: Prisma.TransactionClient,
+  {
+    parentId,
+    scope,
+  }: { parentId: number | null; scope: number | null },
+): Promise<string | null> => {
+  if (parentId === null) return null
+
+  const parent = await tx.docLocation.findUnique({
+    where: { id: parentId },
+    select: { path: true, projectId: true },
+  })
+
+  if (!parent) {
+    throw new GraphQLError("La ubicación padre no existe", {
+      extensions: { code: "BAD_USER_INPUT" },
+    })
+  }
+
+  if (!parentScopeAdmitted({ childScope: scope, parentScope: parent.projectId })) {
+    throw new GraphQLError(
+      scope === null
+        ? "Una ubicación del despliegue no puede colgar de una de proyecto: el árbol global quedaría dependiendo de un proyecto."
+        : "Una ubicación de proyecto solo puede colgar del árbol del despliegue o de su propio árbol.",
+      { extensions: { code: "BAD_USER_INPUT" } },
+    )
+  }
+
+  return parent.path
+}
+
+/**
  * Reescribe la ruta de un nodo y de toda su descendencia.
  *
- * Lee el catálogo completo con tres columnas y calcula en memoria: es un
+ * Lee el catálogo completo con cuatro columnas y calcula en memoria: es un
  * catálogo de decenas o centenas de nodos, y renombrar o mover son operaciones
  * infrecuentes. La alternativa —una consulta por nivel— multiplica los viajes a
  * la base sin ganar nada a esta escala.
+ *
+ * **Lee sin acotar por alcance, y debe hacerlo.** La descendencia de un nodo del
+ * despliegue incluye las ampliaciones que le colgaron los proyectos, y su ruta
+ * también cambia cuando el ancestro global se renombra o se mueve.
  *
  * Escribe **solo lo que cambió**: reescribir rutas idénticas ensuciaría
  * `updatedAt` de nodos que nadie tocó.
@@ -141,49 +225,37 @@ const rewriteSubtree = async (
   return reescritos
 }
 
-/** La ruta del padre de un nodo, o nula si el nodo es raíz. */
-const parentPathOf = async (
-  tx: Prisma.TransactionClient,
-  parentId: number | null,
-): Promise<string | null> => {
-  if (parentId === null) return null
-
-  const parent = await tx.docLocation.findUnique({
-    where: { id: parentId },
-    select: { path: true },
-  })
-
-  if (!parent) {
-    throw new GraphQLError("La ubicación padre no existe", {
-      extensions: { code: "BAD_USER_INPUT" },
-    })
-  }
-
-  return parent.path
-}
-
 export const locationResolvers = {
   Query: {
     /**
-     * El árbol como lista plana, ordenada por ruta.
-     *
-     * Ordenar por ruta agrupa cada rama con su descendencia, que es lo que una
-     * pantalla de árbol necesita para armarse sin recorrer la jerarquía.
+     * El catálogo tal como está declarado, **sin resolver alcance**: lista el del
+     * despliegue o el de un proyecto según se pida. Es la vista de
+     * administración, con la misma forma que la de calificaciones.
      */
     locations: async (
       _: any,
-      { filter }: { filter?: LocationFilterInput },
+      {
+        projectId,
+        filter,
+      }: { projectId?: number; filter?: LocationFilterInput },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
-        context,
-      })
+      const userId =
+        projectId !== undefined
+          ? await projectAuthorization({
+              requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
+              projectId,
+              context,
+            })
+          : await userAuthorization({
+              requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
+              context,
+            })
       logger.info("locations", { userId })
 
       try {
         return await context.orm.docLocation.findMany({
-          where: buildWhere(filter),
+          where: { ...buildWhere(filter), projectId: projectId ?? null },
           orderBy: [{ path: "asc" }],
         })
       } catch (error) {
@@ -200,6 +272,80 @@ export const locationResolvers = {
       }
     },
 
+    /**
+     * Las ubicaciones con que se puede clasificar en un proyecto.
+     *
+     * Resuelve el alcance —heredando del despliegue y sumando las propias, o solo
+     * las propias— y excluye las dadas de baja. La resolución se expone acá y no
+     * se deriva en cada consumidor, con el criterio del §13.
+     */
+    projectLocations: async (
+      _: any,
+      { projectId, filter }: { projectId: number; filter?: LocationFilterInput },
+      context: ResolverContext,
+    ) => {
+      const userId = await projectAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
+        projectId,
+        context,
+      })
+      logger.info("projectLocations", { userId })
+
+      try {
+        const mode = await locationScopeMode(context.orm, projectId)
+
+        return await context.orm.docLocation.findMany({
+          where: { ...buildWhere(filter), ...scopeWhere({ projectId, mode }) },
+          orderBy: [{ path: "asc" }],
+        })
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "GET_PROJECT_LOCATIONS",
+          module: SysLogModule.DOCUMENT,
+          messages: {
+            default: "Error al obtener las ubicaciones del proyecto.",
+          },
+        })
+      }
+    },
+
+    /**
+     * El modo con que un proyecto resuelve este catálogo, resuelto.
+     *
+     * Existe además de `catalogScopes` porque esa consulta devuelve lo declarado,
+     * que puede ser nada, y quien arma una pantalla necesita el modo que rige.
+     */
+    locationScope: async (
+      _: any,
+      { projectId }: { projectId: number },
+      context: ResolverContext,
+    ) => {
+      const userId = await projectAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
+        projectId,
+        context,
+      })
+      logger.info("locationScope", { userId })
+
+      try {
+        return await locationScopeMode(context.orm, projectId)
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "GET_LOCATION_SCOPE",
+          module: SysLogModule.DOCUMENT,
+          messages: {
+            default: "Error al obtener el alcance del catálogo de ubicaciones.",
+          },
+        })
+      }
+    },
+
     locationById: async (
       _: any,
       { id }: { id: number },
@@ -210,6 +356,17 @@ export const locationResolvers = {
         context,
       })
       logger.info("locationById", { userId })
+
+      // Fuera del try: un rechazo de autorización no es un error del servicio.
+      // La ubicación de un proyecto exige membresía; la del despliegue no
+      // pertenece a ninguno y se resuelve con el permiso global (BLOQUE 02, B7).
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOC_LOCATION,
+        objectId: id,
+        context,
+        notFoundMessage: "Ubicación no encontrada",
+      })
 
       try {
         const location = await context.orm.docLocation.findUnique({
@@ -239,30 +396,53 @@ export const locationResolvers = {
     },
 
     /**
-     * El rótulo de la lista es la **ruta completa** y no el nombre: "Unidad 110"
-     * no identifica nada por sí solo, y el mismo nombre puede repetirse en dos
+     * Ubicaciones vigentes como lista de selección, con el alcance resuelto.
+     *
+     * El rótulo es la **ruta completa** y no el nombre: "Unidad 110" no
+     * identifica nada por sí solo, y el mismo nombre puede repetirse en dos
      * plantas.
+     *
+     * `projectId` es opcional porque hay documentos sin proyecto —calidad,
+     * comercial, activos—, y para ellos el catálogo que rige es el del
+     * despliegue. Omitirlo no es un descuido: es el régimen de publicación.
      */
     locationsSelectList: async (
       _: any,
-      { filter }: { filter?: LocationFilterInput },
+      {
+        projectId,
+        filter,
+      }: { projectId?: number; filter?: LocationFilterInput },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
-        requiredPermissions: [
-          PERMISSIONS.DOCUMENTS_LOCATION_SELECT,
-          PERMISSIONS.COMMON_SELECT_LIST_ACCESS,
-        ],
-        context,
-      })
+      const permisos = [
+        PERMISSIONS.DOCUMENTS_LOCATION_SELECT,
+        PERMISSIONS.COMMON_SELECT_LIST_ACCESS,
+      ]
+
+      const userId =
+        projectId !== undefined
+          ? await projectAuthorization({
+              requiredPermissions: permisos,
+              projectId,
+              context,
+            })
+          : await userAuthorization({ requiredPermissions: permisos, context })
       logger.info("locationsSelectList", { userId })
 
       try {
+        const alcance =
+          projectId !== undefined
+            ? scopeWhere({
+                projectId,
+                mode: await locationScopeMode(context.orm, projectId),
+              })
+            : { projectId: null }
+
         const items = await context.orm.docLocation.findMany({
-          where: buildWhere({
-            ...filter,
-            terminatedFilter: TerminatedFilter.ACTIVE,
-          }),
+          where: {
+            ...buildWhere({ ...filter, terminatedFilter: TerminatedFilter.ACTIVE }),
+            ...alcance,
+          },
           orderBy: [{ path: "asc" }],
           select: { id: true, path: true },
         })
@@ -291,10 +471,19 @@ export const locationResolvers = {
       { input }: { input: CreateLocationInput },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_CREATE],
-        context,
-      })
+      const scope = input.projectId ?? null
+
+      const userId =
+        scope !== null
+          ? await projectAuthorization({
+              requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_CREATE],
+              projectId: scope,
+              context,
+            })
+          : await userAuthorization({
+              requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_CREATE],
+              context,
+            })
       logger.info("createLocation", { userId })
 
       try {
@@ -304,12 +493,15 @@ export const locationResolvers = {
         const parentId = input.parentId ?? null
 
         return await context.orm.$transaction(async (tx) => {
+          const parentPath = await assertParentAdmitted(tx, { parentId, scope })
+
           const created = await tx.docLocation.create({
             data: {
+              projectId: scope,
               parentId,
               code: input.code.trim(),
               name,
-              path: composePath(await parentPathOf(tx, parentId), name),
+              path: composePath(parentPath, name),
               sortOrder: input.sortOrder ?? 0,
               externalOrigin: input.externalOrigin ?? null,
               externalRef: input.externalRef?.trim() ?? null,
@@ -341,7 +533,7 @@ export const locationResolvers = {
           module: SysLogModule.DOCUMENT,
           messages: {
             uniqueConstraint:
-              "Ya existe una ubicación con ese código en el mismo nivel.",
+              "Ya existe una ubicación con ese código en el mismo nivel y alcance.",
             default: "Error al crear la ubicación.",
           },
         })
@@ -351,10 +543,12 @@ export const locationResolvers = {
     /**
      * Renombrar, recodificar, reordenar y declarar la referencia externa.
      *
-     * **El padre no se edita acá**: mover tiene operación propia, porque cambia
-     * de lugar una rama entera y exige verificar que no se cuelgue de su propia
-     * descendencia. Renombrar reescribe las mismas rutas, y por eso comparte el
-     * recálculo.
+     * **Ni el padre ni el alcance se editan acá**: mover tiene operación propia,
+     * porque cambia de lugar una rama entera y exige verificar que no se cuelgue
+     * de su propia descendencia. El alcance no se edita en absoluto, con el
+     * criterio de las calificaciones: mover un nodo entre el despliegue y un
+     * proyecto cambiaría qué ve cada proyecto sin que nadie lo declare, y
+     * arrastraría a su descendencia.
      */
     updateLocation: async (
       _: any,
@@ -366,6 +560,14 @@ export const locationResolvers = {
         context,
       })
       logger.info("updateLocation", { userId })
+
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOC_LOCATION,
+        objectId: id,
+        context,
+        notFoundMessage: "Ubicación no encontrada",
+      })
 
       try {
         return await context.orm.$transaction(async (tx) => {
@@ -416,7 +618,10 @@ export const locationResolvers = {
               ? 0
               : await rewriteSubtree(tx, {
                   rootId: id,
-                  parentPath: await parentPathOf(tx, current.parentId),
+                  parentPath: await assertParentAdmitted(tx, {
+                    parentId: current.parentId,
+                    scope: current.projectId,
+                  }),
                 })
 
           await emitAuditEvent(tx, {
@@ -424,7 +629,8 @@ export const locationResolvers = {
             objectId: id,
             actorId: userId,
             // `rewritten` cuenta el nodo y su descendencia: es lo que explica
-            // después por qué cambiaron rutas de nodos que nadie editó.
+            // después por qué cambiaron rutas de nodos que nadie editó, incluidas
+            // las ampliaciones que otros proyectos colgaron de un nodo global.
             meta: { input, rewritten: reescritos },
           })
 
@@ -442,7 +648,7 @@ export const locationResolvers = {
           messages: {
             notFound: "La ubicación no existe.",
             uniqueConstraint:
-              "Ya existe una ubicación con ese código en el mismo nivel.",
+              "Ya existe una ubicación con ese código en el mismo nivel y alcance.",
             default: "Error al actualizar la ubicación.",
           },
         })
@@ -455,6 +661,10 @@ export const locationResolvers = {
      * Tiene operación y acción propias porque reescribe la ruta de toda su
      * descendencia: registrar el movimiento es lo que explica después por qué
      * cambiaron nodos que nadie tocó. `parentId` nulo la convierte en raíz.
+     *
+     * **No cambia el alcance**, y el destino debe admitirlo: es la vía por la que
+     * un nodo de proyecto colgado del árbol global se acomoda dentro del propio,
+     * que es lo que habilita después declarar catálogo propio.
      */
     moveLocation: async (
       _: any,
@@ -466,6 +676,14 @@ export const locationResolvers = {
         context,
       })
       logger.info("moveLocation", { userId })
+
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOC_LOCATION,
+        objectId: id,
+        context,
+        notFoundMessage: "Ubicación no encontrada",
+      })
 
       const destino = parentId ?? null
 
@@ -490,7 +708,10 @@ export const locationResolvers = {
             )
           }
 
-          const parentPath = await parentPathOf(tx, destino)
+          const parentPath = await assertParentAdmitted(tx, {
+            parentId: destino,
+            scope: current.projectId,
+          })
 
           await tx.docLocation.update({
             where: { id },
@@ -554,6 +775,14 @@ export const locationResolvers = {
       })
       logger.info("terminateLocation", { userId })
 
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOC_LOCATION,
+        objectId: id,
+        context,
+        notFoundMessage: "Ubicación no encontrada",
+      })
+
       try {
         return await context.orm.$transaction(async (tx) => {
           const updated = await tx.docLocation.update({
@@ -602,6 +831,14 @@ export const locationResolvers = {
       })
       logger.info("activateLocation", { userId })
 
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOC_LOCATION,
+        objectId: id,
+        context,
+        notFoundMessage: "Ubicación no encontrada",
+      })
+
       try {
         return await context.orm.$transaction(async (tx) => {
           const updated = await tx.docLocation.update({
@@ -643,6 +880,10 @@ export const locationResolvers = {
      * Eliminación definitiva, admitida solo cuando el nodo no tiene
      * descendencia. Es el ciclo de vida del precedente (DOM-024).
      *
+     * La descendencia se cuenta **sin acotar por alcance**: un nodo del
+     * despliegue con ampliaciones de un proyecto tiene descendencia, aunque quien
+     * lo mira no la vea desde su propio catálogo.
+     *
      * La fase 4 le agrega la otra mitad de la condición —que ningún documento lo
      * referencie—, que hoy no puede existir porque el atributo todavía no está.
      */
@@ -656,6 +897,14 @@ export const locationResolvers = {
         context,
       })
       logger.info("deleteLocation", { userId })
+
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOC_LOCATION,
+        objectId: id,
+        context,
+        notFoundMessage: "Ubicación no encontrada",
+      })
 
       try {
         await context.orm.$transaction(async (tx) => {
@@ -689,6 +938,7 @@ export const locationResolvers = {
               code: location.code,
               name: location.name,
               path: location.path,
+              projectId: location.projectId,
             },
           })
         })

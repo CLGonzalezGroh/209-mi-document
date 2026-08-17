@@ -852,3 +852,25 @@ El documento se ubica en una jerarquía física —**sitio ▸ planta ▸ área 
 - **Trece pruebas puras** sobre la composición de rutas, el recálculo por rama y el ciclo, más **cuatro contra la base** sobre la unicidad por nivel, el rechazo del borrado con descendencia y el par de la referencia externa.
 
 **386 pruebas, 0 fallos.**
+
+### Fase 2 — El mecanismo de alcance por proyecto
+
+Un catálogo es un **conjunto**, y esa es la diferencia con las demás configuraciones por proyecto: en el esquema de revisión o en la plantilla del circuito la definición más específica **reemplaza** a la general, mientras que acá lo que se resuelve es qué entradas están disponibles.
+
+- **Dos modos que el proyecto declara**: `INHERIT`, vínculo vivo con el árbol del despliegue más lo que el proyecto agregue, y `OWN`, sin vínculo. En una planta rige el primero, porque cada proyecto interviene sobre la misma instalación; en una empresa de ingeniería el global queda vacío o mínimo y cada proyecto carga la estructura de su cliente.
+- **La ausencia de declaración es heredar**, y es lo que vuelve la migración **aditiva**: todo proyecto existente hereda y nada cambia de comportamiento hasta que alguien declare lo contrario. La consulta de lo declarado **no completa** con `INHERIT` los catálogos sin declarar — fabricar filas inexistentes haría indistinguible lo declarado de lo supuesto—, y el modo que rige se expone resuelto por su lado.
+- **Una fila por proyecto y catálogo, y no columnas de la configuración del proyecto.** `DocCatalogScope` con `DocCatalogKind` de tres valores: el mecanismo es **uno** para los tres catálogos documentales, y esta es la única forma en que eso es cierto en el modelo. `BLOCK_02C` lo reutiliza sobre clase y tipo agregando un valor a esa enumeración, sin migrar estructura, y por eso el mecanismo se estrena acá: el catálogo de ubicación no tiene datos ni interfaz en producción, y clase y tipo sí.
+- **Heredar SUMA, y no reemplaza.** Es una diferencia deliberada con el catálogo de calificaciones, donde el proyecto que declara una propia usa las suyas y solo las suyas porque la lista es la del contrato. Acá ampliar es el caso normal, y por eso el modo **se declara** en lugar de derivarse de que existan entradas propias.
+- **La autorización en dos capas sale del alcance del propio nodo**, sin una regla por operación: un nodo del despliegue se resuelve con el permiso global, uno de proyecto exige membresía. Lo da el derivador de contexto de `BLOQUE 02`, y por eso incorporarla costó una línea por operación.
+- **La unicidad del código incorpora el alcance**: dos proyectos pueden nombrar igual su propio nodo, y un proyecto puede agregar un código que el despliegue no tiene sin chocar con otro. `NULLS NOT DISTINCT` sigue siendo lo que la vuelve efectiva, ahora sobre dos columnas anulables.
+- **El alcance no se edita.** Mover un nodo entre el despliegue y un proyecto cambiaría qué ve cada proyecto sin que nadie lo declare, y arrastraría a su descendencia. Es el criterio con que el catálogo de calificaciones ya trata el suyo.
+- **El permiso es el de la configuración del proyecto** y no uno propio: declarar si un proyecto hereda es configurarlo, de la misma familia que el rol documental y el armador por defecto. Administrar las entradas del catálogo es otra cosa y tiene el suyo. **No hace falta publicar `mi-common` para esta fase.**
+
+**La arruga que solo tiene el árbol**, y que clase y tipo no van a enfrentar porque son planos: *ampliar* significa que el proyecto cuelga un nodo suyo de uno del despliegue, de modo que la relación de padre **cruza alcances**.
+
+- **El cruce se admite en un solo sentido.** Un nodo de proyecto cuelga de uno del despliegue; al revés no, porque volvería el árbol global dependiente de un proyecto —quien mira el catálogo del despliegue vería una rama ajena, y borrar el proyecto dejaría huérfano un nodo global—. Y un proyecto no cuelga del árbol de otro proyecto, que no ve. La invariante **no es expresable en un `CHECK`** porque exige mirar el padre: vive en la operación, con su prueba.
+- **Declarar catálogo propio se rechaza mientras algún nodo del proyecto cuelgue del árbol global**, y el mensaje **nombra las rutas** que lo impiden. La alternativa —convertirlos en raíces— reescribiría rutas de nodos que nadie tocó por un cambio de configuración. Mover es la vía para acomodarlos, y por eso esa operación es la que habilita después el cambio de modo.
+- **El recálculo de rutas lee sin acotar por alcance, y debe hacerlo**: renombrar o mover un nodo del despliegue cambia la ruta de las ampliaciones que le colgaron los proyectos. Lo mismo la cuenta de descendencia que protege el borrado — un nodo global con ampliaciones tiene descendencia, aunque quien lo mira no la vea desde su propio catálogo.
+
+**406 pruebas, 0 fallos.** Quince puras sobre el modo efectivo, la resolución, la coincidencia entre el criterio de consulta y el filtro en memoria, y las dos invariantes de cruce; tres contra la base sobre la unicidad con alcance, la ampliación admitida y la declaración única por par.
+

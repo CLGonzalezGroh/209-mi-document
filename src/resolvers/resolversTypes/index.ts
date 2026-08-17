@@ -575,6 +575,15 @@ export const resolverTypes = {
     },
   },
 
+  DocCatalogScope: {
+    createdBy: (parent: { createdById: number }) => {
+      return { __typename: "UserName", id: parent.createdById }
+    },
+    updatedBy: (parent: { updatedById: number }) => {
+      return { __typename: "UserName", id: parent.updatedById }
+    },
+  },
+
   DocProjectSettings: {
     defaultOrganizer: (parent: { defaultOrganizerId: number | null }) => {
       if (parent.defaultOrganizerId === null) return null

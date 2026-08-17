@@ -3,9 +3,11 @@ import test, { after, before } from "node:test"
 import { readFileSync } from "node:fs"
 import { prisma } from "../lib/prisma.js"
 import {
+  DocCatalogKind,
   DocFileRole,
   DocLocationOrigin,
   DocReplacementRole,
+  DocScopeMode,
   ModuleType,
   RevisionStatus,
   StepStatus,
@@ -73,6 +75,9 @@ const limpiar = async () => {
   })
   await prisma.docLocation.deleteMany({
     where: { code: { startsWith: `${CODIGO}-L` } },
+  })
+  await prisma.docCatalogScope.deleteMany({
+    where: { projectId: { in: [-424406, -424407, -424408, -424409] } },
   })
   await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
   await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: PROYECTO } })
@@ -549,6 +554,7 @@ const crearUbicacion = (
   code: string,
   extra: {
     parentId?: number | null
+    projectId?: number | null
     name?: string
     externalOrigin?: DocLocationOrigin | null
     externalRef?: string | null
@@ -560,6 +566,7 @@ const crearUbicacion = (
       name: extra.name ?? code,
       path: extra.name ?? code,
       parentId: extra.parentId ?? null,
+      projectId: extra.projectId ?? null,
       externalOrigin: extra.externalOrigin ?? null,
       externalRef: extra.externalRef ?? null,
       createdById: 1,
@@ -576,6 +583,69 @@ test("dos ubicaciones raíz con el mismo código se rechazan", async () => {
     await rechazaPorUnicidad(() => crearUbicacion(`${CODIGO}-L1`)),
     true,
   )
+})
+
+test("dos proyectos nombran igual su propio nodo raíz", async () => {
+  // El alcance entra en la tupla de unicidad (B1): el código de un proyecto no
+  // choca con el de otro, ni con el del despliegue.
+  const A = -424406
+  const B = -424407
+
+  const enA = await crearUbicacion(`${CODIGO}-LS`, { projectId: A })
+  const enB = await crearUbicacion(`${CODIGO}-LS`, { projectId: B })
+  const enDespliegue = await crearUbicacion(`${CODIGO}-LS`)
+
+  assert.equal(new Set([enA.id, enB.id, enDespliegue.id]).size, 3)
+
+  // Y dentro del mismo alcance sigue sin repetirse.
+  assert.equal(
+    await rechazaPorUnicidad(() =>
+      crearUbicacion(`${CODIGO}-LS`, { projectId: A }),
+    ),
+    true,
+  )
+})
+
+test("un nodo de proyecto cuelga de uno del despliegue: eso es ampliar", async () => {
+  // El cruce de alcance en ese sentido lo admite la BASE —la clave no lo mira— y
+  // la invariante del sentido contrario vive en la operación, porque exige mirar
+  // el padre y no es expresable en un CHECK.
+  const area = await crearUbicacion(`${CODIGO}-LG`)
+  const ampliacion = await crearUbicacion(`${CODIGO}-LU`, {
+    parentId: area.id,
+    projectId: -424408,
+  })
+
+  assert.equal(ampliacion.parentId, area.id)
+  assert.equal(ampliacion.projectId, -424408)
+})
+
+test("el alcance de un catálogo se declara una sola vez por proyecto", async () => {
+  const proyecto = -424409
+
+  const declarar = (mode: DocScopeMode) =>
+    prisma.docCatalogScope.create({
+      data: {
+        projectId: proyecto,
+        catalog: DocCatalogKind.LOCATION,
+        mode,
+        createdById: 1,
+      },
+    })
+
+  await declarar(DocScopeMode.OWN)
+  assert.equal(await rechazaPorUnicidad(() => declarar(DocScopeMode.INHERIT)), true)
+
+  // Otro catálogo del mismo proyecto sí entra: la unicidad es por el par.
+  const otro = await prisma.docCatalogScope.create({
+    data: {
+      projectId: proyecto,
+      catalog: DocCatalogKind.DOCUMENT_CLASS,
+      mode: DocScopeMode.OWN,
+      createdById: 1,
+    },
+  })
+  assert.equal(otro.catalog, DocCatalogKind.DOCUMENT_CLASS)
 })
 
 test("el mismo código bajo otro padre sí se admite", async () => {

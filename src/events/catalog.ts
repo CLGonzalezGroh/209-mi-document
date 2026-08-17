@@ -111,6 +111,12 @@ export const AuditAction = {
   // `UpdateLocation` más: reescribe la ruta de toda una rama, de modo que sin
   // registro del movimiento los cambios de nodos que nadie tocó serían
   // inexplicables después.
+  //
+  // Declarar el alcance de un catálogo también, y por lo contrario: **cambia qué
+  // entradas tiene disponibles un proyecto sin tocar ninguna entrada**. Sin
+  // registro, un catálogo que pasa de sesenta valores a tres no tendría
+  // explicación en ninguna parte.
+  DeclareCatalogScope: "DeclareCatalogScope",
   CreateLocation: "CreateLocation",
   UpdateLocation: "UpdateLocation",
   MoveLocation: "MoveLocation",
@@ -191,6 +197,7 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   [AuditAction.CorrectItemResponse]: DocObjectType.DOC_TRANSMITTAL_RESPONSE,
 
   // Ubicación física (BLOQUE 02B)
+  [AuditAction.DeclareCatalogScope]: DocObjectType.DOC_CATALOG_SCOPE,
   [AuditAction.CreateLocation]: DocObjectType.DOC_LOCATION,
   [AuditAction.UpdateLocation]: DocObjectType.DOC_LOCATION,
   [AuditAction.MoveLocation]: DocObjectType.DOC_LOCATION,
@@ -341,4 +348,7 @@ export const DOC_OBJECT_READ_PERMISSION: Record<DocObjectType, string> = {
   // La ubicación tiene recurso propio: administrar el árbol de la instalación es
   // distinto de operar los documentos que se clasifican con él.
   [DocObjectType.DOC_LOCATION]: PERMISSIONS.DOCUMENTS_LOCATION_READ,
+  // El alcance del catálogo se lee con la configuración del proyecto: declarar
+  // si se hereda es configurarlo, no administrar el catálogo.
+  [DocObjectType.DOC_CATALOG_SCOPE]: PERMISSIONS.DOCUMENTS_PROJECT_SETTINGS_READ,
 }

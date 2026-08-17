@@ -30,6 +30,7 @@ export type DocLocationAvgAggregateOutputType = {
   id: number | null
   createdById: number | null
   updatedById: number | null
+  projectId: number | null
   parentId: number | null
   sortOrder: number | null
 }
@@ -38,6 +39,7 @@ export type DocLocationSumAggregateOutputType = {
   id: number | null
   createdById: number | null
   updatedById: number | null
+  projectId: number | null
   parentId: number | null
   sortOrder: number | null
 }
@@ -50,6 +52,7 @@ export type DocLocationMinAggregateOutputType = {
   updatedById: number | null
   terminatedAt: Date | null
   isSys: boolean | null
+  projectId: number | null
   parentId: number | null
   code: string | null
   name: string | null
@@ -67,6 +70,7 @@ export type DocLocationMaxAggregateOutputType = {
   updatedById: number | null
   terminatedAt: Date | null
   isSys: boolean | null
+  projectId: number | null
   parentId: number | null
   code: string | null
   name: string | null
@@ -84,6 +88,7 @@ export type DocLocationCountAggregateOutputType = {
   updatedById: number
   terminatedAt: number
   isSys: number
+  projectId: number
   parentId: number
   code: number
   name: number
@@ -99,6 +104,7 @@ export type DocLocationAvgAggregateInputType = {
   id?: true
   createdById?: true
   updatedById?: true
+  projectId?: true
   parentId?: true
   sortOrder?: true
 }
@@ -107,6 +113,7 @@ export type DocLocationSumAggregateInputType = {
   id?: true
   createdById?: true
   updatedById?: true
+  projectId?: true
   parentId?: true
   sortOrder?: true
 }
@@ -119,6 +126,7 @@ export type DocLocationMinAggregateInputType = {
   updatedById?: true
   terminatedAt?: true
   isSys?: true
+  projectId?: true
   parentId?: true
   code?: true
   name?: true
@@ -136,6 +144,7 @@ export type DocLocationMaxAggregateInputType = {
   updatedById?: true
   terminatedAt?: true
   isSys?: true
+  projectId?: true
   parentId?: true
   code?: true
   name?: true
@@ -153,6 +162,7 @@ export type DocLocationCountAggregateInputType = {
   updatedById?: true
   terminatedAt?: true
   isSys?: true
+  projectId?: true
   parentId?: true
   code?: true
   name?: true
@@ -257,6 +267,7 @@ export type DocLocationGroupByOutputType = {
   updatedById: number
   terminatedAt: Date | null
   isSys: boolean
+  projectId: number | null
   parentId: number | null
   code: string
   name: string
@@ -297,6 +308,7 @@ export type DocLocationWhereInput = {
   updatedById?: Prisma.IntFilter<"DocLocation"> | number
   terminatedAt?: Prisma.DateTimeNullableFilter<"DocLocation"> | Date | string | null
   isSys?: Prisma.BoolFilter<"DocLocation"> | boolean
+  projectId?: Prisma.IntNullableFilter<"DocLocation"> | number | null
   parentId?: Prisma.IntNullableFilter<"DocLocation"> | number | null
   code?: Prisma.StringFilter<"DocLocation"> | string
   name?: Prisma.StringFilter<"DocLocation"> | string
@@ -316,6 +328,7 @@ export type DocLocationOrderByWithRelationInput = {
   updatedById?: Prisma.SortOrder
   terminatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   isSys?: Prisma.SortOrder
+  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
   parentId?: Prisma.SortOrderInput | Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
@@ -329,7 +342,7 @@ export type DocLocationOrderByWithRelationInput = {
 
 export type DocLocationWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  code_parentId?: Prisma.DocLocationCodeParentIdCompoundUniqueInput
+  code_parentId_projectId?: Prisma.DocLocationCodeParentIdProjectIdCompoundUniqueInput
   AND?: Prisma.DocLocationWhereInput | Prisma.DocLocationWhereInput[]
   OR?: Prisma.DocLocationWhereInput[]
   NOT?: Prisma.DocLocationWhereInput | Prisma.DocLocationWhereInput[]
@@ -339,6 +352,7 @@ export type DocLocationWhereUniqueInput = Prisma.AtLeast<{
   updatedById?: Prisma.IntFilter<"DocLocation"> | number
   terminatedAt?: Prisma.DateTimeNullableFilter<"DocLocation"> | Date | string | null
   isSys?: Prisma.BoolFilter<"DocLocation"> | boolean
+  projectId?: Prisma.IntNullableFilter<"DocLocation"> | number | null
   parentId?: Prisma.IntNullableFilter<"DocLocation"> | number | null
   code?: Prisma.StringFilter<"DocLocation"> | string
   name?: Prisma.StringFilter<"DocLocation"> | string
@@ -348,7 +362,7 @@ export type DocLocationWhereUniqueInput = Prisma.AtLeast<{
   externalRef?: Prisma.StringNullableFilter<"DocLocation"> | string | null
   parent?: Prisma.XOR<Prisma.DocLocationNullableScalarRelationFilter, Prisma.DocLocationWhereInput> | null
   children?: Prisma.DocLocationListRelationFilter
-}, "id" | "code_parentId">
+}, "id" | "code_parentId_projectId">
 
 export type DocLocationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -358,6 +372,7 @@ export type DocLocationOrderByWithAggregationInput = {
   updatedById?: Prisma.SortOrder
   terminatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   isSys?: Prisma.SortOrder
+  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
   parentId?: Prisma.SortOrderInput | Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
@@ -383,6 +398,7 @@ export type DocLocationScalarWhereWithAggregatesInput = {
   updatedById?: Prisma.IntWithAggregatesFilter<"DocLocation"> | number
   terminatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DocLocation"> | Date | string | null
   isSys?: Prisma.BoolWithAggregatesFilter<"DocLocation"> | boolean
+  projectId?: Prisma.IntNullableWithAggregatesFilter<"DocLocation"> | number | null
   parentId?: Prisma.IntNullableWithAggregatesFilter<"DocLocation"> | number | null
   code?: Prisma.StringWithAggregatesFilter<"DocLocation"> | string
   name?: Prisma.StringWithAggregatesFilter<"DocLocation"> | string
@@ -399,6 +415,7 @@ export type DocLocationCreateInput = {
   updatedById?: number
   terminatedAt?: Date | string | null
   isSys?: boolean
+  projectId?: number | null
   code: string
   name: string
   path: string
@@ -417,6 +434,7 @@ export type DocLocationUncheckedCreateInput = {
   updatedById?: number
   terminatedAt?: Date | string | null
   isSys?: boolean
+  projectId?: number | null
   parentId?: number | null
   code: string
   name: string
@@ -434,6 +452,7 @@ export type DocLocationUpdateInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
@@ -452,6 +471,7 @@ export type DocLocationUncheckedUpdateInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -470,6 +490,7 @@ export type DocLocationCreateManyInput = {
   updatedById?: number
   terminatedAt?: Date | string | null
   isSys?: boolean
+  projectId?: number | null
   parentId?: number | null
   code: string
   name: string
@@ -486,6 +507,7 @@ export type DocLocationUpdateManyMutationInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
@@ -502,6 +524,7 @@ export type DocLocationUncheckedUpdateManyInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -526,9 +549,10 @@ export type DocLocationOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type DocLocationCodeParentIdCompoundUniqueInput = {
+export type DocLocationCodeParentIdProjectIdCompoundUniqueInput = {
   code: string
   parentId: number
+  projectId: number
 }
 
 export type DocLocationCountOrderByAggregateInput = {
@@ -539,6 +563,7 @@ export type DocLocationCountOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   terminatedAt?: Prisma.SortOrder
   isSys?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
   parentId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
@@ -552,6 +577,7 @@ export type DocLocationAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
   parentId?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
@@ -564,6 +590,7 @@ export type DocLocationMaxOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   terminatedAt?: Prisma.SortOrder
   isSys?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
   parentId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
@@ -581,6 +608,7 @@ export type DocLocationMinOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   terminatedAt?: Prisma.SortOrder
   isSys?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
   parentId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
@@ -594,6 +622,7 @@ export type DocLocationSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
   parentId?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
@@ -667,6 +696,7 @@ export type DocLocationCreateWithoutChildrenInput = {
   updatedById?: number
   terminatedAt?: Date | string | null
   isSys?: boolean
+  projectId?: number | null
   code: string
   name: string
   path: string
@@ -684,6 +714,7 @@ export type DocLocationUncheckedCreateWithoutChildrenInput = {
   updatedById?: number
   terminatedAt?: Date | string | null
   isSys?: boolean
+  projectId?: number | null
   parentId?: number | null
   code: string
   name: string
@@ -705,6 +736,7 @@ export type DocLocationCreateWithoutParentInput = {
   updatedById?: number
   terminatedAt?: Date | string | null
   isSys?: boolean
+  projectId?: number | null
   code: string
   name: string
   path: string
@@ -722,6 +754,7 @@ export type DocLocationUncheckedCreateWithoutParentInput = {
   updatedById?: number
   terminatedAt?: Date | string | null
   isSys?: boolean
+  projectId?: number | null
   code: string
   name: string
   path: string
@@ -759,6 +792,7 @@ export type DocLocationUpdateWithoutChildrenInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
@@ -776,6 +810,7 @@ export type DocLocationUncheckedUpdateWithoutChildrenInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -812,6 +847,7 @@ export type DocLocationScalarWhereInput = {
   updatedById?: Prisma.IntFilter<"DocLocation"> | number
   terminatedAt?: Prisma.DateTimeNullableFilter<"DocLocation"> | Date | string | null
   isSys?: Prisma.BoolFilter<"DocLocation"> | boolean
+  projectId?: Prisma.IntNullableFilter<"DocLocation"> | number | null
   parentId?: Prisma.IntNullableFilter<"DocLocation"> | number | null
   code?: Prisma.StringFilter<"DocLocation"> | string
   name?: Prisma.StringFilter<"DocLocation"> | string
@@ -829,6 +865,7 @@ export type DocLocationCreateManyParentInput = {
   updatedById?: number
   terminatedAt?: Date | string | null
   isSys?: boolean
+  projectId?: number | null
   code: string
   name: string
   path: string
@@ -844,6 +881,7 @@ export type DocLocationUpdateWithoutParentInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
@@ -861,6 +899,7 @@ export type DocLocationUncheckedUpdateWithoutParentInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
@@ -878,6 +917,7 @@ export type DocLocationUncheckedUpdateManyWithoutParentInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   path?: Prisma.StringFieldUpdateOperationsInput | string
@@ -925,6 +965,7 @@ export type DocLocationSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   updatedById?: boolean
   terminatedAt?: boolean
   isSys?: boolean
+  projectId?: boolean
   parentId?: boolean
   code?: boolean
   name?: boolean
@@ -945,6 +986,7 @@ export type DocLocationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   updatedById?: boolean
   terminatedAt?: boolean
   isSys?: boolean
+  projectId?: boolean
   parentId?: boolean
   code?: boolean
   name?: boolean
@@ -963,6 +1005,7 @@ export type DocLocationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   updatedById?: boolean
   terminatedAt?: boolean
   isSys?: boolean
+  projectId?: boolean
   parentId?: boolean
   code?: boolean
   name?: boolean
@@ -981,6 +1024,7 @@ export type DocLocationSelectScalar = {
   updatedById?: boolean
   terminatedAt?: boolean
   isSys?: boolean
+  projectId?: boolean
   parentId?: boolean
   code?: boolean
   name?: boolean
@@ -990,7 +1034,7 @@ export type DocLocationSelectScalar = {
   externalRef?: boolean
 }
 
-export type DocLocationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "parentId" | "code" | "name" | "path" | "sortOrder" | "externalOrigin" | "externalRef", ExtArgs["result"]["docLocation"]>
+export type DocLocationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "projectId" | "parentId" | "code" | "name" | "path" | "sortOrder" | "externalOrigin" | "externalRef", ExtArgs["result"]["docLocation"]>
 export type DocLocationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   parent?: boolean | Prisma.DocLocation$parentArgs<ExtArgs>
   children?: boolean | Prisma.DocLocation$childrenArgs<ExtArgs>
@@ -1017,6 +1061,7 @@ export type $DocLocationPayload<ExtArgs extends runtime.Types.Extensions.Interna
     updatedById: number
     terminatedAt: Date | null
     isSys: boolean
+    projectId: number | null
     parentId: number | null
     code: string
     name: string
@@ -1456,6 +1501,7 @@ export interface DocLocationFieldRefs {
   readonly updatedById: Prisma.FieldRef<"DocLocation", 'Int'>
   readonly terminatedAt: Prisma.FieldRef<"DocLocation", 'DateTime'>
   readonly isSys: Prisma.FieldRef<"DocLocation", 'Boolean'>
+  readonly projectId: Prisma.FieldRef<"DocLocation", 'Int'>
   readonly parentId: Prisma.FieldRef<"DocLocation", 'Int'>
   readonly code: Prisma.FieldRef<"DocLocation", 'String'>
   readonly name: Prisma.FieldRef<"DocLocation", 'String'>

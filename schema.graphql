@@ -190,6 +190,53 @@ enum DocLocationOrigin {
   EXTERNAL
 }
 
+"""
+Cómo resuelve un proyecto un catálogo documental.
+
+INHERIT es vínculo vivo: las entradas del despliegue aparecen siempre, más las
+que el proyecto agregue. OWN es sin vínculo: el proyecto no ve nada del
+despliegue. La ausencia de declaración es INHERIT.
+"""
+enum DocScopeMode {
+  "Hereda el catálogo del despliegue y lo amplía"
+  INHERIT
+  "Catálogo propio, sin ver el del despliegue"
+  OWN
+}
+
+"Modo de alcance de un catálogo, para inputs"
+enum DocScopeModeInput {
+  "Hereda el catálogo del despliegue y lo amplía"
+  INHERIT
+  "Catálogo propio, sin ver el del despliegue"
+  OWN
+}
+
+"""
+Catálogos documentales cuyo alcance el proyecto declara.
+
+El mecanismo es uno para los tres. LOCATION lo estrena BLOQUE 02B; clase y tipo
+se incorporan con su propio bloque.
+"""
+enum DocCatalogKind {
+  "Ubicación física: sitio, planta, área, unidad"
+  LOCATION
+  "Clase de documento"
+  DOCUMENT_CLASS
+  "Tipo de documento"
+  DOCUMENT_TYPE
+}
+
+"Catálogo documental, para inputs"
+enum DocCatalogKindInput {
+  "Ubicación física: sitio, planta, área, unidad"
+  LOCATION
+  "Clase de documento"
+  DOCUMENT_CLASS
+  "Tipo de documento"
+  DOCUMENT_TYPE
+}
+
 "Origen de la referencia externa de una ubicación, para inputs"
 enum DocLocationOriginInput {
   "El registro de activos de OperMask"
@@ -1605,6 +1652,45 @@ type DocQualification {
 }
 
 """
+Cómo un proyecto resuelve un catálogo documental.
+
+Una fila por proyecto y catálogo, y no columnas de la configuración del
+proyecto: el mecanismo es uno para los tres catálogos. Las demás configuraciones
+por proyecto son valores donde lo específico reemplaza a lo general; un catálogo
+es un conjunto, y lo que se declara es si se hereda.
+
+La ausencia de fila es INHERIT: no hace falta declarar nada para operar.
+"""
+type DocCatalogScope {
+  "Identificador único"
+  id: Int!
+  "Fecha de creación"
+  createdAt: DateTime!
+  "Usuario que la declaró"
+  createdBy: UserName!
+  "Fecha de última modificación"
+  updatedAt: DateTime
+  "Usuario que la modificó"
+  updatedBy: UserName!
+  "Proyecto que declara"
+  projectId: Int!
+  "Catálogo alcanzado"
+  catalog: DocCatalogKind!
+  "Modo declarado"
+  mode: DocScopeMode!
+}
+
+"Input para declarar cómo un proyecto resuelve un catálogo"
+input DeclareCatalogScopeInput {
+  "Proyecto que declara"
+  projectId: Int!
+  "Catálogo alcanzado"
+  catalog: DocCatalogKindInput!
+  "Modo a declarar"
+  mode: DocScopeModeInput!
+}
+
+"""
 Nodo del catálogo de ubicación física: sitio, planta, área o unidad de proceso.
 
 Jerárquico y auto-referencial, con profundidad libre: se carga como lista plana
@@ -1630,6 +1716,13 @@ type DocLocation {
   terminatedAt: DateTime
   "Provisto por el sistema"
   isSys: Boolean!
+  """
+  Alcance. Nulo = árbol del despliegue, del que los proyectos heredan.
+
+  Con valor, el nodo lo agregó ese proyecto. Un nodo de proyecto puede colgar de
+  uno del despliegue —eso es ampliar—, nunca al revés.
+  """
+  projectId: Int
   "Nodo padre. Nulo si es raíz"
   parent: DocLocation
   "Descendencia directa, ordenada por su orden de presentación"
@@ -2328,6 +2421,8 @@ input DocLocationFilterInput {
 
 "Input para crear un nodo de ubicación física"
 input CreateLocationInput {
+  "Alcance. Omitido = árbol del despliegue"
+  projectId: Int
   "Nodo padre. Omitido = nodo raíz"
   parentId: Int
   "Código, único dentro de su nivel"
@@ -2349,7 +2444,7 @@ El padre no se edita acá: mover tiene operación propia, porque cambia de lugar
 una rama entera y exige verificar que no se cuelgue de su propia descendencia.
 """
 input UpdateLocationInput {
-  "Código, único dentro de su nivel"
+  "Código, único dentro de su nivel y alcance"
   code: String
   "Nombre del nodo. Cambiarlo recalcula la ruta de toda su descendencia"
   name: String
@@ -2990,18 +3085,49 @@ type Query {
   El orden por ruta agrupa cada rama con su descendencia, que es lo que una
   pantalla de árbol necesita para armarse sin recorrer la jerarquía.
   """
-  locations(filter: DocLocationFilterInput): [DocLocation!]!
+  locations(
+    "Alcance a listar. Omitido = árbol del despliegue"
+    projectId: Int
+    filter: DocLocationFilterInput
+  ): [DocLocation!]!
+
+  """
+  Ubicaciones con que se puede clasificar en un proyecto, con el alcance resuelto.
+
+  Hereda del despliegue y suma las propias, o devuelve solo las propias, según lo
+  que el proyecto haya declarado. Excluye las dadas de baja.
+  """
+  projectLocations(projectId: Int!, filter: DocLocationFilterInput): [DocLocation!]!
+
+  """
+  El modo con que un proyecto resuelve este catálogo, resuelto.
+
+  Existe además de catalogScopes porque esa consulta devuelve lo declarado, que
+  puede ser nada, y quien arma una pantalla necesita el modo que rige.
+  """
+  locationScope(projectId: Int!): DocScopeMode!
 
   "Un nodo de ubicación por su identificador"
   locationById(id: Int!): DocLocation!
 
   """
-  Ubicaciones vigentes como lista de selección.
+  Ubicaciones vigentes como lista de selección, con el alcance resuelto.
 
   El rótulo es la ruta completa y no el nombre: "Unidad 110" no identifica nada
   por sí solo, y el mismo nombre puede repetirse en dos plantas.
+
+  projectId es opcional porque hay documentos sin proyecto —calidad, comercial,
+  activos—, y para ellos el catálogo que rige es el del despliegue.
   """
-  locationsSelectList(filter: DocLocationFilterInput): [SelectList!]!
+  locationsSelectList(projectId: Int, filter: DocLocationFilterInput): [SelectList!]!
+
+  """
+  El alcance de los catálogos que el proyecto declaró, que puede ser ninguno.
+
+  No completa con INHERIT los catálogos sin declarar: la ausencia es el default, y
+  fabricar filas inexistentes haría indistinguible lo declarado de lo supuesto.
+  """
+  catalogScopes(projectId: Int!): [DocCatalogScope!]!
 }
 
 # ═══════════════════════════════════════════════════════
@@ -3345,6 +3471,18 @@ type Mutation {
   Eliminar definitivamente un nodo, admitido solo si no tiene descendencia.
   """
   deleteLocation(id: Int!): Boolean!
+
+  """
+  Declarar cómo un proyecto resuelve un catálogo documental.
+
+  Upsert por el par proyecto-catálogo: declarar dos veces no acumula filas, y
+  volver a INHERIT es declararlo, no borrar la fila.
+
+  Declarar OWN sobre la ubicación se rechaza mientras algún nodo del proyecto
+  cuelgue del árbol del despliegue: quedaría colgado de un padre que el proyecto
+  ya no ve. El mensaje nombra los nodos que lo impiden.
+  """
+  declareCatalogScope(input: DeclareCatalogScopeInput!): DocCatalogScope!
 
   # ─── Transmittals ───
   "Crear un nuevo transmittal"

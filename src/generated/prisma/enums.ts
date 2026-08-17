@@ -178,6 +178,23 @@ export const QualificationEffect = {
 export type QualificationEffect = (typeof QualificationEffect)[keyof typeof QualificationEffect]
 
 
+export const DocCatalogKind = {
+  LOCATION: 'LOCATION',
+  DOCUMENT_CLASS: 'DOCUMENT_CLASS',
+  DOCUMENT_TYPE: 'DOCUMENT_TYPE'
+} as const
+
+export type DocCatalogKind = (typeof DocCatalogKind)[keyof typeof DocCatalogKind]
+
+
+export const DocScopeMode = {
+  INHERIT: 'INHERIT',
+  OWN: 'OWN'
+} as const
+
+export type DocScopeMode = (typeof DocScopeMode)[keyof typeof DocScopeMode]
+
+
 export const DocLocationOrigin = {
   ASSETS: 'ASSETS',
   EXTERNAL: 'EXTERNAL'
@@ -203,7 +220,8 @@ export const DocObjectType = {
   DOC_REPLACEMENT: 'DOC_REPLACEMENT',
   DOC_QUALIFICATION: 'DOC_QUALIFICATION',
   DOC_TRANSMITTAL_RESPONSE: 'DOC_TRANSMITTAL_RESPONSE',
-  DOC_LOCATION: 'DOC_LOCATION'
+  DOC_LOCATION: 'DOC_LOCATION',
+  DOC_CATALOG_SCOPE: 'DOC_CATALOG_SCOPE'
 } as const
 
 export type DocObjectType = (typeof DocObjectType)[keyof typeof DocObjectType]

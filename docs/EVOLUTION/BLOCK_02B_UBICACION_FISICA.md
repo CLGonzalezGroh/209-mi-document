@@ -1,7 +1,7 @@
 # Bloque 02B — Ubicación física del documento
 
 **Estado:** `APROBADO_PENDIENTE`
-**Versión:** 1.0
+**Versión:** 1.1
 **Depende de:** `BLOCK_02`, que dejó creada `DocProjectSettings`.
 **Decisiones que ejecuta:** D-14.
 **Decisiones que construye para otro bloque:** el mecanismo de alcance por proyecto de D-21, que `BLOCK_02C` reutiliza sobre clase y tipo.
@@ -218,7 +218,24 @@ Tres cosas que la fase resolvió y no estaban escritas en el bloque:
 
 **386 pruebas, 0 fallos**, con las tres suites de integración. Trece puras sobre rutas, recálculo y ciclos; cuatro contra la base sobre la unicidad por nivel con `NULLS NOT DISTINCT`, el rechazo del borrado con descendencia y el par de la referencia externa.
 
-Pendiente de despliegue: `@CLGonzalezGroh/mi-common` con los seis permisos nuevos, y su siembra en cada cliente. Sin el seed el catálogo es inoperable aunque todo compile, que es lo que la fase 1 de `BLOCK_04` aprendió a los golpes.
+Pendiente de despliegue: `@CLGonzalezGroh/mi-common` con los seis permisos nuevos, y su siembra en cada cliente. Sin el seed el catálogo es inoperable aunque todo compile, que es lo que la fase 1 de `BLOCK_04` aprendió a los golpes. **Publicado como `2.9.0` y sembrado en local**; el alta en `mi-admin` incluyó el reparto por rol, que es el tercer paso y el que no compila si falta.
+
+### Fase 2 — completada
+
+`DocCatalogScope` con los dos modos, el alcance en `DocLocation`, la unicidad recreada con el alcance en la tupla, y la autorización en dos capas sobre las siete operaciones del catálogo.
+
+**Dos decisiones que la fase tomó, y que `B1` no fijaba:**
+
+- **la declaración vive en una tabla propia con una fila por proyecto y catálogo**, y no en columnas de `DocProjectSettings`. Es la única forma en que "un mecanismo para tres catálogos" es cierto en el modelo: `BLOCK_02C` agrega un valor a `DocCatalogKind` y no migra estructura. Es además la distinción que D-21 ya había hecho —las demás configuraciones por proyecto son **valores** donde lo específico reemplaza a lo general; un catálogo es un **conjunto**— y evita empujar a `DocProjectSettings` en la dirección que el plan advierte para cuando llegue el escalón de módulo;
+- **declarar catálogo propio se rechaza mientras algún nodo del proyecto cuelgue del árbol del despliegue**, nombrando las rutas que lo impiden. Convertirlos en raíces reescribiría rutas de nodos que nadie tocó por un cambio de configuración, y mover ya es la vía para acomodarlos.
+
+**Y una invariante que la fase descubrió al modelar el cruce:** el cruce de alcances se admite **en un solo sentido**. Un nodo de proyecto cuelga de uno del despliegue —eso *es* ampliar—; al revés volvería el árbol global dependiente de un proyecto. No es expresable en un `CHECK` porque exige mirar el padre, de modo que vive en la operación con su prueba. Es específica del árbol: `BLOCK_02C` no la va a necesitar, porque clase y tipo son planos.
+
+Dos consecuencias del cruce que había que resolver y no estaban anotadas: el recálculo de rutas **lee sin acotar por alcance**, porque renombrar un nodo global cambia la ruta de las ampliaciones que le colgaron los proyectos; y la cuenta de descendencia que protege el borrado también, porque un nodo global con ampliaciones tiene descendencia aunque quien lo mira no la vea.
+
+**No consumió permisos nuevos.** Declarar el alcance usa el de la configuración del proyecto, que es lo que el acto es. No hubo que publicar `mi-common`.
+
+**406 pruebas, 0 fallos.** Quince puras nuevas y tres contra la base.
 
 ## Referencias
 
