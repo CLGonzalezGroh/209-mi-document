@@ -874,3 +874,23 @@ Un catálogo es un **conjunto**, y esa es la diferencia con las demás configura
 
 **406 pruebas, 0 fallos.** Quince puras sobre el modo efectivo, la resolución, la coincidencia entre el criterio de consulta y el filtro en memoria, y las dos invariantes de cruce; tres contra la base sobre la unicidad con alcance, la ampliación admitida y la declaración única por par.
 
+### Fase 3 — La siembra por copia
+
+Un proyecto que declara catálogo propio arranca vacío, y con clase y tipo obligatorios eso lo dejaría sin poder dar de alta un documento. La siembra es lo que vuelve manejable el modo propio: no una hoja en blanco, sino una copia privada para podar.
+
+- **La copia es puntual y no deja vínculo.** Una copia permanente **es** herencia, y llamarla de otro modo daría dos formas de lo mismo.
+- **La fuente es el árbol del despliegue o el de otro proyecto.** El global suele ser el estándar de la propia organización; el catálogo de un proyecto es el estándar de un cliente, y el segundo proyecto para el mismo cliente lo copia en lugar de recargarlo a mano. Los dos casos son **una sola regla**, porque la fuente es siempre "lo que la fuente ve" con su alcance resuelto.
+- **La identidad de un nodo es su ruta completa, y de ahí sale todo lo demás.** Copiar un árbol no es copiar una lista: dos nodos son el mismo cuando su ruta coincide, y no cuando coincide su código —el mismo código puede repetirse en dos plantas—. Por eso sembrar es **incremental e idempotente**: dos veces no duplica, y una fuente parcialmente solapada agrega solo las ramas que faltan, **colgándolas de los nodos que el destino ya tiene** en lugar de recrearlos.
+- **El destino se compara por lo que VE, no por lo que tiene propio.** Nunca se crea una copia propia que tape a una heredada.
+- **Solo se copia lo vigente con ascendencia vigente.** Un nodo dado de baja no viaja, y su descendencia tampoco: la rama no tendría de qué colgar. Se informa aparte, y no se confunde con lo que ya estaba.
+- **La referencia externa y el orden viajan con el nodo.** La referencia identifica el **mismo objeto real** —el mismo activo—, de modo que copiar el nodo sin ella perdería el vínculo que `B7` existe para sostener.
+- **Leer la fuente exige alcanzarla**: la del despliegue con el permiso global, la de otro proyecto con **membresía en ese proyecto**. Alcanzar el destino no habilita leer el catálogo de otro cliente. Son dos verificaciones y no una.
+- **El resultado son tres números que dicen cosas distintas**: lo agregado, lo que el destino ya veía, y lo que no viajó por estar dado de baja. Un solo total los confundiría.
+
+**Cada nodo copiado emite su creación**, como cualquier otro —un nodo que apareciera sin registro de haber sido creado sería la excepción— y **la siembra emite además su propio acto**. Ese acto va **sin objeto**, y es deliberado: no recae sobre un nodo sino sobre el catálogo del proyecto, y elegir uno de los creados para colgarle la traza sería la atribución arbitraria que el acto de reemplazo evitó con un tipo propio. Existe por un caso que las creaciones no cubren: **una siembra que no agrega nada no dejaría rastro**, y saber que alguien la intentó es justamente lo que se quiere poder responder.
+
+**El orden importa, y no es una restricción del mecanismo: es el orden natural.** Primero se declara catálogo propio y después se siembra. Un proyecto que todavía hereda ya **ve** el árbol del despliegue, de modo que sembrárselo no agrega nada — y eso es correcto, no un defecto: crear copias propias de lo que ya ve lo taparía con duplicados. Lo descubrió una prueba de integración que esperaba lo contrario, y la expectativa era la equivocada.
+
+**435 pruebas, 0 fallos.** Once puras sobre el plan de copia —orden, idempotencia, solapamiento, bajas y determinismo— y **una suite de integración nueva con dieciocho casos** que verifica contra la base lo que el plan puro no alcanza: que la jerarquía se reconstruya de verdad en el destino, que el cruce de alcances se rechace donde corresponde, y que declarar propio nombre las rutas que lo impiden.
+
+

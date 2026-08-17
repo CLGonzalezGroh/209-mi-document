@@ -1,7 +1,7 @@
 # Bloque 02B — Ubicación física del documento
 
 **Estado:** `APROBADO_PENDIENTE`
-**Versión:** 1.1
+**Versión:** 1.2
 **Depende de:** `BLOCK_02`, que dejó creada `DocProjectSettings`.
 **Decisiones que ejecuta:** D-14.
 **Decisiones que construye para otro bloque:** el mecanismo de alcance por proyecto de D-21, que `BLOCK_02C` reutiliza sobre clase y tipo.
@@ -69,7 +69,7 @@ En una planta rige el primero: el árbol del despliegue describe la instalación
 Forma:
 
 - **los proyectos que se ofrecen como fuente son los que el usuario alcanza por membresía** (D-15). La nomenclatura de un cliente es información de ese cliente, y la membresía es lo que determina qué alcanza el usuario. No hace falta concepto nuevo;
-- **sembrar solo agrega**: toma las entradas de la fuente cuyo código no exista en el destino, y nunca quita ni modifica. Se admite más de una vez, no exige que el destino esté vacío, y sembrar dos veces no duplica;
+- **sembrar solo agrega**: toma las entradas de la fuente que el destino no tenga, y nunca quita ni modifica. Se admite más de una vez, no exige que el destino esté vacío, y sembrar dos veces no duplica. **Precisado al implementar la fase 3: la identidad de un nodo es su ruta completa y no su código**, porque el mismo código puede repetirse en dos plantas; y lo que se compara es lo que el destino **ve**, no lo que tiene propio;
 - **de dónde salió el catálogo queda en la traza y no en el modelo**: sembrar emite un evento de auditoría con la fuente en su contexto. Un atributo de linaje sería estructura para una pregunta que `DocAuditEvent` ya contesta;
 - **copiar el árbol no es copiar una lista**: hay que trasladar los nodos, rearmar los vínculos de padre y recalcular las rutas en el destino. Es el caso difícil de la siembra, y es la razón por la que este bloque construye el mecanismo: si funciona sobre la jerarquía, aplicarlo a clase y tipo es el caso fácil.
 
@@ -236,6 +236,26 @@ Dos consecuencias del cruce que había que resolver y no estaban anotadas: el re
 **No consumió permisos nuevos.** Declarar el alcance usa el de la configuración del proyecto, que es lo que el acto es. No hubo que publicar `mi-common`.
 
 **406 pruebas, 0 fallos.** Quince puras nuevas y tres contra la base.
+
+### Fase 3 — completada
+
+La siembra por copia, con el árbol del despliegue o el de otro proyecto como fuente.
+
+**Lo que la fase decidió, y `B2` no fijaba: la identidad de un nodo es su ruta completa.** De ahí sale todo lo demás, y es lo que distingue copiar un árbol de copiar una lista:
+
+- **sembrar es incremental e idempotente.** Dos veces no duplica, y una fuente parcialmente solapada agrega solo las ramas que faltan, colgándolas de los nodos que el destino ya tiene en lugar de recrearlos;
+- **el destino se compara por lo que ve y no por lo que tiene propio**, de modo que nunca se crea una copia propia que tape a una heredada;
+- **la fuente es también "lo que la fuente ve"**, con su alcance resuelto, y por eso el despliegue y otro proyecto son una sola regla y no dos.
+
+Y una consecuencia que apareció al probarlo: **el orden importa, y es el natural.** Primero se declara catálogo propio, después se siembra. Un proyecto que todavía hereda ya ve el árbol del despliegue, de modo que sembrárselo no agrega nada — correcto, no defectuoso. Lo descubrió una prueba de integración cuya expectativa era la equivocada.
+
+Dos decisiones menores que quedaron asentadas: **solo se copia lo vigente con ascendencia vigente**, porque la descendencia de un nodo dado de baja no tendría de qué colgar; y **la referencia externa viaja con el nodo**, porque identifica el mismo objeto real y copiarlo sin ella perdería el vínculo que `B7` sostiene.
+
+**La traza son las creaciones más el acto.** Cada nodo copiado emite su creación, con su contexto derivado; la siembra emite además `SeedLocations`, **sin objeto** y deliberadamente: no recae sobre un nodo sino sobre el catálogo, y elegir uno de los creados sería la atribución arbitraria que `DOC_REPLACEMENT` evitó con un tipo propio. Existe por lo que las creaciones no cubren — una siembra que no agrega nada no dejaría rastro.
+
+**435 pruebas, 0 fallos.** Once puras sobre el plan de copia, y una suite de integración nueva con dieciocho casos que verifica contra la base lo que el plan puro no alcanza: que la jerarquía se reconstruya de verdad, que el cruce de alcances se rechace donde corresponde, y que declarar propio nombre las rutas que lo impiden.
+
+Quedan las fases 4 a 7: el atributo en el documento y su configuración, las consultas de filtrado, la migración con permisos y pruebas de las tres capas, y la promoción a la SFS con el descarte de la matriz.
 
 ## Referencias
 

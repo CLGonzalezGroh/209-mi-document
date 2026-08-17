@@ -117,6 +117,7 @@ export const AuditAction = {
   // registro, un catálogo que pasa de sesenta valores a tres no tendría
   // explicación en ninguna parte.
   DeclareCatalogScope: "DeclareCatalogScope",
+  SeedLocations: "SeedLocations",
   CreateLocation: "CreateLocation",
   UpdateLocation: "UpdateLocation",
   MoveLocation: "MoveLocation",
@@ -198,6 +199,9 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
 
   // Ubicación física (BLOQUE 02B)
   [AuditAction.DeclareCatalogScope]: DocObjectType.DOC_CATALOG_SCOPE,
+  // La siembra recae sobre el CATÁLOGO del proyecto y no sobre un nodo: se emite
+  // sin objeto, y el tipo declarado es el del catálogo que se siembra.
+  [AuditAction.SeedLocations]: DocObjectType.DOC_LOCATION,
   [AuditAction.CreateLocation]: DocObjectType.DOC_LOCATION,
   [AuditAction.UpdateLocation]: DocObjectType.DOC_LOCATION,
   [AuditAction.MoveLocation]: DocObjectType.DOC_LOCATION,

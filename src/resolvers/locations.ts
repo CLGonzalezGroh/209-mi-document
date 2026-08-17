@@ -28,6 +28,7 @@ import {
   parentScopeAdmitted,
   scopeWhere,
 } from "../utils/catalogScope.js"
+import { planSeed } from "../utils/catalogSeed.js"
 
 const logger = createLogger("locations")
 
@@ -111,6 +112,42 @@ const buildWhere = (
   }
 
   return where
+}
+
+/**
+ * Las ubicaciones que un ámbito **ve**.
+ *
+ * Un proyecto ve las propias más las del despliegue si hereda; el despliegue ve
+ * las suyas, que son el árbol global. Los dos casos son una sola función, y es lo
+ * que permite que la siembra trate al despliegue y a otro proyecto con la misma
+ * regla (B2).
+ */
+const visibleLocations = async (
+  client: Prisma.TransactionClient,
+  projectId: number | null,
+) => {
+  const where =
+    projectId === null
+      ? { projectId: null }
+      : scopeWhere({
+          projectId,
+          mode: await locationScopeMode(client, projectId),
+        })
+
+  return client.docLocation.findMany({
+    where,
+    select: {
+      id: true,
+      parentId: true,
+      code: true,
+      name: true,
+      path: true,
+      sortOrder: true,
+      externalOrigin: true,
+      externalRef: true,
+      terminatedAt: true,
+    },
+  })
 }
 
 /** El modo con que un proyecto resuelve el catálogo de ubicación. */
@@ -535,6 +572,162 @@ export const locationResolvers = {
             uniqueConstraint:
               "Ya existe una ubicación con ese código en el mismo nivel y alcance.",
             default: "Error al crear la ubicación.",
+          },
+        })
+      }
+    },
+
+    /**
+     * Sembrar el catálogo de un proyecto copiando otro (B2).
+     *
+     * La copia es **puntual** y no deja vínculo: una copia permanente *es*
+     * herencia. La fuente es el árbol del despliegue —el estándar de la propia
+     * organización— o el de otro proyecto —el estándar de un cliente, que el
+     * segundo proyecto para el mismo cliente no debería recargar a mano—.
+     *
+     * **Solo agrega.** Nunca quita ni modifica, se admite más de una vez y
+     * sembrar dos veces no duplica, porque la identidad del nodo es su ruta
+     * completa. El detalle de qué se copia y en qué orden lo decide `planSeed`;
+     * acá está lo que exige la base: escribir en orden y resolver cada ruta a su
+     * identificador.
+     *
+     * **Leer la fuente exige alcanzarla**: la del despliegue con el permiso
+     * global, la de otro proyecto con membresía en ese proyecto. La nomenclatura
+     * de un cliente es información de ese cliente (D-15).
+     */
+    seedProjectLocations: async (
+      _: any,
+      {
+        projectId,
+        sourceProjectId,
+      }: { projectId: number; sourceProjectId?: number | null },
+      context: ResolverContext,
+    ) => {
+      const fuente = sourceProjectId ?? null
+
+      const userId = await projectAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_CREATE],
+        projectId,
+        context,
+      })
+      logger.info("seedProjectLocations", { userId })
+
+      // La segunda capa sobre la FUENTE, y aparte: alcanzar el destino no
+      // habilita leer el catálogo de un proyecto ajeno.
+      if (fuente !== null) {
+        await projectAuthorization({
+          requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
+          projectId: fuente,
+          context,
+        })
+      }
+
+      try {
+        if (fuente === projectId) {
+          throw new GraphQLError(
+            "Un proyecto no se siembra de sí mismo.",
+            { extensions: { code: "BAD_USER_INPUT" } },
+          )
+        }
+
+        return await context.orm.$transaction(async (tx) => {
+          const origen = await visibleLocations(tx, fuente)
+          const destino = await visibleLocations(tx, projectId)
+
+          const plan = planSeed({
+            source: origen,
+            destinationPaths: destino.map((n) => n.path),
+          })
+
+          // Las rutas que el destino ya resuelve, más las que esta siembra
+          // agrega: es lo que convierte `parentPath` en identificador, sin
+          // distinguir el nodo preexistente del recién creado.
+          const idPorRuta = new Map(destino.map((n) => [n.path, n.id]))
+
+          for (const paso of plan.steps) {
+            const parentId =
+              paso.parentPath === null
+                ? null
+                : (idPorRuta.get(paso.parentPath) ?? null)
+
+            const creado = await tx.docLocation.create({
+              data: {
+                projectId,
+                parentId,
+                code: paso.code,
+                name: paso.name,
+                // Se recompone en lugar de copiarse: la ruta del destino queda
+                // consistente con su propia ascendencia por construcción, en
+                // lugar de confiar en la de la fuente. Coincide con `paso.path`,
+                // porque la identidad del nodo ES su ruta.
+                path: composePath(paso.parentPath, paso.name),
+                sortOrder: paso.sortOrder,
+                externalOrigin: paso.externalOrigin,
+                externalRef: paso.externalRef,
+                createdById: userId,
+                updatedById: userId,
+              },
+            })
+
+            idPorRuta.set(creado.path, creado.id)
+
+            // Cada nodo emite su creación, como cualquier otro: un nodo que
+            // apareciera sin registro de haber sido creado sería la excepción.
+            // El contexto sale del propio nodo, de modo que la traza del proyecto
+            // los muestra.
+            await emitAuditEvent(tx, {
+              action: AuditAction.CreateLocation,
+              objectId: creado.id,
+              actorId: userId,
+              meta: {
+                code: creado.code,
+                name: creado.name,
+                path: creado.path,
+                parentId: creado.parentId,
+                seededFrom: fuente,
+              },
+            })
+          }
+
+          // Y el acto, una vez. **Sin objeto**, y es deliberado: la siembra no
+          // recae sobre un nodo sino sobre el catálogo del proyecto, y elegir uno
+          // de los creados para colgarle la traza sería la atribución arbitraria
+          // que `DOC_REPLACEMENT` evitó con un tipo propio. El costo es que este
+          // evento no lleva contexto derivado; lo compensan las creaciones, que
+          // sí lo llevan.
+          //
+          // Existe además por un caso que las creaciones no cubren: una siembra
+          // que no agrega nada. Sin este evento, intentarla no dejaría rastro.
+          await emitAuditEvent(tx, {
+            action: AuditAction.SeedLocations,
+            objectId: null,
+            actorId: userId,
+            meta: {
+              projectId,
+              sourceProjectId: fuente,
+              added: plan.steps.length,
+              alreadyPresent: plan.alreadyPresent,
+              skippedTerminated: plan.skippedTerminated,
+            },
+          })
+
+          return {
+            added: plan.steps.length,
+            alreadyPresent: plan.alreadyPresent,
+            skippedTerminated: plan.skippedTerminated,
+          }
+        })
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "SEED_PROJECT_LOCATIONS",
+          module: SysLogModule.DOCUMENT,
+          messages: {
+            uniqueConstraint:
+              "Ya existe una ubicación con ese código en el mismo nivel y alcance.",
+            default: "Error al sembrar el catálogo de ubicaciones.",
           },
         })
       }

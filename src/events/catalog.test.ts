@@ -166,5 +166,11 @@ test("el catálogo cubre las escrituras relevadas más lo que agregaron los bloq
   // qué entradas tiene disponibles un proyecto SIN TOCAR ninguna entrada (B1).
   //
   //   + DeclareCatalogScope
-  assert.equal(AUDIT_ACTIONS.length, 57)
+  //
+  // Y 1 en su fase 3, de 57 a 58: la siembra por copia. Existe además de las
+  // creaciones que produce, y por un caso que ellas no cubren: una siembra que no
+  // agrega nada no dejaría rastro (B2).
+  //
+  //   + SeedLocations
+  assert.equal(AUDIT_ACTIONS.length, 58)
 })

@@ -1680,6 +1680,22 @@ type DocCatalogScope {
   mode: DocScopeMode!
 }
 
+"""
+Resultado de sembrar un catálogo por copia.
+
+Los tres números dicen cosas distintas: lo que se agregó, lo que el destino ya
+veía —y por lo tanto no se duplicó— y lo que no viajó por estar dado de baja,
+ello o algún ascendiente.
+"""
+type DocSeedResult {
+  "Nodos creados en el destino"
+  added: Int!
+  "Nodos de la fuente que el destino ya veía, por su ruta"
+  alreadyPresent: Int!
+  "Nodos no copiados por estar dados de baja, ellos o algún ascendiente"
+  skippedTerminated: Int!
+}
+
 "Input para declarar cómo un proyecto resuelve un catálogo"
 input DeclareCatalogScopeInput {
   "Proyecto que declara"
@@ -3483,6 +3499,25 @@ type Mutation {
   ya no ve. El mensaje nombra los nodos que lo impiden.
   """
   declareCatalogScope(input: DeclareCatalogScopeInput!): DocCatalogScope!
+
+  """
+  Sembrar el catálogo de ubicación de un proyecto copiando otro.
+
+  La copia es puntual y no deja vínculo: una copia permanente es herencia. La
+  fuente es el árbol del despliegue —omitiendo sourceProjectId— o el de otro
+  proyecto, cuyo catálogo exige membresía en ese proyecto para leerse.
+
+  Solo agrega: nunca quita ni modifica, se admite más de una vez y sembrar dos
+  veces no duplica, porque la identidad de un nodo es su ruta completa. Una
+  fuente parcialmente solapada agrega solo las ramas que faltan, colgándolas de
+  los nodos que el destino ya tiene.
+  """
+  seedProjectLocations(
+    "Proyecto que recibe la copia"
+    projectId: Int!
+    "Proyecto del que se copia. Omitido = el árbol del despliegue"
+    sourceProjectId: Int
+  ): DocSeedResult!
 
   # ─── Transmittals ───
   "Crear un nuevo transmittal"
