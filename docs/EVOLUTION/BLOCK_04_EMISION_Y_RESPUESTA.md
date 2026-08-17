@@ -1,7 +1,7 @@
 # Bloque 04 — Emisión y respuesta
 
-**Estado:** `APROBADO_PENDIENTE`
-**Versión:** 1.0
+**Estado:** `PROMOVIDO_A_SFS`
+**Versión:** 1.1
 **Depende de:** `BLOCK_02` y `BLOCK_03B`.
 **Decisiones que ejecuta:** D-12, D-18, D-22, y las consecuencias de D-09, D-11 y D-19 sobre la circulación.
 **Consume lo que dejaron habilitado:** `B16` de `BLOCK_03` —circuito sin elaboración y conclusión terminal— y `B9` de `BLOCK_03B` —qué roles de archivo exige la emisión—.
@@ -448,3 +448,18 @@ El catálogo va primero porque la respuesta lo referencia, y el circuito del Rec
 - **La matriz de responsabilidad**, que propondría los revisores del paso 2 de `B12`.
 - **El paquete de información de entrada**, que es `BLOCK_04B`.
 - **El escalón de módulo en la configuración.** Este bloque carga `DocProjectSettings` y el catálogo de calificaciones con configuración específica de contraparte, que es exactamente la evidencia que el plan quería tener a la vista antes de abrir ese bloque.
+
+---
+
+## Cierre
+
+**Promovido a la SFS.** El comportamiento del bloque se incorporó en un ámbito propio, `domain/15_circulation/`, con cuatro Objetos del Dominio nuevos —`Transmittal`, `TransmittalItem`, `DocTransmittalResponse` y `DocQualification`— y sus principios en doce puntos.
+
+El ámbito es propio y no un agregado al ciclo interno porque el bloque introdujo objetos que no le pertenecen: mezclarlos habría vuelto a borrar la frontera que D-18 estableció. El ciclo interno no sabe de transmittals, y la circulación no reabre el circuito salvo en el único punto donde el circuito **es** el mecanismo de respuesta.
+
+Cuatro documentos del ciclo interno se actualizaron por lo que este bloque les cambió: `DocumentRevision` incorpora su estado terminal por rechazo de la contraparte y la regla de que consume código; `ReviewWorkflow` y `ReviewStep`, la conclusión terminal y la calificación exigida al cerrar en el rol Receptor; y `Document`, la lectura de documento pendiente.
+
+**Desplegado y verificado.** Testing —`rbb`, `optimal`, `proion`— y producción —`optimal`, `proion`— sirven el contrato del bloque, con las ocho migraciones aplicadas y los permisos sembrados. La línea base del subsistema legado de `optimal` quedó intacta, comparada entre dos corridas del mismo control antes y después de migrar: 3.289 archivos escaneados, 52 áreas y 5.124 registros de log.
+
+**Lo que no se verificó todavía**, y no depende del bloque: las pruebas funcionales de extremo a extremo, que esperan la interfaz de usuario (H-25, `BLOCK_05`).
+

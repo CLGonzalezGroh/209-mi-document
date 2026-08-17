@@ -69,6 +69,8 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **Solo los pasos que deciden pueden rechazar**, y son los únicos que cuentan para completar el circuito.
 
+**Donde el circuito produce la respuesta de la contraparte, resolverlo exige la calificación.** Ocurre en el rol Receptor, y se exige exactamente cuando la resolución **concluye** el circuito: al aprobar el último paso que decide, o al rechazar en cualquiera. Un paso intermedio no la lleva, porque todavía no hay respuesta que dar; y fuera de ese rol no corresponde, porque ahí la calificación la produce el cliente. El desenlace del paso **se deriva del efecto** de la calificación elegida, y no puede contradecirlo. Ver `../15_circulation/80_Principios_del_Modelo.md`.
+
 **El paso lo resuelve quien lo tiene asignado.** Resolverlo por otro exige el permiso de administración del circuito **y motivo**: es lo que vuelve la delegación trazable y no solo permitida.
 
 **Quien resolvió se registra siempre**, y la divergencia con el asignado se **deriva** de ambos datos.

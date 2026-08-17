@@ -101,6 +101,8 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 # Observaciones
 
+**Un documento está pendiente cuando su revisión en curso todavía no salió.** No es un atributo ni una clase aparte: se deriva de que esa revisión no figure en ninguna emisión, y su significado depende del rol del proyecto. No hay documento esperado y documento adicional — todo el que se da de alta en el proyecto es esperado, y el que aparece más tarde también. Ver `../15_circulation/80_Principios_del_Modelo.md`.
+
 El documento expone **dos lecturas distintas** de su estado, y confundirlas es el defecto que su especificación previene: la revisión **vigente** es la última aprobada y solo esa, y la revisión **en curso** es la última no abandonada en cualquier estado. Un documento sin ninguna revisión aprobada no tiene revisión vigente, y devolver un borrador en su lugar afirmaría que el proyecto tiene un documento que en realidad no aprobó.
 
 **Esas mismas dos lecturas alcanzan a la identificación**, y por eso la copia lleva el prefijo que la nombra. La metadata **vigente** es la de la última aprobada —lo que dice el rótulo que efectivamente salió—; la metadata **en curso** es la de la revisión abierta. Un campo que callara cuál de las dos es se derivaría mal en cada consumidor.

@@ -32,7 +32,10 @@ stateDiagram-v2
     APPROVED --> SUPERSEDED: se aprueba una revisión posterior
     DRAFT --> ABANDONED: se abandona
     IN_REVIEW --> ABANDONED: se abandona
+    IN_REVIEW --> REJECTED: la contraparte la rechaza, en modo Receptor
 ```
+
+El último es el único desenlace que no pertenece al ciclo interno: ocurre donde el circuito **es** el mecanismo con que la contraparte produce su respuesta, y por eso concluye la revisión en lugar de devolverla al elaborador. Ver `../15_circulation/80_Principios_del_Modelo.md`.
 
 Está en borrador mientras el trabajo se arma o se elabora, y en revisión desde que se somete. **No hay un estado por cada paso**: dónde está el trabajo lo dice el paso vigente del circuito.
 
@@ -78,6 +81,8 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **El código es único entre las revisiones no abandonadas del documento.** Las abandonadas **no consumen código**, y un documento puede tener varias con el mismo, distinguidas por su fecha y su motivo.
 
+La rechazada por la contraparte **sí lo consume**: salió, y la contraparte la recibió con él. La secuencia sigue de largo en los tres desenlaces —aprobada, aprobada con comentarios o rechazada— de modo que rechazada la `A`, la siguiente es la `B`.
+
 **Toda revisión viva tiene exactamente un circuito abierto.**
 
 **A lo sumo una copia de trabajo abierta.** Es el mismo invariante que el documento aplica a su revisión en curso y la revisión a su circuito, en un tercer nivel.
@@ -121,7 +126,9 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **La palabra del nivel es «abandonada».** El circuito se cancela, la revisión se abandona y el documento queda obsoleto: cada término pertenece a un solo nivel y no se usa en ningún otro. Retirar un armado, desistir de una emisión y dar por concluida una identidad son hechos que no se confunden en el trabajo real, y no deben confundirse en el nombre.
 
-**El estado `OBSOLETE` se retiró.** Estaba declarado sin uso, reservado a los estados terminales por respuesta de la contraparte. No hace falta: una revisión se aprueba o se rechaza, y si el trabajo deja de tener sentido antes se abandona; si deja de tenerlo después, lo que caduca es el documento y no la emisión que efectivamente salió. Lo que la contraparte responde es el resultado del paso y no un estado de la revisión, y dejarlo disponible invitaba a que lo ocupara — dos máquinas de estados describiendo lo mismo.
+**El estado `OBSOLETE` se retiró.** Estaba declarado sin uso, reservado a los estados terminales por respuesta de la contraparte. No hace falta: lo que la contraparte responde es una calificación y no un estado de la revisión, y dejarlo disponible invitaba a que lo ocupara — dos máquinas de estados describiendo lo mismo.
+
+**`REJECTED` no es aquel estado con otro nombre.** No expresa la respuesta de la contraparte, que vive en la respuesta del ítem y no mueve a la revisión emitida. Expresa la conclusión del **circuito** allí donde el circuito es interno a quien recibe: en modo Receptor el elaborador está afuera y el rechazo no tiene a quién devolverle el trabajo, de modo que la revisión concluye. Sin ese estado quedaría en borrador de forma permanente, bloqueando la emisión siguiente.
 
 ---
 

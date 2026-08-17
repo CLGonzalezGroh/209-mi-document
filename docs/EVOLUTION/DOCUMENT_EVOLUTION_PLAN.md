@@ -93,18 +93,18 @@ Los siguientes puntos requieren revisión antes de convertirse en reglas aprobad
 
 | # | Tema | Situación actual observada | Estado |
 | - | ---- | -------------------------- | ------ |
-| H-11 | Emisión de revisiones no aprobadas | `createTransmittal` no valida el estado de las revisiones incluidas. Es posible emitir al cliente una revisión en `DRAFT` o en `IN_REVIEW`. Resuelto por D-18: puerta dura, sin excepción por código de propósito. | `APROBADO_PENDIENTE` |
-| H-12 | Acuse de recibo sin operación | `TransmittalStatus.ACKNOWLEDGED` se acepta como estado de origen para responder, pero ninguna operación lo asigna. | `IMPLEMENTADO_CON_BRECHA` |
-| H-13 | Items inmutables tras la creación | No existe operación para agregar ni quitar `TransmittalItem` después de crear el transmittal, ni siquiera en estado `DRAFT`. | `PROPUESTO` |
-| H-14 | Respuesta sin verificación de pertenencia | `respondTransmittal` actualiza cada item por su identificador sin comprobar que pertenezca al transmittal indicado. | `IMPLEMENTADO_CON_BRECHA` |
-| H-15 | Cierre sin respuesta completa | `closeTransmittal` no exige que todos los items tengan `clientStatus` registrado. Deja de ser una brecha: las respuestas parciales son la práctica normal y el cierre no condiciona el avance de ningún documento (D-18). Resta definir si el cierre se deriva de los ítems o admite cierre explícito con motivo. | `PROPUESTO` |
-| H-16 | Numeración global y no transaccional | `generateTransmittalCode` deriva `TR-NNN` del último registro por identificador, sin secuencia ni transacción, y la numeración es global en lugar de por proyecto. | `PROPUESTO` |
-| H-29 | Transmittal sin sentido de circulación | El modelo asume una única dirección: se emite y el cliente responde sobre el mismo registro. No existe el concepto de transmittal **entrante** ni el vínculo entre uno de respuesta y el que responde. Según D-18: en modo Emisor el transmittal es saliente y la respuesta llega como transmittal de retorno o documento a documento; en modo Receptor es entrante y **no hay transmittal de salida**. | `APROBADO_PENDIENTE` |
-| H-30 | Sin archivos de respuesta del cliente | La respuesta solo admite `clientStatus` y comentarios de texto. No hay forma de incorporar los archivos marcados que devuelve la contraparte, que son la evidencia de la observación. | `APROBADO_PENDIENTE` |
-| H-31 | Sin listado de documentos esperados | En modo Receptor la planta debe definir los documentos obligatorios por contrato, sobre los que el proveedor emite, pudiendo agregar adicionales. No existe ningún concepto equivalente en el modelo. `BLOCK_04` lo cierra sin incorporarlo: todo documento del proyecto es esperado, y pendiente es el que no salió, derivado y no declarado (B13). | `APROBADO_PENDIENTE` |
+| H-11 | Emisión de revisiones no aprobadas | `createTransmittal` no valida el estado de las revisiones incluidas. Es posible emitir al cliente una revisión en `DRAFT` o en `IN_REVIEW`. Resuelto por D-18: puerta dura, sin excepción por código de propósito. Cerrado en `BLOCK_04` (B3), y aplicada además al incorporar el ítem. | `PROMOVIDO_A_SFS` |
+| H-12 | Acuse de recibo sin operación | `TransmittalStatus.ACKNOWLEDGED` se acepta como estado de origen para responder, pero ninguna operación lo asigna. Cerrado en `BLOCK_04` (B8): el acuse tiene operación propia, y solo en modo Emisor. | `PROMOVIDO_A_SFS` |
+| H-13 | Items inmutables tras la creación | No existe operación para agregar ni quitar `TransmittalItem` después de crear el transmittal, ni siquiera en estado `DRAFT`. Cerrado en `BLOCK_04` (B9): se agregan y se quitan en borrador, y quitar libera la revisión. | `PROMOVIDO_A_SFS` |
+| H-14 | Respuesta sin verificación de pertenencia | `respondTransmittal` actualiza cada item por su identificador sin comprobar que pertenezca al transmittal indicado. Cerrado en `BLOCK_04` (B5) **por construcción**: la respuesta se crea contra el ítem y aquella operación en lote ya no existe. | `PROMOVIDO_A_SFS` |
+| H-15 | Cierre sin respuesta completa | `closeTransmittal` no exige que todos los items tengan `clientStatus` registrado. Deja de ser una brecha: las respuestas parciales son la práctica normal y el cierre no condiciona el avance de ningún documento (D-18). Resta definir si el cierre se deriva de los ítems o admite cierre explícito con motivo.Cerrado en `BLOCK_04` (B10): el cierre es explícito, con motivo, y no exige respuestas completas. | `PROMOVIDO_A_SFS` |
+| H-16 | Numeración global y no transaccional | `generateTransmittalCode` deriva `TR-NNN` del último registro por identificador, sin secuencia ni transacción, y la numeración es global en lugar de por proyecto. Cerrado en `BLOCK_04` (B2): unicidad por proyecto y cálculo dentro de la transacción. | `PROMOVIDO_A_SFS` |
+| H-29 | Transmittal sin sentido de circulación | El modelo asume una única dirección: se emite y el cliente responde sobre el mismo registro. No existe el concepto de transmittal **entrante** ni el vínculo entre uno de respuesta y el que responde. Según D-18: en modo Emisor el transmittal es saliente y la respuesta llega como transmittal de retorno o documento a documento; en modo Receptor es entrante y **no hay transmittal de salida**. Cerrado en `BLOCK_04` (B1): la naturaleza se declara y el sentido se deriva. | `PROMOVIDO_A_SFS` |
+| H-30 | Sin archivos de respuesta del cliente | La respuesta solo admite `clientStatus` y comentarios de texto. No hay forma de incorporar los archivos marcados que devuelve la contraparte, que son la evidencia de la observación. Cerrado en `BLOCK_04` (B5 y B6): los archivos devueltos cuelgan de la respuesta, porque llegan de afuera del circuito. | `PROMOVIDO_A_SFS` |
+| H-31 | Sin listado de documentos esperados | En modo Receptor la planta debe definir los documentos obligatorios por contrato, sobre los que el proveedor emite, pudiendo agregar adicionales. No existe ningún concepto equivalente en el modelo. `BLOCK_04` lo cierra sin incorporarlo: todo documento del proyecto es esperado, y pendiente es el que no salió, derivado y no declarado (B13). | `PROMOVIDO_A_SFS` |
 | H-32 | Sin alcance para usuarios externos | Ambos modos pueden incorporar usuarios ajenos a la organización que hospeda el sistema: el contratista en modo Receptor, y el cliente que responde directamente en modo Emisor (D-12). Cada uno debe ver únicamente lo que le corresponde. No existe hoy ningún mecanismo de alcance: la autorización es puramente global por permiso. Resuelto por D-15 y promovido con `BLOCK_02`, como autorización en dos capas. | `PROMOVIDO_A_SFS` |
 | H-36 | Sin matriz de responsabilidad | En modo Receptor los documentos recibidos se distribuyen entre revisores según disciplina, tipo o área. No existe ningún concepto que proponga esa asignación: hoy cada paso del workflow se asigna a mano, documento por documento (D-18). **Sale del alcance de `BLOCK_04`** y queda entre los diferidos: es otra fuente de propuesta para un paso que ya existe, no una puerta. | `APROBADO_PENDIENTE` |
-| H-33 | Respuesta sin autoría diferenciada | El modelo no distingue quién respondió de quién registró la respuesta. En el caso habitual del modo Emisor la ingresa el control documental de la ingeniería, y esa diferencia debe quedar explícita (D-12). Tampoco se conserva la fecha real de la respuesta frente a la de registro. | `APROBADO_PENDIENTE` |
+| H-33 | Respuesta sin autoría diferenciada | El modelo no distingue quién respondió de quién registró la respuesta. En el caso habitual del modo Emisor la ingresa el control documental de la ingeniería, y esa diferencia debe quedar explícita (D-12). Tampoco se conserva la fecha real de la respuesta frente a la de registro. Cerrado en `BLOCK_04` (B5): autoría diferenciada, con la divergencia derivada. | `PROMOVIDO_A_SFS` |
 
 ### Modelo y alcance
 
@@ -431,7 +431,7 @@ Señal que obligaría a revisar esta recomendación: que dos proveedores emitan 
 
 ### D-18 — La circulación es asimétrica entre modos
 
-**Estado:** Aprobada.
+**Estado:** `PROMOVIDO_A_SFS`.
 
 Origen de la práctica: el transmittal nació como el remito en papel que acompañaba una carpeta de documentos, con una carátula que declaraba su contenido. El cliente respondía ese remito con otro remito, uno a uno, que consolidaba la calificación de todos los documentos enviados.
 
@@ -634,7 +634,7 @@ También definido al abrir `BLOCK_03`:
 
 ### D-12 — La respuesta de la contraparte se registra siempre, la ingrese quien la ingrese
 
-**Estado:** Aprobada.
+**Estado:** `PROMOVIDO_A_SFS`. Queda abierto si la respuesta directa del cliente exige que sea usuario con alcance restringido al proyecto: el modelo no lo prejuzga, porque el autor es texto y no referencia a `User`.
 
 En modo Emisor la respuesta del cliente puede llegar de dos maneras:
 
@@ -761,7 +761,7 @@ Pendientes de definición al abrir el bloque:
 
 ### D-22 — La calificación es un catálogo configurable, no una enumeración
 
-**Estado:** Aprobada en su alcance. Su forma se define en `BLOCK_04`.
+**Estado:** `PROMOVIDO_A_SFS`.
 
 Hoy la respuesta de la contraparte se expresa con `ClientStatus`, **enumeración fija de cuatro valores** en `TransmittalItem`. No resiste el uso real: cada cliente tiene su propio juego de calificaciones, con **sus códigos y su cantidad** —tres, cuatro o cinco—, y el rótulo que el usuario ve es el del cliente, no una traducción nuestra.
 

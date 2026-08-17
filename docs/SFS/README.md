@@ -20,7 +20,7 @@ Esta SFS cubre el subsistema de **Gestión Documental**:
 - documentos y su identificación: `Document`;
 - control de revisiones y versiones: `DocumentRevision` y `DocumentVersion`;
 - circuito de revisión y aprobación: `ReviewWorkflow` y `ReviewStep`;
-- emisión y seguimiento de transmittals: `Transmittal` y `TransmittalItem`;
+- emisión y respuesta de la contraparte: `Transmittal`, `TransmittalItem`, `DocTransmittalResponse` y el catálogo `DocQualification`;
 - archivos adjuntos sin versionado: `Attachment`;
 - vinculación de documentos con tareas de proyecto: `TaskDocumentReference`;
 - eventos funcionales transversales de workflow y auditoría, con el mismo tratamiento de dominio que reciben en OperMask Digitalization.
@@ -72,8 +72,15 @@ Los estados `PROPUESTO`, `APROBADO_PENDIENTE` e `IMPLEMENTADO_CON_BRECHA` perten
 | `domain/10_cycle/70_DOM-011_DocWorkflowTemplate.md` | La propuesta del circuito, resuelta por alcance | Approved |
 | `domain/10_cycle/75_DOM-012_DocSettings.md` | La convención documental del despliegue | Approved |
 | `domain/10_cycle/80_Principios_del_Modelo.md` | Principios del ciclo interno: circuito, versión, firma y numeración | Approved |
+| `domain/10_cycle/90_DOM-013_DocReplacement.md` | El acto que supera un documento con otro, N:M | Approved |
+| `domain/10_cycle/95_DOM-014_DocWorkingCopy.md` | El conjunto en preparación, antes de que la versión exista | Approved |
+| `domain/15_circulation/10_DOM-015_Transmittal.md` | El remito: agrupa la entrega y no gobierna el ciclo | Approved |
+| `domain/15_circulation/20_DOM-016_TransmittalItem.md` | La revisión que salió, y con qué propósito | Approved |
+| `domain/15_circulation/30_DOM-017_DocTransmittalResponse.md` | Lo que la contraparte respondió sobre un documento | Approved |
+| `domain/15_circulation/40_DOM-018_DocQualification.md` | El vocabulario de la respuesta, con su efecto interpretado | Approved |
+| `domain/15_circulation/80_Principios_del_Modelo.md` | Principios de la circulación: puertas, evidencia y asimetría entre modos | Approved |
 
-Los dos primeros Objetos del Dominio provienen del bloque de trazabilidad funcional; los dos siguientes, junto con los principios del contexto de proyecto, del bloque de contexto de proyecto y rol documental. Los ocho del ámbito de ciclo interno, junto con sus principios, provienen del bloque del ciclo interno de revisión. La organización conceptual del dominio —modelos, arquitectura y su índice— se incorporará cuando los bloques correspondientes se promuevan; hasta entonces, este índice cumple esa función.
+Los dos primeros Objetos del Dominio provienen del bloque de trazabilidad funcional; los dos siguientes, junto con los principios del contexto de proyecto, del bloque de contexto de proyecto y rol documental. Los del ámbito de ciclo interno, junto con sus principios, provienen de los bloques del ciclo interno de revisión y de la titularidad por nivel. Los cuatro del ámbito de circulación, junto con sus principios, provienen del bloque de emisión y respuesta. La organización conceptual del dominio —modelos, arquitectura y su índice— se incorporará cuando los bloques correspondientes se promuevan; hasta entonces, este índice cumple esa función.
 
 ## Estructura prevista
 

@@ -31,6 +31,8 @@ stateDiagram-v2
     CANCELLED --> [*]: abre uno nuevo desde el armado
 ```
 
+**En el rol Receptor el rechazo no abre nada**: ahí el circuito es el mecanismo con que la planta produce su respuesta, el elaborador está afuera y la conclusión es terminal para la revisión. Ver `../15_circulation/80_Principios_del_Modelo.md`.
+
 El circuito vigente **se deriva** de los circuitos de la revisión; no se almacena una referencia al vigente, que sería un dato derivado con riesgo de desincronizarse.
 
 ---
@@ -101,6 +103,8 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 # Observaciones
 
 **La reinstanciación depende de la salida.** El rechazo abre un circuito desde la elaboración con el **mismo elenco copiado**, porque el trabajo vuelve al elaborador sin rearmar nada. La cancelación abre uno desde el armado, porque lo que se corrige es precisamente cómo estaba armado.
+
+**Salvo donde no hay elaborador.** La regla uniforme es que el rechazo devuelve el trabajo a quien elabora; lo que cambia es dónde vive esa persona. En el rol Receptor vive afuera, de modo que no hay circuito sucesor y la emisión siguiente llega con revisión nueva. Por lo mismo, ahí el armado no tiene contenido y lo resuelve el sistema desde la plantilla del proyecto.
 
 **El elenco se copia y no se referencia**: reasignar un paso del circuito nuevo no altera la historia del anterior.
 
