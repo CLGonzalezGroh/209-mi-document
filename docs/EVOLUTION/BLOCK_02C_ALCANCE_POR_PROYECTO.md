@@ -1,7 +1,7 @@
 # Bloque 02C — Alcance por proyecto de clase y tipo
 
-**Estado:** `APROBADO_PENDIENTE` — fase 1 de 6 completada
-**Versión:** 1.2
+**Estado:** `APROBADO_PENDIENTE` — fases 1 y 2 de 6 completadas
+**Versión:** 1.3
 **Depende de:** `BLOCK_02B`, que construyó el mecanismo de alcance; `BLOCK_03`, por la unicidad con nulos.
 **Decisiones que ejecuta:** D-21.
 **Decisiones que aplica sin modificar:** D-06, D-13, D-15.
@@ -243,6 +243,29 @@ El modelo y la migración, sin nada de resolución todavía.
 **474 pruebas, 0 fallos** — una nueva, que fija que el eje de módulo ya admite una declaración sin proyecto y que la unicidad la alcanza con `NULLS NOT DISTINCT`, aunque todavía no exista operación que la produzca.
 
 **Lo que esta fase no trae, y es deliberado:** las consultas siguen resolviendo como antes —el alcance existe en el modelo y todavía no lo lee nadie—, no hay siembra, y la invariante de cruce de `B7` es de la fase 4. La webapp no registra una sola línea modificada, que es lo que `B4` sostiene.
+
+### Fase 2 — completada
+
+La resolución de alcance en las consultas y los selectores, con la autorización en dos capas.
+
+**Las dos vistas quedan separadas, con el precedente de la ubicación:**
+
+- **la lista es de administración y NO resuelve alcance.** Muestra lo que ese ámbito declaró: el catálogo del despliegue, o el propio de un proyecto;
+- **el selector resuelve.** Es lo que se puede elegir para clasificar: las propias más las heredadas, o solo las propias.
+
+Confundirlas habría dejado la pantalla de administración de un proyecto mostrando entradas que no puede editar.
+
+**`B8` es una línea de código y una prueba.** El ámbito omitido resuelve `projectId: null`, y las dos pruebas que lo fijan son las que sostienen que la webapp no se toque: la pantalla global llama sin proyecto y sigue devolviendo exactamente lo mismo.
+
+**La autorización sale del alcance de la entrada y no de una regla por operación.** El derivador de contexto de `DOCUMENT_CLASS` y `DOCUMENT_TYPE` **afirmaba que los catálogos eran globales del despliegue** —`projectId: null` fijo, con su comentario—, cosa que dejó de ser cierta en la fase 1. Ahora lee el alcance real, y con eso `assertObjectAccess` exige membresía para una entrada de proyecto sin que ninguna operación lo sepa. Es el mismo mecanismo que la ubicación, y por eso no hubo que escribir una regla por mutación.
+
+**Un defecto encontrado al componer los filtros.** El selector de tipos armaba módulo y clase sobre el mismo `OR` de nivel superior, moviéndolo de lugar cuando aparecía el segundo. Con el alcance —que también puede aportar un `OR`— el último en escribirse habría borrado a los anteriores **sin ruido**: un proyecto con catálogo propio habría visto el del despliegue. Los tres ejes pasan a componerse como condiciones `AND` independientes.
+
+**El alcance no reemplaza al eje de módulo**, y hay prueba: los dos filtran a la vez, de modo que un proyecto que hereda ve el catálogo del despliegue de su módulo y no el de calidad.
+
+**12 pruebas de integración nuevas, y 486 en total, 0 fallos.** Las tres negativas verifican **por qué** se rechaza y no solo que se rechace: un `catch` que acepta cualquier error habría quedado en verde el día que la operación fallara por un código duplicado.
+
+**Lo que esta fase no trae:** la siembra es la fase 3, y las dos invariantes de cruce de `B7` la fase 4 — hoy un tipo del despliegue todavía puede colgar de una clase de proyecto. La webapp sigue sin una línea modificada, y el contrato solo suma argumentos y campos opcionales.
 
 ## Referencias
 

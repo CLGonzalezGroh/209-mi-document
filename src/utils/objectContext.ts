@@ -133,22 +133,28 @@ const derivadores: Record<
     )
   },
 
-  // Los catálogos son globales del despliegue: no pertenecen a ningún proyecto y
-  // su módulo es opcional, donde nulo significa disponible para todos.
+  // Los catálogos de clasificación tienen ALCANCE desde BLOQUE 02C: nulo es la
+  // entrada del despliegue, que no pertenece a ningún proyecto y se resuelve con
+  // el permiso global; con proyecto, la entrada es suya y exige membresía. Es la
+  // autorización en dos capas de BLOQUE 02, B7, y sale del alcance de la propia
+  // entrada — no de una regla por operación.
+  //
+  // El módulo se conserva y es opcional, donde nulo significa disponible para
+  // todos. Los dos ejes conviven, como en la declaración de alcance (B6).
   [DocObjectType.DOCUMENT_CLASS]: async (client, id) => {
     const clase = await client.documentClass.findUnique({
       where: { id },
-      select: { module: true },
+      select: { module: true, projectId: true },
     })
-    return clase && { projectId: null, module: clase.module }
+    return clase && { projectId: clase.projectId, module: clase.module }
   },
 
   [DocObjectType.DOCUMENT_TYPE]: async (client, id) => {
     const tipo = await client.documentType.findUnique({
       where: { id },
-      select: { module: true },
+      select: { module: true, projectId: true },
     })
-    return tipo && { projectId: null, module: tipo.module }
+    return tipo && { projectId: tipo.projectId, module: tipo.module }
   },
 
   // La configuración y la membresía pertenecen a un proyecto por definición, y

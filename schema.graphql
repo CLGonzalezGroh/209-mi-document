@@ -665,6 +665,8 @@ type DocumentClass @key(fields: "id") {
   code: String!
   "Módulo al que pertenece (null = disponible para todos)"
   module: ModuleType
+  "Alcance de la entrada. Null = catálogo del despliegue, del que los proyectos heredan"
+  projectId: Int
   "Descripción de la clase de documento"
   description: String
   "Orden de visualización"
@@ -693,6 +695,8 @@ type DocumentType @key(fields: "id") {
   code: String!
   "Módulo al que pertenece (null = disponible para todos)"
   module: ModuleType
+  "Alcance de la entrada. Null = catálogo del despliegue, del que los proyectos heredan"
+  projectId: Int
   "Clase de documento a la que pertenece (null = disponible para todas)"
   class: DocumentClass
   "Descripción del tipo de documento"
@@ -2586,6 +2590,13 @@ input CreateDocumentTypeInput {
   code: String!
   "Módulo al que pertenece"
   module: ModuleTypeInput
+  """
+  Alcance de la entrada. Omitido = catálogo del despliegue.
+
+  Declararlo exige que el módulo sea PROJECTS, y crear en el alcance de un
+  proyecto exige membresía vigente además del permiso.
+  """
+  projectId: Int
   "Clase de documento a la que pertenece"
   classId: Int
   "Descripción del tipo"
@@ -2618,6 +2629,13 @@ input CreateDocumentClassInput {
   code: String!
   "Módulo al que pertenece"
   module: ModuleTypeInput
+  """
+  Alcance de la entrada. Omitido = catálogo del despliegue.
+
+  Declararlo exige que el módulo sea PROJECTS, y crear en el alcance de un
+  proyecto exige membresía vigente además del permiso.
+  """
+  projectId: Int
   "Descripción de la clase"
   description: String
   "Orden de visualización"
@@ -2939,6 +2957,8 @@ type Query {
   # ─── Tipos de documento ───
   "Listar tipos de documento"
   documentTypes(
+    "Ámbito a listar. Omitido = catálogo del despliegue"
+    projectId: Int
     filter: DocumentTypeFilterInput
     pagination: PaginationInput
     orderBy: DocumentTypeOrderByInput
@@ -2947,12 +2967,24 @@ type Query {
   "Obtener un tipo de documento por ID"
   documentTypeById(id: Int!): DocumentType
 
-  "Listado de tipos de documento para selectores"
-  documentTypesSelectList(module: ModuleTypeInput, classId: Int): [SelectList!]!
+  """
+  Tipos de documento vigentes como lista de selección, con el alcance resuelto.
+
+  projectId es opcional porque hay documentos sin proyecto —calidad, comercial,
+  activos—, y para ellos rige el catálogo del despliegue. Omitirlo nombra ese
+  ámbito y no desactiva el filtro.
+  """
+  documentTypesSelectList(
+    module: ModuleTypeInput
+    classId: Int
+    projectId: Int
+  ): [SelectList!]!
 
   # ─── Clases de documento ───
   "Listar clases de documento"
   documentClasses(
+    "Ámbito a listar. Omitido = catálogo del despliegue"
+    projectId: Int
     filter: DocumentClassFilterInput
     pagination: PaginationInput
     orderBy: DocumentClassOrderByInput
@@ -2961,8 +2993,17 @@ type Query {
   "Obtener una clase de documento por ID"
   documentClassById(id: Int!): DocumentClass
 
-  "Listado de clases de documento para selectores"
-  documentClassesSelectList(module: ModuleTypeInput): [SelectList!]!
+  """
+  Clases de documento vigentes como lista de selección, con el alcance resuelto.
+
+  projectId es opcional porque hay documentos sin proyecto —calidad, comercial,
+  activos—, y para ellos rige el catálogo del despliegue. Omitirlo nombra ese
+  ámbito y no desactiva el filtro.
+  """
+  documentClassesSelectList(
+    module: ModuleTypeInput
+    projectId: Int
+  ): [SelectList!]!
 
   # ─── Áreas ───
   "Listar áreas"

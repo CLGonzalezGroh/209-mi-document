@@ -12,9 +12,18 @@ import { DocumentClass } from "../generated/prisma/client.js"
 import { AuditAction, WorkflowEvent } from "../events/catalog.js"
 import { emitAuditEvent, emitWorkflowEvent } from "../events/emit.js"
 import { userAuthorization } from "../utils/userAuthorization.js"
+import {
+  assertObjectAccess,
+  projectAuthorization,
+} from "../utils/projectAuthorization.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentClassOrderBy } from "../utils/orderByHelper.js"
-import { ModuleType, SysLogModule } from "../generated/prisma/enums.js"
+import { visibleClassificationWhere } from "../utils/classificationScope.js"
+import {
+  DocObjectType,
+  ModuleType,
+  SysLogModule,
+} from "../generated/prisma/enums.js"
 
 export interface DocumentClassOrderByInput extends OrderByInput {
   field: "NAME" | "CODE" | "SORT_ORDER" | "CREATED_AT"
@@ -39,27 +48,45 @@ const logger = createLogger("documentClasses")
 
 export const documentClassResolvers = {
   Query: {
+    /**
+     * El catálogo tal como está declarado, **sin resolver alcance**: lista el del
+     * despliegue o el propio de un proyecto, según se pida. Es la vista de
+     * administración, con la misma forma que la de ubicaciones.
+     *
+     * Omitir el proyecto nombra el ámbito del despliegue y no apaga el filtro
+     * (BLOQUE 02C, B8), que es lo que conserva intacto lo que esta pantalla
+     * muestra hoy.
+     */
     documentClasses: async (
       _: any,
       {
+        projectId,
         filter,
         pagination,
         orderBy,
       }: {
+        projectId?: number
         filter?: DocumentClassFilterInput
         pagination?: PaginationInput
         orderBy?: DocumentClassOrderByInput
       },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_LIST],
-        context,
-      })
+      const userId =
+        projectId !== undefined
+          ? await projectAuthorization({
+              requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_LIST],
+              projectId,
+              context,
+            })
+          : await userAuthorization({
+              requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_LIST],
+              context,
+            })
       logger.info("documentClasses", { userId })
 
       try {
-        const where: any = {}
+        const where: any = { projectId: projectId ?? null }
 
         if (filter?.terminatedFilter !== undefined) {
           if (filter.terminatedFilter === TerminatedFilter.ACTIVE) {
@@ -175,6 +202,17 @@ export const documentClassResolvers = {
       })
       logger.info("documentClassById", { userId })
 
+      // Fuera del try: un rechazo de autorización no es un error del servicio.
+      // La clase de un proyecto exige membresía; la del despliegue no pertenece
+      // a ninguno y se resuelve con el permiso global (BLOQUE 02, B7).
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT_CLASS,
+        objectId: id,
+        context,
+        notFoundMessage: "Clase de documento no encontrada",
+      })
+
       try {
         const documentClass = await context.orm.documentClass.findFirst({
           where: { id },
@@ -203,25 +241,41 @@ export const documentClassResolvers = {
       }
     },
 
+    /**
+     * Las clases con que se puede clasificar, con el **alcance resuelto**:
+     * heredando del despliegue y sumando las propias, o solo las propias.
+     *
+     * `projectId` es opcional porque hay documentos sin proyecto —calidad,
+     * comercial, activos—, y para ellos rige el catálogo del despliegue.
+     */
     documentClassesSelectList: async (
       _: any,
-      { module }: { module?: ModuleType },
+      { module, projectId }: { module?: ModuleType; projectId?: number },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
-        requiredPermissions: [
-          PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_SELECT,
-          PERMISSIONS.COMMON_SELECT_LIST_ACCESS,
-        ],
-        context,
-      })
+      const permisos = [
+        PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_SELECT,
+        PERMISSIONS.COMMON_SELECT_LIST_ACCESS,
+      ]
+
+      const userId =
+        projectId !== undefined
+          ? await projectAuthorization({
+              requiredPermissions: permisos,
+              projectId,
+              context,
+            })
+          : await userAuthorization({ requiredPermissions: permisos, context })
       logger.info("documentClassesSelectList", { userId })
 
       try {
-        const where: any = { terminatedAt: null }
+        const where: any = {
+          terminatedAt: null,
+          ...(await visibleClassificationWhere(context.orm, projectId)),
+        }
 
         if (module) {
-          where.OR = [{ module }, { module: null }]
+          where.AND = [{ OR: [{ module }, { module: null }] }]
         }
 
         const documentClasses = await context.orm.documentClass.findMany({
@@ -261,16 +315,28 @@ export const documentClassResolvers = {
           name: string
           code: string
           module?: ModuleType
+          projectId?: number
           description?: string
           sortOrder?: number
         }
       },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_CREATE],
-        context,
-      })
+      // El alcance de lo que se crea decide quién puede crearlo: la entrada de
+      // un proyecto exige membresía, la del despliegue el permiso global.
+      const scope = input.projectId ?? null
+
+      const userId =
+        scope !== null
+          ? await projectAuthorization({
+              requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_CREATE],
+              projectId: scope,
+              context,
+            })
+          : await userAuthorization({
+              requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_CREATE],
+              context,
+            })
       logger.info("createDocumentClass", { userId })
 
       try {
@@ -279,7 +345,10 @@ export const documentClassResolvers = {
             data: {
               name: input.name,
               code: input.code,
+              // El CHECK de la base exige PROJECTS cuando hay proyecto, y no se
+              // completa de oficio: declarar el módulo es del usuario.
               module: input.module,
+              projectId: scope,
               description: input.description,
               sortOrder: input.sortOrder ?? 0,
               updatedById: userId,
@@ -337,6 +406,14 @@ export const documentClassResolvers = {
       })
       logger.info("updateDocumentClass", { userId })
 
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT_CLASS,
+        objectId: id,
+        context,
+        notFoundMessage: "Clase de documento no encontrada",
+      })
+
       try {
         const documentClass = await context.orm.$transaction(async (tx) => {
           const updated = await tx.documentClass.update({
@@ -386,6 +463,14 @@ export const documentClassResolvers = {
         context,
       })
       logger.info("terminateDocumentClass", { userId })
+
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT_CLASS,
+        objectId: id,
+        context,
+        notFoundMessage: "Clase de documento no encontrada",
+      })
 
       try {
         const documentClass = await context.orm.$transaction(async (tx) => {
@@ -441,6 +526,14 @@ export const documentClassResolvers = {
       })
       logger.info("activateDocumentClass", { userId })
 
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT_CLASS,
+        objectId: id,
+        context,
+        notFoundMessage: "Clase de documento no encontrada",
+      })
+
       try {
         const documentClass = await context.orm.$transaction(async (tx) => {
           const updated = await tx.documentClass.update({
@@ -494,6 +587,14 @@ export const documentClassResolvers = {
         context,
       })
       logger.info("deleteDocumentClass", { userId })
+
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT_CLASS,
+        objectId: id,
+        context,
+        notFoundMessage: "Clase de documento no encontrada",
+      })
 
       try {
         const documentClass = await context.orm.documentClass.findFirst({

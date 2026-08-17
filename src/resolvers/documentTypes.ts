@@ -10,9 +10,18 @@ import {
 } from "@CLGonzalezGroh/mi-common"
 import { DocumentType } from "../generated/prisma/client.js"
 import { userAuthorization } from "../utils/userAuthorization.js"
+import {
+  assertObjectAccess,
+  projectAuthorization,
+} from "../utils/projectAuthorization.js"
+import { visibleClassificationWhere } from "../utils/classificationScope.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentTypeOrderBy } from "../utils/orderByHelper.js"
-import { ModuleType, SysLogModule } from "../generated/prisma/enums.js"
+import {
+  DocObjectType,
+  ModuleType,
+  SysLogModule,
+} from "../generated/prisma/enums.js"
 import { AuditAction, WorkflowEvent } from "../events/catalog.js"
 import { emitAuditEvent, emitWorkflowEvent } from "../events/emit.js"
 
@@ -33,27 +42,41 @@ const logger = createLogger("documentTypes")
 
 export const documentTypeResolvers = {
   Query: {
+    /**
+     * El catálogo tal como está declarado, **sin resolver alcance**, con la misma
+     * forma que el de clases: omitir el proyecto nombra el ámbito del despliegue
+     * y no apaga el filtro (BLOQUE 02C, B8).
+     */
     documentTypes: async (
       _: any,
       {
+        projectId,
         filter,
         pagination,
         orderBy,
       }: {
+        projectId?: number
         filter?: DocumentTypeFilterInput
         pagination?: PaginationInput
         orderBy?: DocumentTypeOrderByInput
       },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_LIST],
-        context,
-      })
+      const userId =
+        projectId !== undefined
+          ? await projectAuthorization({
+              requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_LIST],
+              projectId,
+              context,
+            })
+          : await userAuthorization({
+              requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_LIST],
+              context,
+            })
       logger.info("documentTypes", { userId })
 
       try {
-        const where: any = {}
+        const where: any = { projectId: projectId ?? null }
 
         if (filter?.terminatedFilter !== undefined) {
           if (filter.terminatedFilter === TerminatedFilter.ACTIVE) {
@@ -168,6 +191,15 @@ export const documentTypeResolvers = {
       })
       logger.info("documentTypeById", { userId })
 
+      // Fuera del try: un rechazo de autorización no es un error del servicio.
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT_TYPE,
+        objectId: id,
+        context,
+        notFoundMessage: "Tipo de documento no encontrado",
+      })
+
       try {
         const documentType = await context.orm.documentType.findFirst({
           where: { id },
@@ -197,41 +229,50 @@ export const documentTypeResolvers = {
       }
     },
 
+    /**
+     * Los tipos con que se puede clasificar, con el **alcance resuelto**.
+     *
+     * `projectId` es opcional porque hay documentos sin proyecto —calidad,
+     * comercial, activos—, y para ellos rige el catálogo del despliegue.
+     */
     documentTypesSelectList: async (
       _: any,
-      { module, classId }: { module?: ModuleType; classId?: number },
+      {
+        module,
+        classId,
+        projectId,
+      }: { module?: ModuleType; classId?: number; projectId?: number },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
-        requiredPermissions: [
-          PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_SELECT,
-          PERMISSIONS.COMMON_SELECT_LIST_ACCESS,
-        ],
-        context,
-      })
+      const permisos = [
+        PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_SELECT,
+        PERMISSIONS.COMMON_SELECT_LIST_ACCESS,
+      ]
+
+      const userId =
+        projectId !== undefined
+          ? await projectAuthorization({
+              requiredPermissions: permisos,
+              projectId,
+              context,
+            })
+          : await userAuthorization({ requiredPermissions: permisos, context })
       logger.info("documentTypesSelectList", { userId })
 
       try {
-        const where: any = { terminatedAt: null }
-
-        if (module) {
-          where.OR = [{ module }, { module: null }]
+        const where: any = {
+          terminatedAt: null,
+          ...(await visibleClassificationWhere(context.orm, projectId)),
         }
 
-        if (classId) {
-          const classCondition = {
-            OR: [{ classId }, { classId: null }],
-          }
-          if (where.OR) {
-            where.AND = [
-              { OR: where.OR },
-              classCondition,
-            ]
-            delete where.OR
-          } else {
-            Object.assign(where, classCondition)
-          }
-        }
+        // Cada eje se agrega como una condición AND propia. Componerlos sobre el
+        // mismo `OR` de nivel superior obligaba a moverlo de lugar cuando aparecía
+        // el segundo, y con el alcance —que también puede aportar uno— el último
+        // en escribirse habría borrado a los anteriores sin ruido.
+        const ejes: any[] = []
+        if (module) ejes.push({ OR: [{ module }, { module: null }] })
+        if (classId) ejes.push({ OR: [{ classId }, { classId: null }] })
+        if (ejes.length > 0) where.AND = ejes
 
         const documentTypes = await context.orm.documentType.findMany({
           where,
@@ -270,6 +311,7 @@ export const documentTypeResolvers = {
           name: string
           code: string
           module?: ModuleType
+          projectId?: number
           classId?: number
           description?: string
           requiresFormalReview?: boolean
@@ -277,10 +319,20 @@ export const documentTypeResolvers = {
       },
       context: ResolverContext,
     ) => {
-      const userId = await userAuthorization({
-        requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_CREATE],
-        context,
-      })
+      // El alcance de lo que se crea decide quién puede crearlo (BLOQUE 02, B7).
+      const scope = input.projectId ?? null
+
+      const userId =
+        scope !== null
+          ? await projectAuthorization({
+              requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_CREATE],
+              projectId: scope,
+              context,
+            })
+          : await userAuthorization({
+              requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_CREATE],
+              context,
+            })
       logger.info("createDocumentType", { userId })
 
       try {
@@ -290,6 +342,7 @@ export const documentTypeResolvers = {
               name: input.name,
               code: input.code,
               module: input.module,
+              projectId: scope,
               classId: input.classId,
               description: input.description,
               requiresFormalReview: input.requiresFormalReview ?? false,
@@ -349,6 +402,14 @@ export const documentTypeResolvers = {
       })
       logger.info("updateDocumentType", { userId })
 
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT_TYPE,
+        objectId: id,
+        context,
+        notFoundMessage: "Tipo de documento no encontrado",
+      })
+
       try {
         const documentType = await context.orm.$transaction(async (tx) => {
           const updated = await tx.documentType.update({
@@ -398,6 +459,14 @@ export const documentTypeResolvers = {
         context,
       })
       logger.info("terminateDocumentType", { userId })
+
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT_TYPE,
+        objectId: id,
+        context,
+        notFoundMessage: "Tipo de documento no encontrado",
+      })
 
       try {
         const documentType = await context.orm.$transaction(async (tx) => {
@@ -453,6 +522,14 @@ export const documentTypeResolvers = {
       })
       logger.info("activateDocumentType", { userId })
 
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT_TYPE,
+        objectId: id,
+        context,
+        notFoundMessage: "Tipo de documento no encontrado",
+      })
+
       try {
         const documentType = await context.orm.$transaction(async (tx) => {
           const updated = await tx.documentType.update({
@@ -506,6 +583,14 @@ export const documentTypeResolvers = {
         context,
       })
       logger.info("deleteDocumentType", { userId })
+
+      await assertObjectAccess({
+        userId,
+        objectType: DocObjectType.DOCUMENT_TYPE,
+        objectId: id,
+        context,
+        notFoundMessage: "Tipo de documento no encontrado",
+      })
 
       try {
         const documentType = await context.orm.documentType.findFirst({

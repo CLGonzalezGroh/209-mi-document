@@ -1024,3 +1024,28 @@ El mecanismo de alcance ya existía: `BLOQUE 02B` lo construyó y lo probó sobr
 **Verificado en los dos sentidos** —el diff contra la base queda vacío, y las 28 migraciones replicadas desde cero producen exactamente el modelo—, con **474 pruebas y 0 fallos**.
 
 **La migración es aditiva y no cambia el comportamiento de nada existente.** Toda entrada ya cargada queda en el alcance del despliegue, que es el único que hoy existe y el que las pantallas administran; la ausencia de fila de alcance sigue siendo heredar. Las consultas todavía resuelven como antes: el alcance está en el modelo y aún no lo lee nadie. La webapp no registra una sola línea modificada.
+
+---
+
+# What's new in María Ingeniería API Documents 2.9.1
+
+2026-08-18
+
+## Alcance por proyecto de clase y tipo (BLOQUE 02C)
+
+### Fase 2 — La resolución del alcance, y la autorización en dos capas
+
+El alcance dejó de ser una columna que nadie lee.
+
+- **Dos vistas separadas, con el precedente de la ubicación.** La **lista es de administración y no resuelve alcance**: muestra lo que ese ámbito declaró, el catálogo del despliegue o el propio de un proyecto. El **selector resuelve**: es lo que se puede elegir para clasificar, las propias más las heredadas o solo las propias. Confundirlas habría dejado la pantalla de administración de un proyecto mostrando entradas que no puede editar.
+- **Omitir el ámbito nombra el despliegue**, y es lo que sostiene que la webapp no se toque: la pantalla global llama sin proyecto y sigue devolviendo exactamente lo mismo. La ausencia de argumento no desactiva el filtro — un filtro que no encuentra no se apaga solo.
+- **La autorización sale del alcance de la entrada y no de una regla por operación.** El derivador de contexto de clase y tipo **afirmaba que los catálogos eran globales del despliegue**, con `projectId` fijo en nulo y su comentario explicándolo; dejó de ser cierto en la fase anterior. Ahora lee el alcance real, y con eso la entrada de un proyecto exige membresía y la del despliegue se resuelve con el permiso global, sin que ninguna mutación tenga que saberlo. Es el mismo mecanismo que la ubicación.
+- **Clase y tipo leen una sola declaración**, `CLASSIFICATION`, en un util propio. Son cuatro los consumidores —la lista y el selector de cada catálogo— y ninguno debe poder discrepar de otro.
+
+**Un defecto encontrado al componer los filtros.** El selector de tipos armaba módulo y clase sobre el mismo `OR` de nivel superior, moviéndolo de lugar cuando aparecía el segundo. Con el alcance —que también puede aportar un `OR`— el último en escribirse habría borrado a los anteriores **sin ruido**: un proyecto con catálogo propio habría visto el del despliegue. Los tres ejes pasan a componerse como condiciones independientes.
+
+**El alcance no reemplaza al eje de módulo**: los dos filtran a la vez, de modo que un proyecto que hereda ve el catálogo del despliegue de su módulo y no el de calidad.
+
+**486 pruebas, 0 fallos**, con doce de integración nuevas. Las tres negativas verifican **por qué** se rechaza y no solo que se rechace: un `catch` que acepta cualquier error habría quedado en verde el día que la operación fallara por un código duplicado.
+
+El contrato solo suma argumentos y campos opcionales, y la webapp sigue sin una línea modificada.
