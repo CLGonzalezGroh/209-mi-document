@@ -1551,6 +1551,17 @@ Configuración documental de un proyecto. Un registro por proyecto.
 Declara el rol documental y, cuando corresponde, la contraparte.
 """
 type DocProjectSettings {
+  "¿El proyecto usa el atributo de ubicación física?"
+  locationEnabled: Boolean!
+  "¿Lo exige al dar de alta un documento? Solo tiene efecto si está habilitado"
+  locationRequired: Boolean!
+  """
+  Etiqueta con que el proyecto la nombra: "área", "unidad", "sector".
+
+  Configurable, a diferencia del esquema de revisión: cada organización usa un
+  nombre distinto, mientras que "revisión" es terminología establecida.
+  """
+  locationLabel: String
   "Identificador único"
   id: Int!
   "Fecha de creación"
@@ -1574,6 +1585,12 @@ type DocProjectSettings {
 
 "Declaración de la configuración documental de un proyecto"
 input DeclareDocProjectSettingsInput {
+  "¿El proyecto usa el atributo de ubicación física? Por defecto sí"
+  locationEnabled: Boolean
+  "¿Lo exige al dar de alta un documento? Por defecto no"
+  locationRequired: Boolean
+  "Etiqueta con que el proyecto la nombra"
+  locationLabel: String
   "Proyecto al que corresponde"
   projectId: Int!
   "Rol documental a declarar"
@@ -2194,6 +2211,8 @@ input TransmittalOrderByInput {
 
 "Input para crear un documento"
 input CreateDocumentInput {
+  "Ubicación física. Opcional; el proyecto puede exigirla por configuración"
+  locationId: Int
   "Código único del documento"
   code: String!
   "Título del documento"
@@ -2257,6 +2276,8 @@ pertenece a la emisión que lo produjo. Lo que queda no aparece en ningún rótu
 y por eso se edita siempre, incluso con la revisión vigente aprobada.
 """
 input UpdateDocumentInput {
+  "Ubicación física. Se edita siempre; nulo la retira"
+  locationId: Int
   "Nueva descripción del documento"
   description: String
   "Tarea de proyecto de la que el documento es entregable"

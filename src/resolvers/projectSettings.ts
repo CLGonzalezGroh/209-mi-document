@@ -69,6 +69,14 @@ export const projectSettingsResolvers = {
           // Armador por defecto —habitualmente el jefe de proyecto—, con el que
           // el alta llega con el campo lleno (B3).
           defaultOrganizerId?: number | null
+          // Configuración del atributo de ubicación física (BLOQUE 02B, B4).
+          // Habilitado y no obligatorio por defecto, en los tres roles: la planta
+          // lo usa para filtrar, no para exigir. La etiqueta sí es configurable,
+          // porque "área", "unidad" o "sector" son nombres que cada organización
+          // usa distinto.
+          locationEnabled?: boolean
+          locationRequired?: boolean
+          locationLabel?: string | null
         }
       },
       context: ResolverContext,
@@ -95,6 +103,9 @@ export const projectSettingsResolvers = {
               counterpartyName: input.counterpartyName ?? null,
               revisionScheme: input.revisionScheme ?? null,
               defaultOrganizerId: input.defaultOrganizerId ?? null,
+              locationEnabled: input.locationEnabled ?? true,
+              locationRequired: input.locationRequired ?? false,
+              locationLabel: input.locationLabel ?? null,
               updatedById: userId,
             },
             create: {
@@ -103,6 +114,9 @@ export const projectSettingsResolvers = {
               counterpartyName: input.counterpartyName ?? null,
               revisionScheme: input.revisionScheme ?? null,
               defaultOrganizerId: input.defaultOrganizerId ?? null,
+              locationEnabled: input.locationEnabled ?? true,
+              locationRequired: input.locationRequired ?? false,
+              locationLabel: input.locationLabel ?? null,
               createdById: userId,
               updatedById: userId,
             },
@@ -118,6 +132,9 @@ export const projectSettingsResolvers = {
               counterpartyName: input.counterpartyName ?? null,
               revisionScheme: input.revisionScheme ?? null,
               defaultOrganizerId: input.defaultOrganizerId ?? null,
+              locationEnabled: input.locationEnabled ?? true,
+              locationRequired: input.locationRequired ?? false,
+              locationLabel: input.locationLabel ?? null,
             },
           })
 

@@ -9,8 +9,10 @@ import {
   DocProjectSide,
   DocScopeMode,
   DocumentRole,
+  ModuleType,
 } from "../generated/prisma/enums.js"
 import { locationResolvers } from "./locations.js"
+import { documentResolvers } from "./documents.js"
 import { catalogScopeResolvers } from "./catalogScopes.js"
 import { projectSettingsResolvers } from "./projectSettings.js"
 import { projectMemberResolvers } from "./projectMembers.js"
@@ -43,6 +45,8 @@ const CODIGO = "TEST-B02B"
 let context: ResolverContext
 
 const limpiar = async () => {
+  // Los documentos primero: referencian ubicaciones con RESTRICT.
+  await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
   // Por niveles descendentes: la clave del árbol es RESTRICT.
   for (let i = 0; i < 4; i++) {
     await prisma.docLocation.deleteMany({
@@ -66,7 +70,11 @@ const limpiar = async () => {
   })
 }
 
-const declarar = async (projectId: number, conMembresia = true) => {
+const declarar = async (
+  projectId: number,
+  conMembresia = true,
+  ubicacion: { locationEnabled?: boolean; locationRequired?: boolean } = {},
+) => {
   await projectSettingsResolvers.Mutation.declareDocProjectSettings(
     null,
     {
@@ -74,6 +82,7 @@ const declarar = async (projectId: number, conMembresia = true) => {
         projectId,
         documentRole: DocumentRole.INTERNAL,
         defaultOrganizerId: USER_ID,
+        ...ubicacion,
       },
     },
     context,
@@ -411,4 +420,215 @@ test("la lista de selección sin proyecto ofrece el árbol del despliegue", asyn
   assert.ok(propias.length >= 4)
   // El rótulo es la ruta completa y no el nombre.
   assert.ok(propias.some((o) => o.label === "Planta Urea / Área 100 / Unidad 110"))
+})
+
+// --- El atributo en el documento (B3, B4) ---
+
+let documentTypeId: number
+
+const crearDocumento = async (
+  sufijo: string,
+  projectId: number,
+  locationId?: number | null,
+) =>
+  (await documentResolvers.Mutation.createDocument(
+    null,
+    {
+      input: {
+        code: `${CODIGO}-${sufijo}`,
+        title: `Documento ${sufijo}`,
+        module: ModuleType.PROJECTS,
+        projectId,
+        documentTypeId,
+        assignedOrganizerId: USER_ID,
+        ...(locationId !== undefined && { locationId }),
+      },
+    } as any,
+    context,
+  )) as any
+
+test("un documento sin ubicación es válido con la configuración por defecto", async () => {
+  const tipo = await prisma.documentType.findFirstOrThrow({ select: { id: true } })
+  documentTypeId = tipo.id
+
+  const doc = await crearDocumento("D1", PLANTA)
+
+  assert.equal(doc.locationId, null)
+  assert.equal(doc.locationPath, null)
+})
+
+test("el documento guarda la ruta como snapshot al declarar su ubicación", async () => {
+  const doc = await crearDocumento("D2", PLANTA, area.id)
+
+  assert.equal(doc.locationId, area.id)
+  assert.equal(doc.locationPath, "Planta Urea / Área 100")
+})
+
+test("una ubicación fuera del alcance del proyecto se rechaza", async () => {
+  // `INGENIERIA` declaró catálogo propio: los nodos del despliegue no le
+  // resuelven, aunque existan.
+  await assert.rejects(
+    () => crearDocumento("D3", INGENIERIA, area.id),
+    /no pertenece al catálogo que el proyecto resuelve/,
+  )
+})
+
+test("una ubicación dada de baja no se elige, y lo ya clasificado la conserva", async () => {
+  const nodo = await crear({ code: "TB", name: "Área de baja", parentId: planta.id })
+  const doc = await crearDocumento("D4", PLANTA, nodo.id)
+
+  await locationResolvers.Mutation.terminateLocation(null, { id: nodo.id }, context)
+
+  await assert.rejects(
+    () => crearDocumento("D5", PLANTA, nodo.id),
+    /está dada de baja/,
+  )
+
+  // El documento que ya la tenía la conserva: la validación es solo en escritura.
+  const conservado = await prisma.document.findUniqueOrThrow({
+    where: { id: doc.id },
+    select: { locationId: true, locationPath: true },
+  })
+  assert.equal(conservado.locationId, nodo.id)
+  assert.equal(conservado.locationPath, "Planta Urea / Área de baja")
+})
+
+test("un proyecto puede exigir la ubicación", async () => {
+  await declarar(OTRO_CLIENTE, true, { locationRequired: true })
+
+  await assert.rejects(
+    () => crearDocumento("D6", OTRO_CLIENTE),
+    /exige declarar la ubicación física/,
+  )
+
+  // Con una de su propio catálogo, entra. `OTRO_CLIENTE` declaró propio en la
+  // fase 3 y tiene su copia del árbol.
+  const propia = await prisma.docLocation.findFirstOrThrow({
+    where: { projectId: OTRO_CLIENTE, name: "Área 100" },
+  })
+  const doc = await crearDocumento("D7", OTRO_CLIENTE, propia.id)
+  assert.equal(doc.locationPath, "Planta Urea / Área 100")
+})
+
+test("con el atributo deshabilitado no se declara ubicación", async () => {
+  await declarar(OTRO_CLIENTE, true, { locationEnabled: false })
+
+  const propia = await prisma.docLocation.findFirstOrThrow({
+    where: { projectId: OTRO_CLIENTE, name: "Área 100" },
+  })
+  await assert.rejects(
+    () => crearDocumento("D8", OTRO_CLIENTE, propia.id),
+    /deshabilitado el atributo de ubicación/,
+  )
+
+  // Y deshabilitado no exige, aunque quedara marcada como obligatoria.
+  const doc = await crearDocumento("D9", OTRO_CLIENTE)
+  assert.equal(doc.locationId, null)
+})
+
+// --- El snapshot se recalcula solo (B6) ---
+
+test("renombrar el nodo recalcula el snapshot de los documentos clasificados", async () => {
+  const doc = await prisma.document.findFirstOrThrow({
+    where: { code: `${CODIGO}-D2` },
+  })
+  const antes = doc.updatedAt
+
+  await locationResolvers.Mutation.updateLocation(
+    null,
+    { id: area.id, input: { name: "Área 100 - Síntesis" } },
+    context,
+  )
+
+  const despues = await prisma.document.findUniqueOrThrow({ where: { id: doc.id } })
+  assert.equal(despues.locationPath, "Planta Urea / Área 100 - Síntesis")
+
+  // Nadie editó el documento: atribuirle el cambio a quien renombró el nodo
+  // diría que tocó documentos que no tocó.
+  assert.equal(despues.updatedById, doc.updatedById)
+  assert.deepEqual(despues.updatedAt, antes)
+})
+
+test("mover el nodo también lo recalcula, y el evento dice cuántos", async () => {
+  const raiz = await crear({ code: "OTRA", name: "Planta Amoníaco" })
+
+  await locationResolvers.Mutation.moveLocation(
+    null,
+    { id: area.id, parentId: raiz.id },
+    context,
+  )
+
+  const doc = await prisma.document.findFirstOrThrow({
+    where: { code: `${CODIGO}-D2` },
+  })
+  assert.equal(doc.locationPath, "Planta Amoníaco / Área 100 - Síntesis")
+
+  const evento = await prisma.docAuditEvent.findFirstOrThrow({
+    where: { action: AuditAction.MoveLocation },
+    orderBy: { id: "desc" },
+  })
+  // `meta` es una columna Json: viene como objeto y no como texto.
+  const meta = evento.meta as { documents?: number }
+  assert.ok(
+    (meta.documents ?? 0) >= 1,
+    "el evento no informa los documentos recalculados",
+  )
+})
+
+// --- La otra mitad de la condición de borrado ---
+
+test("no se elimina una ubicación con documentos clasificados", async () => {
+  // Una HOJA con documentos: si tuviera descendencia se rechazaría por eso, y la
+  // prueba no distinguiría las dos mitades de la condición.
+  const hoja = await prisma.docLocation.findFirstOrThrow({
+    where: { code: `${CODIGO}-TB` },
+  })
+  assert.equal(await prisma.docLocation.count({ where: { parentId: hoja.id } }), 0)
+  assert.ok(await prisma.document.count({ where: { locationId: hoja.id } }))
+
+  await assert.rejects(
+    () => locationResolvers.Mutation.deleteLocation(null, { id: hoja.id }, context),
+    /documento\(s\) están clasificados/,
+  )
+})
+
+test("una hoja sin documentos ni descendencia sí se elimina", async () => {
+  const suelta = await crear({ code: "SUELTA", name: "Área suelta" })
+
+  assert.equal(
+    await locationResolvers.Mutation.deleteLocation(
+      null,
+      { id: suelta.id },
+      context,
+    ),
+    true,
+  )
+  assert.equal(
+    await prisma.docLocation.count({ where: { id: suelta.id } }),
+    0,
+  )
+})
+
+test("la ubicación se edita con revisión aprobada, porque clasifica y no identifica", async () => {
+  const doc = await prisma.document.findFirstOrThrow({
+    where: { code: `${CODIGO}-D1` },
+  })
+
+  const actualizado = (await documentResolvers.Mutation.updateDocument(
+    null,
+    { id: doc.id, input: { locationId: area.id } },
+    context,
+  )) as any
+
+  assert.equal(actualizado.locationId, area.id)
+  assert.equal(actualizado.locationPath, "Planta Amoníaco / Área 100 - Síntesis")
+
+  // Y se retira con nulo.
+  const sinUbicacion = (await documentResolvers.Mutation.updateDocument(
+    null,
+    { id: doc.id, input: { locationId: null } },
+    context,
+  )) as any
+  assert.equal(sinUbicacion.locationId, null)
+  assert.equal(sinUbicacion.locationPath, null)
 })

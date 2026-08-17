@@ -16,6 +16,7 @@ import {
   projectScopeAuthorization,
 } from "../utils/projectAuthorization.js"
 import { assertDocumentContext } from "../utils/documentContext.js"
+import { resolveDocumentLocation } from "../utils/documentLocation.js"
 import { handleError } from "../utils/handleError.js"
 import { buildDocumentOrderBy } from "../utils/orderByHelper.js"
 import {
@@ -472,6 +473,9 @@ export const documentResolvers = {
           // El armador del primer circuito (B3). Obligatorio, con el valor por
           // defecto del proyecto cuando no se informa.
           assignedOrganizerId?: number
+          // Ubicación física, opcional en los tres roles (BLOQUE 02B, B3 y B4).
+          // La obligatoriedad la configura el proyecto y se valida en escritura.
+          locationId?: number | null
           // Esquema con que se propone el código de la primera revisión. No se
           // persiste: gobierna la propuesta y nada más (B13).
           revisionScheme?: RevisionScheme
@@ -527,6 +531,13 @@ export const documentResolvers = {
           }
           const { revisionCode, organizerId, templateId } = planned.plan
 
+          // La ubicación se valida contra el alcance que el proyecto resuelve, y
+          // su ruta se guarda como snapshot (BLOQUE 02B, B3).
+          const locationPath = await resolveDocumentLocation(tx, {
+            locationId: input.locationId ?? null,
+            projectId: input.projectId ?? null,
+          })
+
           // No existe documento sin circuito: existe circuito en armado (B3).
           // Los pasos siguientes se materializan al completarse el armado, y no
           // antes, porque hasta entonces no tienen actor.
@@ -540,6 +551,8 @@ export const documentResolvers = {
               currentTitle: input.title,
               currentDocumentTypeId: input.documentTypeId,
               currentDocumentClassId: input.documentClassId,
+              locationId: input.locationId ?? null,
+              locationPath,
               createdById: userId,
               updatedById: userId,
               revisions: {
@@ -859,6 +872,10 @@ export const documentResolvers = {
         input: {
           description?: string
           projectTaskId?: number | null
+          // La ubicación se edita SIEMPRE, como la descripción (BLOQUE 02B, B3):
+          // no entra en el congelamiento de D-05 ni en el payload de la firma,
+          // porque clasifica y no identifica. Nulo la retira.
+          locationId?: number | null
         }
       },
       context: ResolverContext,
@@ -888,10 +905,26 @@ export const documentResolvers = {
         // porque acá ya no se toca nada que el rótulo muestre. La descripción no
         // se imprime en ninguno, y corregirla no debe exigir abrir una revisión.
         const document = await context.orm.$transaction(async (tx) => {
+          // La ubicación se valida contra el alcance del PROYECTO DEL DOCUMENTO y
+          // no contra el del input: cambiar de proyecto no es una edición.
+          const locationPath =
+            input.locationId === undefined
+              ? undefined
+              : await resolveDocumentLocation(tx, {
+                  locationId: input.locationId,
+                  projectId: (
+                    await tx.document.findUniqueOrThrow({
+                      where: { id },
+                      select: { projectId: true },
+                    })
+                  ).projectId,
+                })
+
           const updated = await tx.document.update({
             where: { id },
             data: {
               ...input,
+              ...(locationPath !== undefined && { locationPath }),
               updatedById: userId,
             },
             include: documentIncludes,

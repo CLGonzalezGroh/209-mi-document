@@ -1,7 +1,7 @@
 # Bloque 02B — Ubicación física del documento
 
 **Estado:** `APROBADO_PENDIENTE`
-**Versión:** 1.2
+**Versión:** 1.3
 **Depende de:** `BLOCK_02`, que dejó creada `DocProjectSettings`.
 **Decisiones que ejecuta:** D-14.
 **Decisiones que construye para otro bloque:** el mecanismo de alcance por proyecto de D-21, que `BLOCK_02C` reutiliza sobre clase y tipo.
@@ -255,7 +255,24 @@ Dos decisiones menores que quedaron asentadas: **solo se copia lo vigente con as
 
 **435 pruebas, 0 fallos.** Once puras sobre el plan de copia, y una suite de integración nueva con dieciocho casos que verifica contra la base lo que el plan puro no alcanza: que la jerarquía se reconstruya de verdad, que el cruce de alcances se rechace donde corresponde, y que declarar propio nombre las rutas que lo impiden.
 
-Quedan las fases 4 a 7: el atributo en el documento y su configuración, las consultas de filtrado, la migración con permisos y pruebas de las tres capas, y la promoción a la SFS con el descarte de la matriz.
+### Fase 4 — completada
+
+El atributo en `Document` con su snapshot de ruta, y la configuración de habilitación, obligatoriedad y etiqueta en `DocProjectSettings`. Migración aditiva: nace habilitado y no obligatorio, de modo que todo proyecto sigue operando igual.
+
+**Cuatro precisiones que la fase agregó:**
+
+- **el alcance del documento es una aplicación de `B1`, no una regla nueva.** La validación del nodo elegido y la resolución del catálogo comparten el predicado de visibilidad: una regla, dos usos;
+- **deshabilitado no exige**, aunque el proyecto haya quedado con la obligatoriedad marcada. Exigir lo que no se puede declarar sería una contradicción, y es la combinación que una pantalla puede producir sin querer;
+- **la baja del nodo se verifica antes que el alcance**, para que el motivo del rechazo sea el que el usuario puede corregir eligiendo otro nodo, y no el que sugiere un problema de configuración;
+- **al editar, el alcance se resuelve contra el proyecto del documento** y no contra el del input: cambiar de proyecto no es una edición.
+
+**Y un defecto que encontró una prueba de integración, no el diseño.** El recálculo del snapshot movía el `updatedAt` de cada documento alcanzado, porque Prisma dispara `@updatedAt` también en una actualización masiva. Nadie editó esos documentos, y dejar *"modificado en T por X"* con un X que no hizo nada en T es exactamente el ruido que esta denormalización existe para no producir. Se resuelve con una actualización en SQL de la sola columna, y queda una prueba que lo fija.
+
+`deleteLocation` gana la otra mitad de su condición: ningún documento clasificado, diciendo cuántos. La baja lógica sigue siendo la salida correcta, y no revalida lo existente.
+
+**457 pruebas, 0 fallos.** Once puras nuevas y once casos de integración más.
+
+Quedan las fases 5 a 7: las consultas de listado y filtrado con sus eventos, la migración con permisos y pruebas de las tres capas, y la promoción a la SFS con el descarte de la matriz.
 
 ## Referencias
 

@@ -143,6 +143,15 @@ export const resolverTypes = {
         orderBy: { id: "asc" },
       })
     },
+    /**
+     * La ubicación física (BLOQUE 02B, B3). La ruta viaja en `locationPath` como
+     * snapshot, de modo que un listado no necesita este resolver para mostrarla.
+     */
+    location: async (parent: any) => {
+      if (parent.location !== undefined) return parent.location
+      if (parent.locationId === null) return null
+      return prisma.docLocation.findUnique({ where: { id: parent.locationId } })
+    },
     taskDocumentReferences: async (parent: Document) => {
       return prisma.taskDocumentReference.findMany({
         where: { documentId: parent.id },

@@ -39,11 +39,23 @@ export const effectiveMode = (
  */
 export const visibleEntries = <T extends ScopedEntry>(
   entries: T[],
+  scope: { projectId: number; mode: DocScopeMode },
+): T[] => entries.filter((e) => entryVisible(e.projectId, scope))
+
+/**
+ * ¿Una entrada de alcance `entryScope` la ve el proyecto indicado?
+ *
+ * Es la misma regla que `visibleEntries` aplica a un conjunto, expuesta para una
+ * sola entrada: es lo que necesita validar que el nodo elegido por un documento
+ * esté dentro de su alcance. Una regla, dos usos.
+ */
+export const entryVisible = (
+  entryScope: number | null,
   { projectId, mode }: { projectId: number; mode: DocScopeMode },
-): T[] =>
+): boolean =>
   mode === DocScopeMode.OWN
-    ? entries.filter((e) => e.projectId === projectId)
-    : entries.filter((e) => e.projectId === projectId || e.projectId === null)
+    ? entryScope === projectId
+    : entryScope === projectId || entryScope === null
 
 /**
  * Criterio de consulta equivalente a `visibleEntries`, para no traer de la base

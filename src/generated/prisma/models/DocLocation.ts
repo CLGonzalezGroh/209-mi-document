@@ -318,6 +318,7 @@ export type DocLocationWhereInput = {
   externalRef?: Prisma.StringNullableFilter<"DocLocation"> | string | null
   parent?: Prisma.XOR<Prisma.DocLocationNullableScalarRelationFilter, Prisma.DocLocationWhereInput> | null
   children?: Prisma.DocLocationListRelationFilter
+  documents?: Prisma.DocumentListRelationFilter
 }
 
 export type DocLocationOrderByWithRelationInput = {
@@ -338,6 +339,7 @@ export type DocLocationOrderByWithRelationInput = {
   externalRef?: Prisma.SortOrderInput | Prisma.SortOrder
   parent?: Prisma.DocLocationOrderByWithRelationInput
   children?: Prisma.DocLocationOrderByRelationAggregateInput
+  documents?: Prisma.DocumentOrderByRelationAggregateInput
 }
 
 export type DocLocationWhereUniqueInput = Prisma.AtLeast<{
@@ -362,6 +364,7 @@ export type DocLocationWhereUniqueInput = Prisma.AtLeast<{
   externalRef?: Prisma.StringNullableFilter<"DocLocation"> | string | null
   parent?: Prisma.XOR<Prisma.DocLocationNullableScalarRelationFilter, Prisma.DocLocationWhereInput> | null
   children?: Prisma.DocLocationListRelationFilter
+  documents?: Prisma.DocumentListRelationFilter
 }, "id" | "code_parentId_projectId">
 
 export type DocLocationOrderByWithAggregationInput = {
@@ -424,6 +427,7 @@ export type DocLocationCreateInput = {
   externalRef?: string | null
   parent?: Prisma.DocLocationCreateNestedOneWithoutChildrenInput
   children?: Prisma.DocLocationCreateNestedManyWithoutParentInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutLocationInput
 }
 
 export type DocLocationUncheckedCreateInput = {
@@ -443,6 +447,7 @@ export type DocLocationUncheckedCreateInput = {
   externalOrigin?: $Enums.DocLocationOrigin | null
   externalRef?: string | null
   children?: Prisma.DocLocationUncheckedCreateNestedManyWithoutParentInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type DocLocationUpdateInput = {
@@ -461,6 +466,7 @@ export type DocLocationUpdateInput = {
   externalRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parent?: Prisma.DocLocationUpdateOneWithoutChildrenNestedInput
   children?: Prisma.DocLocationUpdateManyWithoutParentNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutLocationNestedInput
 }
 
 export type DocLocationUncheckedUpdateInput = {
@@ -480,6 +486,7 @@ export type DocLocationUncheckedUpdateInput = {
   externalOrigin?: Prisma.NullableEnumDocLocationOriginFieldUpdateOperationsInput | $Enums.DocLocationOrigin | null
   externalRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   children?: Prisma.DocLocationUncheckedUpdateManyWithoutParentNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type DocLocationCreateManyInput = {
@@ -627,6 +634,22 @@ export type DocLocationSumOrderByAggregateInput = {
   sortOrder?: Prisma.SortOrder
 }
 
+export type DocLocationCreateNestedOneWithoutDocumentsInput = {
+  create?: Prisma.XOR<Prisma.DocLocationCreateWithoutDocumentsInput, Prisma.DocLocationUncheckedCreateWithoutDocumentsInput>
+  connectOrCreate?: Prisma.DocLocationCreateOrConnectWithoutDocumentsInput
+  connect?: Prisma.DocLocationWhereUniqueInput
+}
+
+export type DocLocationUpdateOneWithoutDocumentsNestedInput = {
+  create?: Prisma.XOR<Prisma.DocLocationCreateWithoutDocumentsInput, Prisma.DocLocationUncheckedCreateWithoutDocumentsInput>
+  connectOrCreate?: Prisma.DocLocationCreateOrConnectWithoutDocumentsInput
+  upsert?: Prisma.DocLocationUpsertWithoutDocumentsInput
+  disconnect?: Prisma.DocLocationWhereInput | boolean
+  delete?: Prisma.DocLocationWhereInput | boolean
+  connect?: Prisma.DocLocationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocLocationUpdateToOneWithWhereWithoutDocumentsInput, Prisma.DocLocationUpdateWithoutDocumentsInput>, Prisma.DocLocationUncheckedUpdateWithoutDocumentsInput>
+}
+
 export type DocLocationCreateNestedOneWithoutChildrenInput = {
   create?: Prisma.XOR<Prisma.DocLocationCreateWithoutChildrenInput, Prisma.DocLocationUncheckedCreateWithoutChildrenInput>
   connectOrCreate?: Prisma.DocLocationCreateOrConnectWithoutChildrenInput
@@ -689,6 +712,96 @@ export type DocLocationUncheckedUpdateManyWithoutParentNestedInput = {
   deleteMany?: Prisma.DocLocationScalarWhereInput | Prisma.DocLocationScalarWhereInput[]
 }
 
+export type DocLocationCreateWithoutDocumentsInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  projectId?: number | null
+  code: string
+  name: string
+  path: string
+  sortOrder?: number
+  externalOrigin?: $Enums.DocLocationOrigin | null
+  externalRef?: string | null
+  parent?: Prisma.DocLocationCreateNestedOneWithoutChildrenInput
+  children?: Prisma.DocLocationCreateNestedManyWithoutParentInput
+}
+
+export type DocLocationUncheckedCreateWithoutDocumentsInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  projectId?: number | null
+  parentId?: number | null
+  code: string
+  name: string
+  path: string
+  sortOrder?: number
+  externalOrigin?: $Enums.DocLocationOrigin | null
+  externalRef?: string | null
+  children?: Prisma.DocLocationUncheckedCreateNestedManyWithoutParentInput
+}
+
+export type DocLocationCreateOrConnectWithoutDocumentsInput = {
+  where: Prisma.DocLocationWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocLocationCreateWithoutDocumentsInput, Prisma.DocLocationUncheckedCreateWithoutDocumentsInput>
+}
+
+export type DocLocationUpsertWithoutDocumentsInput = {
+  update: Prisma.XOR<Prisma.DocLocationUpdateWithoutDocumentsInput, Prisma.DocLocationUncheckedUpdateWithoutDocumentsInput>
+  create: Prisma.XOR<Prisma.DocLocationCreateWithoutDocumentsInput, Prisma.DocLocationUncheckedCreateWithoutDocumentsInput>
+  where?: Prisma.DocLocationWhereInput
+}
+
+export type DocLocationUpdateToOneWithWhereWithoutDocumentsInput = {
+  where?: Prisma.DocLocationWhereInput
+  data: Prisma.XOR<Prisma.DocLocationUpdateWithoutDocumentsInput, Prisma.DocLocationUncheckedUpdateWithoutDocumentsInput>
+}
+
+export type DocLocationUpdateWithoutDocumentsInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  externalOrigin?: Prisma.NullableEnumDocLocationOriginFieldUpdateOperationsInput | $Enums.DocLocationOrigin | null
+  externalRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  parent?: Prisma.DocLocationUpdateOneWithoutChildrenNestedInput
+  children?: Prisma.DocLocationUpdateManyWithoutParentNestedInput
+}
+
+export type DocLocationUncheckedUpdateWithoutDocumentsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  externalOrigin?: Prisma.NullableEnumDocLocationOriginFieldUpdateOperationsInput | $Enums.DocLocationOrigin | null
+  externalRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  children?: Prisma.DocLocationUncheckedUpdateManyWithoutParentNestedInput
+}
+
 export type DocLocationCreateWithoutChildrenInput = {
   createdAt?: Date | string
   createdById: number
@@ -704,6 +817,7 @@ export type DocLocationCreateWithoutChildrenInput = {
   externalOrigin?: $Enums.DocLocationOrigin | null
   externalRef?: string | null
   parent?: Prisma.DocLocationCreateNestedOneWithoutChildrenInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutLocationInput
 }
 
 export type DocLocationUncheckedCreateWithoutChildrenInput = {
@@ -722,6 +836,7 @@ export type DocLocationUncheckedCreateWithoutChildrenInput = {
   sortOrder?: number
   externalOrigin?: $Enums.DocLocationOrigin | null
   externalRef?: string | null
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type DocLocationCreateOrConnectWithoutChildrenInput = {
@@ -744,6 +859,7 @@ export type DocLocationCreateWithoutParentInput = {
   externalOrigin?: $Enums.DocLocationOrigin | null
   externalRef?: string | null
   children?: Prisma.DocLocationCreateNestedManyWithoutParentInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutLocationInput
 }
 
 export type DocLocationUncheckedCreateWithoutParentInput = {
@@ -762,6 +878,7 @@ export type DocLocationUncheckedCreateWithoutParentInput = {
   externalOrigin?: $Enums.DocLocationOrigin | null
   externalRef?: string | null
   children?: Prisma.DocLocationUncheckedCreateNestedManyWithoutParentInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type DocLocationCreateOrConnectWithoutParentInput = {
@@ -800,6 +917,7 @@ export type DocLocationUpdateWithoutChildrenInput = {
   externalOrigin?: Prisma.NullableEnumDocLocationOriginFieldUpdateOperationsInput | $Enums.DocLocationOrigin | null
   externalRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parent?: Prisma.DocLocationUpdateOneWithoutChildrenNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutLocationNestedInput
 }
 
 export type DocLocationUncheckedUpdateWithoutChildrenInput = {
@@ -818,6 +936,7 @@ export type DocLocationUncheckedUpdateWithoutChildrenInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   externalOrigin?: Prisma.NullableEnumDocLocationOriginFieldUpdateOperationsInput | $Enums.DocLocationOrigin | null
   externalRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type DocLocationUpsertWithWhereUniqueWithoutParentInput = {
@@ -889,6 +1008,7 @@ export type DocLocationUpdateWithoutParentInput = {
   externalOrigin?: Prisma.NullableEnumDocLocationOriginFieldUpdateOperationsInput | $Enums.DocLocationOrigin | null
   externalRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   children?: Prisma.DocLocationUpdateManyWithoutParentNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutLocationNestedInput
 }
 
 export type DocLocationUncheckedUpdateWithoutParentInput = {
@@ -907,6 +1027,7 @@ export type DocLocationUncheckedUpdateWithoutParentInput = {
   externalOrigin?: Prisma.NullableEnumDocLocationOriginFieldUpdateOperationsInput | $Enums.DocLocationOrigin | null
   externalRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   children?: Prisma.DocLocationUncheckedUpdateManyWithoutParentNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type DocLocationUncheckedUpdateManyWithoutParentInput = {
@@ -933,10 +1054,12 @@ export type DocLocationUncheckedUpdateManyWithoutParentInput = {
 
 export type DocLocationCountOutputType = {
   children: number
+  documents: number
 }
 
 export type DocLocationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   children?: boolean | DocLocationCountOutputTypeCountChildrenArgs
+  documents?: boolean | DocLocationCountOutputTypeCountDocumentsArgs
 }
 
 /**
@@ -954,6 +1077,13 @@ export type DocLocationCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.
  */
 export type DocLocationCountOutputTypeCountChildrenArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.DocLocationWhereInput
+}
+
+/**
+ * DocLocationCountOutputType without action
+ */
+export type DocLocationCountOutputTypeCountDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentWhereInput
 }
 
 
@@ -975,6 +1105,7 @@ export type DocLocationSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   externalRef?: boolean
   parent?: boolean | Prisma.DocLocation$parentArgs<ExtArgs>
   children?: boolean | Prisma.DocLocation$childrenArgs<ExtArgs>
+  documents?: boolean | Prisma.DocLocation$documentsArgs<ExtArgs>
   _count?: boolean | Prisma.DocLocationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["docLocation"]>
 
@@ -1038,6 +1169,7 @@ export type DocLocationOmit<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type DocLocationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   parent?: boolean | Prisma.DocLocation$parentArgs<ExtArgs>
   children?: boolean | Prisma.DocLocation$childrenArgs<ExtArgs>
+  documents?: boolean | Prisma.DocLocation$documentsArgs<ExtArgs>
   _count?: boolean | Prisma.DocLocationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DocLocationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1052,6 +1184,7 @@ export type $DocLocationPayload<ExtArgs extends runtime.Types.Extensions.Interna
   objects: {
     parent: Prisma.$DocLocationPayload<ExtArgs> | null
     children: Prisma.$DocLocationPayload<ExtArgs>[]
+    documents: Prisma.$DocumentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1465,6 +1598,7 @@ export interface Prisma__DocLocationClient<T, Null = never, ExtArgs extends runt
   readonly [Symbol.toStringTag]: "PrismaPromise"
   parent<T extends Prisma.DocLocation$parentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocLocation$parentArgs<ExtArgs>>): Prisma.Prisma__DocLocationClient<runtime.Types.Result.GetResult<Prisma.$DocLocationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   children<T extends Prisma.DocLocation$childrenArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocLocation$childrenArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocLocationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documents<T extends Prisma.DocLocation$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocLocation$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1950,6 +2084,30 @@ export type DocLocation$childrenArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.DocLocationScalarFieldEnum | Prisma.DocLocationScalarFieldEnum[]
+}
+
+/**
+ * DocLocation.documents
+ */
+export type DocLocation$documentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Document
+   */
+  select?: Prisma.DocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Document
+   */
+  omit?: Prisma.DocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentInclude<ExtArgs> | null
+  where?: Prisma.DocumentWhereInput
+  orderBy?: Prisma.DocumentOrderByWithRelationInput | Prisma.DocumentOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
 }
 
 /**

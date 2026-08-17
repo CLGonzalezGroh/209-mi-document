@@ -893,4 +893,23 @@ Un proyecto que declara catálogo propio arranca vacío, y con clase y tipo obli
 
 **435 pruebas, 0 fallos.** Once puras sobre el plan de copia —orden, idempotencia, solapamiento, bajas y determinismo— y **una suite de integración nueva con dieciocho casos** que verifica contra la base lo que el plan puro no alcanza: que la jerarquía se reconstruya de verdad en el destino, que el cruce de alcances se rechace donde corresponde, y que declarar propio nombre las rutas que lo impiden.
 
+### Fase 4 — El atributo en el documento, y su configuración
+
+- **La ubicación pertenece al documento y se edita siempre**, como la descripción. No entra en el congelamiento de D-05 ni en el payload de la firma: que aparezca impresa en el rótulo no la vuelve identificación. Lo que D-23 sostiene es que la **identificación** pertenece a la emisión, no que todo lo impreso lo haga — el código identifica, el título describe la emisión, y la ubicación **clasifica**.
+- **Un nodo, habitualmente la hoja.** El documento que alcanza dos áreas apunta al ancestro común, que un árbol de profundidad libre ya permite: no se modela N:M, que agregaría una tabla de unión y la ambigüedad de qué ruta mostrar en un listado, para un atributo cuyo único uso es filtrar.
+- **Opcional en los tres roles, con la obligatoriedad configurable por proyecto** —habilitado, obligatorio y etiqueta, en `DocProjectSettings`—. Nace habilitado y no obligatorio, de modo que la migración es aditiva y todo proyecto sigue operando igual. **Deshabilitado no exige, aunque quede marcado como obligatorio**: exigir lo que no se puede declarar sería una contradicción, no una regla estricta, y es la combinación que una pantalla puede producir sin querer.
+- **La etiqueta sí es configurable**, a diferencia del esquema de revisión: "área", "unidad" o "sector" son nombres que cada organización usa distinto, mientras que "revisión" es terminología establecida del dominio documental.
+- **El nodo elegido debe estar en el alcance que el documento resuelve** — el árbol que su proyecto ve, o el del despliegue si no tiene proyecto—. Es la misma regla de visibilidad de la fase 2 aplicada a una sola entrada, y no una segunda: `visibleEntries` y la validación del documento comparten el predicado.
+- **El régimen de publicación usa el árbol del despliegue, y solo él.** Sin proyecto no se hereda de ninguno, porque no pertenece a ninguno.
+- **Un nodo dado de baja no se elige, y lo ya clasificado con él lo conserva.** La validación ocurre solo en escritura y nunca revalida lo existente (D-13). Y la baja se verifica antes que el alcance, para que el motivo sea el que el usuario puede corregir eligiendo otro y no el que sugiere un problema de configuración.
+- **Al editar, el alcance se resuelve contra el proyecto del documento y no contra el del input**: cambiar de proyecto no es una edición.
+- **La eliminación definitiva gana su otra mitad**: se rechaza si algún documento lo referencia, diciendo cuántos. La clave es `RESTRICT` y la base lo rechazaría igual, pero un error de restricción no dice qué hacer. La baja lógica sigue admitiéndose, que es la salida correcta.
+
+**El snapshot del documento se recalcula solo** cuando el nodo se renombra o se mueve, con la misma escritura que reescribe la rama: es la misma denormalización un nivel más abajo, y la ruta del documento no acredita nada. El evento de la ubicación informa **cuántos documentos** se recalcularon, además de cuántos nodos.
+
+**Y ahí apareció algo que una prueba de integración detectó y el diseño no:** ese recálculo movía el `updatedAt` de cada documento, porque Prisma dispara `@updatedAt` también en una actualización masiva. Nadie editó esos documentos —el snapshot es consecuencia de haber tocado el nodo— y dejar *"modificado en T por X"* con un X que no hizo nada en T es exactamente el ruido que esta denormalización no debe producir. Se resuelve con una actualización en SQL de la sola columna, parametrizada por Prisma, y queda una prueba que lo fija.
+
+**457 pruebas, 0 fallos**, con once puras nuevas sobre la regla del atributo y once casos de integración más, hasta veintinueve en su suite.
+
+
 

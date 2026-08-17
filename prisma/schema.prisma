@@ -310,6 +310,27 @@ model Document {
   // Un esquema almacenado podía contradecir a los hechos —declarar NUMERIC con
   // la revisión vigente en A— y obligaba a una precondición para taparlo.
 
+  // Ubicación física del documento (BLOQUE 02B, B3 y B5).
+  //
+  // Pertenece al DOCUMENTO y no a la revisión, y se edita SIEMPRE: no entra en el
+  // congelamiento de D-05 ni en el payload de la firma. Que aparezca impresa en
+  // el rótulo no la vuelve identificación —lo que D-23 sostiene es que la
+  // identificación pertenece a la emisión, no que todo lo impreso lo haga—. El
+  // código identifica, el título describe la emisión, y la ubicación CLASIFICA.
+  //
+  // Un nodo, habitualmente la hoja (B5). El documento que alcanza dos áreas
+  // apunta al ancestro común, que un árbol de profundidad libre ya permite.
+  //
+  // `locationPath` es el snapshot de la ruta, y es DENORMALIZACIÓN de conveniencia
+  // y no evidencia (B6): evita el join en cada listado, y renombrar o mover un
+  // nodo lo recalcula de forma automática. Su único escritor es la operación de
+  // la ubicación, más el alta y la edición del documento.
+  //
+  // Opcional en los tres roles (B4). La obligatoriedad se configura por proyecto
+  // y no es del modelo, con la orientación de D-13: se valida en escritura.
+  locationId   Int?
+  locationPath String?
+
   // Federación A.5: documento como entregable de una tarea de proyecto (capa 1)
   // null cuando module ≠ PROJECTS o cuando todavía no fue vinculado.
   // Sin FK porque ProjectTask vive en mi-project.
@@ -318,6 +339,7 @@ model Document {
   // Relaciones
   currentDocumentType  DocumentType            @relation(fields: [currentDocumentTypeId], references: [id])
   currentDocumentClass DocumentClass?          @relation(fields: [currentDocumentClassId], references: [id])
+  location             DocLocation?            @relation(fields: [locationId], references: [id])
   revisions            DocumentRevision[]
   taskDocumentRefs     TaskDocumentReference[]
   replacementItems     DocReplacementItem[]
@@ -333,6 +355,7 @@ model Document {
   @@index([module])
   @@index([currentDocumentClassId])
   @@index([projectTaskId])
+  @@index([locationId])
   @@map("documents")
 }
 
@@ -868,6 +891,20 @@ model DocProjectSettings {
   // quien crea el documento debe designarlo. Referencia externa sin FK.
   defaultOrganizerId Int?
 
+  // Configuración del atributo de ubicación física (BLOQUE 02B, B4).
+  //
+  // Habilitado y NO obligatorio por defecto, en los tres roles. Se corrige acá la
+  // expectativa de D-14 de que "una planta lo exigirá": la planta lo usa para
+  // filtrar, no para exigir. Un proyecto atraviesa el ciclo completo sin declarar
+  // ninguna ubicación.
+  //
+  // La etiqueta sí es configurable, a diferencia del esquema de revisión: "área",
+  // "unidad" o "sector" son nombres que cada organización usa distinto, mientras
+  // que "revisión" es terminología establecida del dominio documental.
+  locationEnabled  Boolean @default(true)
+  locationRequired Boolean @default(false)
+  locationLabel    String?
+
   @@map("doc_project_settings")
 }
 
@@ -1293,8 +1330,9 @@ model DocLocation {
   externalRef    String?
 
   // Relaciones
-  parent   DocLocation?  @relation("DocLocationTree", fields: [parentId], references: [id])
-  children DocLocation[] @relation("DocLocationTree")
+  parent    DocLocation?  @relation("DocLocationTree", fields: [parentId], references: [id])
+  children  DocLocation[] @relation("DocLocationTree")
+  documents Document[]
 
   // Unicidad del código dentro de su nivel Y de su alcance, recreada con NULLS
   // NOT DISTINCT en la migración: sin la cláusula los nodos RAÍZ del despliegue

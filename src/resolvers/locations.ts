@@ -244,7 +244,7 @@ const assertParentAdmitted = async (
 const rewriteSubtree = async (
   tx: Prisma.TransactionClient,
   { rootId, parentPath }: { rootId: number; parentPath: string | null },
-): Promise<number> => {
+): Promise<{ nodes: number; documents: number }> => {
   const nodes = await tx.docLocation.findMany({
     select: { id: true, parentId: true, name: true, path: true },
   })
@@ -253,13 +253,31 @@ const rewriteSubtree = async (
   const actual = new Map(nodes.map((n) => [n.id, n.path]))
 
   let reescritos = 0
+  let documentos = 0
+
   for (const [id, path] of rutas) {
     if (actual.get(id) === path) continue
+
     await tx.docLocation.update({ where: { id }, data: { path } })
     reescritos++
+
+    // El snapshot del documento se recalcula con la misma escritura, porque es
+    // la misma denormalización un nivel más abajo (BLOQUE 02B, B6): la ruta del
+    // documento no acredita nada, de modo que no hay inmutabilidad que respetar
+    // ni propagación que pedir.
+    //
+    // **En SQL y no con `updateMany`**, y por una razón concreta: `updatedAt` es
+    // `@updatedAt`, y Prisma lo mueve también en una actualización masiva. Nadie
+    // editó estos documentos —el snapshot es consecuencia de haber tocado el
+    // nodo— y dejar "modificado en T por X" con un X que no hizo nada en T es
+    // exactamente el ruido que esta denormalización no debe producir. Los
+    // parámetros van interpolados por Prisma, no concatenados.
+    documentos += await tx.$executeRaw`
+      UPDATE "documents" SET "locationPath" = ${path} WHERE "locationId" = ${id}
+    `
   }
 
-  return reescritos
+  return { nodes: reescritos, documents: documentos }
 }
 
 export const locationResolvers = {
@@ -808,7 +826,7 @@ export const locationResolvers = {
 
           const reescritos =
             name === current.name
-              ? 0
+              ? { nodes: 0, documents: 0 }
               : await rewriteSubtree(tx, {
                   rootId: id,
                   parentPath: await assertParentAdmitted(tx, {
@@ -821,13 +839,18 @@ export const locationResolvers = {
             action: AuditAction.UpdateLocation,
             objectId: id,
             actorId: userId,
-            // `rewritten` cuenta el nodo y su descendencia: es lo que explica
-            // después por qué cambiaron rutas de nodos que nadie editó, incluidas
-            // las ampliaciones que otros proyectos colgaron de un nodo global.
-            meta: { input, rewritten: reescritos },
+            // `rewritten` cuenta el nodo y su descendencia, y `documents` los
+            // documentos cuyo snapshot se recalculó: es lo que explica después por
+            // qué cambiaron rutas de objetos que nadie editó, incluidas las
+            // ampliaciones que otros proyectos colgaron de un nodo global.
+            meta: {
+              input,
+              rewritten: reescritos.nodes,
+              documents: reescritos.documents,
+            },
           })
 
-          return reescritos === 0
+          return reescritos.nodes === 0
             ? updated
             : tx.docLocation.findUnique({ where: { id } })
         })
@@ -925,7 +948,8 @@ export const locationResolvers = {
               toParentId: destino,
               fromPath: current.path,
               toPath: composePath(parentPath, current.name),
-              rewritten: reescritos,
+              rewritten: reescritos.nodes,
+              documents: reescritos.documents,
             },
           })
 
@@ -1077,8 +1101,9 @@ export const locationResolvers = {
      * despliegue con ampliaciones de un proyecto tiene descendencia, aunque quien
      * lo mira no la vea desde su propio catálogo.
      *
-     * La fase 4 le agrega la otra mitad de la condición —que ningún documento lo
-     * referencie—, que hoy no puede existir porque el atributo todavía no está.
+     * Y que **ningún documento lo referencie**, que es la otra mitad de la
+     * condición del precedente. La clave es `RESTRICT` y la base lo rechazaría
+     * igual; acá se verifica antes para decir cuántos son.
      */
     deleteLocation: async (
       _: any,
@@ -1114,6 +1139,17 @@ export const locationResolvers = {
           if (hijos > 0) {
             throw new GraphQLError(
               `No se puede eliminar: la ubicación tiene ${hijos} descendiente(s) directo(s). Dela de baja o mueva su descendencia.`,
+              { extensions: { code: "BAD_USER_INPUT" } },
+            )
+          }
+
+          const clasificados = await tx.document.count({
+            where: { locationId: id },
+          })
+
+          if (clasificados > 0) {
+            throw new GraphQLError(
+              `No se puede eliminar: ${clasificados} documento(s) están clasificados con esta ubicación. Dela de baja, que no revalida lo ya clasificado.`,
               { extensions: { code: "BAD_USER_INPUT" } },
             )
           }

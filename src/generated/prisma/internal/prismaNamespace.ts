@@ -2970,6 +2970,8 @@ export const DocumentScalarFieldEnum = {
   obsoletedAt: 'obsoletedAt',
   obsoletedById: 'obsoletedById',
   obsoleteReason: 'obsoleteReason',
+  locationId: 'locationId',
+  locationPath: 'locationPath',
   projectTaskId: 'projectTaskId'
 } as const
 
@@ -3199,7 +3201,10 @@ export const DocProjectSettingsScalarFieldEnum = {
   documentRole: 'documentRole',
   counterpartyName: 'counterpartyName',
   revisionScheme: 'revisionScheme',
-  defaultOrganizerId: 'defaultOrganizerId'
+  defaultOrganizerId: 'defaultOrganizerId',
+  locationEnabled: 'locationEnabled',
+  locationRequired: 'locationRequired',
+  locationLabel: 'locationLabel'
 } as const
 
 export type DocProjectSettingsScalarFieldEnum = (typeof DocProjectSettingsScalarFieldEnum)[keyof typeof DocProjectSettingsScalarFieldEnum]

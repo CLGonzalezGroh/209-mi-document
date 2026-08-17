@@ -1,6 +1,6 @@
 {
   "name": "209-mi-document",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "description": "María Ingeniería API de Gestión Documental",
   "type": "module",
   "main": "index.js",
@@ -54,7 +54,8 @@
     "test:location-path": "node --import tsx --test src/utils/locationPath.test.ts",
     "test:catalog-scope": "node --import tsx --test src/utils/catalogScope.test.ts",
     "test:catalog-seed": "node --import tsx --test src/utils/catalogSeed.test.ts",
-    "test:block02b": "npm run test:block04 && npm run test:location-path && npm run test:catalog-scope && npm run test:catalog-seed",
+    "test:document-location": "node --import tsx --test src/utils/documentLocation.test.ts",
+    "test:block02b": "npm run test:block04 && npm run test:location-path && npm run test:catalog-scope && npm run test:catalog-seed && npm run test:document-location",
     "test:block02b-db": "npm run test:block02b && npm run test:events-db && npm run test:project-scope-db && npm run test:object-context-db && npm run test:model-constraints-db",
     "test:block02b-integration": "node --import tsx --test src/resolvers/location.integration.test.ts",
     "test:block02b-all": "npm run test:block02b-db && npm run test:block02-integration && npm run test:block03-integration && npm run test:block04-integration && npm run test:block02b-integration"
