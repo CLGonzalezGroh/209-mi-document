@@ -1714,7 +1714,7 @@ módulo no lo duplica.
 type DocSeedSource {
   "Proyecto fuente"
   projectId: Int!
-  "Cuántos nodos aportaría"
+  "Cuántas entradas aportaría"
   nodeCount: Int!
 }
 
@@ -1726,11 +1726,14 @@ veía —y por lo tanto no se duplicó— y lo que no viajó por estar dado de b
 ello o algún ascendiente.
 """
 type DocSeedResult {
-  "Nodos creados en el destino"
+  "Entradas creadas en el destino"
   added: Int!
-  "Nodos de la fuente que el destino ya veía, por su ruta"
+  "Entradas de la fuente que el destino ya veía, por su identidad"
   alreadyPresent: Int!
-  "Nodos no copiados por estar dados de baja, ellos o algún ascendiente"
+  """
+  No copiadas por estar dadas de baja, ellas o aquello de lo que cuelgan: su
+  ascendencia en el árbol, su clase en la clasificación.
+  """
   skippedTerminated: Int!
 }
 
@@ -3233,6 +3236,15 @@ type Query {
   """
   locationSeedSources(projectId: Int!): [DocSeedSource!]!
 
+  """
+  Los proyectos que pueden sembrar la clasificación de este, y cuánto aportaría
+  cada uno entre clases y tipos.
+
+  Son los que el usuario alcanza por membresía vigente y tienen catálogo propio.
+  El global del despliegue no figura: siempre está disponible.
+  """
+  classificationSeedSources(projectId: Int!): [DocSeedSource!]!
+
   "Un nodo de ubicación por su identificador"
   locationById(id: Int!): DocLocation!
 
@@ -3626,6 +3638,20 @@ type Mutation {
     "Proyecto que recibe la copia"
     projectId: Int!
     "Proyecto del que se copia. Omitido = el árbol del despliegue"
+    sourceProjectId: Int
+  ): DocSeedResult!
+
+  """
+  Sembrar la clasificación de un proyecto copiando clase y tipo en un acto.
+
+  La copia es puntual y no deja vínculo: una copia permanente ES herencia. Es
+  incremental e idempotente —dos veces no duplica— y un tipo arrastra su clase
+  cuando el destino no la tiene.
+  """
+  seedProjectClassification(
+    "Proyecto que recibe la copia"
+    projectId: Int!
+    "Proyecto del que se copia. Omitido = el catálogo del despliegue"
     sourceProjectId: Int
   ): DocSeedResult!
 

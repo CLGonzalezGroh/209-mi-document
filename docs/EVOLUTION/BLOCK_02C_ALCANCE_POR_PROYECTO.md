@@ -1,7 +1,7 @@
 # Bloque 02C — Alcance por proyecto de clase y tipo
 
-**Estado:** `APROBADO_PENDIENTE` — fases 1 y 2 de 6 completadas
-**Versión:** 1.3
+**Estado:** `APROBADO_PENDIENTE` — fases 1 a 3 de 6 completadas
+**Versión:** 1.4
 **Depende de:** `BLOCK_02B`, que construyó el mecanismo de alcance; `BLOCK_03`, por la unicidad con nulos.
 **Decisiones que ejecuta:** D-21.
 **Decisiones que aplica sin modificar:** D-06, D-13, D-15.
@@ -266,6 +266,26 @@ Confundirlas habría dejado la pantalla de administración de un proyecto mostra
 **12 pruebas de integración nuevas, y 486 en total, 0 fallos.** Las tres negativas verifican **por qué** se rechaza y no solo que se rechace: un `catch` que acepta cualquier error habría quedado en verde el día que la operación fallara por un código duplicado.
 
 **Lo que esta fase no trae:** la siembra es la fase 3, y las dos invariantes de cruce de `B7` la fase 4 — hoy un tipo del despliegue todavía puede colgar de una clase de proyecto. La webapp sigue sin una línea modificada, y el contrato solo suma argumentos y campos opcionales.
+
+### Fase 3 — completada
+
+La siembra conjunta, con su util puro, su operación y la consulta de fuentes.
+
+**La identidad es toda la diferencia con el árbol.** Allá un nodo **es** su ruta completa; acá una clase es su código y un tipo su código **dentro de su clase**. De ahí sale lo demás: el paso lleva el `classCode` y no el identificador, por el mismo motivo que el paso del árbol lleva `parentPath` —la clase del destino todavía no existe cuando el plan se arma—, y el mismo código de tipo bajo dos clases distintas son dos entradas.
+
+**El plan no sabe de ejes, y el módulo se filtra donde el alcance.** El util recibe **lo que cada lado ve**, ya resuelto, exactamente como el del árbol. Por eso el filtro de módulo vive en la lectura y no en el plan: un proyecto ve el catálogo de proyectos más el compartido, de modo que una clase de calidad no viaja — el destino no la vería nunca.
+
+**La entrada copiada queda en el módulo de proyectos**, que es lo que el `CHECK` exige y lo que la entrada pasa a ser: la clase compartida del despliegue, al copiarse al alcance de un proyecto, deja de estar disponible para todos los módulos.
+
+**Un tipo cuya clase no viaja tampoco viaja**, sea porque está dada de baja o porque no está en lo que la fuente ve. Es la misma regla que en el árbol descarta la rama sin ascendencia vigente, y es la contracara de que el tipo arrastre su clase.
+
+**La siembra vive en un archivo propio y no en el de clases ni en el de tipos**, porque no es de ninguno de los dos: recae sobre el par. Elegir uno habría dejado la mitad del acto lejos de la otra.
+
+**El resultado es el del mecanismo y el desglose vive en la traza.** `DocSeedResult` sirve a los tres catálogos, de modo que sus tres números no se abren por clase y tipo; el evento del acto sí lleva `addedClasses` y `addedTypes`. Se generalizó de paso el vocabulario del tipo, que hablaba de nodos.
+
+**`SeedClassification` es acción propia y no reúso de `SeedLocations`**: una sola acción para las dos dejaría la traza sin decir qué catálogo se sembró.
+
+**14 pruebas puras y 9 de integración nuevas. 509 en total, 0 fallos.** Una de ellas falló al escribirse y tenía razón el código: el tipo del despliegue se había creado sin clase, de modo que la prueba de la resolución por código no probaba nada. Se le dio una clase.
 
 ## Referencias
 

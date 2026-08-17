@@ -1049,3 +1049,29 @@ El alcance dejó de ser una columna que nadie lee.
 **486 pruebas, 0 fallos**, con doce de integración nuevas. Las tres negativas verifican **por qué** se rechaza y no solo que se rechace: un `catch` que acepta cualquier error habría quedado en verde el día que la operación fallara por un código duplicado.
 
 El contrato solo suma argumentos y campos opcionales, y la webapp sigue sin una línea modificada.
+
+---
+
+# What's new in María Ingeniería API Documents 2.9.2
+
+2026-08-18
+
+## Alcance por proyecto de clase y tipo (BLOQUE 02C)
+
+### Fase 3 — La siembra conjunta
+
+Copiar el catálogo de un ámbito a otro, con clase y tipo en un acto.
+
+- **La identidad es toda la diferencia con la siembra del árbol.** Allá un nodo **es** su ruta completa; acá una clase es su código y un tipo su código **dentro de su clase**, porque el mismo código de tipo puede repetirse bajo dos clases distintas y son entradas distintas. Es la identidad que la base ya declara, y no una convención nueva.
+- **El paso lleva el código de la clase y no su identificador**, por el mismo motivo que el paso del árbol lleva la ruta del padre: la clase del destino todavía no existe cuando el plan se arma, y puede ser una que el destino ya tenía o una que esta misma siembra crea unos pasos antes.
+- **Un tipo arrastra su clase** cuando el destino no la tiene, y **no viaja si su clase no viaja** —dada de baja, o ausente de lo que la fuente ve—. Las dos caras de lo mismo: un tipo sin su clase es un huérfano.
+- **El plan no sabe de alcance ni de módulo**, igual que el del árbol: recibe lo que cada lado **ve**, ya resuelto. Por eso el filtro de módulo vive en la lectura, y una clase de calidad no viaja a un proyecto que nunca la vería.
+- **La entrada copiada queda en el módulo de proyectos**, que es lo que la base exige y lo que la entrada pasa a ser: la clase compartida del despliegue, al copiarse al alcance de un proyecto, deja de estar disponible para todos los módulos.
+- **Las cuatro reglas de la siembra se conservan enteras**: la fuente es lo que la fuente ve, el destino se compara por lo que ve, solo viaja lo vigente, y sembrar es incremental e idempotente — dos veces no duplica, y una fuente parcialmente solapada agrega solo lo que falta.
+- **La fuente admite el despliegue o un proyecto existente**, con la autorización aplicada aparte sobre cada lado: alcanzar el destino no habilita leer el catálogo de un proyecto ajeno.
+
+**La siembra vive en un archivo propio** y no en el de clases ni en el de tipos, porque no es de ninguno de los dos: recae sobre el par.
+
+**El resultado es el del mecanismo y el desglose vive en la traza.** El tipo del resultado sirve a los tres catálogos, de modo que sus números no se abren por clase y tipo; el evento del acto sí los lleva. La siembra emite además la creación de cada entrada, y el acto una vez —sin objeto— por el caso que las creaciones no cubren: una siembra que no agrega nada no dejaría rastro.
+
+**509 pruebas, 0 fallos**, con 14 puras y 9 de integración nuevas.

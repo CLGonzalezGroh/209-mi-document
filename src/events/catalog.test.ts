@@ -172,5 +172,11 @@ test("el catálogo cubre las escrituras relevadas más lo que agregaron los bloq
   // agrega nada no dejaría rastro (B2).
   //
   //   + SeedLocations
-  assert.equal(AUDIT_ACTIONS.length, 58)
+  //
+  // Y 1 en la fase 3 de BLOQUE 02C, de 58 a 59: la siembra de la clasificación.
+  // Es acción propia y no reúso de la anterior, porque siembra OTRO catálogo:
+  // una sola acción para los dos dejaría la traza sin decir cuál se sembró.
+  //
+  //   + SeedClassification
+  assert.equal(AUDIT_ACTIONS.length, 59)
 })

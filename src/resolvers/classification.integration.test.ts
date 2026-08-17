@@ -13,8 +13,10 @@ import {
 import { documentClassResolvers } from "./documentClasses.js"
 import { documentTypeResolvers } from "./documentTypes.js"
 import { catalogScopeResolvers } from "./catalogScopes.js"
+import { classificationResolvers } from "./classification.js"
 import { projectSettingsResolvers } from "./projectSettings.js"
 import { projectMemberResolvers } from "./projectMembers.js"
+import { AuditAction } from "../events/catalog.js"
 
 /**
  * Alcance por proyecto de clase y tipo, contra la base y el resolver
@@ -37,8 +39,11 @@ const ROLE_IDS = [1, 16] // view + doc-full
 const HEREDA = -424430
 const PROPIO = -424431
 const AJENO = -424432 // sin membresía del usuario
+const SEMBRADO = -424433 // destino de la siembra desde el despliegue
+const SEGUNDO = -424434 // destino de la siembra desde otro proyecto
+const TERCERO = -424435 // destino donde se prueba lo dado de baja
 
-const PROYECTOS = [HEREDA, PROPIO, AJENO]
+const PROYECTOS = [HEREDA, PROPIO, AJENO, SEMBRADO, SEGUNDO, TERCERO]
 const CODIGO = "TEST-B02C"
 
 let context: ResolverContext
@@ -108,6 +113,13 @@ const crearTipo = (input: Record<string, unknown>) =>
         code: `${CODIGO}-${input.code}`,
       } as any,
     },
+    context,
+  ) as Promise<any>
+
+const sembrar = (projectId: number, sourceProjectId?: number) =>
+  classificationResolvers.Mutation.seedProjectClassification(
+    null,
+    { projectId, sourceProjectId },
     context,
   ) as Promise<any>
 
@@ -349,4 +361,142 @@ test("el tipo resuelve su alcance con la misma declaración que la clase", async
   assert.deepEqual(await vistos(), [`${CODIGO}-PLANO`])
   assert.deepEqual(await vistos(HEREDA), [`${CODIGO}-PLANO`])
   assert.deepEqual(await vistos(PROPIO), [`${CODIGO}-PLANO-P`])
+})
+
+// --- La siembra por copia (B2) ---
+
+test("sembrar desde el despliegue copia clase y tipo en un acto", async () => {
+  // SEMBRADO declara catálogo propio: sin eso ya vería el despliegue y sembrar
+  // no agregaría nada, que es justamente la regla del destino.
+  await declarar(SEMBRADO)
+  await declararAlcance(SEMBRADO, DocScopeMode.OWN)
+
+  // Un tipo COLGADO de una clase, que es el caso que ejercita la resolución por
+  // código: el tipo suelto no prueba nada de eso.
+  await crearTipo({
+    code: "PLANO-C",
+    name: `${CODIGO} Plano civil`,
+    classId: global1.id,
+  })
+
+  const antes = await clasesQueVe(SEMBRADO)
+  assert.deepEqual(antes, [])
+
+  const res = await sembrar(SEMBRADO)
+
+  assert.equal(res.added > 0, true)
+  assert.equal((await clasesQueVe(SEMBRADO)).includes(`${CODIGO}-CIVIL`), true)
+
+  const tipos = await prisma.documentType.findMany({
+    where: { projectId: SEMBRADO, code: { startsWith: CODIGO } },
+    select: { code: true, classId: true },
+  })
+  assert.equal(tipos.length > 0, true)
+})
+
+test("el tipo copiado cuelga de la clase copiada, y no de la del origen", async () => {
+  // Es lo que el plan resuelve con el CÓDIGO de la clase: en el destino la
+  // clase es otra fila, con otro identificador.
+  const tipo = await prisma.documentType.findFirstOrThrow({
+    where: { projectId: SEMBRADO, code: `${CODIGO}-PLANO-C` },
+    select: { classId: true },
+  })
+  const clase = await prisma.documentClass.findUniqueOrThrow({
+    where: { id: tipo.classId as number },
+    select: { projectId: true, code: true },
+  })
+
+  assert.equal(clase.projectId, SEMBRADO)
+  assert.equal(clase.code, `${CODIGO}-CIVIL`)
+})
+
+test("sembrar dos veces no duplica", async () => {
+  const res = await sembrar(SEMBRADO)
+
+  assert.equal(res.added, 0)
+  assert.equal(res.alreadyPresent > 0, true)
+
+  const clases = await prisma.documentClass.findMany({
+    where: { projectId: SEMBRADO, code: `${CODIGO}-CIVIL` },
+  })
+  assert.equal(clases.length, 1)
+})
+
+test("la entrada copiada queda en el módulo de proyectos", async () => {
+  // El CHECK de la base lo exige, y además es lo que la entrada pasa a ser: la
+  // clase compartida del despliegue, al copiarse al alcance de un proyecto, ya
+  // no está disponible para todos los módulos.
+  const clase = await prisma.documentClass.findFirstOrThrow({
+    where: { projectId: SEMBRADO, code: `${CODIGO}-CIVIL` },
+    select: { module: true },
+  })
+
+  assert.equal(clase.module, ModuleType.PROJECTS)
+})
+
+test("un proyecto no se siembra de sí mismo", async () => {
+  await assert.rejects(
+    () => sembrar(SEMBRADO, SEMBRADO),
+    /no se siembra de sí mismo/,
+  )
+})
+
+test("sembrar desde un proyecto ajeno se rechaza por la fuente", async () => {
+  // La segunda capa se aplica sobre la fuente aparte: alcanzar el destino no
+  // habilita leer el catálogo de un proyecto del que no se es miembro.
+  assert.equal(
+    await rechazaPorMembresia(() => sembrar(SEMBRADO, AJENO)),
+    true,
+  )
+})
+
+test("sembrar desde otro proyecto copia lo que ese proyecto ve", async () => {
+  // El segundo proyecto para el mismo cliente copia del primero, que es el caso
+  // que esta fuente existe para cubrir.
+  await declarar(SEGUNDO)
+  await declararAlcance(SEGUNDO, DocScopeMode.OWN)
+
+  const res = await sembrar(SEGUNDO, SEMBRADO)
+
+  assert.equal(res.added > 0, true)
+  assert.equal((await clasesQueVe(SEGUNDO)).includes(`${CODIGO}-CIVIL`), true)
+})
+
+test("la siembra deja el acto en la traza, aunque no agregue nada", async () => {
+  const antes = await prisma.docAuditEvent.count({
+    where: { action: AuditAction.SeedClassification, projectId: null },
+  })
+
+  await sembrar(SEMBRADO)
+
+  const despues = await prisma.docAuditEvent.count({
+    where: { action: AuditAction.SeedClassification, projectId: null },
+  })
+
+  assert.equal(despues, antes + 1)
+})
+
+test("una clase dada de baja no viaja, y su tipo tampoco", async () => {
+  await declarar(TERCERO)
+  await declararAlcance(TERCERO, DocScopeMode.OWN)
+
+  const baja = await crearClase({ code: "BAJA", name: `${CODIGO} De baja` })
+  await crearTipo({ code: "BAJA-T", name: `${CODIGO} Tipo de baja`, classId: baja.id })
+  await documentClassResolvers.Mutation.terminateDocumentClass(
+    null,
+    { id: baja.id },
+    context,
+  )
+
+  await sembrar(TERCERO)
+
+  const copiadas = await prisma.documentClass.findMany({
+    where: { projectId: TERCERO, code: `${CODIGO}-BAJA` },
+  })
+  const copiados = await prisma.documentType.findMany({
+    where: { projectId: TERCERO, code: `${CODIGO}-BAJA-T` },
+  })
+
+  assert.equal(copiadas.length, 0)
+  assert.equal(copiados.length, 0)
 })

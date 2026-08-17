@@ -118,6 +118,7 @@ export const AuditAction = {
   // explicación en ninguna parte.
   DeclareCatalogScope: "DeclareCatalogScope",
   SeedLocations: "SeedLocations",
+  SeedClassification: "SeedClassification",
   CreateLocation: "CreateLocation",
   UpdateLocation: "UpdateLocation",
   MoveLocation: "MoveLocation",
@@ -202,6 +203,10 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   // La siembra recae sobre el CATÁLOGO del proyecto y no sobre un nodo: se emite
   // sin objeto, y el tipo declarado es el del catálogo que se siembra.
   [AuditAction.SeedLocations]: DocObjectType.DOC_LOCATION,
+  // La siembra de la clasificación recae sobre el PAR y no sobre una entrada
+  // (BLOQUE 02C, B1). Se declara con el tipo de la clase, que es la cabeza del
+  // par —el tipo cuelga de ella—, y se emite sin objeto como la del árbol.
+  [AuditAction.SeedClassification]: DocObjectType.DOCUMENT_CLASS,
   [AuditAction.CreateLocation]: DocObjectType.DOC_LOCATION,
   [AuditAction.UpdateLocation]: DocObjectType.DOC_LOCATION,
   [AuditAction.MoveLocation]: DocObjectType.DOC_LOCATION,
