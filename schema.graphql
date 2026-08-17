@@ -176,6 +176,28 @@ enum QualificationEffect {
   REJECTED
 }
 
+"""
+De dónde viene el objeto que un nodo de ubicación describe, cuando describe uno.
+
+Es el puente con el registro de activos —dueño del árbol cuando ese módulo
+exista— y con un sistema documental externo. Externo es respecto de este módulo,
+que es el que resuelve la referencia.
+"""
+enum DocLocationOrigin {
+  "El registro de activos de OperMask"
+  ASSETS
+  "Un sistema ajeno al ecosistema"
+  EXTERNAL
+}
+
+"Origen de la referencia externa de una ubicación, para inputs"
+enum DocLocationOriginInput {
+  "El registro de activos de OperMask"
+  ASSETS
+  "Un sistema ajeno al ecosistema"
+  EXTERNAL
+}
+
 "Módulos de la aplicación para inputs"
 enum ModuleTypeInput {
   "Calidad"
@@ -1583,6 +1605,58 @@ type DocQualification {
 }
 
 """
+Nodo del catálogo de ubicación física: sitio, planta, área o unidad de proceso.
+
+Jerárquico y auto-referencial, con profundidad libre: se carga como lista plana
+de un nivel o como árbol de varios, según cómo cada organización describa su
+instalación. El sitio no es una entidad aparte, es el nivel superior del mismo
+árbol.
+
+Es un catálogo de **clasificación** y no un registro de activos: afirma cómo
+nombra el cliente sus sectores, no que un equipo exista y sea propio.
+"""
+type DocLocation {
+  "Identificador único"
+  id: Int!
+  "Fecha de creación"
+  createdAt: DateTime!
+  "Usuario que lo creó"
+  createdBy: UserName!
+  "Fecha de última modificación"
+  updatedAt: DateTime
+  "Usuario que lo modificó"
+  updatedBy: UserName!
+  "Fecha de baja lógica. Nula si está vigente"
+  terminatedAt: DateTime
+  "Provisto por el sistema"
+  isSys: Boolean!
+  "Nodo padre. Nulo si es raíz"
+  parent: DocLocation
+  "Descendencia directa, ordenada por su orden de presentación"
+  children: [DocLocation!]!
+  "¿Es hoja? El nodo sin descendencia, que es el que habitualmente se elige"
+  isLeaf: Boolean!
+  "Código, único dentro de su nivel"
+  code: String!
+  "Nombre del nodo"
+  name: String!
+  """
+  Ruta completa: los nombres de los ascendientes y el propio, separados por " / ".
+
+  Es denormalización de conveniencia y no evidencia: la ubicación se edita
+  siempre y no integra el payload de la firma, de modo que renombrar o mover un
+  nodo recalcula las rutas de su descendencia de forma automática.
+  """
+  path: String!
+  "Orden de presentación entre hermanos"
+  sortOrder: Int!
+  "Origen del objeto que este nodo describe. Nulo si no describe ninguno"
+  externalOrigin: DocLocationOrigin
+  "Identificador del objeto en el sistema de origen. Viaja con el origen"
+  externalRef: String
+}
+
+"""
 Plantilla del circuito. PROPONE el circuito; el armado lo define.
 
 Se resuelve contra la tupla del propio documento y gana la MÁS ESPECÍFICA
@@ -2240,6 +2314,53 @@ input UpdateDocWorkflowTemplateInput {
   steps: [WorkflowTemplateStepInput!]
 }
 
+"Filtro del catálogo de ubicación física"
+input DocLocationFilterInput {
+  "Busca en el código, el nombre y la ruta completa"
+  query: String
+  "Descendencia directa de un nodo"
+  parentId: Int
+  "Solo los nodos raíz. Gana sobre parentId"
+  rootsOnly: Boolean
+  "Estado de los registros a devolver"
+  terminatedFilter: TerminatedFilterInput
+}
+
+"Input para crear un nodo de ubicación física"
+input CreateLocationInput {
+  "Nodo padre. Omitido = nodo raíz"
+  parentId: Int
+  "Código, único dentro de su nivel"
+  code: String!
+  "Nombre del nodo"
+  name: String!
+  "Orden de presentación entre hermanos"
+  sortOrder: Int
+  "Origen del objeto que describe. Exige externalRef"
+  externalOrigin: DocLocationOriginInput
+  "Identificador en el sistema de origen. Exige externalOrigin"
+  externalRef: String
+}
+
+"""
+Input para editar un nodo de ubicación física.
+
+El padre no se edita acá: mover tiene operación propia, porque cambia de lugar
+una rama entera y exige verificar que no se cuelgue de su propia descendencia.
+"""
+input UpdateLocationInput {
+  "Código, único dentro de su nivel"
+  code: String
+  "Nombre del nodo. Cambiarlo recalcula la ruta de toda su descendencia"
+  name: String
+  "Orden de presentación entre hermanos"
+  sortOrder: Int
+  "Origen del objeto que describe. Nulo retira la referencia"
+  externalOrigin: DocLocationOriginInput
+  "Identificador en el sistema de origen. Nulo retira la referencia"
+  externalRef: String
+}
+
 "Input para filtrar el catálogo de calificaciones"
 input QualificationFilterInput {
   "Alcance. Omitido = catálogo del despliegue"
@@ -2862,6 +2983,25 @@ type Query {
     "Incluye las membresías dadas de baja. Por defecto solo las vigentes"
     includeRevoked: Boolean
   ): [DocProjectMember!]!
+
+  """
+  Catálogo de ubicación física, como lista plana ordenada por ruta.
+
+  El orden por ruta agrupa cada rama con su descendencia, que es lo que una
+  pantalla de árbol necesita para armarse sin recorrer la jerarquía.
+  """
+  locations(filter: DocLocationFilterInput): [DocLocation!]!
+
+  "Un nodo de ubicación por su identificador"
+  locationById(id: Int!): DocLocation!
+
+  """
+  Ubicaciones vigentes como lista de selección.
+
+  El rótulo es la ruta completa y no el nombre: "Unidad 110" no identifica nada
+  por sí solo, y el mismo nombre puede repetirse en dos plantas.
+  """
+  locationsSelectList(filter: DocLocationFilterInput): [SelectList!]!
 }
 
 # ═══════════════════════════════════════════════════════
@@ -3170,6 +3310,41 @@ type Mutation {
 
   "Volver a habilitar una calificación dada de baja"
   activateQualification(id: Int!): DocQualification!
+
+  # ─── Ubicación física ───
+  "Incorporar un nodo al catálogo de ubicación física"
+  createLocation(input: CreateLocationInput!): DocLocation!
+
+  """
+  Renombrar, recodificar, reordenar o declarar la referencia externa de un nodo.
+
+  Cambiar el nombre recalcula la ruta del nodo y de toda su descendencia.
+  """
+  updateLocation(id: Int!, input: UpdateLocationInput!): DocLocation!
+
+  """
+  Mover una rama de lugar. parentId nulo la convierte en raíz.
+
+  Tiene operación propia porque reescribe la ruta de toda su descendencia. Una
+  ubicación no puede colgarse de sí misma ni de su propia descendencia.
+  """
+  moveLocation(id: Int!, parentId: Int): DocLocation!
+
+  """
+  Dar de baja lógica un nodo. Lo ya clasificado con él no se revalida.
+
+  La baja no alcanza a la descendencia: un nodo dado de baja con hijos vigentes
+  es un estado legítimo.
+  """
+  terminateLocation(id: Int!): DocLocation!
+
+  "Volver a habilitar un nodo dado de baja"
+  activateLocation(id: Int!): DocLocation!
+
+  """
+  Eliminar definitivamente un nodo, admitido solo si no tiene descendencia.
+  """
+  deleteLocation(id: Int!): Boolean!
 
   # ─── Transmittals ───
   "Crear un nuevo transmittal"

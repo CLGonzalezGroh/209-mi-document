@@ -491,6 +491,23 @@ export type EnumQualificationEffectWithAggregatesFilter<$PrismaModel = never> = 
   _max?: Prisma.NestedEnumQualificationEffectFilter<$PrismaModel>
 }
 
+export type EnumDocLocationOriginNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocLocationOrigin | Prisma.EnumDocLocationOriginFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DocLocationOrigin[] | Prisma.ListEnumDocLocationOriginFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DocLocationOrigin[] | Prisma.ListEnumDocLocationOriginFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDocLocationOriginNullableFilter<$PrismaModel> | $Enums.DocLocationOrigin | null
+}
+
+export type EnumDocLocationOriginNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocLocationOrigin | Prisma.EnumDocLocationOriginFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DocLocationOrigin[] | Prisma.ListEnumDocLocationOriginFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DocLocationOrigin[] | Prisma.ListEnumDocLocationOriginFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDocLocationOriginNullableWithAggregatesFilter<$PrismaModel> | $Enums.DocLocationOrigin | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocLocationOriginNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocLocationOriginNullableFilter<$PrismaModel>
+}
+
 export type EnumDocObjectTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.DocObjectType | Prisma.EnumDocObjectTypeFieldRefInput<$PrismaModel>
   in?: $Enums.DocObjectType[] | Prisma.ListEnumDocObjectTypeFieldRefInput<$PrismaModel>
@@ -1115,6 +1132,23 @@ export type NestedEnumQualificationEffectWithAggregatesFilter<$PrismaModel = nev
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumQualificationEffectFilter<$PrismaModel>
   _max?: Prisma.NestedEnumQualificationEffectFilter<$PrismaModel>
+}
+
+export type NestedEnumDocLocationOriginNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocLocationOrigin | Prisma.EnumDocLocationOriginFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DocLocationOrigin[] | Prisma.ListEnumDocLocationOriginFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DocLocationOrigin[] | Prisma.ListEnumDocLocationOriginFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDocLocationOriginNullableFilter<$PrismaModel> | $Enums.DocLocationOrigin | null
+}
+
+export type NestedEnumDocLocationOriginNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocLocationOrigin | Prisma.EnumDocLocationOriginFieldRefInput<$PrismaModel> | null
+  in?: $Enums.DocLocationOrigin[] | Prisma.ListEnumDocLocationOriginFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.DocLocationOrigin[] | Prisma.ListEnumDocLocationOriginFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumDocLocationOriginNullableWithAggregatesFilter<$PrismaModel> | $Enums.DocLocationOrigin | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocLocationOriginNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocLocationOriginNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumDocObjectTypeFilter<$PrismaModel = never> = {

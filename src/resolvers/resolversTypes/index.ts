@@ -543,6 +543,38 @@ export const resolverTypes = {
       requiresNewRevision(parent.effect),
   },
 
+  // Ubicación física (BLOQUE 02B). El árbol se expone por sus dos vínculos
+  // directos; la ascendencia completa la da `path`, que existe justamente para
+  // no recorrerla en cada consulta.
+  DocLocation: {
+    createdBy: (parent: { createdById: number }) => {
+      return { __typename: "UserName", id: parent.createdById }
+    },
+    updatedBy: (parent: { updatedById: number }) => {
+      return { __typename: "UserName", id: parent.updatedById }
+    },
+    parent: async (parent: any) => {
+      if (parent.parent !== undefined) return parent.parent
+      if (parent.parentId === null) return null
+      return prisma.docLocation.findUnique({ where: { id: parent.parentId } })
+    },
+    children: async (parent: any) => {
+      if (Array.isArray(parent.children)) return parent.children
+      return prisma.docLocation.findMany({
+        where: { parentId: parent.id },
+        orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      })
+    },
+    /** Nodo hoja: el que no tiene descendencia, que es el que se elige. */
+    isLeaf: async (parent: any) => {
+      if (Array.isArray(parent.children)) return parent.children.length === 0
+      const hijos = await prisma.docLocation.count({
+        where: { parentId: parent.id },
+      })
+      return hijos === 0
+    },
+  },
+
   DocProjectSettings: {
     defaultOrganizer: (parent: { defaultOrganizerId: number | null }) => {
       if (parent.defaultOrganizerId === null) return null

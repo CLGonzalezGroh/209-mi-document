@@ -818,3 +818,37 @@ La condición se resuelve en memoria y no como `where`: la regla de cuál es la 
 **`qualificationsSelectList` declaraba `SelectOption`**, que no existe en el contrato: el tipo del módulo es `SelectList`. Compilaba, porque el nombre venía del tipo de TypeScript de `mi-common`.
 
 **369 pruebas, 0 fallos.**
+
+---
+
+# What's new in María Ingeniería API Documents 2.7.0
+
+2026-08-17
+
+## Ubicación física del documento (BLOQUE 02B)
+
+Bloque en curso. Esta sección se extiende con cada fase.
+
+### Fase 1 — El catálogo jerárquico, con rutas y baja lógica
+
+El documento se ubica en una jerarquía física —**sitio ▸ planta ▸ área ▸ unidad de proceso**— que para el operador de una planta es el criterio principal de orden y de búsqueda: la documentación se consulta por dónde está el equipo, no por qué proyecto la produjo.
+
+- **`DocLocation`**, auto-referencial y de **profundidad libre**: se carga como lista plana de un nivel o como árbol de varios, según cómo cada organización describa su instalación. El **sitio no es una entidad aparte**, es el nivel superior del mismo árbol — modelarlo por separado duplicaría la estructura sin agregar capacidad.
+- **La ruta completa es denormalización y no evidencia.** Existe para evitar el recorrido recursivo en cada listado y en cada filtro, y ordenar por ella agrupa cada rama con su descendencia, que es lo que una pantalla de árbol necesita. Como la ubicación se edita siempre y **no integra el payload de la firma**, renombrar o mover un nodo recalcula las rutas de su descendencia **de forma automática**: no hay propagación explícita ni auditada, que es donde este catálogo se aparta del precedente de digitalización, donde el snapshot forma parte de una publicación.
+- **Mover tiene operación y acción propias**, separadas de editar. Reescribe la ruta de toda una rama, de modo que sin registro del movimiento los cambios de nodos que nadie tocó serían inexplicables después. Y **verifica el ciclo**: una ubicación no puede colgarse de sí misma ni de su propia descendencia, porque la rama quedaría desconectada de toda raíz y ningún recálculo la alcanzaría. El precedente no lo necesita porque no admite mover un nodo.
+- **La unicidad del código es por nivel, con `NULLS NOT DISTINCT`.** Dos plantas pueden tener su área "100"; dos raíces con el mismo código, no. Sin la cláusula los nodos raíz —que en un catálogo plano son **todos**— no se considerarían duplicados: es H-19 aplicado al árbol, con el mecanismo que `BLOQUE 03` dejó decidido.
+- **La baja lógica no alcanza a la descendencia.** Un nodo dado de baja con hijos vigentes es un estado legítimo —el área sigue existiendo, la unidad intermedia dejó de usarse— y cerrar la rama de oficio decidiría por el usuario algo que nadie pidió. Lo ya clasificado no se revalida.
+- **La eliminación definitiva exige no tener descendencia**, verificada en la operación para dar mensaje y garantizada por la clave, que es **RESTRICT y no CASCADE**: la base no debe resolver el pedido borrando en silencio una rama entera.
+- **El nodo admite una referencia externa opcional** —origen e identificador, que viajan juntos y lo sostiene un `CHECK`—. Es el puente con el registro de activos, dueño del árbol cuando ese módulo exista, y con un sistema documental externo. Se modela ahora porque cuesta dos columnas, y porque el precedente disponible —`ScannedFile.externalReference`, una cadena más una URL armada por variable de entorno— no modela el concepto.
+- **Seis acciones nuevas de auditoría y dos transiciones**, más `DOC_LOCATION` como tipo de objeto con su derivador de contexto. El nodo tiene traza propia porque administrar el árbol de la instalación es distinto de operar los documentos que se clasifican con él.
+
+**Es un catálogo de clasificación y no un registro de activos.** Afirma cómo nombra el cliente sus sectores, no que un equipo exista y sea propio. Es lo que resuelve a quién pertenece el árbol cuando la respuesta parecía depender de qué módulos tenga cada despliegue: el registro de activos tiene un dueño —activos, con su propio ciclo de vida, incluido el decomisionamiento— y el catálogo de clasificación lo administra cada módulo que clasifica. La divergencia entre los dos **no es un defecto**, porque no dicen lo mismo.
+
+**Lo que esta fase todavía no trae**, y es deliberado: el catálogo es **del despliegue** y la autorización es global —el alcance por proyecto, con herencia y ampliación, es la fase 2, y con él la segunda capa de autorización—; y el documento **no tiene atributo de ubicación** todavía, que es la fase 4. Esta fase deja el árbol, que es el escalón del que ese mecanismo hereda.
+
+**El atributo no tiene ningún consumidor de comportamiento.** Ninguna regla del módulo lo lee: es clasificación y filtrado. Su único consumidor previsto era el eje de área de la matriz de responsabilidad, **descartado al abrir el bloque** — los revisores de un proyecto son los mismos sin importar el sector, y si cambiaran serían proyectos distintos, porque cada proyecto es un contrato. Sin ese eje la matriz queda sin contenido propio, y el bloque diferido se cierra.
+
+- **Permisos nuevos** `documents:location:{read,list,select,create,update,delete}`, dados de alta en `205-mi-admin`. Requiere `@CLGonzalezGroh/mi-common` con esas constantes y **`npm run seed:permissions` en cada despliegue**: sin el seed el catálogo es inoperable aunque todo compile, que es lo que la fase 1 de `BLOQUE 04` aprendió a los golpes.
+- **Trece pruebas puras** sobre la composición de rutas, el recálculo por rama y el ciclo, más **cuatro contra la base** sobre la unicidad por nivel, el rechazo del borrado con descendencia y el par de la referencia externa.
+
+**386 pruebas, 0 fallos.**

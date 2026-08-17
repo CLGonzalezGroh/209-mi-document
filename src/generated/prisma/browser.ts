@@ -143,6 +143,11 @@ export type DocTransmittalResponse = Prisma.DocTransmittalResponseModel
  */
 export type DocResponseFile = Prisma.DocResponseFileModel
 /**
+ * Model DocLocation
+ * 
+ */
+export type DocLocation = Prisma.DocLocationModel
+/**
  * Model DocWorkflowEvent
  * 
  */

@@ -254,6 +254,21 @@ const derivadores: Record<
     return qualification && { projectId: qualification.projectId, module: null }
   },
 
+  // El catálogo de ubicación es del despliegue en esta fase: no pertenece a
+  // ningún proyecto ni a ningún módulo. El módulo es nulo porque el árbol no es
+  // documentación sino la descripción de la instalación, con la misma forma que
+  // la plantilla del circuito y el catálogo de calificaciones.
+  //
+  // La fase 2 le incorpora el alcance por proyecto, y entonces `projectId` sale
+  // del propio nodo como en `DOC_QUALIFICATION`.
+  [DocObjectType.DOC_LOCATION]: async (client, id) => {
+    const location = await client.docLocation.findUnique({
+      where: { id },
+      select: { id: true },
+    })
+    return location && { projectId: null, module: null }
+  },
+
   // La respuesta toma el contexto del transmittal por el que el documento salió,
   // a través de su ítem. Es la misma cadena que el transmittal recorre, un nivel
   // más abajo, y por eso su módulo es también PROJECTS.

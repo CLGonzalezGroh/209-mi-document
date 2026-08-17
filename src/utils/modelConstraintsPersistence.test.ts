@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs"
 import { prisma } from "../lib/prisma.js"
 import {
   DocFileRole,
+  DocLocationOrigin,
   DocReplacementRole,
   ModuleType,
   RevisionStatus,
@@ -45,7 +46,34 @@ const rechazaPorUnicidad = async (fn: () => Promise<unknown>) => {
   }
 }
 
+const esViolacionDeCheck = (error: unknown) =>
+  typeof error === "object" &&
+  error !== null &&
+  (error as { message?: string }).message?.includes(
+    "doc_locations_external_reference_complete",
+  ) === true
+
+/** Ejecuta el alta y devuelve si la base la rechazó por el CHECK. */
+const rechazaPorCheck = async (fn: () => Promise<unknown>) => {
+  try {
+    await fn()
+    return false
+  } catch (error) {
+    if (esViolacionDeCheck(error)) return true
+    throw error
+  }
+}
+
 const limpiar = async () => {
+  // La descendencia primero: la clave del árbol es RESTRICT, de modo que un
+  // borrado que llegue al padre antes que al hijo se rechaza. Las pruebas de
+  // ubicación no pasan de dos niveles.
+  await prisma.docLocation.deleteMany({
+    where: { code: { startsWith: `${CODIGO}-L` }, parentId: { not: null } },
+  })
+  await prisma.docLocation.deleteMany({
+    where: { code: { startsWith: `${CODIGO}-L` } },
+  })
   await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
   await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: PROYECTO } })
   await prisma.documentType.deleteMany({
@@ -513,4 +541,97 @@ test("un documento no se repite con el mismo papel en un acto de reemplazo", asy
   assert.equal(reemplazante.role, DocReplacementRole.REPLACING)
 
   await prisma.docReplacement.delete({ where: { id: acto.id } })
+})
+
+// --- BLOQUE 02B, B5 a B7: el catálogo de ubicación física ---
+
+const crearUbicacion = (
+  code: string,
+  extra: {
+    parentId?: number | null
+    name?: string
+    externalOrigin?: DocLocationOrigin | null
+    externalRef?: string | null
+  } = {},
+) =>
+  prisma.docLocation.create({
+    data: {
+      code,
+      name: extra.name ?? code,
+      path: extra.name ?? code,
+      parentId: extra.parentId ?? null,
+      externalOrigin: extra.externalOrigin ?? null,
+      externalRef: extra.externalRef ?? null,
+      createdById: 1,
+    },
+  })
+
+test("dos ubicaciones raíz con el mismo código se rechazan", async () => {
+  // Es el caso que exige NULLS NOT DISTINCT: sin la cláusula, dos nodos con
+  // `parentId` nulo no se consideran duplicados, y en un catálogo plano son
+  // TODOS los nodos. Es H-19 en el nivel del árbol.
+  await crearUbicacion(`${CODIGO}-L1`)
+
+  assert.equal(
+    await rechazaPorUnicidad(() => crearUbicacion(`${CODIGO}-L1`)),
+    true,
+  )
+})
+
+test("el mismo código bajo otro padre sí se admite", async () => {
+  // La unicidad es por nivel y no global: dos plantas pueden tener su "100".
+  const plantaA = await crearUbicacion(`${CODIGO}-LA`)
+  const plantaB = await crearUbicacion(`${CODIGO}-LB`)
+
+  const enA = await crearUbicacion(`${CODIGO}-L100`, { parentId: plantaA.id })
+  const enB = await crearUbicacion(`${CODIGO}-L100`, { parentId: plantaB.id })
+
+  assert.ok(enA.id !== enB.id)
+
+  // Y dentro del mismo padre no se repite.
+  assert.equal(
+    await rechazaPorUnicidad(() =>
+      crearUbicacion(`${CODIGO}-L100`, { parentId: plantaA.id }),
+    ),
+    true,
+  )
+})
+
+test("eliminar un nodo con descendencia lo rechaza la base", async () => {
+  // La operación lo verifica antes para dar un mensaje, pero la garantía es de
+  // la clave: RESTRICT y no CASCADE, para que la base no resuelva borrando en
+  // silencio una rama entera.
+  const padre = await crearUbicacion(`${CODIGO}-LP`)
+  await crearUbicacion(`${CODIGO}-LH`, { parentId: padre.id })
+
+  await assert.rejects(() =>
+    prisma.docLocation.delete({ where: { id: padre.id } }),
+  )
+})
+
+test("la referencia externa se declara completa o no se declara", async () => {
+  // Los dos campos viajan juntos (B7): un origen sin identificador no dice
+  // nada. El resolver lo rechaza antes para dar un mensaje; el CHECK es lo que
+  // lo garantiza contra cualquier escritura.
+  const completa = await crearUbicacion(`${CODIGO}-LX`, {
+    externalOrigin: DocLocationOrigin.ASSETS,
+    externalRef: "TAG-110",
+  })
+  assert.equal(completa.externalRef, "TAG-110")
+
+  assert.equal(
+    await rechazaPorCheck(() =>
+      crearUbicacion(`${CODIGO}-LY`, {
+        externalOrigin: DocLocationOrigin.ASSETS,
+      }),
+    ),
+    true,
+  )
+
+  assert.equal(
+    await rechazaPorCheck(() =>
+      crearUbicacion(`${CODIGO}-LZ`, { externalRef: "TAG-120" }),
+    ),
+    true,
+  )
 })

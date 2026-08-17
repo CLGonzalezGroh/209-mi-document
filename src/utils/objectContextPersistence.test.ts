@@ -424,14 +424,15 @@ test("la respuesta toma el contexto del transmittal por el que el documento sali
   )
 })
 
-test("los dieciséis tipos de objeto tienen derivador", async () => {
+test("los diecisiete tipos de objeto tienen derivador", async () => {
   // Ninguno queda sin regla: es la prueba que BLOQUE 01 exige y que cada tipo
-  // nuevo debe seguir pasando.
+  // nuevo debe seguir pasando. El decimoséptimo es `DOC_LOCATION`, que BLOQUE
+  // 02B incorpora.
   for (const objectType of Object.values(DocObjectType)) {
     await assert.doesNotReject(
       () => contextoDe(objectType, -999999),
       `${objectType} no tiene derivador de contexto`,
     )
   }
-  assert.equal(Object.values(DocObjectType).length, 16)
+  assert.equal(Object.values(DocObjectType).length, 17)
 })

@@ -106,6 +106,17 @@ export const AuditAction = {
   AcknowledgeTransmittal: "AcknowledgeTransmittal",
   RegisterItemResponse: "RegisterItemResponse",
   CorrectItemResponse: "CorrectItemResponse",
+
+  // Ubicación física (BLOQUE 02B). Mover tiene acción propia y no es un
+  // `UpdateLocation` más: reescribe la ruta de toda una rama, de modo que sin
+  // registro del movimiento los cambios de nodos que nadie tocó serían
+  // inexplicables después.
+  CreateLocation: "CreateLocation",
+  UpdateLocation: "UpdateLocation",
+  MoveLocation: "MoveLocation",
+  TerminateLocation: "TerminateLocation",
+  ActivateLocation: "ActivateLocation",
+  DeleteLocation: "DeleteLocation",
 } as const
 
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
@@ -178,6 +189,14 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   [AuditAction.AcknowledgeTransmittal]: DocObjectType.TRANSMITTAL,
   [AuditAction.RegisterItemResponse]: DocObjectType.DOC_TRANSMITTAL_RESPONSE,
   [AuditAction.CorrectItemResponse]: DocObjectType.DOC_TRANSMITTAL_RESPONSE,
+
+  // Ubicación física (BLOQUE 02B)
+  [AuditAction.CreateLocation]: DocObjectType.DOC_LOCATION,
+  [AuditAction.UpdateLocation]: DocObjectType.DOC_LOCATION,
+  [AuditAction.MoveLocation]: DocObjectType.DOC_LOCATION,
+  [AuditAction.TerminateLocation]: DocObjectType.DOC_LOCATION,
+  [AuditAction.ActivateLocation]: DocObjectType.DOC_LOCATION,
+  [AuditAction.DeleteLocation]: DocObjectType.DOC_LOCATION,
 }
 
 // ================================
@@ -236,6 +255,11 @@ export const WorkflowEvent = {
   TransmittalAcknowledged: "TransmittalAcknowledged",
   QualificationTerminated: "QualificationTerminated",
   QualificationActivated: "QualificationActivated",
+
+  // Ubicación física (BLOQUE 02B). La baja de un nodo es una transición: deja de
+  // estar disponible para clasificar, sin revalidar lo ya clasificado.
+  LocationTerminated: "LocationTerminated",
+  LocationActivated: "LocationActivated",
 } as const
 
 export type WorkflowEvent = (typeof WorkflowEvent)[keyof typeof WorkflowEvent]
@@ -273,6 +297,8 @@ export const WORKFLOW_EVENT_OBJECT: Record<WorkflowEvent, DocObjectType> = {
   [WorkflowEvent.TransmittalAcknowledged]: DocObjectType.TRANSMITTAL,
   [WorkflowEvent.QualificationTerminated]: DocObjectType.DOC_QUALIFICATION,
   [WorkflowEvent.QualificationActivated]: DocObjectType.DOC_QUALIFICATION,
+  [WorkflowEvent.LocationTerminated]: DocObjectType.DOC_LOCATION,
+  [WorkflowEvent.LocationActivated]: DocObjectType.DOC_LOCATION,
 }
 
 // ================================
@@ -312,4 +338,7 @@ export const DOC_OBJECT_READ_PERMISSION: Record<DocObjectType, string> = {
   // La respuesta se lee con el transmittal por el que el documento salió: la
   // traza forma parte del objeto.
   [DocObjectType.DOC_TRANSMITTAL_RESPONSE]: PERMISSIONS.DOCUMENTS_TRANSMITTAL_READ,
+  // La ubicación tiene recurso propio: administrar el árbol de la instalación es
+  // distinto de operar los documentos que se clasifican con él.
+  [DocObjectType.DOC_LOCATION]: PERMISSIONS.DOCUMENTS_LOCATION_READ,
 }

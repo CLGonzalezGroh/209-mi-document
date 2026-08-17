@@ -1162,6 +1162,89 @@ model DocResponseFile {
 }
 
 // ================================
+// UBICACIÓN FÍSICA — BLOQUE 02B
+// ================================
+
+// De dónde viene el objeto que un nodo describe, cuando describe uno (B7).
+//
+// `ASSETS` es el registro de activos de OperMask, dueño del árbol cuando ese
+// módulo existe; `EXTERNAL`, un sistema ajeno al ecosistema. Externo es respecto
+// de ESTE módulo, que es el que resuelve la referencia.
+enum DocLocationOrigin {
+  ASSETS
+  EXTERNAL
+}
+
+// Catálogo de ubicación física del documento (BLOQUE 02B, B5 a B7).
+//
+// Jerárquico y auto-referencial —sitio ▸ planta ▸ área ▸ unidad—, con el patrón
+// de `CatalogReference` (DOM-024) de digitalización. La profundidad es LIBRE: se
+// carga como lista plana de un nivel o como árbol de varios, según cómo cada
+// organización describa su instalación. El sitio no es una entidad aparte: es el
+// nivel superior del mismo árbol (D-14).
+//
+// Es un catálogo de CLASIFICACIÓN y no un registro de activos (B8): afirma cómo
+// nombra el cliente sus sectores, no que un equipo exista y sea propio. Por eso
+// convive con el árbol que administrará el módulo de activos sin contradecirlo
+// —la divergencia entre un catálogo de clasificación y un registro de activos no
+// es un defecto, porque no dicen lo mismo—.
+//
+// NO reutiliza `Area`, que es plana, obligatoriamente atada al proyecto y
+// pertenece al subsistema de `ScannedFile` que sale del módulo.
+//
+// El ALCANCE por proyecto llega en la fase 2. Esta fase deja el árbol del
+// despliegue, que es el escalón del que ese mecanismo hereda.
+model DocLocation {
+  id           Int       @id @default(autoincrement())
+  createdAt    DateTime  @default(now())
+  createdById  Int
+  updatedAt    DateTime? @updatedAt
+  updatedById  Int       @default(1)
+  terminatedAt DateTime?
+  isSys        Boolean   @default(false)
+
+  // Jerarquía. Nulo = nodo raíz.
+  parentId Int?
+
+  code String
+  name String
+
+  // Ruta completa: los nombres de los ascendientes y el propio, separados por
+  // " / ". Es DENORMALIZACIÓN de conveniencia y no evidencia (B6) —evita el
+  // recorrido recursivo en cada listado—, de modo que renombrar o mover un nodo
+  // recalcula las rutas de su descendencia de forma automática, sin propagación
+  // explícita ni auditada. La ubicación se edita siempre y no entra en el
+  // payload de la firma (B3), así que no hay inmutabilidad que respetar.
+  path String
+
+  sortOrder Int @default(0)
+
+  // Referencia al objeto de otro sistema que este nodo describe (B7). Los dos
+  // campos viajan juntos: un origen sin identificador no dice nada.
+  //
+  // Es el puente con el registro de activos —su dueño cuando ese módulo exista—
+  // y con un sistema documental externo. Se modela desde el principio porque
+  // cuesta dos columnas, y porque el precedente disponible
+  // —`ScannedFile.externalReference`, una cadena más una URL armada por variable
+  // de entorno— no modela el concepto.
+  externalOrigin DocLocationOrigin?
+  externalRef    String?
+
+  // Relaciones
+  parent   DocLocation?  @relation("DocLocationTree", fields: [parentId], references: [id])
+  children DocLocation[] @relation("DocLocationTree")
+
+  // Unicidad del código dentro de su nivel, recreada con NULLS NOT DISTINCT en
+  // la migración: sin la cláusula los nodos RAÍZ —donde `parentId` es nulo, y
+  // que son todos los de un catálogo plano— no se considerarían duplicados, que
+  // es el defecto de H-19. La fase 2 la recrea incorporando el alcance.
+  @@unique([code, parentId], map: "doc_locations_code_level_key") // NULLS NOT DISTINCT en la base
+  @@index([parentId])
+  @@index([path])
+  @@map("doc_locations")
+}
+
+// ================================
 // EVENTOS DE DOMINIO — BLOQUE 01
 // ================================
 
@@ -1200,6 +1283,12 @@ enum DocObjectType {
   // concreto, y su traza describe ese documento y no la carpeta en que salió.
   DOC_QUALIFICATION
   DOC_TRANSMITTAL_RESPONSE
+
+  // Ubicación física (BLOQUE 02B). El nodo tiene traza propia: quién agregó,
+  // renombró, movió o dio de baja una ubicación explica por qué un documento
+  // quedó clasificado donde está, y el recálculo de rutas alcanza a nodos que
+  // nadie tocó.
+  DOC_LOCATION
 }
 
 // Transición de estado de un objeto del dominio documental.

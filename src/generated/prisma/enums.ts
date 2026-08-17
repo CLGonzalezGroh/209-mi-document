@@ -178,6 +178,14 @@ export const QualificationEffect = {
 export type QualificationEffect = (typeof QualificationEffect)[keyof typeof QualificationEffect]
 
 
+export const DocLocationOrigin = {
+  ASSETS: 'ASSETS',
+  EXTERNAL: 'EXTERNAL'
+} as const
+
+export type DocLocationOrigin = (typeof DocLocationOrigin)[keyof typeof DocLocationOrigin]
+
+
 export const DocObjectType = {
   DOCUMENT: 'DOCUMENT',
   DOCUMENT_REVISION: 'DOCUMENT_REVISION',
@@ -194,7 +202,8 @@ export const DocObjectType = {
   DOC_SETTINGS: 'DOC_SETTINGS',
   DOC_REPLACEMENT: 'DOC_REPLACEMENT',
   DOC_QUALIFICATION: 'DOC_QUALIFICATION',
-  DOC_TRANSMITTAL_RESPONSE: 'DOC_TRANSMITTAL_RESPONSE'
+  DOC_TRANSMITTAL_RESPONSE: 'DOC_TRANSMITTAL_RESPONSE',
+  DOC_LOCATION: 'DOC_LOCATION'
 } as const
 
 export type DocObjectType = (typeof DocObjectType)[keyof typeof DocObjectType]

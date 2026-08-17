@@ -153,5 +153,13 @@ test("el catálogo cubre las escrituras relevadas más lo que agregaron los bloq
   // existen —aprobar y rechazar un paso— y lo que cambia es su desenlace. Sí
   // suma una transición, `RevisionRejected`, porque el hecho es otro: la
   // revisión concluye en lugar de volver al elaborador (B12).
-  assert.equal(AUDIT_ACTIONS.length, 50)
+  //
+  // BLOQUE 02B suma 6 en su fase 1, de 50 a 56: el catálogo de ubicación física
+  // con su ciclo de vida completo, más el movimiento, que tiene acción propia
+  // porque reescribe la ruta de toda una rama y sin registro los cambios de
+  // nodos que nadie tocó serían inexplicables después (B6).
+  //
+  //   + CreateLocation, UpdateLocation, MoveLocation
+  //   + TerminateLocation, ActivateLocation, DeleteLocation
+  assert.equal(AUDIT_ACTIONS.length, 56)
 })

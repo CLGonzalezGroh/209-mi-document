@@ -204,6 +204,22 @@ De modo que el escalón de módulo **no se disuelve, se acota**: este bloque no 
 
 El catálogo va primero porque el alcance opera sobre él, y la siembra después del alcance porque la fuente es un catálogo con alcance declarado.
 
+## Ejecución
+
+### Fase 1 — completada
+
+`DocLocation` con su jerarquía, su ruta recalculada por rama, su ciclo de vida y la referencia externa de `B7`. Dos migraciones —el catálogo y el valor de enumeración de la traza, separado por el motivo que ya obligó a separarlo en `BLOCK_03B` y en `BLOCK_04`—, seis acciones de auditoría, dos transiciones y el derivador de contexto del tipo nuevo.
+
+Tres cosas que la fase resolvió y no estaban escritas en el bloque:
+
+- **mover es operación propia y verifica el ciclo.** El precedente de digitalización no lo necesita porque no admite mover un nodo; `B6` sí lo pide. Sin la verificación, colgar un nodo de su propia descendencia desconecta la rama de toda raíz y ningún recálculo la alcanza;
+- **la clave del árbol es `RESTRICT` y no `CASCADE`.** Eliminar un nodo con descendencia se rechaza en la operación para dar mensaje, y la base lo garantiza en lugar de resolverlo borrando en silencio una rama entera;
+- **la baja lógica no alcanza a la descendencia.** Un nodo dado de baja con hijos vigentes es un estado legítimo, y cerrar la rama de oficio decidiría algo que nadie pidió.
+
+**386 pruebas, 0 fallos**, con las tres suites de integración. Trece puras sobre rutas, recálculo y ciclos; cuatro contra la base sobre la unicidad por nivel con `NULLS NOT DISTINCT`, el rechazo del borrado con descendencia y el par de la referencia externa.
+
+Pendiente de despliegue: `@CLGonzalezGroh/mi-common` con los seis permisos nuevos, y su siembra en cada cliente. Sin el seed el catálogo es inoperable aunque todo compile, que es lo que la fase 1 de `BLOCK_04` aprendió a los golpes.
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-14, D-21, D-23, H-36
