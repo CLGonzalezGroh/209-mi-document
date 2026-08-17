@@ -948,6 +948,21 @@ El snapshot conserva su razón de ser, que era otra: mostrar y ordenar sin un jo
 
 **473 pruebas, 0 fallos**, con cinco casos de integración más y uno puro sobre la firma.
 
+### Fase 7 — Promoción a la SFS
+
+**Promovido**, en un ámbito propio: `domain/20_classification/`, con `DocLocation`, `DocCatalogScope` y sus principios en siete puntos.
+
+El ámbito es propio y no un agregado al ciclo interno, por el mismo criterio con que la circulación se separó: **clasificar no es identificar**. El código identifica y no cambia, el título describe la emisión y por eso vive en la revisión, y la ubicación clasifica — de modo que se edita siempre, no se congela con la revisión aprobada y no integra el payload de la firma.
+
+`Document` y `DocProjectSettings` se actualizaron por lo que el bloque les cambió: el atributo con su snapshot en el primero, y la configuración en el segundo, con la distinción de que ahí viven los **valores** y no los **conjuntos** — un catálogo se hereda, un valor se reemplaza.
+
+**Desplegado y verificado en testing** —`rbb`, `optimal`, `proion`—, con las cinco migraciones aplicadas y los permisos sembrados. El contrato servido por la imagen desplegada da verde en los dos bloques, y los seis permisos de ubicación están repartidos por rol en los tres clientes.
+
+**La línea base del subsistema legado de `optimal` quedó intacta**: 9 archivos escaneados, 3 áreas y 32 registros de log, con el subsistema documental en cero. Las cinco migraciones no mencionan `scanned_files` ni `areas` ni una sola vez.
+
+**Dos controles nuevos en `210-mi-deploy`, y los dos por defectos reales:** `check-document-contract.sh` ahora verifica **por bloque** —fundidas en una lista sola, informaba que faltaba el bloque equivocado— y **`check-document-permissions.sh` es nuevo**, para el hueco que ninguna verificación cubría: el contrato en verde no significa operable.
+
+
 
 
 

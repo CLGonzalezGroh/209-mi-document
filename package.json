@@ -1,6 +1,6 @@
 {
   "name": "209-mi-document",
-  "version": "2.7.5",
+  "version": "2.8.0",
   "description": "María Ingeniería API de Gestión Documental",
   "type": "module",
   "main": "index.js",

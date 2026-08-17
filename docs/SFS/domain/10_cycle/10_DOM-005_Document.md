@@ -51,11 +51,14 @@ Entre los atributos propios del `Document` podrán encontrarse:
 
 - **código identificador**, que no cambia;
 - descripción y ámbito —proyecto o módulo de publicación—;
+- **ubicación física** y la ruta de esa ubicación como snapshot;
 - copia de la identificación de su revisión en curso: título, clase y tipo;
 - fecha, actor y motivo de su obsolescencia;
 - fechas y actores de alta y modificación.
 
 **No se encuentra entre ellos el esquema de revisión.** Se elige al crear cada revisión y se lee de la última no abandonada.
+
+**La ubicación se edita siempre, como la descripción.** No entra en el congelamiento de la revisión aprobada ni en el payload de la firma: clasifica y no identifica, de modo que corregir dónde está un equipo no exige abrir una revisión. Su ruta es un snapshot que el propio catálogo recalcula al renombrar o mover el nodo. Es opcional, y el proyecto puede exigirla por configuración — ver `../20_classification/10_DOM-019_DocLocation.md`.
 
 La copia de la identificación **se nombra por la lectura que sirve** —`currentTitle` y equivalentes—, para que ningún consumidor la confunda con la identificación de la revisión aprobada.
 

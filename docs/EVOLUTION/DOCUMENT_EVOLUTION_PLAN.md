@@ -555,7 +555,7 @@ Riesgos y pendientes:
 
 ### D-14 — El documento se ubica en una jerarquía física
 
-**Estado:** Aprobada.
+**Estado:** `PROMOVIDO_A_SFS`. Ejecutada en `BLOCK_02B` y desplegada en testing.
 
 Los proyectos de una planta industrial ocurren en un sitio y en una ubicación física concreta —planta, área, unidad de proceso—. Para el operador de la planta esos metadatos son el criterio principal de orden y de búsqueda: la documentación se consulta por dónde está el equipo, no por qué proyecto la produjo. Para la empresa de ingeniería el dato es accesorio.
 
@@ -752,7 +752,7 @@ Pendientes de definición al abrir el bloque:
 
 ### D-21 — El catálogo documental admite alcance por proyecto
 
-**Estado:** Aprobada en su alcance. Su forma se define al abrir el bloque correspondiente.
+**Estado:** Aprobada. **Su mecanismo está construido y promovido** con `BLOCK_02B`, sobre el catálogo de ubicación; `BLOCK_02C` lo aplica a clase y tipo, que son los que tienen datos e interfaz en producción.
 
 `DocumentClass` y `DocumentType` son hoy catálogos **globales del despliegue**, con `module` opcional donde nulo significa disponible para todos los módulos. Eso ya resuelve dos de los tres alcances que el negocio necesita:
 
@@ -1109,7 +1109,7 @@ Orden propuesto. Cada bloque se abre con su propio documento, con línea base co
 | `BLOCK_03B` | Titularidad por nivel: metadata de identificación en la revisión, código inmutable con acto de reemplazo N:M entre documentos, la versión como conjunto de archivos con rol producido por copia de trabajo, y una palabra por nivel para los estados terminales (D-23 a D-27). Revisa `B4` y `B6` de `BLOCK_03` | `BLOCK_03` |
 | `BLOCK_04` | Emisión y respuesta: circulación asimétrica por modo, **circuito del rol Receptor y catálogo de calificaciones**, puerta de emisión, respuesta como objeto propio del ítem con archivos y autoría diferenciada, acuse de recibo, propósito de la emisión y documento pendiente derivado (D-12, D-18, D-22; H-11 a H-16, H-29 a H-31, H-33) | `BLOCK_03B` |
 | `BLOCK_04B` | Paquete de información de entrada y promoción a documento controlado (D-16, D-20) | `BLOCK_02` |
-| `BLOCK_02B` | Ubicación física jerárquica del documento, y **el mecanismo de alcance por proyecto** que los tres catálogos comparten (D-14; construye D-21; descarta H-36) | `BLOCK_02` |
+| `BLOCK_02B` ✔ | Ubicación física jerárquica del documento, y **el mecanismo de alcance por proyecto** que los tres catálogos comparten (D-14; construye D-21; descarta H-36). **Promovido a la SFS y desplegado en testing** | `BLOCK_02` |
 | `BLOCK_02C` | Alcance por proyecto de clase y tipo, aplicando el mecanismo que construye `BLOCK_02B` (D-21) | `BLOCK_02`, `BLOCK_03` por la unicidad, `BLOCK_02B` por el mecanismo |
 | `BLOCK_05` | Interfaz de usuario del subsistema (H-25) | `BLOCK_03`, `BLOCK_04`, `BLOCK_02B` |
 

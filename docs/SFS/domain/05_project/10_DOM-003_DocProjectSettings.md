@@ -56,7 +56,14 @@ Entre los atributos propios del `DocProjectSettings` podrán encontrarse:
 - proyecto al que corresponde, único;
 - rol documental declarado;
 - nombre de la contraparte, ausente cuando el rol no la tiene;
+- **configuración del atributo de ubicación física**: si está habilitado, si es obligatorio y con qué etiqueta se lo nombra;
 - fechas y actores de alta y modificación.
+
+**La ubicación nace habilitada y no obligatoria, en los tres roles.** Un proyecto atraviesa el ciclo completo sin declarar ninguna, y la planta la usa para filtrar y no para exigir. **Deshabilitada no exige**, aunque quede marcada como obligatoria: exigir lo que no se puede declarar sería una contradicción y no una regla estricta.
+
+La etiqueta **sí** es configurable —*área*, *unidad*, *sector*—, a diferencia del esquema de revisión: cada organización la nombra distinto, mientras que *revisión* es terminología establecida del dominio documental.
+
+**Acá viven los valores, no los conjuntos.** Qué entradas de catálogo resuelve el proyecto lo declara `DocCatalogScope`, porque un catálogo se hereda y un valor se reemplaza.
 
 La definición detallada de estos atributos corresponde al Modelo de Datos.
 

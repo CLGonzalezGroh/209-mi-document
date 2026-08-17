@@ -1,7 +1,7 @@
 # Bloque 02B — Ubicación física del documento
 
-**Estado:** `APROBADO_PENDIENTE`
-**Versión:** 1.5
+**Estado:** `PROMOVIDO_A_SFS`
+**Versión:** 1.6
 **Depende de:** `BLOCK_02`, que dejó creada `DocProjectSettings`.
 **Decisiones que ejecuta:** D-14.
 **Decisiones que construye para otro bloque:** el mecanismo de alcance por proyecto de D-21, que `BLOCK_02C` reutiliza sobre clase y tipo.
@@ -311,7 +311,24 @@ Los criterios 10 y 11 quedan del lado del despliegue y del diff: `Area` y `Scann
 
 **473 pruebas, 0 fallos.**
 
-Queda la fase 7: la promoción a la SFS, con el descarte de la matriz de responsabilidad.
+### Fase 7 — completada
+
+**Promovido a la SFS**, en un ámbito propio: `domain/20_classification/`, con dos Objetos del Dominio nuevos —`DocLocation` y `DocCatalogScope`— y sus principios en siete puntos.
+
+El ámbito es propio y no un agregado al ciclo interno por el mismo criterio con que `BLOCK_04` separó la circulación: **clasificar no es identificar**. El código identifica y no cambia, el título describe la emisión y por eso vive en la revisión, y la ubicación clasifica — de modo que se edita siempre, no se congela y no integra el payload de la firma. Meterla en el ciclo habría borrado esa frontera.
+
+Dos documentos existentes se actualizaron por lo que el bloque les cambió: `Document` incorpora la ubicación y su snapshot, con la regla de que se edita siempre; y `DocProjectSettings`, la configuración del atributo, con la distinción de que ahí viven los **valores** y no los **conjuntos**.
+
+**Desplegado y verificado en testing** —`rbb`, `optimal`, `proion`—, con las cinco migraciones aplicadas y los permisos sembrados. El contrato servido por la imagen desplegada da verde en los dos bloques, y los seis permisos de ubicación están repartidos por rol en los tres clientes: `doc-basic` con tres, `doc-full` con seis.
+
+**La línea base del subsistema legado de `optimal` quedó intacta**: 9 archivos escaneados, 3 áreas y 32 registros de log, con el subsistema documental en cero. Las cinco migraciones no mencionan `scanned_files` ni `areas` **ni una sola vez**, verificado sobre el texto de las migraciones y no por declaración.
+
+**Dos controles nuevos quedaron en `210-mi-deploy`**, y los dos por defectos reales de esta sesión:
+
+- `check-document-contract.sh` verifica **por bloque**. Al incorporar este bloque fundí sus operaciones con las de `BLOCK_04` en una lista sola, y el resultado informaba *"la imagen NO tiene BLOQUE 04"* cuando `BLOCK_04` estaba entero y faltaba solo `02B`. Es la clase de salida que manda a diagnosticar el problema equivocado;
+- **`check-document-permissions.sh` es nuevo**, y cubre el hueco que ninguna verificación tenía: el contrato en verde no significa operable. El servicio expone la operación aunque ningún rol tenga su permiso, y el primer llamado real devuelve *no estás autorizado*. Mira los dos últimos de los tres pasos del alta de un permiso —el alta y el reparto por rol—, que es exactamente lo que yo mismo olvidé al abrir la fase 1.
+
+**Lo que no se verificó todavía**, y no depende del bloque: las pruebas funcionales de extremo a extremo, que esperan la interfaz de usuario (H-25, `BLOCK_05`).
 
 ## Referencias
 
