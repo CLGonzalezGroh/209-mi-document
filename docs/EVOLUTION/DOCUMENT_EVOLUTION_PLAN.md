@@ -1,7 +1,7 @@
 # Plan de evolución funcional — OperMask Documents
 
 **Estado:** Decisiones aprobadas — en ejecución por bloques
-**Versión:** 1.1
+**Versión:** 1.2
 **Alcance:** subsistema de Gestión Documental (`Document`, `DocumentRevision`, `DocumentVersion`, `ReviewWorkflow`, `ReviewStep`, `Transmittal`, `TransmittalItem`, catálogos, adjuntos y vínculo con tareas de proyecto).
 
 ## Objetivo
@@ -103,7 +103,7 @@ Los siguientes puntos requieren revisión antes de convertirse en reglas aprobad
 | H-30 | Sin archivos de respuesta del cliente | La respuesta solo admite `clientStatus` y comentarios de texto. No hay forma de incorporar los archivos marcados que devuelve la contraparte, que son la evidencia de la observación. Cerrado en `BLOCK_04` (B5 y B6): los archivos devueltos cuelgan de la respuesta, porque llegan de afuera del circuito. | `PROMOVIDO_A_SFS` |
 | H-31 | Sin listado de documentos esperados | En modo Receptor la planta debe definir los documentos obligatorios por contrato, sobre los que el proveedor emite, pudiendo agregar adicionales. No existe ningún concepto equivalente en el modelo. `BLOCK_04` lo cierra sin incorporarlo: todo documento del proyecto es esperado, y pendiente es el que no salió, derivado y no declarado (B13). | `PROMOVIDO_A_SFS` |
 | H-32 | Sin alcance para usuarios externos | Ambos modos pueden incorporar usuarios ajenos a la organización que hospeda el sistema: el contratista en modo Receptor, y el cliente que responde directamente en modo Emisor (D-12). Cada uno debe ver únicamente lo que le corresponde. No existe hoy ningún mecanismo de alcance: la autorización es puramente global por permiso. Resuelto por D-15 y promovido con `BLOCK_02`, como autorización en dos capas. | `PROMOVIDO_A_SFS` |
-| H-36 | Sin matriz de responsabilidad | En modo Receptor los documentos recibidos se distribuyen entre revisores según disciplina, tipo o área. No existe ningún concepto que proponga esa asignación: hoy cada paso del workflow se asigna a mano, documento por documento (D-18). **Sale del alcance de `BLOCK_04`** y queda entre los diferidos: es otra fuente de propuesta para un paso que ya existe, no una puerta. | `APROBADO_PENDIENTE` |
+| H-36 | Sin matriz de responsabilidad | En modo Receptor los documentos recibidos se distribuyen entre revisores según disciplina, tipo o área. Salió del alcance de `BLOCK_04` con dos de sus tres ejes ya construidos: la plantilla de `BLOCK_03` resuelve por proyecto, clase y tipo con actores preasignados, y en proyectos la clase es la disciplina. **Descartado al abrir `BLOCK_02B` (B9)**, que retira el eje de área —el único pendiente— por desproporcionado: los revisores de un proyecto son los mismos sin importar el sector, y si cambiaran serían proyectos distintos, porque cada proyecto es un contrato (D-15). Sin ese eje la matriz queda sin contenido. Lo que quede fuera de la propuesta lo resuelve la reasignación de D-04. | `DESCARTADO` |
 | H-33 | Respuesta sin autoría diferenciada | El modelo no distingue quién respondió de quién registró la respuesta. En el caso habitual del modo Emisor la ingresa el control documental de la ingeniería, y esa diferencia debe quedar explícita (D-12). Tampoco se conserva la fecha real de la respuesta frente a la de registro. Cerrado en `BLOCK_04` (B5): autoría diferenciada, con la divergencia derivada. | `PROMOVIDO_A_SFS` |
 
 ### Modelo y alcance
@@ -469,6 +469,8 @@ Con la información de partida fuera, la única distinción que el transmittal d
 
 **Asignación de revisores en modo Receptor.** La matriz de responsabilidad —por disciplina, tipo de documento o área— **propone** los revisores de cada documento recibido, y quien recibe el transmittal puede ajustarlos antes de confirmar. Es una sugerencia, no una asignación automática: evita asignar a mano cada emisión sin quitar el control sobre el resultado.
 
+**Resuelto sin la matriz.** La plantilla de `BLOCK_03` cubre los ejes de disciplina y tipo —en proyectos la clase **es** la disciplina— y `BLOCK_04` la usa para armar el circuito del receptor. El eje de área quedó descartado al abrir `BLOCK_02B` (`B9`), de modo que la matriz queda sin contenido propio y H-36 pasa a `DESCARTADO`. Los ajustes sobre lo propuesto los hace la reasignación de D-04.
+
 **Consecuencia sobre el transmittal.** Agrupa la emisión, pero no gobierna el ciclo. Su estado se desprende de sus ítems y su cierre es un acto documental, no una precondición para que un documento avance.
 
 Definido al abrir `BLOCK_04`:
@@ -568,9 +570,19 @@ Se adopta el patrón de `CatalogReference` (DOM-024) de OperMask Digitalization:
 
 **El sitio no es una entidad aparte: es el nivel superior del mismo árbol.** Sitio ▸ Planta ▸ Área ▸ Unidad es una jerarquía única, no dos conceptos. Modelar el sitio por separado duplicaría la estructura sin agregar capacidad.
 
-La obligatoriedad se resuelve por configuración, en `DocProjectSettings` y junto con el esquema de revisión de D-13: habilitado, obligatorio y etiqueta. Un proyecto de ingeniería puede deshabilitar el atributo; una planta lo exigirá.
+La obligatoriedad se resuelve por configuración, en `DocProjectSettings` y junto con el esquema de revisión de D-13: habilitado, obligatorio y etiqueta.
 
 **Se ejecuta en `BLOCK_02B`, no en `BLOCK_02`.** La entidad de configuración por proyecto la crea `BLOCK_02`; el catálogo jerárquico y su vínculo con el documento son un cuerpo de trabajo separable que no bloquea al ciclo interno.
+
+Definido al abrir `BLOCK_02B`:
+
+- **el árbol se hereda del despliegue y el proyecto lo amplía**, en dos modos que el proyecto declara: heredar el del despliegue y agregarle nodos, o tener el propio sin verlo. En una planta rige el primero, porque cada proyecto interviene sobre la misma instalación; en una empresa de ingeniería el global queda vacío o mínimo y cada proyecto carga la estructura de su cliente. **Es el mecanismo de alcance de D-21 y lo construye este bloque**, sobre el catálogo que no tiene datos ni interfaz en producción (`B1`);
+- **la ubicación pertenece al documento y no a la revisión, y se edita siempre.** No entra en el congelamiento de D-05 ni en el payload de la firma: que un dato aparezca impreso en el rótulo no lo vuelve identificación. Lo que D-23 sostiene es que la identificación pertenece a la emisión, no que todo lo impreso lo haga — el código identifica, el título describe la emisión, y la ubicación clasifica (`B3`);
+- **el atributo es opcional en los tres roles.** Se corrige acá la expectativa de que *"una planta lo exigirá"*: la planta lo usa para filtrar, no para exigir. La configuración de habilitación, obligatoriedad y etiqueta se conserva, con el valor por defecto habilitado y no obligatorio (`B4`);
+- **el snapshot de la ruta es denormalización y no evidencia.** Sin inmutabilidad que respetar, renombrar o mover un nodo recalcula las rutas de forma automática, y la propagación explícita y auditada que esta decisión anticipaba deja de hacer falta: existía en el precedente porque allá el snapshot formaba parte de una publicación (`B6`);
+- **el nodo lleva una referencia externa opcional**, con origen e identificador, para que el puente con el registro de activos sea después una operación y no una migración (`B7`).
+
+**La ubicación no tiene ningún consumidor de comportamiento.** Ninguna regla del módulo la lee: es clasificación y filtrado. Su único consumidor previsto era el eje de área de la matriz de responsabilidad, que `B9` descarta.
 
 **No se reutiliza `Area`.** La entidad existente es plana, está atada al proyecto y pertenece al subsistema de `ScannedFile`, que sale del módulo. La ubicación documental es una jerarquía propia.
 
@@ -583,7 +595,15 @@ Pendientes de definición, que el usuario dejó explícitamente abiertos:
 
 En consecuencia, se descarta la alternativa de que el proyecto declare su sitio y el documento lo herede: con un proyecto multisitio esa herencia sería ambigua. **El documento lleva su propia ubicación**, y es el único dato autoritativo sobre dónde está lo que describe.
 
-Advertencia de frontera: esta jerarquía de ubicación es la misma que administraría el módulo de biblioteca de planta. Si cada módulo construye su propio árbol de sitios y áreas, se obtienen dos jerarquías divergentes sobre la misma instalación. Es el mismo riesgo de duplicación discutido para el control documental, y conviene resolverlo cuando ese módulo se defina.
+Advertencia de frontera: esta jerarquía de ubicación es la misma que administraría el módulo de biblioteca de planta. Si cada módulo construye su propio árbol de sitios y áreas, se obtienen dos jerarquías divergentes sobre la misma instalación. Es el mismo riesgo de duplicación discutido para el control documental.
+
+**Contestada al abrir `BLOCK_02B`, en lugar de diferida a que el módulo de activos se defina** (`B8`). El planteo era que el dueño natural del árbol es activos, que solo tiene sentido en una planta, mientras que una empresa de ingeniería puede necesitar el atributo sin tener ese módulo y un contratista de digitalización debe entregarlo cuando su cliente lo exige — de modo que la titularidad quedaba dependiendo de qué módulos tenga cada despliegue.
+
+La salida es que **son dos cosas distintas que se parecen**, y por eso no compiten por un dueño. El **registro de activos** afirma que un equipo existe y es propio, con ciclo de vida real —el decomisionamiento de una unidad deja obsoleta su documentación sin que nada la reemplace, causa que este módulo no conoce— y su dueño es activos. El **catálogo de clasificación** afirma cómo nombra el cliente sus sectores, no tiene ciclo de vida sobre nada, y su dueño es el módulo que clasifica: documentos el suyo, digitalización el suyo —que ya tiene, y correctamente—.
+
+Con eso, la divergencia entre un catálogo de clasificación y un registro de activos **no es un defecto**, porque no dicen lo mismo. La divergencia entre dos registros de activos sí lo sería, y no va a ocurrir. El costo aceptado es que un despliegue de planta con ambos módulos mantenga el árbol dos veces hasta que el puente de `B7` exista, y lo vuelve tolerable que el atributo documental sea opcional y solo sirva para filtrar.
+
+Alternativa descartada: un hogar transversal para el árbol —`mi-admin`, único subgraph presente en todo despliegue, o uno propio—. Resolvería la duplicación de raíz y se descarta ahora porque obligaría a diseñar dato maestro compartido para un módulo todavía sin especificar, y arrastraría la migración del `CatalogReference` que digitalización ya tiene modelado. La referencia externa de `B7` mantiene el camino abierto.
 
 ### D-13 — El esquema de revisión es configurable por proyecto
 
@@ -751,12 +771,18 @@ Consecuencia sobre la unicidad: el alcance por proyecto agrega otra columna anul
 
 **Es la primera vez que un cambio de este plan toca algo con interfaz y datos en producción.** La webapp ya tiene pantallas de catálogos, y `ScannedFile` referencia ambas entidades en el único cliente con uso real. La migración es aditiva —todo lo existente queda como global— pero la resolución cambia en cada consulta y en cada selector, y esa parte debe planificarse con el mismo cuidado que la salida de `ScannedFile`.
 
-Pendientes de definición al abrir el bloque:
+**El mecanismo de alcance lo construye `BLOCK_02B` y no `BLOCK_02C`.** Es el mismo para tres catálogos —clase, tipo y la ubicación de D-14—, de modo que conviene definirlo una vez, y conviene probarlo donde no hay datos ni interfaz en producción. `BLOCK_02C` lo reutiliza sobre los dos catálogos donde `optimal` tiene 7 clases y 57 tipos productivos: el bloque barato prueba el mecanismo, el caro lo aplica. La jerarquía es además el caso difícil de la copia, porque hay que rearmar vínculos de padre y recalcular rutas: si funciona ahí, clase y tipo son el caso fácil.
 
-- **cómo declara el proyecto si hereda o reemplaza**, y si esa declaración vive en `DocProjectSettings` junto con las demás;
-- si un catálogo propio puede **sembrarse copiando** el del módulo, y si esa copia es puntual o permanente;
-- si una entrada heredada puede **excluirse** en un proyecto, o si la única forma de no verla es no heredar;
-- qué pasa con un documento ya clasificado cuando su entrada deja de estar disponible. La orientación es la de D-13: la validación ocurre solo en escritura y nunca revalida lo existente;
+Definido al abrir `BLOCK_02B`, y vale para los tres catálogos:
+
+- **dos modos que el proyecto declara**: heredar el catálogo del despliegue y ampliarlo, o tener el propio sin verlo. Heredar es el valor por defecto, que es lo que la migración aditiva necesita. **La declaración es por catálogo y no una sola por proyecto**: un cliente puede dictar los tipos de documento y no tener nomenclatura formal de áreas (`B1`);
+- **la siembra por copia es puntual**, y esa es justamente la distinción entre los dos modos: una copia permanente **es** herencia, y llamarla de otro modo daría dos formas de lo mismo;
+- **la fuente de la siembra admite el global del despliegue o un proyecto existente.** El global suele ser el estándar de la propia organización, mientras que el catálogo de un proyecto es el estándar de un cliente: el segundo proyecto para el mismo cliente copia del primero. Los proyectos que se ofrecen como fuente son los que el usuario alcanza por membresía (D-15), y sembrar solo agrega lo que falta, se admite más de una vez y no duplica. De dónde salió el catálogo queda en `DocAuditEvent` y no en un atributo de linaje (`B2`);
+- **excluir una entrada heredada deja de hacer falta.** Si hay que podar, se declara *propio* y se siembra. Un mecanismo de exclusión sería una tercera forma de decir lo mismo, con la ambigüedad de qué ocurre cuando el global agrega una entrada nueva (`B2`);
+- **cambiar de modo con documentos ya clasificados se admite**, con la orientación de D-13: la validación ocurre solo en escritura y nunca revalida lo existente. No se le impone la inmutabilidad que D-09 exige al rol documental, porque acá no hay semántica que cambie de significado (`B1`).
+
+Pendiente de definición al abrir `BLOCK_02C`:
+
 - cómo se traduce la clasificación al promover un documento a la biblioteca de planta, donde el catálogo es el del activo y no el del proyecto (nota prospectiva del cierre de proyecto).
 
 ### D-22 — La calificación es un catálogo configurable, no una enumeración
@@ -1083,8 +1109,8 @@ Orden propuesto. Cada bloque se abre con su propio documento, con línea base co
 | `BLOCK_03B` | Titularidad por nivel: metadata de identificación en la revisión, código inmutable con acto de reemplazo N:M entre documentos, la versión como conjunto de archivos con rol producido por copia de trabajo, y una palabra por nivel para los estados terminales (D-23 a D-27). Revisa `B4` y `B6` de `BLOCK_03` | `BLOCK_03` |
 | `BLOCK_04` | Emisión y respuesta: circulación asimétrica por modo, **circuito del rol Receptor y catálogo de calificaciones**, puerta de emisión, respuesta como objeto propio del ítem con archivos y autoría diferenciada, acuse de recibo, propósito de la emisión y documento pendiente derivado (D-12, D-18, D-22; H-11 a H-16, H-29 a H-31, H-33) | `BLOCK_03B` |
 | `BLOCK_04B` | Paquete de información de entrada y promoción a documento controlado (D-16, D-20) | `BLOCK_02` |
-| `BLOCK_02B` | Ubicación física jerárquica del documento (D-14) | `BLOCK_02` |
-| `BLOCK_02C` | Alcance por proyecto de los catálogos documentales, con herencia del catálogo del módulo (D-21) | `BLOCK_02`, `BLOCK_03` por la unicidad |
+| `BLOCK_02B` | Ubicación física jerárquica del documento, y **el mecanismo de alcance por proyecto** que los tres catálogos comparten (D-14; construye D-21; descarta H-36) | `BLOCK_02` |
+| `BLOCK_02C` | Alcance por proyecto de clase y tipo, aplicando el mecanismo que construye `BLOCK_02B` (D-21) | `BLOCK_02`, `BLOCK_03` por la unicidad, `BLOCK_02B` por el mecanismo |
 | `BLOCK_05` | Interfaz de usuario del subsistema (H-25) | `BLOCK_03`, `BLOCK_04`, `BLOCK_02B` |
 
 El rol documental (D-09) gobierna el ciclo completo, por lo que el contexto de proyecto pasa a ser el primer bloque funcional: ya no puede quedar detrás del ciclo de revisión.
@@ -1093,9 +1119,11 @@ El rol documental (D-09) gobierna el ciclo completo, por lo que el contexto de p
 
 El paquete de información de entrada se separó al abrir `BLOCK_04`, con el identificador `BLOCK_04B`. **Es el mismo argumento con que D-20 lo separó del transmittal**, aplicado un nivel más arriba: sus reglas son disjuntas de las de la emisión —no tiene puerta de aprobación, ni vínculo entre respuesta e ítem, ni calificación, ni cierre—, opera sobre archivos sin catalogar en lugar de revisiones, y **existe en los tres roles**, incluido el Interno que no admite transmittals. Depende de `BLOCK_02` y no de la circulación, de modo que puede ejecutarse en paralelo. Arrastra además dos preguntas que D-16 ya había diferido a un análisis propio —la búsqueda por contenido y el ingreso de un comprimido—, que no deben condicionar el calendario de la emisión.
 
-El alcance por proyecto de los catálogos (D-21) se registró al abrir `BLOCK_03` y también se separó, con el identificador `BLOCK_02C`. No pertenece al ciclo interno y **es el primer bloque que altera un objeto con interfaz y datos en producción**, de modo que su ejecución tiene condiciones propias. `BLOCK_03` le deja resuelto el mecanismo de unicidad con nulos.
+El alcance por proyecto de los catálogos (D-21) se registró al abrir `BLOCK_03` y también se separó, con el identificador `BLOCK_02C`. No pertenece al ciclo interno y **es el primer bloque que altera un objeto con interfaz y datos en producción**, de modo que su ejecución tiene condiciones propias. `BLOCK_03` le deja resuelto el mecanismo de unicidad con nulos, y `BLOCK_02B` el mecanismo de alcance.
 
-La ubicación física (D-14) se separó del contexto de proyecto al abrir `BLOCK_02`. Es un catálogo auto-referencial completo —con recálculo de rutas, snapshot en el documento y propagación auditada— y no bloquea al ciclo interno, de modo que puede ejecutarse en paralelo a `BLOCK_03` y `BLOCK_04`. Conserva el identificador `BLOCK_02B` para no renumerar los bloques ya referenciados. Su configuración de habilitación y obligatoriedad reside en `DocProjectSettings`, que `BLOCK_02` deja creado.
+La ubicación física (D-14) se separó del contexto de proyecto al abrir `BLOCK_02`. Es un catálogo auto-referencial completo —con recálculo de rutas y snapshot en el documento— y no bloquea al ciclo interno, de modo que pudo diferirse detrás de `BLOCK_03` y `BLOCK_04`. Conserva el identificador `BLOCK_02B` para no renumerar los bloques ya referenciados. Su configuración de habilitación y obligatoriedad reside en `DocProjectSettings`, que `BLOCK_02` deja creado.
+
+**Se abre después de `BLOCK_04` y antes de `BLOCK_05`, y cargó dos responsabilidades que no tenía.** Es la última dependencia de la interfaz, y es el terreno más barato del módulo: la ubicación no tiene ningún consumidor de comportamiento, no hay datos productivos y no hay pantallas que cambiar. Por eso se le asignó **construir el mecanismo de alcance de D-21**, que es común a los tres catálogos, en lugar de que lo estrenara `BLOCK_02C` sobre clase y tipo, donde `optimal` tiene datos e interfaz en producción. Y **descarta el eje de área de la matriz de responsabilidad** (`B9`), que era lo único que dependía de D-14 y lo único que le faltaba a ese bloque diferido.
 
 Diferidos, con su propio análisis y sin fecha asignada:
 
@@ -1103,8 +1131,7 @@ Diferidos, con su propio análisis y sin fecha asignada:
 | ------ | --------- | ------ |
 | Interfaz tareas–documentos | Unificación del doble vínculo y avance de tarea por revisión aprobada (D-07; H-18) | Requiere definición funcional adicional. Se retoma tras consolidar el núcleo documental. |
 | Adjuntos | Destino de `Attachment` (D-08; H-21) | Depende de la cuestión de fondo sobre el alcance del módulo. |
-| Matriz de responsabilidad | Propuesta de revisores **por área** en modo Receptor (D-18; H-36). Los otros dos ejes ya están: la plantilla de `BLOCK_03` resuelve por proyecto, clase y tipo con actores preasignados, y en proyectos **clase es la disciplina**. `BLOCK_04` la usa para armar el circuito del receptor sin intervención, de modo que lo que resta es el eje de área, que depende de D-14 | Se separó al abrir `BLOCK_04`. `B16` de `BLOCK_03` la dejó como **otra fuente de propuesta para el paso de armado**, que ya existe y ya admite plantilla: es una comodidad sobre un mecanismo construido, no una puerta del ciclo. Sale sin dejar deuda — sin ella, el receptor asigna los revisores a mano, que es lo que hace hoy. |
-| Escalón de módulo en la configuración | Valores por defecto y plantilla de circuito con alcance de módulo, para los documentos sin proyecto | **No bloquea a `BLOCK_04`**, que es enteramente sobre documentos con contraparte. Su plazo lo fija el roadmap de calidad, comercial y activos: antes de que el primero use el ciclo. Conviene abrirlo **después** de `BLOCK_04`, que al cargar `DocProjectSettings` de configuración de contraparte va a dejar en evidencia que el escalón no puede ser esa misma tabla con proyecto anulable. |
+| Escalón de módulo en la configuración | Valores por defecto y plantilla de circuito con alcance de módulo, para los documentos sin proyecto. **`BLOCK_02B` le agrega un caso concreto**: exigir la ubicación en documentos sin proyecto, que es justamente la biblioteca de planta, donde ese atributo es el eje principal de orden | **No bloquea a `BLOCK_04`** ni a `BLOCK_02B`, que funcionan sin él. Su plazo lo fija el roadmap de calidad, comercial y activos: antes de que el primero use el ciclo. Conviene abrirlo **después** de `BLOCK_04`, que al cargar `DocProjectSettings` de configuración de contraparte deja en evidencia que el escalón no puede ser esa misma tabla con proyecto anulable. |
 | Salida de `ScannedFile` y `Area` | Migración hacia `212-mi-digitalization` | Único subsistema con datos e interfaz en producción. Exige preservar la continuidad operativa del cliente que lo usa. |
 
 La cobertura de pruebas (H-26) no se trata como bloque propio: cada bloque incorpora sus propias pruebas como parte de sus criterios de aceptación.
