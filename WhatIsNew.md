@@ -1098,3 +1098,23 @@ El alcance deja de ser solo una vista y pasa a ser un límite.
 **Y una asimetría con la ubicación, resuelta aparte: una entrada dada de baja no se elige.** El catálogo declaraba la baja lógica sin efecto sobre lo que se podía elegir, de modo que la entrada seguía siendo elegible por quien conociera su identificador. Rige ahora la misma regla que la ubicación, con el límite que la vuelve compatible con la orientación del módulo: **se valida solo lo que se escribe**. Lo ya clasificado conserva su entrada aunque se dé de baja después, y editar el título de una revisión cuya clase caducó no se rechaza — es lo que distingue *no se elige* de *deja de valer*.
 
 **519 pruebas, 0 fallos.**
+
+---
+
+# What's new in María Ingeniería API Documents 2.9.5
+
+2026-08-18
+
+## Alcance por proyecto de clase y tipo (BLOQUE 02C)
+
+### Fase 5 — La ruta de migración, verificada en los dos sentidos
+
+- **El control de precondición de este bloque sí puede cancelar la migración**, a diferencia del anterior: aquel era enteramente aditivo sobre tablas que nacían vacías, y este retira dos valores de una enumeración y cambia la obligatoriedad de una columna. Bloquea por filas con los valores retirados, por aplicación parcial previa, y si no encuentra las dos constraints a renombrar.
+- **Se probó disparando, y no solo en verde.** Con una fila en el valor retirado sobre una base pre-bloque, el control bloquea **y la migración se detiene sola**: la conversión del tipo no puede interpretar el valor. Dentro de una transacción —como la aplica Prisma— revierte entera. Un control que solo se prueba en verde no prueba que bloquee.
+- **La base pre-bloque se reconstruyó con el SQL real de las 27 migraciones anteriores**, y el resultado es estructuralmente idéntico a la base migrada de forma incremental: la única diferencia es la tabla de registro de Prisma, ausente por haberse aplicado el SQL a mano.
+
+**Un hallazgo sobre la herramienta, con consecuencia sobre cómo se verifica.** El primer intento reconstruyó la base con `prisma migrate diff`, y esa base **no era fiel**: el diff de Prisma **no expresa `NULLS NOT DISTINCT`, los índices parciales ni los `CHECK`**, de modo que los perdía todos. De ahí que un diff limpio sea **necesario y no suficiente** — dice que el modelo y la base coinciden en lo que Prisma sabe expresar, y las cláusulas que este módulo escribe a mano quedan fuera. Lo que las sostiene es la base, y lo que lo verifica son las pruebas de persistencia, que existen justamente por eso. Se les incorporaron cuatro casos: la unicidad con nulos en los dos catálogos, que dos proyectos puedan repetir un código, que el mismo código de tipo conviva bajo dos clases, y los dos CHECK del alcance.
+
+**Y un defecto propio, encontrado por una prueba ajena**: al generalizar el reconocimiento de violaciones de CHECK a un sufijo común, quedó fuera el del catálogo de ubicación, que no lo tiene. Se nombran los tres del módulo en lugar de buscar un patrón.
+
+**523 pruebas, 0 fallos.** Queda del lado del despliegue correr el control en cada cliente antes de migrar, y medir la línea base de `ScannedFile` en producción antes y después.

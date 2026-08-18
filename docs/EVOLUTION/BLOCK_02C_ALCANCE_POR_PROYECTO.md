@@ -1,7 +1,7 @@
 # Bloque 02C — Alcance por proyecto de clase y tipo
 
-**Estado:** `APROBADO_PENDIENTE` — fases 1 a 4 de 6 completadas
-**Versión:** 1.6
+**Estado:** `APROBADO_PENDIENTE` — fases 1 a 5 de 6 completadas
+**Versión:** 1.7
 **Depende de:** `BLOCK_02B`, que construyó el mecanismo de alcance; `BLOCK_03`, por la unicidad con nulos.
 **Decisiones que ejecuta:** D-21.
 **Decisiones que aplica sin modificar:** D-06, D-13, D-15.
@@ -312,6 +312,26 @@ Las invariantes de cruce y el alcance de la entrada elegida. Quedaron **cuatro**
 **Y una asimetría con la ubicación que quedó planteada acá y resuelta en `B9`**: clasificar con una entrada dada de baja se admitía.
 
 **7 pruebas de integración nuevas, 516 en total, 0 fallos.** Dos fallaron al escribirse y tenían razón: el control del alta del tipo **no se había insertado** —la edición sí— y las pruebas lo encontraron enseguida. Es exactamente para lo que la prueba negativa existe.
+
+### Fase 5 — completada
+
+La ruta de migración verificada en los dos sentidos, el control de precondición y la línea base.
+
+**Este control sí puede cancelar la migración, a diferencia del de `BLOCK_02B`.** Aquel era enteramente aditivo sobre tablas que nacían vacías; este retira dos valores de una enumeración y cambia la obligatoriedad de una columna. Tiene tres veredictos que bloquean: filas con los valores retirados, aplicación parcial previa, y las dos constraints a renombrar ausentes.
+
+**El primero se probó disparando, y no solo en verde.** Con una fila en `DOCUMENT_TYPE` sobre una base pre-bloque, el control devuelve `bloquea = true` **y la migración se detiene sola**: el `USING` de la conversión no puede interpretar el valor. Aplicada dentro de una transacción —como la aplica Prisma— revierte entera: la enumeración queda con sus tres valores y ninguna columna nueva aparece. Un control que solo se prueba en verde no prueba que bloquee.
+
+**La verificación en los dos sentidos, y una corrección de método.** El primer intento reconstruyó la base pre-bloque con `prisma migrate diff --from-empty --to-migrations`, y esa base **no era fiel**: el diff de Prisma **no expresa `NULLS NOT DISTINCT`, los índices parciales ni los `CHECK`**, de modo que los perdía todos. Se rehízo aplicando el SQL real de las 27 migraciones anteriores, y sobre esa base sí se aplicó la del bloque. El resultado es **estructuralmente idéntico** a la base migrada de forma incremental: la única diferencia es la tabla de registro de migraciones de Prisma, ausente por haberse aplicado el SQL a mano.
+
+**El hallazgo tiene una consecuencia sobre el criterio 13, y conviene enunciarla.** Un diff limpio es **necesario y no suficiente**: dice que el modelo y la base coinciden en lo que Prisma sabe expresar, y las cláusulas que este módulo escribe a mano quedan fuera de esa comparación. Lo que las sostiene es la base, y lo que lo verifica son las pruebas de persistencia — que existen justamente por eso. Se les incorporaron cuatro casos: la unicidad con nulos en los dos catálogos, que dos proyectos puedan repetir un código, que el mismo código de tipo conviva bajo dos clases, y los dos `CHECK` del alcance.
+
+**Un defecto propio, encontrado por una prueba ajena.** Al generalizar el reconocimiento de violaciones de `CHECK` a un sufijo común, quedó fuera `doc_locations_external_reference_complete`, que no lo tiene, y la prueba de `BLOCK_02B` empezó a fallar. Se nombran los tres `CHECK` del módulo en lugar de buscar un patrón.
+
+**La línea base queda contada por el control**, que informa clases, tipos, cuántos son compartidos, los consumidores que no cambian y los dos números de `ScannedFile` del criterio 10. En la base local: 17 clases y 9 tipos, 6 archivos escaneados y 2 áreas.
+
+**523 pruebas, 0 fallos.**
+
+**Lo que queda del lado del despliegue**, y no de este bloque: correr el control en cada cliente antes de migrar, y comparar la línea base de `ScannedFile` en `optimal` de producción antes y después. Es el criterio 10 **medido**, con el mismo procedimiento que `BLOCK_02B` usó en su fase 7.
 
 ## Referencias
 

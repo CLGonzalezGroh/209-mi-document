@@ -48,12 +48,26 @@ const rechazaPorUnicidad = async (fn: () => Promise<unknown>) => {
   }
 }
 
-const esViolacionDeCheck = (error: unknown) =>
-  typeof error === "object" &&
-  error !== null &&
-  (error as { message?: string }).message?.includes(
-    "doc_locations_external_reference_complete",
-  ) === true
+/**
+ * Los CHECK se reconocen por su nombre y no por un código de Prisma, que los
+ * devuelve como error genérico. Se nombran los dos que el módulo declara en
+ * lugar de buscar un sufijo común: `doc_locations_external_reference_complete`
+ * no termina en `_check`, y un patrón que lo cubriera dejaría de distinguir un
+ * CHECK de cualquier otro error con esa palabra.
+ */
+const CHECKS_DEL_MODULO = [
+  "doc_locations_external_reference_complete",
+  "document_classes_project_scope_check",
+  "document_types_project_scope_check",
+]
+
+const esViolacionDeCheck = (error: unknown) => {
+  const mensaje =
+    typeof error === "object" && error !== null
+      ? ((error as { message?: string }).message ?? "")
+      : ""
+  return CHECKS_DEL_MODULO.some((c) => mensaje.includes(c))
+}
 
 /** Ejecuta el alta y devuelve si la base la rechazó por el CHECK. */
 const rechazaPorCheck = async (fn: () => Promise<unknown>) => {
@@ -748,6 +762,106 @@ test("la referencia externa se declara completa o no se declara", async () => {
   assert.equal(
     await rechazaPorCheck(() =>
       crearUbicacion(`${CODIGO}-LZ`, { externalRef: "TAG-120" }),
+    ),
+    true,
+  )
+})
+
+// --- El alcance de la clasificación (BLOQUE 02C) ---
+//
+// Estas cuatro pruebas existen por lo que `prisma migrate diff` NO compara:
+// `NULLS NOT DISTINCT` y los CHECK escritos a mano quedan fuera de su modelo,
+// de modo que un diff limpio no dice nada sobre ellos. Lo que los sostiene es
+// la base, y lo que lo verifica es esto.
+
+test("dos clases con el mismo código y sin módulo ni proyecto no conviven", async () => {
+  const crear = () =>
+    prisma.documentClass.create({
+      data: { name: `${CODIGO} clase dup`, code: `${CODIGO}-CDUP`, updatedById: 1 },
+    })
+
+  await crear()
+  assert.equal(await rechazaPorUnicidad(crear), true)
+})
+
+test("dos proyectos pueden tener el mismo código de clase", async () => {
+  // La unicidad incorpora el alcance: es lo que permite que dos clientes
+  // nombren igual su propia clase.
+  const enProyecto = (projectId: number) =>
+    prisma.documentClass.create({
+      data: {
+        name: `${CODIGO} clase de ${projectId}`,
+        code: `${CODIGO}-CSCOPE`,
+        module: ModuleType.PROJECTS,
+        projectId,
+        updatedById: 1,
+      },
+    })
+
+  const a = await enProyecto(-424440)
+  const b = await enProyecto(-424441)
+
+  assert.notEqual(a.id, b.id)
+  assert.equal(a.code, b.code)
+})
+
+test("el mismo código de tipo bajo dos clases distintas convive", async () => {
+  const claseA = await prisma.documentClass.create({
+    data: { name: `${CODIGO} A`, code: `${CODIGO}-CA`, updatedById: 1 },
+  })
+  const claseB = await prisma.documentClass.create({
+    data: { name: `${CODIGO} B`, code: `${CODIGO}-CB`, updatedById: 1 },
+  })
+
+  const bajoClase = (classId: number) =>
+    prisma.documentType.create({
+      data: {
+        name: `${CODIGO} tipo de ${classId}`,
+        code: `${CODIGO}-TDUP`,
+        classId,
+        updatedById: 1,
+      },
+    })
+
+  await bajoClase(claseA.id)
+  const segundo = await bajoClase(claseB.id)
+
+  assert.equal(segundo.code, `${CODIGO}-TDUP`)
+
+  // Y bajo la MISMA clase, no: ahí sí es la misma entrada.
+  assert.equal(await rechazaPorUnicidad(() => bajoClase(claseB.id)), true)
+})
+
+test("una entrada con proyecto exige el módulo de proyectos", async () => {
+  // El CHECK de la base, que es la forma del invariante que D-06 fija para
+  // `Document`: el proyecto solo tiene sentido como alcance dentro del módulo
+  // que lo tiene.
+  assert.equal(
+    await rechazaPorCheck(() =>
+      prisma.documentClass.create({
+        data: {
+          name: `${CODIGO} clase mal`,
+          code: `${CODIGO}-CMAL`,
+          module: ModuleType.QUALITY,
+          projectId: -424442,
+          updatedById: 1,
+        },
+      }),
+    ),
+    true,
+  )
+
+  assert.equal(
+    await rechazaPorCheck(() =>
+      prisma.documentType.create({
+        data: {
+          name: `${CODIGO} tipo mal`,
+          code: `${CODIGO}-TMAL`,
+          module: ModuleType.QUALITY,
+          projectId: -424442,
+          updatedById: 1,
+        },
+      }),
     ),
     true,
   )
