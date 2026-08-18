@@ -86,7 +86,7 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **Se clasifica por**
 
-- `DocumentClass` y `DocumentType`, por la copia de la identificación de su revisión en curso
+- `DocumentClass` y `DocumentType`, por la copia de la identificación de su revisión en curso. La clase y el tipo elegidos deben estar **dentro del alcance que su proyecto resuelve** y **vigentes**: el selector no es una sugerencia sino un límite
 
 **Agrupa a**
 

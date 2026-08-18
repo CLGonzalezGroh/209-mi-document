@@ -764,7 +764,7 @@ Pendientes de definición al abrir el bloque:
 
 ### D-21 — El catálogo documental admite alcance por proyecto
 
-**Estado:** Aprobada. **Su mecanismo está construido y promovido** con `BLOCK_02B`, sobre el catálogo de ubicación; `BLOCK_02C` lo aplica a clase y tipo, que son los que tienen datos e interfaz en producción, y tiene sus definiciones cerradas.
+**Estado:** `PROMOVIDO_A_SFS`. Su mecanismo lo construyó `BLOCK_02B` sobre el catálogo de ubicación, y `BLOCK_02C` lo aplicó a clase y tipo —los que tienen datos e interfaz en producción—, desplegado en testing y producción.
 
 `DocumentClass` y `DocumentType` son hoy catálogos **globales del despliegue**, con `module` opcional donde nulo significa disponible para todos los módulos. Eso ya resuelve dos de los tres alcances que el negocio necesita:
 
@@ -1162,7 +1162,7 @@ Orden propuesto. Cada bloque se abre con su propio documento, con línea base co
 | `BLOCK_04` ✔ | Emisión y respuesta: circulación asimétrica por modo, **circuito del rol Receptor y catálogo de calificaciones**, puerta de emisión, respuesta como objeto propio del ítem con archivos y autoría diferenciada, acuse de recibo, propósito de la emisión y documento pendiente derivado (D-12, D-18, D-22; H-11 a H-16, H-29 a H-31, H-33) | `BLOCK_03B` |
 | `BLOCK_04B` | Paquete de información de entrada y promoción a documento controlado (D-16, D-20) | `BLOCK_02` |
 | `BLOCK_02B` ✔ | Ubicación física jerárquica del documento, y **el mecanismo de alcance por proyecto** que los tres catálogos comparten (D-14; construye D-21; descarta H-36). **Promovido a la SFS y desplegado en testing** | `BLOCK_02` |
-| `BLOCK_02C` | Alcance por proyecto de clase y tipo, aplicando el mecanismo que construye `BLOCK_02B`: clase y tipo declaran juntos, siembra conjunta, cruce en un solo sentido, y el eje de módulo preparado en la declaración de alcance (D-21). **Definiciones cerradas** | `BLOCK_02`, `BLOCK_03` por la unicidad, `BLOCK_02B` por el mecanismo |
+| `BLOCK_02C` ✔ | Alcance por proyecto de clase y tipo, aplicando el mecanismo que construye `BLOCK_02B`: clase y tipo declaran juntos, siembra conjunta, cruce en un solo sentido, y el eje de módulo preparado en la declaración de alcance (D-21). **Promovido a la SFS y desplegado en testing y producción** | `BLOCK_02`, `BLOCK_03` por la unicidad, `BLOCK_02B` por el mecanismo |
 | `BLOCK_05` | Interfaz de usuario del subsistema, en la organización por ámbito de D-28 (H-25) | `BLOCK_03`, `BLOCK_04`, `BLOCK_02B`, `BLOCK_02C` |
 
 El rol documental (D-09) gobierna el ciclo completo, por lo que el contexto de proyecto pasa a ser el primer bloque funcional: ya no puede quedar detrás del ciclo de revisión.

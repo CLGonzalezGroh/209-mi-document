@@ -84,7 +84,7 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 **Acota su alcance con**
 
 - un proyecto, por referencia externa
-- `DocumentClass` y `DocumentType`
+- `DocumentClass` y `DocumentType`, dentro del alcance que la propia plantilla resuelve: una del despliegue no referencia entradas de proyecto
 
 ---
 

@@ -32,11 +32,15 @@ Un catálogo es un **conjunto**, de modo que la pregunta es otra: qué entradas 
 
 ---
 
-# 4. El mecanismo de alcance es uno para los tres catálogos
+# 4. El mecanismo de alcance es uno, y los catálogos son dos
 
-Ubicación, clase y tipo comparten la declaración, los dos modos y la siembra por copia. Está construido una vez sobre el catálogo que no tenía datos ni interfaz en producción, y los otros dos lo reutilizan agregando un valor a la enumeración del catálogo alcanzado.
+Ubicación y clasificación comparten la declaración, los dos modos y la siembra por copia. Está construido una vez sobre el catálogo que no tenía datos ni interfaz en producción, y el otro lo reutiliza sin migrar estructura.
 
-Lo que **no** se generaliza son las invariantes de cruce: existen porque la ubicación es un árbol y la relación de padre puede atravesar alcances. Clase y tipo son planos y no las necesitan.
+**Clase y tipo son un solo catálogo y no dos.** El tipo cuelga de la clase, de modo que declararlos por separado admitiría un proyecto con clasificación propia heredando tipos que apuntan a clases que no ve. Los ejes de alcance son los mismos; lo que se declara una sola vez es cómo se resuelven.
+
+**La invariante de cruce sí se generaliza, y no es del árbol.** Compara dos alcances y no dos nodos: lo del proyecto cuelga de lo del despliegue —eso es ampliar— y nunca al revés, porque el catálogo global quedaría dependiendo de un proyecto. Vale para el nodo y su padre, para el tipo y su clase, y para la plantilla del circuito y las entradas que referencia. La clase es lo único que no la necesita, porque no cuelga de nada.
+
+**Lo que cambia entre los dos catálogos es la identidad, y de ahí sale la siembra.** Un nodo **es** su ruta completa; una clase es su código, y un tipo su código **dentro de su clase**. Por eso copiar un árbol resuelve rutas y copiar la clasificación resuelve códigos, con la misma regla: copiar solo lo vigente, comparar contra lo que el destino **ve**, y no duplicar.
 
 ---
 
@@ -60,7 +64,17 @@ El puente queda modelado desde el principio —origen e identificador del objeto
 
 ---
 
-# 7. Opcional en los tres roles
+# 7. Lo dado de baja no se elige, y lo ya clasificado no se revalida
+
+Las dos mitades son necesarias y dicen cosas distintas. Una entrada dada de baja **deja de ser elegible** —no aparece en el selector, y clasificar con ella se rechaza— porque de otro modo la baja lógica no significaría nada: quien conociera su identificador seguiría usándola.
+
+Y **lo ya clasificado la conserva**: la validación ocurre solo en escritura y nunca revalida lo existente. Un documento no cambia de clasificación porque alguien dio de baja una entrada, ni queda inválido por eso.
+
+Es la misma partición que gobierna el cambio de modo de un catálogo, y la razón por la que ninguna de esas operaciones necesita recorrer lo ya escrito.
+
+---
+
+# 8. Opcional en los tres roles
 
 El atributo nace habilitado y no obligatorio, y un proyecto atraviesa el ciclo completo sin declarar ninguna ubicación. La obligatoriedad se configura, y **deshabilitado no exige**: exigir lo que no se puede declarar sería una contradicción, no una regla estricta.
 

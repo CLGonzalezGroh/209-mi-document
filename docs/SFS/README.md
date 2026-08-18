@@ -80,10 +80,12 @@ Los estados `PROPUESTO`, `APROBADO_PENDIENTE` e `IMPLEMENTADO_CON_BRECHA` perten
 | `domain/15_circulation/40_DOM-018_DocQualification.md` | El vocabulario de la respuesta, con su efecto interpretado | Approved |
 | `domain/15_circulation/80_Principios_del_Modelo.md` | Principios de la circulación: puertas, evidencia y asimetría entre modos | Approved |
 | `domain/20_classification/10_DOM-019_DocLocation.md` | El árbol de la instalación, con alcance por proyecto | Approved |
-| `domain/20_classification/20_DOM-020_DocCatalogScope.md` | Cómo un proyecto resuelve cada catálogo documental | Approved |
+| `domain/20_classification/20_DOM-020_DocCatalogScope.md` | Cómo un ámbito resuelve cada catálogo documental | Approved |
+| `domain/20_classification/30_DOM-021_DocumentClass.md` | La familia del documento: en proyectos, su disciplina | Approved |
+| `domain/20_classification/40_DOM-022_DocumentType.md` | Qué clase de entregable es, dentro de su familia | Approved |
 | `domain/20_classification/80_Principios_del_Modelo.md` | Principios de la clasificación: qué clasifica, qué identifica y qué se hereda | Approved |
 
-Los dos primeros Objetos del Dominio provienen del bloque de trazabilidad funcional; los dos siguientes, junto con los principios del contexto de proyecto, del bloque de contexto de proyecto y rol documental. Los del ámbito de ciclo interno, junto con sus principios, provienen de los bloques del ciclo interno de revisión y de la titularidad por nivel. Los cuatro del ámbito de circulación, junto con sus principios, provienen del bloque de emisión y respuesta. La organización conceptual del dominio —modelos, arquitectura y su índice— se incorporará cuando los bloques correspondientes se promuevan; hasta entonces, este índice cumple esa función.
+Los dos primeros Objetos del Dominio provienen del bloque de trazabilidad funcional; los dos siguientes, junto con los principios del contexto de proyecto, del bloque de contexto de proyecto y rol documental. Los del ámbito de ciclo interno, junto con sus principios, provienen de los bloques del ciclo interno de revisión y de la titularidad por nivel. Los cuatro del ámbito de circulación, junto con sus principios, provienen del bloque de emisión y respuesta. Los del ámbito de clasificación provienen del bloque de ubicación física y del de alcance por proyecto de clase y tipo. La organización conceptual del dominio —modelos, arquitectura y su índice— se incorporará cuando los bloques correspondientes se promuevan; hasta entonces, este índice cumple esa función.
 
 ## Estructura prevista
 

@@ -1,7 +1,7 @@
 # Bloque 02C — Alcance por proyecto de clase y tipo
 
-**Estado:** `APROBADO_PENDIENTE` — fases 1 a 5 completadas, desplegado en testing y producción
-**Versión:** 1.11
+**Estado:** `PROMOVIDO_A_SFS`
+**Versión:** 2.0
 **Depende de:** `BLOCK_02B`, que construyó el mecanismo de alcance; `BLOCK_03`, por la unicidad con nulos.
 **Decisiones que ejecuta:** D-21.
 **Decisiones que aplica sin modificar:** D-06, D-13, D-15.
@@ -392,6 +392,20 @@ Los dos veredictos que bloquean en la segunda corrida son la confirmación de qu
 
 - **las 7 clases y los 57 tipos declaran módulo** —cero compartidos—, de modo que todos pasan al alcance del despliegue sin ambigüedad;
 - **no existía ninguna declaración de alcance en producción**: `BLOCK_02B` nunca las estrenó ahí. La conversión de la enumeración tuvo **cero filas que convertir**, que era el único control capaz de fallar por datos y no por aplicación parcial.
+
+### Fase 6 — completada
+
+**Promovido a la SFS**, sobre el ámbito `domain/20_classification/` que `BLOCK_02B` creó.
+
+**Dos Objetos del Dominio nuevos** —`DocumentClass` y `DocumentType`—, que hasta ahora **no existían en la SFS**: los catálogos venían del origen del módulo y ningún bloque los había documentado. Se documentan cuando dejan de ser una lista y pasan a tener reglas propias: alcance, cruce, unicidad por ámbito y elegibilidad.
+
+**Tres documentos existentes se corrigieron por lo que este bloque volvió falso**, que es la parte que no conviene omitir:
+
+- **`DocCatalogScope` decía "una fila por proyecto y catálogo"** y ahora son dos ejes y dos catálogos. Se reescribieron su descripción, el rechazo de `OWN` —que ahora alcanza también a los tipos colgados de una clase del despliegue— y la siembra, cuya identidad difiere entre los dos catálogos;
+- **el principio 4 afirmaba lo contrario de lo que este bloque estableció**: *"lo que no se generaliza son las invariantes de cruce… clase y tipo son planos y no las necesitan"*. La invariante **sí** se generaliza, porque compara dos alcances y no dos nodos. El principio quedó reescrito y el ámbito ganó uno nuevo, sobre lo dado de baja;
+- **`Document` y `DocWorkflowTemplate`** declaraban su clasificación sin decir que está acotada por alcance.
+
+Que un bloque corrija principios ya promovidos es lo previsto: la SFS describe lo implementado y validado, y cuando lo implementado cambia, lo que estaba escrito **deja de ser cierto** y no simplemente incompleto.
 
 ## Referencias
 

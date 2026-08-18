@@ -1183,3 +1183,25 @@ Al correrla aparecieron **tres divergencias más, anteriores a este bloque**:
 Que `ScannedFile` no participe del alcance deja de ser una decisión de diseño y pasa a ser un hecho verificado sobre el único cliente con uso real.
 
 **Dos observaciones de la línea base que conviene retener:** las 7 clases y los 57 tipos **declaran módulo** —cero compartidos—, de modo que todos pasan al alcance del despliegue sin ambigüedad; y **no existía ninguna declaración de alcance en producción**, porque BLOQUE 02B nunca las estrenó ahí, de modo que la conversión de la enumeración tuvo cero filas que convertir — que era el único control capaz de fallar por datos.
+
+---
+
+# What's new in María Ingeniería API Documents 2.10.0
+
+2026-08-18
+
+## Alcance por proyecto de clase y tipo (BLOQUE 02C) — promovido a la SFS
+
+### Fase 6 — Promoción
+
+**Dos Objetos del Dominio nuevos** —`DocumentClass` y `DocumentType`—, que hasta ahora **no existían en la SFS**: los catálogos venían del origen del módulo y ningún bloque los había documentado. Se documentan cuando dejan de ser una lista y pasan a tener reglas propias — alcance, cruce, unicidad por ámbito y elegibilidad.
+
+**Tres documentos existentes se corrigieron por lo que este bloque volvió falso**, que es la parte que no conviene omitir:
+
+- **`DocCatalogScope` decía "una fila por proyecto y catálogo"**, y ahora son dos ejes y dos catálogos. Se reescribieron su descripción, el rechazo de catálogo propio —que ahora alcanza también a los tipos colgados de una clase del despliegue— y la siembra, cuya identidad difiere entre los dos catálogos: la ruta completa en el árbol, el código dentro de la clase en la clasificación;
+- **el principio 4 afirmaba lo contrario de lo que este bloque estableció**: *"lo que no se generaliza son las invariantes de cruce… clase y tipo son planos y no las necesitan"*. La invariante **sí** se generaliza, porque compara dos alcances y no dos nodos: vale para el nodo y su padre, para el tipo y su clase, y para la plantilla y las entradas que referencia. El ámbito ganó además un principio nuevo, sobre lo dado de baja y lo ya clasificado;
+- **`Document` y `DocWorkflowTemplate`** declaraban su clasificación sin decir que está acotada por alcance.
+
+Que un bloque corrija principios ya promovidos es lo previsto: la SFS describe lo implementado y validado, y cuando lo implementado cambia, lo que estaba escrito **deja de ser cierto** y no simplemente incompleto.
+
+Con esto el bloque queda cerrado: seis fases, desplegado y verificado en los cinco despliegues.

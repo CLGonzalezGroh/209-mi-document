@@ -15,7 +15,7 @@ Declarar **cómo resuelve un proyecto cada catálogo documental**: heredando el 
 
 # Descripción
 
-Un `DocCatalogScope` es una fila por **proyecto y catálogo**, con dos modos:
+Un `DocCatalogScope` es una fila por **ámbito y catálogo**, con dos modos:
 
 | Modo | Qué ve el proyecto |
 | ---- | ------------------ |
@@ -26,7 +26,18 @@ En una planta rige el primero, porque cada proyecto interviene sobre la misma in
 
 **La ausencia de fila es `INHERIT`.** No hace falta declarar nada para operar, y es lo que vuelve aditiva la incorporación del mecanismo: todo proyecto existente hereda.
 
-**El mecanismo es uno para los tres catálogos documentales** —ubicación, clase y tipo—, y por eso el catálogo alcanzado es un valor y no una entidad distinta por cada uno.
+**Los catálogos documentales son dos**: la ubicación y la clasificación. Clase y tipo no son dos catálogos sino uno —el tipo cuelga de la clase—, de modo que se heredan ambos o ninguno. Declararlos por separado admitiría un proyecto con clasificación propia heredando tipos que apuntan a clases que no ve.
+
+**El ámbito se declara con los mismos dos ejes que la entrada del catálogo**: el módulo, siempre presente, y el proyecto, que puede no estarlo.
+
+| Ámbito | Módulo | Proyecto | Qué declara |
+| ------ | ------ | -------- | ----------- |
+| Proyecto | Proyectos | el suyo | Cómo resuelve ese proyecto |
+| Módulo | Calidad, comercial, activos | — | Cómo resuelve ese módulo |
+
+Un proyecto pertenece siempre al módulo de proyectos, de modo que los dos ejes **conviven en lugar de excluirse**: no son dos referencias anulables con una regla de exclusión mutua, que es la forma que este dominio evita.
+
+La declaración por módulo está modelada y todavía no tiene operación que la produzca. Existe para que la **ausencia de proyecto no equivalga al despliegue**, que es lo que haría falta corregir después con una migración.
 
 ---
 
@@ -54,7 +65,9 @@ Proyecto, catálogo alcanzado y modo, con la autoría del alta y de la última m
 
 **Se declara y se vuelve a declarar.** Volver a `INHERIT` es declararlo, no borrar la fila: que quede el registro de haber vuelto es justamente lo que la traza necesita.
 
-**Declarar `OWN` sobre la ubicación se rechaza mientras algún nodo del proyecto cuelgue del árbol del despliegue.** Al dejar de heredar, esos nodos quedarían colgados de un padre que el proyecto ya no ve. El rechazo nombra las rutas que lo impiden, y moverlas a un nodo propio es la vía para habilitarlo.
+**Declarar `OWN` se rechaza mientras algo del proyecto cuelgue de algo del despliegue.** Al dejar de heredar, esas entradas quedarían apuntando a un padre que el proyecto ya no ve: los nodos de ubicación colgados del árbol global, y los tipos colgados de una clase del despliegue. El rechazo los nombra, y moverlos a una entrada propia es la vía para habilitarlo.
+
+No se resuelve desprendiéndolos de oficio, porque eso reescribiría entradas que nadie tocó por un cambio de configuración.
 
 **Cambiar de modo con documentos ya clasificados se admite.** La validación ocurre solo en escritura y nunca revalida lo existente: un documento clasificado conserva su valor aunque su entrada deje de estar disponible. No se le impone la inmutabilidad que el rol documental exige, porque acá no hay semántica que cambie de significado.
 
@@ -70,15 +83,19 @@ Proyecto, catálogo alcanzado y modo, con la autoría del alta y de la última m
 
 # Observaciones
 
-**Es una entidad propia y no columnas de la configuración del proyecto**, y esa es la forma de que el mecanismo sea uno para los tres catálogos en lugar de tres veces el mismo. Incorporar clase y tipo no cuesta una columna sino un valor más del catálogo alcanzado.
+**Es una entidad propia y no columnas de la configuración del proyecto**, y esa es la forma de que el mecanismo sea uno para los dos catálogos en lugar de dos veces el mismo. Incorporar la clasificación no costó una columna sino un valor más del catálogo alcanzado. Es también lo que permitió agregarle el eje de módulo sin tocar la configuración del proyecto, que no lo tiene.
 
 **Es además la distinción entre configurar un valor y configurar un conjunto.** Las demás definiciones por proyecto —el rol documental, el esquema de revisión, el armador por defecto— son **valores**, donde lo específico reemplaza a lo general. Un catálogo es un **conjunto**, y lo que se declara es si se hereda.
 
-**La declaración es por catálogo y no una sola por proyecto**, porque los casos difieren: un cliente puede dictar los tipos de documento y no tener nomenclatura formal de áreas.
+**La declaración es por catálogo y no una sola por ámbito**, porque los casos difieren: un cliente puede dictar la clasificación de sus documentos y no tener nomenclatura formal de áreas.
 
 **Heredar suma y no reemplaza**, al contrario del catálogo de calificaciones, donde el proyecto que declara una propia usa las suyas y solo las suyas porque la lista es la del contrato. Acá ampliar es el caso normal, y por eso el modo **se declara** en lugar de derivarse de que existan entradas propias.
 
-**La siembra por copia no es un tercer modo.** Es puntual y no deja vínculo: una copia permanente *es* herencia. Copia lo que la fuente ve —el árbol del despliegue o el de otro proyecto que el usuario alcance por membresía—, solo agrega, y no duplica, porque la identidad de un nodo es su ruta completa. Sembrar en un proyecto que hereda esas rutas no agrega nada, y es correcto: ya las ve.
+**La siembra por copia no es un tercer modo.** Es puntual y no deja vínculo: una copia permanente *es* herencia. Copia lo que la fuente ve —el catálogo del despliegue o el de otro proyecto que el usuario alcance por membresía—, solo agrega y no duplica.
+
+**Lo que no duplica lo decide la identidad, y difiere entre los dos catálogos.** Un nodo de ubicación **es** su ruta completa; una clase es su código, y un tipo su código dentro de su clase. La clasificación se siembra entera en un acto, y **un tipo arrastra su clase** cuando el destino no la tiene — un tipo sin su clase es el huérfano que la declaración conjunta descarta.
+
+Sembrar en un proyecto que hereda no agrega nada, y es correcto: ya lo ve.
 
 **El orden natural es declarar primero y sembrar después.** Un proyecto que todavía hereda ya ve el árbol del despliegue, de modo que sembrárselo sería una operación vacía.
 
