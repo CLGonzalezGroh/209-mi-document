@@ -62,6 +62,13 @@ enum RevisionStatus {
   SUPERSEDED
   "Se desistió de ella antes de aprobarla. No consume código de revisión"
   ABANDONED
+  """
+  Rechazada: el circuito concluyó negativamente y no hay a quién devolverle el
+  trabajo. Es el caso del rol Receptor, donde quien elabora está afuera del
+  sistema. CONSUME código de revisión, a diferencia de ABANDONED, porque salió y
+  la contraparte la recibió con él.
+  """
+  REJECTED
 }
 
 "Estado del workflow de revisión"
@@ -221,20 +228,22 @@ se incorporan con su propio bloque.
 enum DocCatalogKind {
   "Ubicación física: sitio, planta, área, unidad"
   LOCATION
-  "Clase de documento"
-  DOCUMENT_CLASS
-  "Tipo de documento"
-  DOCUMENT_TYPE
+  """
+  Clasificación: clase y tipo de documento, juntos.
+
+  Son un solo sistema y no dos catálogos —el tipo cuelga de la clase—, de modo
+  que declararlos por separado admitiría un proyecto con clasificación propia
+  heredando tipos que apuntan a clases que no ve.
+  """
+  CLASSIFICATION
 }
 
 "Catálogo documental, para inputs"
 enum DocCatalogKindInput {
   "Ubicación física: sitio, planta, área, unidad"
   LOCATION
-  "Clase de documento"
-  DOCUMENT_CLASS
-  "Tipo de documento"
-  DOCUMENT_TYPE
+  "Clasificación: clase y tipo de documento, juntos"
+  CLASSIFICATION
 }
 
 "Origen de la referencia externa de una ubicación, para inputs"
@@ -283,6 +292,8 @@ enum RevisionStatusInput {
   SUPERSEDED
   "Abandonada"
   ABANDONED
+  "Rechazada: el circuito concluyó negativamente en el rol Receptor"
+  REJECTED
 }
 
 "Estado del workflow para inputs"
@@ -581,6 +592,12 @@ enum DocObjectType {
   DOC_REPLACEMENT
   "Calificación del catálogo de respuestas de la contraparte"
   DOC_QUALIFICATION
+  "Respuesta de la contraparte sobre un ítem emitido"
+  DOC_TRANSMITTAL_RESPONSE
+  "Nodo del catálogo de ubicación física"
+  DOC_LOCATION
+  "Declaración de cómo un ámbito resuelve un catálogo"
+  DOC_CATALOG_SCOPE
 }
 
 "Objeto del dominio documental para inputs"
@@ -617,6 +634,14 @@ enum DocObjectTypeInput {
   traza cuelga de la revisión en la que se prepara.
   """
   DOC_REPLACEMENT
+  "Calificación del catálogo de respuestas de la contraparte"
+  DOC_QUALIFICATION
+  "Respuesta de la contraparte sobre un ítem emitido"
+  DOC_TRANSMITTAL_RESPONSE
+  "Nodo del catálogo de ubicación física"
+  DOC_LOCATION
+  "Declaración de cómo un ámbito resuelve un catálogo"
+  DOC_CATALOG_SCOPE
 }
 
 "Nivel del log para inputs"

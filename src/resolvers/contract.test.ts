@@ -2,7 +2,9 @@ import assert from "node:assert/strict"
 import test from "node:test"
 import { readFileSync } from "node:fs"
 import { parse } from "graphql"
+import type { EnumTypeDefinitionNode } from "graphql"
 import { resolvers } from "./index.js"
+import * as prismaEnums from "../generated/prisma/enums.js"
 
 /**
  * El contrato y los resolvers dicen lo mismo (BLOQUE 03B, fase G).
@@ -152,4 +154,80 @@ test("el contrato no declara los campos que el bloque movió de nivel", () => {
       `DocumentVersion todavía declara ${retirado}`,
     )
   }
+})
+
+/**
+ * Las enumeraciones del contrato dicen lo mismo que las del modelo.
+ *
+ * Lo agrega `BLOQUE 02C`, fase 6, después de que el control de contrato del
+ * despliegue encontrara lo que esta suite no veía: `DocCatalogKind` cambió de
+ * tres valores a dos en `schema.prisma`, y el `.graphql` conservó los tres
+ * viejos. **Ninguna verificación anterior podía verlo** — `tsc` no lee el
+ * contrato, y las pruebas de arriba comparan operaciones y campos, no valores.
+ *
+ * La consecuencia era peor que una inconsistencia de documentación: el valor
+ * nuevo no era enviable —el contrato no lo aceptaba— y los dos retirados sí,
+ * hacia una base que ya no los tenía. La operación quedaba inalcanzable por
+ * GraphQL, y las pruebas de integración no lo notaban porque llaman al resolver
+ * directamente.
+ *
+ * Se comparan solo las enumeraciones que existen de los dos lados con el mismo
+ * nombre: el contrato tiene además las variantes `...Input`, y el modelo tiene
+ * enumeraciones que no se exponen.
+ */
+const enumsDelContrato = new Map(
+  (parse(contrato).definitions.filter(
+    (d) => d.kind === "EnumTypeDefinition",
+  ) as EnumTypeDefinitionNode[]).map((d) => [
+    d.name.value,
+    (d.values ?? []).map((v) => v.name.value).sort(),
+  ]),
+)
+
+const enumsDelModelo = new Map(
+  Object.entries(prismaEnums as Record<string, unknown>)
+    .filter(([, v]) => typeof v === "object" && v !== null)
+    .map(([k, v]) => [k, Object.keys(v as object).sort()]),
+)
+
+test("las enumeraciones del contrato coinciden con las del modelo", () => {
+  const compartidas = [...enumsDelModelo.keys()].filter((n) =>
+    enumsDelContrato.has(n),
+  )
+
+  // Si esta lista quedara vacía, la prueba no verificaría nada.
+  assert.ok(compartidas.length > 10, "no se encontraron enumeraciones compartidas")
+
+  const divergentes = compartidas.filter(
+    (n) =>
+      JSON.stringify(enumsDelContrato.get(n)) !==
+      JSON.stringify(enumsDelModelo.get(n)),
+  )
+
+  assert.deepEqual(
+    divergentes.map((n) => ({
+      enumeracion: n,
+      contrato: enumsDelContrato.get(n),
+      modelo: enumsDelModelo.get(n),
+    })),
+    [],
+  )
+})
+
+test("y la variante Input de una enumeración también coincide", () => {
+  // Las `...Input` existen porque el contrato federado no admite reusar la
+  // enumeración de salida como entrada. Divergen del mismo modo y sin ruido.
+  const conInput = [...enumsDelContrato.keys()].filter(
+    (n) => n.endsWith("Input") && enumsDelModelo.has(n.replace(/Input$/, "")),
+  )
+
+  assert.ok(conInput.length > 0, "no se encontraron variantes Input")
+
+  const divergentes = conInput.filter(
+    (n) =>
+      JSON.stringify(enumsDelContrato.get(n)) !==
+      JSON.stringify(enumsDelModelo.get(n.replace(/Input$/, ""))),
+  )
+
+  assert.deepEqual(divergentes, [])
 })

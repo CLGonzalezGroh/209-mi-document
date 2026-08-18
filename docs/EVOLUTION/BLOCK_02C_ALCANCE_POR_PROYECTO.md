@@ -1,7 +1,7 @@
 # Bloque 02C — Alcance por proyecto de clase y tipo
 
 **Estado:** `APROBADO_PENDIENTE` — fases 1 a 5 de 6 completadas
-**Versión:** 1.8
+**Versión:** 1.9
 **Depende de:** `BLOCK_02B`, que construyó el mecanismo de alcance; `BLOCK_03`, por la unicidad con nulos.
 **Decisiones que ejecuta:** D-21.
 **Decisiones que aplica sin modificar:** D-06, D-13, D-15.
@@ -340,6 +340,22 @@ Que la webapp no se toque era hasta acá una afirmación del bloque. Se verific�
 - **la webapp compila sin una sola línea modificada** y su árbol de trabajo está limpio.
 
 Lo que sostiene la equivalencia de comportamiento es la migración: toda entrada preexistente queda con `projectId` nulo, que es exactamente el ámbito que la consulta sin argumento resuelve (B8). El filtro que se agrega no descarta ninguna fila que antes se devolviera.
+
+#### Cuatro divergencias entre el contrato y el modelo, y la que faltaba las encontró
+
+Al incorporar `BLOQUE 02C` al control de contrato de `210-mi-deploy` apareció que **el `schema.graphql` conservaba los tres valores viejos de `DocCatalogKind`**: la fase 1 cambió la enumeración de Prisma y el contrato quedó atrás. La consecuencia era peor que una inconsistencia de documentación — el valor nuevo **no era enviable** y los dos retirados sí, hacia una base que ya no los tenía, de modo que declarar el alcance de la clasificación era **inalcanzable por GraphQL**. Las pruebas de integración no lo veían porque llaman al resolver directamente.
+
+**Ninguna verificación del módulo podía verlo**, y por eso la suite del contrato gana la que faltaba: **las enumeraciones del contrato coinciden con las del modelo**, en las dos direcciones y también en las variantes `...Input`.
+
+Al correrla aparecieron **tres divergencias más, y ninguna de este bloque**:
+
+| Enumeración | Falta en el contrato | De dónde viene |
+| ----------- | -------------------- | -------------- |
+| `RevisionStatus` | `REJECTED` | `BLOCK_04`, al corregir D-26 |
+| `DocObjectType` | `DOC_LOCATION`, `DOC_CATALOG_SCOPE`, `DOC_TRANSMITTAL_RESPONSE` | `BLOCK_02B` y `BLOCK_04` |
+| `DocObjectTypeInput` | las tres anteriores más `DOC_QUALIFICATION` | ídem |
+
+**Las dos son roturas latentes y no inconsistencias de forma.** Un valor que la base puede contener y el contrato no declara hace **fallar la serialización** de cualquier consulta que lo devuelva: una revisión rechazada en el rol Receptor, o un evento de auditoría de una ubicación —que `BLOCK_02B` emite y está en producción—. Se corrigen acá porque son aditivas, no rompen a ningún cliente y dejarlas sería desplegar sabiendo que están.
 
 **Lo que queda del lado del despliegue**, y no de este bloque: correr el control en cada cliente antes de migrar, y comparar la línea base de `ScannedFile` en `optimal` de producción antes y después. Es el criterio 10 **medido**, con el mismo procedimiento que `BLOCK_02B` usó en su fase 7.
 

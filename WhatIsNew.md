@@ -1122,3 +1122,25 @@ El alcance deja de ser solo una vista y pasa a ser un límite.
 **Y el criterio de que la webapp no se toque, verificado y no argumentado.** Los 45 documentos GraphQL del subgraph documental validan **idénticamente** contra el esquema anterior al bloque y contra el actual —se compararon los dos resultados y la diferencia es vacía—, ninguno de los seis de clase y tipo menciona el ámbito, y la webapp compila sin una sola línea modificada. Lo que sostiene la equivalencia de comportamiento es la migración: toda entrada preexistente queda en el ámbito del despliegue, que es exactamente el que la consulta sin argumento resuelve.
 
 Queda del lado del despliegue correr el control en cada cliente antes de migrar, y medir la línea base de `ScannedFile` en producción antes y después.
+
+---
+
+# What's new in María Ingeniería API Documents 2.9.6
+
+2026-08-18
+
+## El contrato y el modelo dicen lo mismo, también en sus enumeraciones
+
+Al preparar la actualización de testing e incorporar BLOQUE 02C al control de contrato del despliegue apareció que **el `schema.graphql` conservaba los tres valores viejos de `DocCatalogKind`**: la fase 1 cambió la enumeración de Prisma y el contrato quedó atrás. La consecuencia era peor que una inconsistencia de documentación — el valor nuevo **no era enviable** y los dos retirados sí, hacia una base que ya no los tenía, de modo que declarar el alcance de la clasificación era **inalcanzable por GraphQL**. Las pruebas de integración no lo veían porque llaman al resolver directamente.
+
+**Ninguna verificación del módulo podía verlo**, y por eso la suite del contrato gana la que faltaba: **las enumeraciones del contrato coinciden con las del modelo**, en las dos direcciones y también en las variantes `...Input`.
+
+Al correrla aparecieron **tres divergencias más, anteriores a este bloque**:
+
+- **`RevisionStatus` no declaraba `REJECTED`**, que BLOQUE 04 agregó al corregir el estado terminal del rol Receptor;
+- **`DocObjectType` no declaraba `DOC_LOCATION`, `DOC_CATALOG_SCOPE` ni `DOC_TRANSMITTAL_RESPONSE`**;
+- su variante `Input`, esas tres más `DOC_QUALIFICATION`.
+
+**Son roturas latentes y no inconsistencias de forma.** Un valor que la base puede contener y el contrato no declara hace **fallar la serialización** de cualquier consulta que lo devuelva: una revisión rechazada en el rol Receptor, o un evento de auditoría de una ubicación — que BLOQUE 02B emite y está en producción. Las correcciones son aditivas y no rompen a ningún cliente.
+
+**525 pruebas, 0 fallos.**
