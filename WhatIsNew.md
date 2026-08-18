@@ -1165,3 +1165,21 @@ Al correrla aparecieron **tres divergencias más, anteriores a este bloque**:
 - **el de permisos no miraba clase ni tipo.** El bloque no crea permisos —usa los que existen desde el origen— y por eso nadie los había verificado nunca, siendo que la siembra exige crear sobre los dos catálogos. Están completos y repartidos.
 
 **Y un defecto propio, con moraleja.** Al ampliar el control de permisos se nombraron los recursos con el prefijo del módulo, que los posteriores llevan y estos dos no. El control informó cero permisos en los tres despliegues: un **veredicto en falso**, que es el peor resultado posible porque manda a arreglar lo que está bien. Lo desarmó contrastarlo con un hecho conocido —las pantallas de catálogos funcionan en producción desde siempre—, y queda anotado en el propio script.
+
+---
+
+# What's new in María Ingeniería API Documents 2.9.8
+
+2026-08-18
+
+## Alcance por proyecto de clase y tipo (BLOQUE 02C)
+
+### Desplegado y verificado en producción
+
+`optimal` y `proion`, con las mismas tres verificaciones en verde.
+
+**Acá el criterio del subsistema legado se midió de verdad.** En testing `optimal` tenía 4 archivos escaneados con clase y 4 con tipo; en producción son **3.182 y 3.164 sobre 3.289**, el 96% del subsistema apoyado en los dos catálogos que este bloque altera. La comparación antes y después no registra **una sola diferencia**: 7 clases, 57 tipos, 3.289 archivos escaneados, 3.182 con clase, 3.164 con tipo y 52 áreas, idénticos.
+
+Que `ScannedFile` no participe del alcance deja de ser una decisión de diseño y pasa a ser un hecho verificado sobre el único cliente con uso real.
+
+**Dos observaciones de la línea base que conviene retener:** las 7 clases y los 57 tipos **declaran módulo** —cero compartidos—, de modo que todos pasan al alcance del despliegue sin ambigüedad; y **no existía ninguna declaración de alcance en producción**, porque BLOQUE 02B nunca las estrenó ahí, de modo que la conversión de la enumeración tuvo cero filas que convertir — que era el único control capaz de fallar por datos.

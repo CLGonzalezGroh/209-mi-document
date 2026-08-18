@@ -1,7 +1,7 @@
 # Bloque 02C — Alcance por proyecto de clase y tipo
 
-**Estado:** `APROBADO_PENDIENTE` — fases 1 a 5 completadas y desplegado en testing
-**Versión:** 1.10
+**Estado:** `APROBADO_PENDIENTE` — fases 1 a 5 completadas, desplegado en testing y producción
+**Versión:** 1.11
 **Depende de:** `BLOCK_02B`, que construyó el mecanismo de alcance; `BLOCK_03`, por la unicidad con nulos.
 **Decisiones que ejecuta:** D-21.
 **Decisiones que aplica sin modificar:** D-06, D-13, D-15.
@@ -372,7 +372,26 @@ Los dos veredictos que bloquean en la segunda corrida son la confirmación de qu
 
 **Un defecto propio, y con moraleja.** Al ampliar el control de permisos nombré los recursos `documentsDocumentClass` y `documentsDocumentType`, siguiendo la convención de los posteriores; se llaman `documentClass` y `documentType`, **sin el prefijo del módulo**. El control informó cero permisos en los tres despliegues, que es un **veredicto en falso** — el peor resultado posible, porque manda a arreglar lo que está bien. Lo que lo desarmó fue contrastarlo con un hecho conocido: las pantallas de catálogos funcionan en producción desde siempre. Queda anotado en el propio script.
 
-**Lo que queda del lado del despliegue**: producción, con el mismo procedimiento. Ahí `optimal` tiene 7 clases y 57 tipos, de modo que es donde el bloque se prueba de verdad.
+#### Desplegado y verificado en producción
+
+`optimal` y `proion`, con el mismo procedimiento y las mismas tres verificaciones en verde.
+
+**Acá el criterio 10 se midió de verdad.** En testing `optimal` tenía 4 archivos escaneados con clase y 4 con tipo; en producción son **3.182 y 3.164 sobre 3.289**, el 96% del subsistema legado apoyado en los dos catálogos que este bloque altera. La comparación antes y después no registra **una sola diferencia**:
+
+| `optimal` en producción | antes | después |
+| ----------------------- | ----- | ------- |
+| clases / tipos | 7 / 57 | 7 / 57 |
+| archivos escaneados | 3.289 | 3.289 |
+| con clase declarada | 3.182 | 3.182 |
+| con tipo declarado | 3.164 | 3.164 |
+| áreas | 52 | 52 |
+
+`B3` deja de ser una decisión de alcance y pasa a ser un hecho verificado sobre el único cliente con uso real.
+
+**Dos observaciones de la línea base que conviene retener:**
+
+- **las 7 clases y los 57 tipos declaran módulo** —cero compartidos—, de modo que todos pasan al alcance del despliegue sin ambigüedad;
+- **no existía ninguna declaración de alcance en producción**: `BLOCK_02B` nunca las estrenó ahí. La conversión de la enumeración tuvo **cero filas que convertir**, que era el único control capaz de fallar por datos y no por aplicación parcial.
 
 ## Referencias
 
