@@ -1,7 +1,7 @@
 # Bloque 02C — Alcance por proyecto de clase y tipo
 
-**Estado:** `APROBADO_PENDIENTE` — fases 1 a 5 de 6 completadas
-**Versión:** 1.9
+**Estado:** `APROBADO_PENDIENTE` — fases 1 a 5 completadas y desplegado en testing
+**Versión:** 1.10
 **Depende de:** `BLOCK_02B`, que construyó el mecanismo de alcance; `BLOCK_03`, por la unicidad con nulos.
 **Decisiones que ejecuta:** D-21.
 **Decisiones que aplica sin modificar:** D-06, D-13, D-15.
@@ -357,7 +357,22 @@ Al correrla aparecieron **tres divergencias más, y ninguna de este bloque**:
 
 **Las dos son roturas latentes y no inconsistencias de forma.** Un valor que la base puede contener y el contrato no declara hace **fallar la serialización** de cualquier consulta que lo devuelva: una revisión rechazada en el rol Receptor, o un evento de auditoría de una ubicación —que `BLOCK_02B` emite y está en producción—. Se corrigen acá porque son aditivas, no rompen a ningún cliente y dejarlas sería desplegar sabiendo que están.
 
-**Lo que queda del lado del despliegue**, y no de este bloque: correr el control en cada cliente antes de migrar, y comparar la línea base de `ScannedFile` en `optimal` de producción antes y después. Es el criterio 10 **medido**, con el mismo procedimiento que `BLOCK_02B` usó en su fase 7.
+#### Desplegado y verificado en testing
+
+`rbb`, `optimal` y `proion`, con la migración aplicada y las tres verificaciones en verde.
+
+**La línea base es idéntica antes y después en los tres**, medida con el mismo control corrido dos veces. En `optimal` —el único con datos— 2 clases, 3 tipos, 9 archivos escaneados con 4 clasificados por clase y 4 por tipo, y 3 áreas, sin una sola diferencia. Es el criterio 10 **medido** y `B3` dejando de ser una afirmación.
+
+Los dos veredictos que bloquean en la segunda corrida son la confirmación de que la migración entró: tres columnas nuevas y **cero** constraints con el nombre viejo.
+
+**Dos controles de `210-mi-deploy` se ampliaron, y los dos por huecos reales:**
+
+- **el de contrato ahora verifica valores de enumeración.** Sin eso una imagen anterior al bloque lo pasaba: `DocCatalogKind` existe en las dos versiones, con contenido distinto. Es lo que encontró que el `schema.graphql` había quedado atrás;
+- **el de permisos no miraba clase ni tipo.** El bloque no crea permisos —usa los que existen desde el origen— y por eso nadie los había verificado nunca, siendo que la siembra exige `CREATE` sobre los dos catálogos. Están completos y repartidos: `doc-basic` con tres, `doc-full` con seis, igual que ubicación y calificación.
+
+**Un defecto propio, y con moraleja.** Al ampliar el control de permisos nombré los recursos `documentsDocumentClass` y `documentsDocumentType`, siguiendo la convención de los posteriores; se llaman `documentClass` y `documentType`, **sin el prefijo del módulo**. El control informó cero permisos en los tres despliegues, que es un **veredicto en falso** — el peor resultado posible, porque manda a arreglar lo que está bien. Lo que lo desarmó fue contrastarlo con un hecho conocido: las pantallas de catálogos funcionan en producción desde siempre. Queda anotado en el propio script.
+
+**Lo que queda del lado del despliegue**: producción, con el mismo procedimiento. Ahí `optimal` tiene 7 clases y 57 tipos, de modo que es donde el bloque se prueba de verdad.
 
 ## Referencias
 

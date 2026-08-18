@@ -1144,3 +1144,24 @@ Al correrla aparecieron **tres divergencias más, anteriores a este bloque**:
 **Son roturas latentes y no inconsistencias de forma.** Un valor que la base puede contener y el contrato no declara hace **fallar la serialización** de cualquier consulta que lo devuelva: una revisión rechazada en el rol Receptor, o un evento de auditoría de una ubicación — que BLOQUE 02B emite y está en producción. Las correcciones son aditivas y no rompen a ningún cliente.
 
 **525 pruebas, 0 fallos.**
+
+---
+
+# What's new in María Ingeniería API Documents 2.9.7
+
+2026-08-18
+
+## Alcance por proyecto de clase y tipo (BLOQUE 02C)
+
+### Desplegado y verificado en testing
+
+`rbb`, `optimal` y `proion`, con la migración aplicada y las tres verificaciones en verde.
+
+**La línea base es idéntica antes y después en los tres**, medida con el mismo control corrido dos veces. En `optimal` —el único con datos— 2 clases, 3 tipos, 9 archivos escaneados con 4 clasificados por clase y 4 por tipo, y 3 áreas, sin una sola diferencia. El subsistema legado no participa del alcance y ahora está medido, no argumentado.
+
+**Dos controles del despliegue se ampliaron, y los dos por huecos reales:**
+
+- **el de contrato verifica ahora valores de enumeración.** Sin eso, una imagen anterior al bloque lo pasaba: `DocCatalogKind` existe en las dos versiones, con contenido distinto. Es la verificación que encontró que el contrato había quedado atrás;
+- **el de permisos no miraba clase ni tipo.** El bloque no crea permisos —usa los que existen desde el origen— y por eso nadie los había verificado nunca, siendo que la siembra exige crear sobre los dos catálogos. Están completos y repartidos.
+
+**Y un defecto propio, con moraleja.** Al ampliar el control de permisos se nombraron los recursos con el prefijo del módulo, que los posteriores llevan y estos dos no. El control informó cero permisos en los tres despliegues: un **veredicto en falso**, que es el peor resultado posible porque manda a arreglar lo que está bien. Lo desarmó contrastarlo con un hecho conocido —las pantallas de catálogos funcionan en producción desde siempre—, y queda anotado en el propio script.
