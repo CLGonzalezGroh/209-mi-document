@@ -1,7 +1,7 @@
 # Bloque 02C — Alcance por proyecto de clase y tipo
 
 **Estado:** `APROBADO_PENDIENTE` — fases 1 a 5 de 6 completadas
-**Versión:** 1.7
+**Versión:** 1.8
 **Depende de:** `BLOCK_02B`, que construyó el mecanismo de alcance; `BLOCK_03`, por la unicidad con nulos.
 **Decisiones que ejecuta:** D-21.
 **Decisiones que aplica sin modificar:** D-06, D-13, D-15.
@@ -330,6 +330,16 @@ La ruta de migración verificada en los dos sentidos, el control de precondició
 **La línea base queda contada por el control**, que informa clases, tipos, cuántos son compartidos, los consumidores que no cambian y los dos números de `ScannedFile` del criterio 10. En la base local: 17 clases y 9 tipos, 6 archivos escaneados y 2 áreas.
 
 **523 pruebas, 0 fallos.**
+
+#### El criterio 9, verificado y no argumentado
+
+Que la webapp no se toque era hasta acá una afirmación del bloque. Se verificó de tres formas, antes de promover:
+
+- **Los 45 documentos GraphQL del subgraph documental validan idénticamente** contra el esquema anterior al bloque y contra el actual. Se compararon los dos resultados y **la diferencia es vacía**, incluidos los 26 que fallan por `UserName` —un tipo que resuelve `mi-admin` y que este esquema declara como referencia—, que fallan igual en ambos. Comparar los dos es lo que vuelve al ruido irrelevante: lo que importa no es que validen, sino que validen **lo mismo**;
+- **ninguno de los seis documentos de clase y tipo menciona el ámbito.** Los argumentos y campos que el bloque agrega son todos opcionales, de modo que las consultas que la webapp envía hoy siguen siendo válidas palabra por palabra;
+- **la webapp compila sin una sola línea modificada** y su árbol de trabajo está limpio.
+
+Lo que sostiene la equivalencia de comportamiento es la migración: toda entrada preexistente queda con `projectId` nulo, que es exactamente el ámbito que la consulta sin argumento resuelve (B8). El filtro que se agrega no descarta ninguna fila que antes se devolviera.
 
 **Lo que queda del lado del despliegue**, y no de este bloque: correr el control en cada cliente antes de migrar, y comparar la línea base de `ScannedFile` en `optimal` de producción antes y después. Es el criterio 10 **medido**, con el mismo procedimiento que `BLOCK_02B` usó en su fase 7.
 

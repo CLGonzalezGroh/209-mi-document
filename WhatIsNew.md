@@ -1117,4 +1117,8 @@ El alcance deja de ser solo una vista y pasa a ser un límite.
 
 **Y un defecto propio, encontrado por una prueba ajena**: al generalizar el reconocimiento de violaciones de CHECK a un sufijo común, quedó fuera el del catálogo de ubicación, que no lo tiene. Se nombran los tres del módulo en lugar de buscar un patrón.
 
-**523 pruebas, 0 fallos.** Queda del lado del despliegue correr el control en cada cliente antes de migrar, y medir la línea base de `ScannedFile` en producción antes y después.
+**523 pruebas, 0 fallos.**
+
+**Y el criterio de que la webapp no se toque, verificado y no argumentado.** Los 45 documentos GraphQL del subgraph documental validan **idénticamente** contra el esquema anterior al bloque y contra el actual —se compararon los dos resultados y la diferencia es vacía—, ninguno de los seis de clase y tipo menciona el ámbito, y la webapp compila sin una sola línea modificada. Lo que sostiene la equivalencia de comportamiento es la migración: toda entrada preexistente queda en el ámbito del despliegue, que es exactamente el que la consulta sin argumento resuelve.
+
+Queda del lado del despliegue correr el control en cada cliente antes de migrar, y medir la línea base de `ScannedFile` en producción antes y después.
