@@ -76,11 +76,11 @@ const declarar = async (projectId: number, documentRole: DocumentRole) => {
   // todo lo que la prueba cuelga de `docProjectId` sigue siendo válido.
   await asegurarContratos(prisma, [projectId], documentRole)
 
-  const contrato: any = await docProjectsResolvers.Mutation.declareDocProject(
+  const contrato: any = await docProjectsResolvers.Mutation.updateDocProject(
     null,
     {
+      id: projectId,
       input: {
-        code: `T-${projectId}`,
         name: "Contrato de prueba",
         projectId,
         documentRole,

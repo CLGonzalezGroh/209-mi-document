@@ -45,6 +45,8 @@ export const AuditAction = {
 
   // Contexto de proyecto (BLOQUE 02)
   DeclareDocProject: "DeclareDocProject",
+  UpdateDocProject: "UpdateDocProject",
+  DeleteDocProject: "DeleteDocProject",
   CloseDocProject: "CloseDocProject",
   ReopenDocProject: "ReopenDocProject",
   AssignProjectMember: "AssignProjectMember",
@@ -156,6 +158,8 @@ export const AUDIT_ACTION_OBJECT: Record<AuditAction, DocObjectType> = {
   [AuditAction.ActivateDocumentType]: DocObjectType.DOCUMENT_TYPE,
   [AuditAction.DeleteDocumentType]: DocObjectType.DOCUMENT_TYPE,
   [AuditAction.DeclareDocProject]: DocObjectType.DOC_PROJECT,
+  [AuditAction.UpdateDocProject]: DocObjectType.DOC_PROJECT,
+  [AuditAction.DeleteDocProject]: DocObjectType.DOC_PROJECT,
   [AuditAction.CloseDocProject]: DocObjectType.DOC_PROJECT,
   [AuditAction.ReopenDocProject]: DocObjectType.DOC_PROJECT,
   [AuditAction.AssignProjectMember]: DocObjectType.DOC_PROJECT_MEMBER,

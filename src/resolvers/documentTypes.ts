@@ -68,7 +68,7 @@ export const documentTypeResolvers = {
       const userId =
         docProjectId !== undefined
           ? await projectAuthorization({
-            intent: "read",
+              intent: "read",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_LIST],
               docProjectId,
               context,
@@ -257,7 +257,7 @@ export const documentTypeResolvers = {
       const userId =
         docProjectId !== undefined
           ? await projectAuthorization({
-            intent: "read",
+              intent: "read",
               requiredPermissions: permisos,
               docProjectId,
               context,
@@ -331,7 +331,7 @@ export const documentTypeResolvers = {
       const userId =
         scope !== null
           ? await projectAuthorization({
-            intent: "write",
+              intent: "write",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_CREATE],
               docProjectId: scope,
               context,

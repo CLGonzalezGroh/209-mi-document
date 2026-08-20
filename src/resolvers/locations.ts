@@ -333,7 +333,7 @@ export const locationResolvers = {
       const userId =
         docProjectId !== undefined
           ? await projectAuthorization({
-            intent: "read",
+              intent: "read",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
               docProjectId,
               context,
@@ -589,7 +589,7 @@ export const locationResolvers = {
       const userId =
         docProjectId !== undefined
           ? await projectAuthorization({
-            intent: "read",
+              intent: "read",
               requiredPermissions: permisos,
               docProjectId,
               context,
@@ -647,7 +647,7 @@ export const locationResolvers = {
       const userId =
         scope !== null
           ? await projectAuthorization({
-            intent: "write",
+              intent: "write",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_CREATE],
               docProjectId: scope,
               context,

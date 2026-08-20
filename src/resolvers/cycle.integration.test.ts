@@ -92,11 +92,11 @@ before(async () => {
   // testContracts): la mutación hace upsert por código y cae sobre esta fila.
   await asegurarContratos(prisma, [PROYECTO], DocumentRole.ISSUER)
 
-  await docProjectsResolvers.Mutation.declareDocProject(
+  await docProjectsResolvers.Mutation.updateDocProject(
     null,
     {
+      id: PROYECTO,
       input: {
-        code: `T-${PROYECTO}`,
         name: "Contrato de prueba",
         projectId: PROYECTO,
         documentRole: DocumentRole.ISSUER,

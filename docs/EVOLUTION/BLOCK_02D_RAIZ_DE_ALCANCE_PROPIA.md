@@ -445,6 +445,32 @@ Es la contracara exacta del hallazgo de la fase 3 sobre el contrato: allá un ca
 
 **Verificado:** `tsc` limpio, **534 pruebas y 0 fallos**.
 
+### Fase 8 — completada
+
+**El contrato tiene recurso de permisos propio**: `documentsDocProject`, con sus seis permisos, publicado en `@CLGonzalezGroh/mi-common@3.1.0`. Es recurso propio y no una variante de `documentsProjectSettings` porque el contrato es un objeto nuevo —con identidad, listado y pantalla— que **absorbe** a la configuración en lugar de ser una versión suya.
+
+**Los tres pasos, y no uno.** La constante en `mi-common`, el alta en `seedPermissions.ts` y **el reparto por rol en `rolePermissions.ts`**: `doc-basic` lee, lista y selecciona; `doc-full` administra los seis. Sin el tercero el permiso existe y ningún rol lo tiene, que es la misma inoperancia que la falta de seed — y nada lo delata: compila, siembra, y falla en la primera llamada real.
+
+**El alta se separó de la edición, y el `upsert` por código desapareció.** `declareDocProject` era el intermedio confuso: quien creía estar editando la configuración de un contrato podía estar creando uno nuevo por errar el código. Quedan actos distintos:
+
+| Operación | Qué hace |
+| --------- | -------- |
+| `docProjects(filter, pagination)` | Listado del despliegue, paginado |
+| `docProjectsSelectList(onlyActive)` | Selector para desplegables |
+| `docProjectById(id)` / `docProjectsByProject(projectId)` | Por identidad / los de una obra |
+| `createDocProject(input)` | Alta. El código es obligatorio |
+| `updateDocProject(id, input)` | Edición. **El código no se declara**: es identidad (D-24) |
+| `deleteDocProject(id)` | Borrado, solo si no tiene nada colgando |
+| `closeDocProject` / `reopenDocProject` | La puerta de `B9` |
+
+**El borrado no necesitó lógica propia.** La clave foránea `RESTRICT` de `B7` ya rechaza borrar un contrato con documentación; lo único que agrega el resolver es traducir ese rechazo a un mensaje que dice qué hacer en su lugar: **un contrato con documentación no se borra, se cierra**.
+
+**Y la puerta de `B9` alcanza al propio contrato**: uno cerrado tampoco se edita. Reabrirlo es el camino, y eso es lo que lo distingue de un estado terminal.
+
+**Un filtro que no es la ausencia de otro.** `withoutProject` nombra a los contratos **sin gestión PMI**, que es una condición y no un dato faltante (B3, B6). Declararlo como filtro propio evita que la interfaz lo confunda con "no filtrar por obra".
+
+**Verificado:** `tsc` limpio en los tres repos, **538 pruebas y 0 fallos** contra el paquete **publicado** —no contra la copia local—, supergrafo compuesto, y el seed corrido en la base local con los seis permisos repartidos a los dos roles.
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-06, D-07, D-09, D-15, D-19, D-21, D-24, D-28, D-29

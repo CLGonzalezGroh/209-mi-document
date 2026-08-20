@@ -1347,3 +1347,34 @@ Dos estados y **un solo efecto**: `ACTIVE` admite todo, `CLOSED` solo lectura.
 
 **Verificado:** `tsc` limpio, **534 pruebas y 0 fallos**.
 
+---
+
+# What's new in María Ingeniería API Documents 2.17.0
+
+2026-08-20
+
+## La raíz de alcance propia del módulo (BLOQUE 02D)
+
+### Fase 8 — el juego completo de operaciones del contrato
+
+**Recurso de permisos propio**: `documentsDocProject` con sus seis permisos, en `@CLGonzalezGroh/mi-common@3.1.0`.
+
+**El alta se separó de la edición.** `declareDocProject` —que hacía upsert por código— desaparece. Era el intermedio confuso: quien creía estar editando la configuración de un contrato podía estar creando uno nuevo por errar el código.
+
+| Operación | Qué hace |
+| --------- | -------- |
+| `docProjects` | Listado del despliegue, paginado y con filtros |
+| `docProjectsSelectList` | Selector para desplegables |
+| `docProjectById` / `docProjectsByProject` | Por identidad / los de una obra |
+| `createDocProject` | Alta, con el código obligatorio |
+| `updateDocProject` | Edición. **El código no se declara**: es identidad |
+| `deleteDocProject` | Borrado, solo si no tiene nada colgando |
+
+**El borrado no necesitó lógica propia**: la clave foránea `RESTRICT` ya lo rechaza, y el resolver solo traduce el rechazo a un mensaje que dice qué hacer — un contrato con documentación no se borra, **se cierra**.
+
+**La puerta del estado alcanza al propio contrato**: uno cerrado tampoco se edita.
+
+**Al desplegar:** exige `mi-common@3.1.0` y `205-mi-admin` 2.6.0 con `seed --permissions-only` **y** `seed --sync-roles`. Sin el segundo los permisos existen y ningún rol los tiene, y nada lo delata hasta la primera llamada real.
+
+**Verificado:** `tsc` limpio, **538 pruebas y 0 fallos** contra el paquete publicado, y supergrafo compuesto con `rover`.
+

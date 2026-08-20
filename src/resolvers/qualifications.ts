@@ -50,7 +50,7 @@ export const qualificationResolvers = {
       const userId =
         filter?.docProjectId !== undefined
           ? await projectAuthorization({
-            intent: "read",
+              intent: "read",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_QUALIFICATION_LIST],
               docProjectId: filter.docProjectId,
               context,
@@ -251,7 +251,7 @@ export const qualificationResolvers = {
       const userId =
         input.docProjectId !== undefined
           ? await projectAuthorization({
-            intent: "write",
+              intent: "write",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_QUALIFICATION_CREATE],
               docProjectId: input.docProjectId,
               context,

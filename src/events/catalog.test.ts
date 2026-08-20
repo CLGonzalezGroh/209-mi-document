@@ -187,5 +187,14 @@ test("el catálogo cubre las escrituras relevadas más lo que agregaron los bloq
   //
   //   + CloseDocProject
   //   + ReopenDocProject
-  assert.equal(AUDIT_ACTIONS.length, 61)
+  //
+  // Y 2 en la fase 8, de 61 a 63: editar y borrar el contrato. El alta conserva
+  // el nombre `DeclareDocProject` de la fase 2 —la acción es la misma, cambió
+  // la operación que la emite— y el borrado tiene la suya porque la base lo
+  // rechaza cuando hay documentación colgando: la traza registra los que sí
+  // prosperaron.
+  //
+  //   + UpdateDocProject
+  //   + DeleteDocProject
+  assert.equal(AUDIT_ACTIONS.length, 63)
 })

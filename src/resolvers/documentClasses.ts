@@ -75,7 +75,7 @@ export const documentClassResolvers = {
       const userId =
         docProjectId !== undefined
           ? await projectAuthorization({
-            intent: "read",
+              intent: "read",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_LIST],
               docProjectId,
               context,
@@ -263,7 +263,7 @@ export const documentClassResolvers = {
       const userId =
         docProjectId !== undefined
           ? await projectAuthorization({
-            intent: "read",
+              intent: "read",
               requiredPermissions: permisos,
               docProjectId,
               context,
@@ -332,7 +332,7 @@ export const documentClassResolvers = {
       const userId =
         scope !== null
           ? await projectAuthorization({
-            intent: "write",
+              intent: "write",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_CREATE],
               docProjectId: scope,
               context,

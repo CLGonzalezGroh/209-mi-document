@@ -276,11 +276,11 @@ test("crear en un proyecto ajeno se rechaza con FORBIDDEN", async () => {
 // --- Contexto de proyecto: configuración y membresía (fase F) ---
 
 test("la configuración se declara y se lee, y emite su traza", async () => {
-  const settings: any = await docProjectsResolvers.Mutation.declareDocProject(
+  const settings: any = await docProjectsResolvers.Mutation.updateDocProject(
     null,
     {
+      id: PROYECTO_CON_MEMBRESIA,
       input: {
-        code: `T-${PROYECTO_CON_MEMBRESIA}`,
         name: "Contrato de prueba",
         projectId: PROYECTO_CON_MEMBRESIA,
         documentRole: DocumentRole.ISSUER,
@@ -292,16 +292,17 @@ test("la configuración se declara y se lee, y emite su traza", async () => {
 
   assert.equal(settings.documentRole, DocumentRole.ISSUER)
 
-  const leida: any = await docProjectsResolvers.Query.docProject(
+  const leida: any = await docProjectsResolvers.Query.docProjectById(
     null,
     { id: settings.id },
     context,
   )
   assert.equal(leida.counterpartyId, EMPRESA_A)
 
-  // La traza del objeto nuevo lleva su proyecto, derivado (B9)
+  // La traza lleva el contrato, derivado del objeto (B9). La edición emite su
+  // acción propia: lo que cambia no es cómo se creó sino qué se editó.
   const eventos = await prisma.docAuditEvent.findMany({
-    where: { objectId: settings.id, action: AuditAction.DeclareDocProject },
+    where: { objectId: settings.id, action: AuditAction.UpdateDocProject },
   })
   assert.equal(eventos.length, 1)
   assert.equal(eventos[0].docProjectId, PROYECTO_CON_MEMBRESIA)
@@ -310,11 +311,11 @@ test("la configuración se declara y se lee, y emite su traza", async () => {
 test("un proyecto interno no admite contraparte", async () => {
   assert.equal(
     await codigoDeError(() =>
-      docProjectsResolvers.Mutation.declareDocProject(
+      docProjectsResolvers.Mutation.updateDocProject(
         null,
         {
+          id: PROYECTO_SIN_MEMBRESIA,
           input: {
-            code: `T-${PROYECTO_SIN_MEMBRESIA}`,
             name: "Contrato de prueba",
             projectId: PROYECTO_SIN_MEMBRESIA,
             documentRole: DocumentRole.INTERNAL,
@@ -336,7 +337,8 @@ test("una obra admite varios contratos, uno por contratista", async () => {
   const codigos = ["OBRA-CIVIL", "OBRA-MEC", "OBRA-CONSTR"]
 
   for (const [i, code] of codigos.entries()) {
-    await docProjectsResolvers.Mutation.declareDocProject(
+    // Acá SÍ es un alta: son tres contratos nuevos sobre la misma obra.
+    await docProjectsResolvers.Mutation.createDocProject(
       null,
       {
         input: {
@@ -383,11 +385,11 @@ test("el rol no puede cambiarse si el proyecto ya tiene documentos", async () =>
   // PROYECTO_CON_MEMBRESIA ya tiene un documento creado en el before
   assert.equal(
     await codigoDeError(() =>
-      docProjectsResolvers.Mutation.declareDocProject(
+      docProjectsResolvers.Mutation.updateDocProject(
         null,
         {
+          id: PROYECTO_CON_MEMBRESIA,
           input: {
-            code: `T-${PROYECTO_CON_MEMBRESIA}`,
             name: "Contrato de prueba",
             projectId: PROYECTO_CON_MEMBRESIA,
             documentRole: DocumentRole.RECEIVER,
@@ -639,5 +641,144 @@ test("el régimen de publicación no tiene puerta que atravesar", async () => {
     context,
   )
   assert.equal(leido.id, docPublicado)
+})
+
+// --- El juego completo de operaciones del contrato (BLOQUE 02D, fase 8) ---
+
+test("el alta y la edición son actos distintos, y el código no se edita", async () => {
+  const creado: any = await docProjectsResolvers.Mutation.createDocProject(
+    null,
+    {
+      input: {
+        code: `${CODIGO}-OPS`,
+        name: "Contrato de operaciones",
+        documentRole: DocumentRole.INTERNAL,
+      },
+    },
+    context,
+  )
+  assert.equal(creado.code, `${CODIGO}-OPS`)
+  assert.equal(creado.status, "ACTIVE")
+  assert.equal(creado.projectId, null, "sin gestión PMI es un contrato válido")
+
+  // Dos altas con el mismo código se rechazan: el código es la identidad.
+  assert.equal(
+    await codigoDeError(() =>
+      docProjectsResolvers.Mutation.createDocProject(
+        null,
+        {
+          input: {
+            code: `${CODIGO}-OPS`,
+            name: "Duplicado",
+            documentRole: DocumentRole.INTERNAL,
+          },
+        },
+        context,
+      ),
+    ),
+    "CONFLICT",
+  )
+
+  // La edición no puede tocar el código —el input ni lo declara— y sí el
+  // vínculo con la gestión PMI, que puede aparecer después (B3).
+  const editado: any = await docProjectsResolvers.Mutation.updateDocProject(
+    null,
+    {
+      id: creado.id,
+      input: {
+        name: "Contrato editado",
+        projectId: -424470,
+        documentRole: DocumentRole.INTERNAL,
+      },
+    },
+    context,
+  )
+  assert.equal(editado.code, `${CODIGO}-OPS`, "el código no cambia")
+  assert.equal(editado.name, "Contrato editado")
+  assert.equal(editado.projectId, -424470, "el vínculo PMI se agrega después")
+
+  // Y se puede volver a quitar.
+  const desvinculado: any = await docProjectsResolvers.Mutation.updateDocProject(
+    null,
+    {
+      id: creado.id,
+      input: { name: "Contrato editado", documentRole: DocumentRole.INTERNAL },
+    },
+    context,
+  )
+  assert.equal(desvinculado.projectId, null)
+
+  await docProjectsResolvers.Mutation.deleteDocProject(null, { id: creado.id }, context)
+})
+
+test("un contrato con documentación no se borra: se cierra", async () => {
+  // Lo impide la clave foránea RESTRICT de B7, y el mensaje lo explica.
+  assert.equal(
+    await codigoDeError(() =>
+      docProjectsResolvers.Mutation.deleteDocProject(
+        null,
+        { id: PROYECTO_CON_MEMBRESIA },
+        context,
+      ),
+    ),
+    "CONFLICT",
+  )
+})
+
+test("un contrato cerrado tampoco se edita", async () => {
+  // La puerta de B9 alcanza al propio contrato: reabrirlo es el camino.
+  await docProjectsResolvers.Mutation.closeDocProject(
+    null,
+    { id: PROYECTO_SIN_MEMBRESIA },
+    context,
+  )
+
+  assert.equal(
+    await codigoDeError(() =>
+      docProjectsResolvers.Mutation.updateDocProject(
+        null,
+        {
+          id: PROYECTO_SIN_MEMBRESIA,
+          input: { name: "No debería", documentRole: DocumentRole.INTERNAL },
+        },
+        context,
+      ),
+    ),
+    "CONFLICT",
+  )
+
+  await docProjectsResolvers.Mutation.reopenDocProject(
+    null,
+    { id: PROYECTO_SIN_MEMBRESIA },
+    context,
+  )
+})
+
+test("el listado filtra por estado, por obra y por ausencia de obra", async () => {
+  const sinObra: any = await docProjectsResolvers.Query.docProjects(
+    null,
+    { filter: { withoutProject: true, query: CODIGO } },
+    context,
+  )
+  // Los dos contratos del before tienen obra, de modo que no aparecen acá.
+  assert.equal(sinObra.items.length, 0)
+
+  const deLaObra: any = await docProjectsResolvers.Query.docProjects(
+    null,
+    { filter: { projectId: PROYECTO_CON_MEMBRESIA } },
+    context,
+  )
+  assert.ok(
+    deLaObra.items.some((c: any) => c.id === PROYECTO_CON_MEMBRESIA),
+    "el contrato de la obra debería aparecer",
+  )
+  assert.ok(deLaObra.pagination.totalItems >= 1)
+
+  const selector: any = await docProjectsResolvers.Query.docProjectsSelectList(
+    null,
+    { onlyActive: true },
+    context,
+  )
+  assert.ok(selector.every((o: any) => o.label.includes(" — ")))
 })
 
