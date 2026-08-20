@@ -287,36 +287,43 @@ El renombre va después de la contraparte y no antes: son dos cambios de columna
 
 ## Ejecución
 
-### Fase 1 — en curso
+### Fase 1 — completada
 
-**Los tres despliegues de testing, medidos el 2026-08-20. Ningún control bloquea.**
+**Los cinco despliegues medidos el 2026-08-20. Ningún control bloquea en ninguno.**
 
-| Control | `rbb` | `optimal` | `proion` |
-| ------- | ----- | --------- | -------- |
-| Clases con proyecto declarado | 0 | 0 | 0 |
-| Tipos con proyecto declarado | 0 | 0 | 0 |
-| Escaneados clasificados por una entrada con proyecto | 0 | 0 | 0 |
-| Alcances, ubicaciones, plantillas y calificaciones con proyecto | 0 | 0 | 0 |
-| Configuraciones y membresías de proyecto | 0 | 0 | 0 |
-| Subsistema documental con datos | 0 | 0 | 0 |
-| Aplicación parcial previa | 0 | 0 | 0 |
+Los seis controles que bloquean —entradas de clase o tipo con proyecto, escaneados clasificados por alguna de ellas, alcances / ubicaciones / plantillas / calificaciones con proyecto, configuración y membresía cargadas, subsistema documental con datos, y aplicación parcial previa— dan **cero en los cinco**.
+
+**El supuesto sobre el que se apoya el bloque queda probado y no argumentado: no hay una sola fila que colgar de un contrato inexistente.** El renombre de `projectId` a `docProjectId` en los once modelos no tiene nada que convertir.
 
 Línea base informativa:
 
-| Línea base | `rbb` | `optimal` | `proion` |
-| ---------- | ----- | --------- | -------- |
-| Clases / tipos | 0 / 0 | **3 / 4** | 0 / 0 |
-| Declaraciones de alcance / ubicaciones | 0 / 0 | 0 / 0 | 0 / 0 |
-| Escaneados, con clase, con tipo | 0 | 9, 4, 4 | 1, 0, 0 |
-| Áreas | 0 | 3 | 0 |
-| Registros de log | 0 | 32 | 1 |
-| Proyectos distintos referenciados por el legado | 0 | 2 | 1 |
+| Línea base | `rbb` t | `optimal` t | `proion` t | `optimal` p | `proion` p |
+| ---------- | ------- | ----------- | ---------- | ----------- | ---------- |
+| Clases / tipos | 0 / 0 | 3 / 4 | 0 / 0 | **8 / 57** | 0 / 0 |
+| Declaraciones de alcance / ubicaciones | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| Escaneados | 0 | 9 | 1 | **3.425** | 0 |
+| Con clase / con tipo | 0 / 0 | 4 / 4 | 0 / 0 | **3.318 / 3.300** | 0 / 0 |
+| Áreas | 0 | 3 | 0 | **52** | 0 |
+| Registros de log | 0 | 32 | 1 | **5.277** | 0 |
+| Proyectos distintos referenciados por el legado | 0 | 2 | 1 | **2** | 0 |
 
-**Los catálogos de `optimal` en testing se movieron desde la última línea base, y es la mejor defensa del control.** `BLOCK_02C` midió ahí **2 clases y 3 tipos** el 2026-08-18; hoy son **3 y 4**. Una clase y un tipo nuevos en dos días. Nada de eso bloquea —los dos nacieron con proyecto nulo, que es el alcance del despliegue— pero desarma el argumento de reutilizar la medición anterior: **los catálogos son objetos vivos que alguien edita**, y una medición de hace dos días no describe la base de hoy. El resto de la línea base de `optimal` —9 escaneados, 4 con clase, 4 con tipo, 3 áreas— es idéntica a la de aquel bloque.
+**Los números de `optimal` productivo son la línea base del criterio 5** y deben repetirse idénticos después de migrar.
 
-**`rbb` da cero en todo, incluido el log.** Es coherente con que ese despliegue corra únicamente `quality`: la base de documentos existe y está migrada, y nunca se usó.
+#### El subsistema legado no está quieto, y la nota anterior era falsa
 
-**Falta producción**: `optimal` y `proion`. La fase no se cierra hasta medirlos, y son los únicos donde el control puede encontrar algo: son las bases con 3.289 archivos escaneados y 57 tipos.
+`BLOCK_02C` midió `optimal` productivo el 2026-08-18: **3.289** archivos escaneados, 3.182 con clase, 3.164 con tipo, 5.124 registros de log y 7 clases. Dos días después son **3.425**, 3.318, 3.300, 5.277 y **8 clases**.
+
+**136 archivos escaneados nuevos en dos días**, y una clase de documento más. La caracterización anterior —*"está quieto, no creciendo"*, apoyada en que los mismos números se repitieron entre el 14 y el 17 de agosto— **no describe lo que pasa**: la carga es esporádica y por lotes, no ausente. Las 52 áreas sí siguen iguales.
+
+Tres consecuencias, y ninguna bloquea:
+
+- **refuerza B7.** El subsistema del que se excluye el renombre no es un archivo histórico congelado: es un sistema en uso, cargando esta semana;
+- **la línea base del criterio 5 hay que tomarla inmediatamente antes de migrar**, y no reutilizar la de esta fase. Entre la medición y la migración pueden entrar lotes nuevos, y una diferencia por carga legítima leída como daño de la migración es exactamente el veredicto en falso que este bloque quiere evitar;
+- **la clase nueva llegó con `projectId` nulo**, como todas. El control central sigue en cero, y la deriva de los catálogos que ya se había visto en `optimal` de testing —2/3 a 3/4— aparece también en producción: 7 a 8.
+
+#### Lo demás que la medición confirma
+
+**`proion` productivo da cero absoluto**, catálogos incluidos: nunca usó ni el subsistema documental ni el legado. **`rbb` da cero en todo** en testing, coherente con que ese despliegue corra únicamente `quality`. De los cinco, **`optimal` productivo es el único con algo real en juego**, y es el que gobierna el cuidado del bloque.
 
 ## Referencias
 
