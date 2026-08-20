@@ -487,6 +487,20 @@ Se lo vio fallar **sin buscarlo**: el puerto local estaba ocupado por un servici
 
 **Verificado:** **539 pruebas y 0 fallos**, los dos controles en verde contra el servicio y la base locales, y los dos vistos fallar contra su propio defecto.
 
+#### El contrato federado, y la webapp
+
+Tres verificaciones que ninguna de las anteriores cubre, y que el despliegue local necesita porque **usa Apollo Studio** y no un supergrafo de archivo.
+
+**`rover subgraph check Maria-Ingenieria@current`: Operation Check y Linter Check aprobados.** *"Compared 184 schema changes against 44 operations"* — y esta vez hay operaciones registradas con las que comparar, a diferencia de `BLOCK_03B`, donde el veredicto se degradó por no haber ninguna. Los 184 cambios incluyen todos los `projectId` retirados y la mutación `declareDocProject`, **sin una sola operación registrada afectada**.
+
+El linter marcó dos advertencias —los valores de `DocProjectStatusInput` sin descripción— y se corrigieron antes de publicar.
+
+**`rover subgraph publish`**, y el supergrafo de `@current` recompuesto. El router local lo tomó por su propio polling: no hace falta reiniciarlo cuando la federación es administrada, a diferencia del supergrafo de archivo de testing y producción.
+
+**`npm run codegen` en la webapp: sin errores**, y `type-check` limpio después de regenerar. Eso prueba algo que ninguna verificación del subgrafo puede: que **ningún documento `.graphql` de la webapp pide un campo que dejó de existir**.
+
+**Y la búsqueda del nombre viejo, que es la lección que rover y `tsc` no cubren.** Cero apariciones de `docProjectSettings`, `declareDocProject`, `counterpartyName` y `DOC_PROJECT_SETTINGS` fuera de lo generado. Los `projectId` que quedan en los documentos del módulo documental son **todos de `Area` y `ScannedFile`**, que son exactamente los dos tipos que `B7` excluyó — de modo que la exclusión, además de medida en la base, queda confirmada del lado del consumidor.
+
 ## Despliegue
 
 El bloque toca **tres repositorios** y el orden no es negociable: cada paso deja lo que el siguiente exige.

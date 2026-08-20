@@ -1669,7 +1669,9 @@ input DocProjectFilterInput {
 
 "Estado del contrato, como entrada de filtro"
 enum DocProjectStatusInput {
+  "En curso"
   ACTIVE
+  "Cerrado. Solo lectura y consulta histórica"
   CLOSED
 }
 

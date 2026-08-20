@@ -1400,3 +1400,21 @@ Dos estados y **un solo efecto**: `ACTIVE` admite todo, `CLOSED` solo lectura.
 
 **Verificado:** **539 pruebas y 0 fallos**, los dos controles en verde y los dos vistos fallar contra su propio defecto.
 
+---
+
+# What's new in María Ingeniería API Documents 2.17.2
+
+2026-08-20
+
+## La raíz de alcance propia del módulo (BLOQUE 02D)
+
+### Fase 9 — el contrato federado, publicado y consumido
+
+**`rover subgraph check`: Operation Check y Linter Check aprobados.** *"Compared 184 schema changes against 44 operations"*, sin una sola operación registrada afectada — y esta vez con operaciones reales contra las que comparar. Las dos advertencias del linter, valores de enumeración sin descripción, se corrigieron antes de publicar.
+
+**Publicado a `Maria-Ingenieria@current`** y supergrafo recompuesto. El despliegue local usa federación administrada, de modo que el router lo tomó por polling.
+
+**`npm run codegen` en la webapp sin errores** y `type-check` limpio: ningún documento `.graphql` pide un campo que dejó de existir.
+
+**Búsqueda del nombre viejo**: cero apariciones de `docProjectSettings`, `declareDocProject`, `counterpartyName` y `DOC_PROJECT_SETTINGS` fuera de lo generado. Los `projectId` que quedan son todos de `Area` y `ScannedFile` — los dos tipos que el bloque excluyó a propósito.
+
