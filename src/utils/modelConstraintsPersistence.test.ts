@@ -63,6 +63,7 @@ const CHECKS_DEL_MODULO = [
   "doc_locations_external_reference_complete",
   "document_classes_project_scope_check",
   "document_types_project_scope_check",
+  "documents_module_scope_check",
 ]
 
 const esViolacionDeCheck = (error: unknown) => {
@@ -876,3 +877,137 @@ test("una entrada con proyecto exige el módulo de proyectos", async () => {
     true,
   )
 })
+
+// ---------------------------------------------------------------------------
+// La unicidad del código del documento, por módulo (BLOQUE 02D, B5)
+// ---------------------------------------------------------------------------
+//
+// Son dos índices ÚNICOS PARCIALES y `prisma migrate diff` no los expresa en
+// ninguna dirección: lo único que verifica estas reglas es esta prueba.
+
+const documento = (code: string, extra: Record<string, unknown>) =>
+  prisma.document.create({
+    data: {
+      code,
+      currentTitle: `Documento ${code}`,
+      currentDocumentTypeId: documentTypeId,
+      createdById: 1,
+      ...extra,
+    } as any,
+  })
+
+test("dos contratos de la misma obra pueden repetir el código", async () => {
+  // La contracara del N:1 de B3, y deliberada: son contrapartes distintas, y
+  // cada contratista numera su documentación con su propia convención.
+  // Obligarlas a una numeración común sería imponer un acuerdo que no existe.
+  const CIVIL = -424460
+  const MECANICA = -424461
+  await asegurarContratos(prisma, [CIVIL, MECANICA])
+  await prisma.docProject.updateMany({
+    where: { id: { in: [CIVIL, MECANICA] } },
+    data: { projectId: -424462 },
+  })
+
+  const code = `${CODIGO}-COMPARTIDO`
+  await documento(code, { module: ModuleType.PROJECTS, docProjectId: CIVIL })
+
+  assert.equal(
+    await rechazaPorUnicidad(() =>
+      documento(code, { module: ModuleType.PROJECTS, docProjectId: MECANICA }),
+    ),
+    false,
+    "dos contratos de la misma obra deberían poder repetir código",
+  )
+
+  // Y dentro del MISMO contrato, no.
+  assert.equal(
+    await rechazaPorUnicidad(() =>
+      documento(code, { module: ModuleType.PROJECTS, docProjectId: CIVIL }),
+    ),
+    true,
+  )
+
+  await prisma.document.deleteMany({ where: { code } })
+  await borrarContratos(prisma, [CIVIL, MECANICA])
+})
+
+test("el discriminador es el módulo y no el nulo del alcance", async () => {
+  // Lo publicado es único por módulo, y dos módulos distintos pueden publicar
+  // el mismo código sin conflicto (B5).
+  const code = `${CODIGO}-PUBLICADO`
+
+  await documento(code, { module: ModuleType.QUALITY, docProjectId: null })
+
+  assert.equal(
+    await rechazaPorUnicidad(() =>
+      documento(code, { module: ModuleType.QUALITY, docProjectId: null }),
+    ),
+    true,
+    "el mismo código en el mismo módulo debería rechazarse",
+  )
+
+  assert.equal(
+    await rechazaPorUnicidad(() =>
+      documento(code, { module: ModuleType.TAGS, docProjectId: null }),
+    ),
+    false,
+    "el mismo código en otro módulo debería admitirse",
+  )
+
+  await prisma.document.deleteMany({ where: { code } })
+})
+
+test("un documento de proyecto y uno publicado no compiten por el código", async () => {
+  // Los dos nulos viven en niveles distintos y no se tocan (B6): el índice de
+  // circulación solo mira `module = PROJECTS`, y el de publicación el resto.
+  const code = `${CODIGO}-CRUZADO`
+  const CONTRATO = -424463
+  await asegurarContratos(prisma, [CONTRATO])
+
+  await documento(code, { module: ModuleType.PROJECTS, docProjectId: CONTRATO })
+
+  assert.equal(
+    await rechazaPorUnicidad(() =>
+      documento(code, { module: ModuleType.QUALITY, docProjectId: null }),
+    ),
+    false,
+    "el régimen de publicación no debería colisionar con el de circulación",
+  )
+
+  await prisma.document.deleteMany({ where: { code } })
+  await borrarContratos(prisma, [CONTRATO])
+})
+
+test("el módulo y el alcance tienen que coincidir, y lo impide la base", async () => {
+  // El invariante de D-06 vivía solo en la aplicación, y este bloque lo volvió
+  // estructura porque el discriminador nuevo lo necesita: un documento de
+  // PROJECTS sin contrato caería en el índice de circulación con alcance nulo y
+  // no quedaría cubierto por ninguna unicidad (BLOQUE 02D, B5).
+  assert.equal(
+    await rechazaPorCheck(() =>
+      documento(`${CODIGO}-SINALCANCE`, {
+        module: ModuleType.PROJECTS,
+        docProjectId: null,
+      }),
+    ),
+    true,
+    "un documento de proyecto sin contrato debería rechazarse",
+  )
+
+  const CONTRATO = -424464
+  await asegurarContratos(prisma, [CONTRATO])
+
+  assert.equal(
+    await rechazaPorCheck(() =>
+      documento(`${CODIGO}-FUERADEPROY`, {
+        module: ModuleType.QUALITY,
+        docProjectId: CONTRATO,
+      }),
+    ),
+    true,
+    "un documento publicado con contrato debería rechazarse",
+  )
+
+  await borrarContratos(prisma, [CONTRATO])
+})
+

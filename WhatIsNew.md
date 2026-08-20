@@ -1302,3 +1302,26 @@ Se contrata con la **empresa** y no con la razón social: a cuál se le factura 
 
 Y una advertencia que esta fase dejó a la vista: **`tsc` no delata un campo viejo en una escritura de Prisma**. El `upsert` que seguía pasando `counterpartyName` compiló sin un solo error, porque el `XOR<...>` con que Prisma tipa `data` desactiva el control de propiedades excedentes. En ejecución falla, de modo que lo único que lo encuentra son las pruebas.
 
+---
+
+# What's new in María Ingeniería API Documents 2.15.0
+
+2026-08-20
+
+## La raíz de alcance propia del módulo (BLOQUE 02D)
+
+### Fase 6 — la unicidad del código se discrimina por módulo
+
+Los dos índices únicos parciales de `documents` dejan de condicionarse por el nulo del alcance y pasan a condicionarse por el módulo:
+
+- **circulación** — `UNIQUE (code, docProjectId) WHERE module = 'PROJECTS'`;
+- **publicación** — `UNIQUE (code, module) WHERE module <> 'PROJECTS'`.
+
+**Consecuencia deliberada: dos contratos de la misma obra pueden repetir el código de documento.** La unicidad es por contrato y no por obra — son contrapartes distintas, y cada contratista numera con su propia convención. Es la contracara del N:1 de la fase 4, y no contradice a D-24: el código sigue siendo el identificador **dentro de su ámbito**.
+
+**Un `CHECK` nuevo, y no es un agregado suelto.** Con la condición vieja un documento de `PROJECTS` sin contrato quedaba cubierto por el índice de publicación; con la nueva cae en el de circulación con alcance nulo y —como Postgres trata los nulos como distintos— **no queda cubierto por ninguna unicidad**. El invariante de D-06 existía desde BLOQUE 02 pero vivía solo en la aplicación, de modo que la base admitía justamente esa combinación. `documents_module_scope_check` lo vuelve estructura, bicondicional, y es lo que garantiza que los dos índices cubran juntos todas las filas.
+
+**Al desplegar:** la migración se detiene si encuentra documentos donde el módulo y el alcance no coinciden.
+
+**Verificado:** `tsc` limpio, **531 pruebas y 0 fallos** —cuatro nuevas de persistencia, que es lo único que verifica índices parciales y `CHECK`, invisibles para `migrate diff`—, y ruta completa sobre base limpia con `pg_dump` idéntico al de la base incremental.
+

@@ -143,6 +143,18 @@ Siguen siendo dos índices únicos parciales en SQL crudo, por el mismo motivo p
 
 **D-24 se conserva.** El código sigue siendo el identificador y sigue sin cambiar; lo que este bloque precisa es cuál es el ámbito dentro del que se exige único, que es lo que aquella decisión ya dice: *la unicidad es dentro de su ámbito*.
 
+**El discriminador nuevo necesita un `CHECK`, y sin él abriría un hueco.** Con la condición vieja —el nulo del alcance— un documento de `module = PROJECTS` **sin** contrato caía en el índice de publicación y quedaba cubierto por `UNIQUE (code, module)`. Con la condición nueva cae en el de circulación, `UNIQUE (code, docProjectId)`, y como Postgres trata los nulos como distintos **no queda cubierto por ninguna unicidad**: dos filas iguales entrarían las dos.
+
+El invariante de D-06 —alcance obligatorio cuando `module = PROJECTS`— existía desde `BLOCK_02` pero **vivía solo en la aplicación**, de modo que la base admitía justamente la combinación que abre el hueco. Se vuelve estructura, que es lo mismo que `B1` hizo con la pertenencia al convertirla en clave foránea:
+
+```
+documents_module_scope_check
+  CHECK ((module =  'PROJECTS' AND docProjectId IS NOT NULL)
+      OR (module <> 'PROJECTS' AND docProjectId IS NULL))
+```
+
+Es **bicondicional**, y por eso más fuerte que el de los catálogos: allá `CHECK (docProjectId IS NULL OR module = 'PROJECTS')` solo impide el alcance fuera de proyectos; acá hace falta además la dirección inversa, que es la que garantiza que **los dos índices parciales cubran juntos todas las filas**.
+
 **El resto de las unicidades acompaña el renombre sin cambiar de forma**: `[docProjectId, code]` en `Transmittal`, `[docProjectId, userId]` en la membresía, y las de los catálogos con `NULLS NOT DISTINCT` tal como `BLOCK_02C` las dejó.
 
 ### B6 — Los dos nulos viven en niveles distintos y no se confunden
@@ -397,6 +409,21 @@ Al retirar `counterpartyName` del modelo y regenerar el cliente, el `upsert` que
 Es la contracara exacta del hallazgo de la fase 3 sobre el contrato: allá un campo retirado del modelo se resolvía como `null` en lugar de romperse; acá una escritura con el nombre viejo compila y falla recién al ejecutarse. **En los dos casos `tsc` limpio no es evidencia de nada**, y lo que vale es `grep` del nombre viejo más una prueba que ejercite el camino.
 
 **Verificado:** `tsc` limpio, **527 pruebas y 0 fallos**, `prisma migrate diff` sin diferencias, ruta completa sobre base limpia con `pg_dump` idéntico, y el supergrafo compuesto sin error.
+
+### Fase 6 — completada
+
+**Los dos índices parciales pasan a discriminar por módulo.** El régimen dejó de expresarse con una columna anulable que coincidía con él y pasa a expresarse con lo que lo nombra.
+
+**Y apareció el motivo por el que el cambio no era solo cosmético.** El discriminador viejo y el nuevo coinciden en toda fila donde módulo y alcance concuerdan — y **la base no exigía que concordaran**. Un documento de `PROJECTS` sin contrato quedaba cubierto por el índice de publicación con la condición vieja, y con la nueva no queda cubierto por ninguna, porque los nulos son distintos entre sí. La fase agregó el `CHECK` bicondicional que cierra el hueco, y con eso el invariante de D-06 dejó de vivir solo en la aplicación.
+
+**Lo verifican las pruebas y no el diff**, y conviene retenerlo: `prisma migrate diff` no expresa índices parciales **ni `CHECK`**, de modo que las cuatro reglas de esta fase son invisibles para él. Se agregaron cuatro pruebas de persistencia:
+
+- dos contratos de la misma obra **pueden** repetir código, y dentro del mismo contrato no;
+- lo publicado es único por módulo, y dos módulos distintos pueden publicar el mismo código;
+- un documento de contrato y uno publicado **no compiten** por el código (B6, los dos nulos en niveles distintos);
+- módulo y alcance tienen que coincidir, y **lo impide la base**.
+
+**Verificado:** `tsc` limpio, **531 pruebas y 0 fallos**, `prisma migrate diff` sin diferencias, y ruta completa sobre base limpia con `pg_dump` idéntico —que acá vale doble, porque es lo único que compara los índices parciales y el `CHECK` entre las dos bases—.
 
 ## Referencias
 

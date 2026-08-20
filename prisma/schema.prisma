@@ -387,12 +387,33 @@ model Document {
   replacementItems     DocReplacementItem[]
 
   // Unicidad del código por dos índices ÚNICOS PARCIALES, creados en SQL porque
-  // Prisma no los expresa (BLOQUE 02, B2):
-  //   documents_code_projectId_key  UNIQUE (code, projectId) WHERE projectId IS NOT NULL
-  //   documents_code_module_key     UNIQUE (code, module)    WHERE projectId IS NULL
-  // Único por proyecto para los documentos en circulación; único por módulo para
-  // los publicados. Reemplaza a [code, module, entityType, entityId], cuya tupla
-  // con columnas anulables no impedía duplicados (H-19).
+  // Prisma no los expresa (BLOQUE 02, B2; BLOQUE 02D, B5):
+  //   documents_code_docProjectId_key UNIQUE (code, docProjectId) WHERE module  = 'PROJECTS'
+  //   documents_code_module_key       UNIQUE (code, module)       WHERE module <> 'PROJECTS'
+  //
+  // Único por CONTRATO para los documentos en circulación; único por módulo
+  // para los publicados. El discriminador es el módulo y no el nulo del
+  // alcance: el régimen queda expresado por lo que lo nombra en lugar de por
+  // una columna anulable que coincidía con él.
+  //
+  // Consecuencia deliberada: DOS CONTRATOS DE LA MISMA OBRA PUEDEN REPETIR
+  // CÓDIGO. Son contrapartes distintas, y cada contratista numera con su propia
+  // convención. Es la contracara del N:1 de B3, y no contradice a D-24: el
+  // código sigue siendo el identificador dentro de su ámbito.
+  //
+  // Reemplaza a [code, module, entityType, entityId], cuya tupla con columnas
+  // anulables no impedía duplicados (H-19).
+  //
+  // Los dos índices se apoyan en un CHECK que Prisma tampoco expresa:
+  //   documents_module_scope_check
+  //     CHECK ((module = 'PROJECTS' AND docProjectId IS NOT NULL)
+  //         OR (module <> 'PROJECTS' AND docProjectId IS NULL))
+  //
+  // Es el invariante de D-06 vuelto estructura. Sin él, un documento de
+  // PROJECTS sin contrato caería en el índice de circulación con el alcance
+  // nulo y —como Postgres trata los nulos como distintos— no quedaría cubierto
+  // por NINGUNA unicidad. El CHECK es lo que garantiza que los dos índices
+  // parciales cubran juntos todas las filas.
   @@index([docProjectId])
   @@index([module])
   @@index([currentDocumentClassId])
