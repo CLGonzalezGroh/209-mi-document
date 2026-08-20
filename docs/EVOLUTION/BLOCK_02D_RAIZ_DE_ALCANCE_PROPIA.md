@@ -45,6 +45,10 @@ Verificada sobre el código y sobre los despliegues después de `BLOCK_04` y `BL
 
 **Si el control da distinto de cero, la fase 2 no arranca**: primero se decide qué contrato representa a ese proyecto, o se retira la declaración.
 
+**Cómo leer un resultado distinto de cero.** El control se probó contra la base de desarrollo local antes de mandarlo a ningún despliegue, y **bloqueó**: 12 clases y 6 tipos con proyecto declarado. Son residuo de las pruebas de integración —`projectId` negativo, la convención de fixtures de `modelConstraintsPersistence.test.ts`— y no una declaración real. La lección no es que el dato sea inocuo, sino que **un resultado distinto de cero exige identificar la causa antes de concluir**: fixture sin limpiar, carga de prueba manual, o alcance real de un cliente. Solo el tercero cambia el alcance del bloque; los otros dos se limpian.
+
+Vale además como noticia buena para la fase 5: la migración se ejercita en local **contra el caso que la haría fallar**, y no contra una base ideal donde todo es nulo.
+
 ## Decisiones ya aprobadas que aplican
 
 - **D-15** — cada proyecto **es un contrato**, con una sola contraparte; la membresía habilita el acceso y no define permisos; la estructura es binaria entre anfitrión y contraparte.
