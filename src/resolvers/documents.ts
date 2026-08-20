@@ -107,6 +107,7 @@ export const documentResolvers = {
       // Fuera del try: un rechazo por permiso o por membresía no es un error del
       // servicio, y handleError lo registraría como ERROR en DocumentSysLog.
       await assertObjectAccess({
+        intent: "read",
         userId,
         objectType: DocObjectType.DOCUMENT,
         objectId: id,
@@ -419,6 +420,7 @@ export const documentResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
+        intent: "read",
         requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_LIST],
         docProjectId,
         context,
@@ -530,6 +532,7 @@ export const documentResolvers = {
       // El proyecto viene en el input, de modo que la doble capa es estricta.
       // Nulo cuando el módulo no es PROJECTS: régimen de publicación (B1).
       const userId = await projectAuthorization({
+        intent: "write",
         requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CREATE],
         docProjectId: input.docProjectId ?? null,
         context,
@@ -728,6 +731,7 @@ export const documentResolvers = {
       logger.info("correctDocumentCode", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT,
         objectId: id,
@@ -827,6 +831,7 @@ export const documentResolvers = {
       logger.info("obsoleteDocument", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT,
         objectId: id,
@@ -925,6 +930,7 @@ export const documentResolvers = {
       logger.info("updateDocument", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT,
         objectId: id,
@@ -1007,6 +1013,7 @@ export const documentResolvers = {
       logger.info("terminateDocument", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT,
         objectId: id,
@@ -1068,6 +1075,7 @@ export const documentResolvers = {
       logger.info("activateDocument", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT,
         objectId: id,

@@ -76,6 +76,7 @@ export const revisionResolvers = {
 
       // Fuera del try: un rechazo de autorización no es un error del servicio
       await assertObjectAccess({
+        intent: "read",
         userId,
         objectType: DocObjectType.DOCUMENT_REVISION,
         objectId: id,
@@ -145,6 +146,7 @@ export const revisionResolvers = {
 
       // La revisión se abre sobre un documento: el proyecto es el del documento
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT,
         objectId: documentId,
@@ -343,6 +345,7 @@ export const revisionResolvers = {
       logger.info("updateRevisionMetadata", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_REVISION,
         objectId: revisionId,
@@ -517,6 +520,7 @@ export const revisionResolvers = {
       logger.info("abandonRevision", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_REVISION,
         objectId: revisionId,

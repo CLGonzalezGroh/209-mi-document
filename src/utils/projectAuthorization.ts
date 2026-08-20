@@ -2,7 +2,7 @@ import { GraphQLError } from "graphql"
 import { ResolverContext } from "../types.js"
 import { userAuthorization } from "./userAuthorization.js"
 import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
-import { DocObjectType } from "../generated/prisma/enums.js"
+import { DocObjectType, DocProjectStatus } from "../generated/prisma/enums.js"
 import { resolveObjectContext } from "./objectContext.js"
 
 const logger = createLogger("projectAuthorization")
@@ -147,6 +147,52 @@ export const assertProjectMembership = async ({
 }
 
 /**
+ * Intención de la operación sobre el contrato (BLOQUE 02D, B9).
+ *
+ * Se declara de forma explícita en cada llamada, con el mismo criterio con que
+ * `docProjectId` no es opcional: un valor por defecto haría que la puerta se
+ * saltee por descuido en lugar de por decisión.
+ */
+export type ContractIntent = "read" | "write"
+
+/**
+ * La puerta de escritura del contrato (BLOQUE 02D, B9).
+ *
+ * En curso admite todas las operaciones; cerrado, solo lectura. Es una puerta
+ * sobre la escritura y NO una máquina de estados: no se propaga hacia abajo, de
+ * modo que una revisión en circuito al momento del cierre queda donde está y
+ * deja de poder avanzar.
+ *
+ * Un objeto sin contrato —el régimen de publicación— no tiene puerta que
+ * atravesar: se gobierna solo por el permiso global (B1).
+ */
+export const assertContractOpen = async ({
+  docProjectId,
+  intent,
+  context,
+}: {
+  docProjectId: number | null
+  intent: ContractIntent
+  context: ResolverContext
+}): Promise<void> => {
+  if (intent === "read" || docProjectId === null) return
+
+  const contrato = await context.orm.docProject.findUnique({
+    where: { id: docProjectId },
+    select: { status: true, code: true },
+  })
+
+  // Un contrato inexistente no es asunto de esta puerta: lo resuelve la clave
+  // foránea al escribir, o el NOT_FOUND de quien resolvió el objeto.
+  if (!contrato || contrato.status !== DocProjectStatus.CLOSED) return
+
+  throw new GraphQLError(
+    `El contrato ${contrato.code} está cerrado y solo admite lectura`,
+    { extensions: { code: "CONFLICT" } },
+  )
+}
+
+/**
  * Segunda capa para una operación sobre un objeto existente, cualquiera sea su
  * tipo. Resuelve el proyecto del objeto con la tabla de derivación compartida y
  * exige membresía.
@@ -161,12 +207,14 @@ export const assertObjectAccess = async ({
   objectId,
   context,
   notFoundMessage,
+  intent,
 }: {
   userId: number
   objectType: DocObjectType
   objectId: number
   context: ResolverContext
   notFoundMessage: string
+  intent: ContractIntent
 }): Promise<void> => {
   const contexto = await resolveObjectContext(context.orm, objectType, objectId)
 
@@ -179,6 +227,12 @@ export const assertObjectAccess = async ({
   await assertProjectMembership({
     userId,
     docProjectId: contexto.docProjectId,
+    context,
+  })
+
+  await assertContractOpen({
+    docProjectId: contexto.docProjectId,
+    intent,
     context,
   })
 }
@@ -195,6 +249,8 @@ type ProjectAuthorizationProps = {
    */
   docProjectId: number | null
   context: ResolverContext
+  /** Si la operación escribe. Cerrado, el contrato solo admite lectura (B9). */
+  intent: ContractIntent
 }
 
 /**
@@ -205,12 +261,17 @@ export const projectAuthorization = async ({
   requiredPermissions,
   docProjectId,
   context,
+  intent,
 }: ProjectAuthorizationProps): Promise<number> => {
   // Capa 1: permiso global (valida JWT + consulta a mi-admin)
   const userId = await userAuthorization({ requiredPermissions, context })
 
   // Capa 2: membresía vigente en el proyecto
   await assertProjectMembership({ userId, docProjectId, context })
+
+  // Y la puerta del estado del contrato, que no es una capa de autorización:
+  // no dice quién puede, dice qué admite el contrato (B9).
+  await assertContractOpen({ docProjectId, intent, context })
 
   return userId
 }

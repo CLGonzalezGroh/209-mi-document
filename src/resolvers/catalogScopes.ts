@@ -43,6 +43,7 @@ export const catalogScopeResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
+        intent: "read",
         requiredPermissions: [PERMISSIONS.DOCUMENTS_PROJECT_SETTINGS_READ],
         docProjectId,
         context,
@@ -101,6 +102,7 @@ export const catalogScopeResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
+        intent: "write",
         requiredPermissions: [PERMISSIONS.DOCUMENTS_PROJECT_SETTINGS_UPDATE],
         docProjectId: input.docProjectId,
         context,

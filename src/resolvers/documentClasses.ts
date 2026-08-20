@@ -75,6 +75,7 @@ export const documentClassResolvers = {
       const userId =
         docProjectId !== undefined
           ? await projectAuthorization({
+            intent: "read",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_LIST],
               docProjectId,
               context,
@@ -206,6 +207,7 @@ export const documentClassResolvers = {
       // La clase de un proyecto exige membresía; la del despliegue no pertenece
       // a ninguno y se resuelve con el permiso global (BLOQUE 02, B7).
       await assertObjectAccess({
+        intent: "read",
         userId,
         objectType: DocObjectType.DOCUMENT_CLASS,
         objectId: id,
@@ -261,6 +263,7 @@ export const documentClassResolvers = {
       const userId =
         docProjectId !== undefined
           ? await projectAuthorization({
+            intent: "read",
               requiredPermissions: permisos,
               docProjectId,
               context,
@@ -329,6 +332,7 @@ export const documentClassResolvers = {
       const userId =
         scope !== null
           ? await projectAuthorization({
+            intent: "write",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_CREATE],
               docProjectId: scope,
               context,
@@ -407,6 +411,7 @@ export const documentClassResolvers = {
       logger.info("updateDocumentClass", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_CLASS,
         objectId: id,
@@ -465,6 +470,7 @@ export const documentClassResolvers = {
       logger.info("terminateDocumentClass", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_CLASS,
         objectId: id,
@@ -527,6 +533,7 @@ export const documentClassResolvers = {
       logger.info("activateDocumentClass", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_CLASS,
         objectId: id,
@@ -589,6 +596,7 @@ export const documentClassResolvers = {
       logger.info("deleteDocumentClass", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_CLASS,
         objectId: id,

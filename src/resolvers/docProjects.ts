@@ -3,7 +3,7 @@ import { ResolverContext } from "../types.js"
 import { PERMISSIONS } from "@CLGonzalezGroh/mi-common"
 import { userAuthorization } from "../utils/userAuthorization.js"
 import { handleError } from "../utils/handleError.js"
-import { DocumentRole, RevisionScheme } from "../generated/prisma/enums.js"
+import { DocProjectStatus, DocumentRole, RevisionScheme } from "../generated/prisma/enums.js"
 import { AuditAction } from "../events/catalog.js"
 import { emitAuditEvent } from "../events/emit.js"
 import { assertCounterparty, assertRoleIsSettled } from "../utils/docProjects.js"
@@ -210,6 +210,145 @@ export const docProjectsResolvers = {
               "Ya existe un contrato con ese código, o la obra ya tiene contrato documental.",
             default: "Error al declarar el contrato documental.",
           },
+        })
+      }
+    },
+
+    /**
+     * Cerrar el contrato (BLOQUE 02D, B9).
+     *
+     * Es una PUERTA sobre la escritura y no una máquina de estados: no se
+     * propaga hacia abajo. Una revisión en circuito al momento del cierre queda
+     * donde está y deja de poder avanzar. Abandonarla o cancelar su circuito
+     * sería inventar desenlaces que nadie decidió, y D-26 ya le dio a cada nivel
+     * su palabra propia para terminar mal.
+     *
+     * Y no promueve nada: la promoción al régimen de publicación es selectiva
+     * por naturaleza, y por eso no puede ser un efecto automático del cierre.
+     */
+    closeDocProject: async (
+      _: any,
+      { id }: { id: number },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_PROJECT_SETTINGS_UPDATE],
+        context,
+      })
+      logger.info("closeDocProject", { userId })
+
+      try {
+        return await context.orm.$transaction(async (tx) => {
+          const actual = await tx.docProject.findUnique({
+            where: { id },
+            select: { status: true },
+          })
+
+          if (!actual) {
+            throw new GraphQLError("El contrato no existe", {
+              extensions: { code: "NOT_FOUND" },
+            })
+          }
+
+          if (actual.status === DocProjectStatus.CLOSED) {
+            throw new GraphQLError("El contrato ya está cerrado", {
+              extensions: { code: "CONFLICT" },
+            })
+          }
+
+          const contrato = await tx.docProject.update({
+            where: { id },
+            data: {
+              status: DocProjectStatus.CLOSED,
+              closedAt: new Date(),
+              closedById: userId,
+              updatedById: userId,
+            },
+          })
+
+          await emitAuditEvent(tx, {
+            action: AuditAction.CloseDocProject,
+            objectId: contrato.id,
+            actorId: userId,
+            meta: { code: contrato.code },
+          })
+
+          return contrato
+        })
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "CLOSE_DOC_PROJECT",
+          messages: { default: "Error al cerrar el contrato documental." },
+        })
+      }
+    },
+
+    /**
+     * Reabrir el contrato (BLOQUE 02D, B9).
+     *
+     * Sin reapertura, un cierre por error dejaría la documentación de un
+     * contrato congelada sin ninguna salida. Es un acto explícito, con actor y
+     * fecha en su evento de auditoría.
+     */
+    reopenDocProject: async (
+      _: any,
+      { id }: { id: number },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_PROJECT_SETTINGS_UPDATE],
+        context,
+      })
+      logger.info("reopenDocProject", { userId })
+
+      try {
+        return await context.orm.$transaction(async (tx) => {
+          const actual = await tx.docProject.findUnique({
+            where: { id },
+            select: { status: true },
+          })
+
+          if (!actual) {
+            throw new GraphQLError("El contrato no existe", {
+              extensions: { code: "NOT_FOUND" },
+            })
+          }
+
+          if (actual.status !== DocProjectStatus.CLOSED) {
+            throw new GraphQLError("El contrato no está cerrado", {
+              extensions: { code: "CONFLICT" },
+            })
+          }
+
+          const contrato = await tx.docProject.update({
+            where: { id },
+            data: {
+              status: DocProjectStatus.ACTIVE,
+              closedAt: null,
+              closedById: null,
+              updatedById: userId,
+            },
+          })
+
+          await emitAuditEvent(tx, {
+            action: AuditAction.ReopenDocProject,
+            objectId: contrato.id,
+            actorId: userId,
+            meta: { code: contrato.code },
+          })
+
+          return contrato
+        })
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "REOPEN_DOC_PROJECT",
+          messages: { default: "Error al reabrir el contrato documental." },
         })
       }
     },

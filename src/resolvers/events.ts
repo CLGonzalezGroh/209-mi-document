@@ -47,6 +47,7 @@ export const eventResolvers = {
 
       // Fuera del try: un rechazo de autorización no es un error del servicio
       await assertObjectAccess({
+        intent: "read",
         userId,
         objectType,
         objectId,
@@ -102,6 +103,7 @@ export const eventResolvers = {
 
       // Fuera del try: un rechazo de autorización no es un error del servicio
       await assertObjectAccess({
+        intent: "read",
         userId,
         objectType,
         objectId,

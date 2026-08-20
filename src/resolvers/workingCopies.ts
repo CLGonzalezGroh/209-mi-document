@@ -144,6 +144,7 @@ export const workingCopyResolvers = {
       logger.info("openWorkingCopy", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_REVISION,
         objectId: revisionId,
@@ -243,6 +244,7 @@ export const workingCopyResolvers = {
       logger.info("putWorkingCopyFile", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_REVISION,
         objectId: revisionId,
@@ -318,6 +320,7 @@ export const workingCopyResolvers = {
       logger.info("removeWorkingCopyFile", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_REVISION,
         objectId: revisionId,
@@ -395,6 +398,7 @@ export const workingCopyResolvers = {
       logger.info("confirmWorkingCopy", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_REVISION,
         objectId: revisionId,
@@ -543,6 +547,7 @@ export const workingCopyResolvers = {
       logger.info("discardWorkingCopy", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_REVISION,
         objectId: revisionId,

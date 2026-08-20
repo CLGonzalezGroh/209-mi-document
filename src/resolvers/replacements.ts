@@ -88,6 +88,7 @@ export const replacementResolvers = {
       // representativo: el acto los toca a todos.
       for (const id of [...replacedIds, ...replacingIds]) {
         await assertObjectAccess({
+          intent: "write",
           userId,
           objectType: DocObjectType.DOCUMENT,
           objectId: id,

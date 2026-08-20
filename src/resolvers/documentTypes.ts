@@ -68,6 +68,7 @@ export const documentTypeResolvers = {
       const userId =
         docProjectId !== undefined
           ? await projectAuthorization({
+            intent: "read",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_LIST],
               docProjectId,
               context,
@@ -196,6 +197,7 @@ export const documentTypeResolvers = {
 
       // Fuera del try: un rechazo de autorización no es un error del servicio.
       await assertObjectAccess({
+        intent: "read",
         userId,
         objectType: DocObjectType.DOCUMENT_TYPE,
         objectId: id,
@@ -255,6 +257,7 @@ export const documentTypeResolvers = {
       const userId =
         docProjectId !== undefined
           ? await projectAuthorization({
+            intent: "read",
               requiredPermissions: permisos,
               docProjectId,
               context,
@@ -328,6 +331,7 @@ export const documentTypeResolvers = {
       const userId =
         scope !== null
           ? await projectAuthorization({
+            intent: "write",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_CREATE],
               docProjectId: scope,
               context,
@@ -414,6 +418,7 @@ export const documentTypeResolvers = {
       logger.info("updateDocumentType", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_TYPE,
         objectId: id,
@@ -486,6 +491,7 @@ export const documentTypeResolvers = {
       logger.info("terminateDocumentType", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_TYPE,
         objectId: id,
@@ -548,6 +554,7 @@ export const documentTypeResolvers = {
       logger.info("activateDocumentType", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_TYPE,
         objectId: id,
@@ -610,6 +617,7 @@ export const documentTypeResolvers = {
       logger.info("deleteDocumentType", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_TYPE,
         objectId: id,

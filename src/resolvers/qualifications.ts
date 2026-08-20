@@ -50,6 +50,7 @@ export const qualificationResolvers = {
       const userId =
         filter?.docProjectId !== undefined
           ? await projectAuthorization({
+            intent: "read",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_QUALIFICATION_LIST],
               docProjectId: filter.docProjectId,
               context,
@@ -104,6 +105,7 @@ export const qualificationResolvers = {
       // La calificación de un proyecto exige membresía; la del despliegue no
       // pertenece a ninguno y se resuelve con el permiso global (BLOQUE 02, B7).
       await assertObjectAccess({
+        intent: "read",
         userId,
         objectType: DocObjectType.DOC_QUALIFICATION,
         objectId: id,
@@ -151,6 +153,7 @@ export const qualificationResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
+        intent: "read",
         requiredPermissions: [PERMISSIONS.DOCUMENTS_QUALIFICATION_LIST],
         docProjectId,
         context,
@@ -190,6 +193,7 @@ export const qualificationResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
+        intent: "read",
         requiredPermissions: [
           PERMISSIONS.DOCUMENTS_QUALIFICATION_SELECT,
           PERMISSIONS.COMMON_SELECT_LIST_ACCESS,
@@ -247,6 +251,7 @@ export const qualificationResolvers = {
       const userId =
         input.docProjectId !== undefined
           ? await projectAuthorization({
+            intent: "write",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_QUALIFICATION_CREATE],
               docProjectId: input.docProjectId,
               context,
@@ -334,6 +339,7 @@ export const qualificationResolvers = {
       // La calificación de un proyecto exige membresía; la del despliegue no
       // pertenece a ninguno y se resuelve con el permiso global (BLOQUE 02, B7).
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOC_QUALIFICATION,
         objectId: id,
@@ -393,6 +399,7 @@ export const qualificationResolvers = {
       // La calificación de un proyecto exige membresía; la del despliegue no
       // pertenece a ninguno y se resuelve con el permiso global (BLOQUE 02, B7).
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOC_QUALIFICATION,
         objectId: id,
@@ -452,6 +459,7 @@ export const qualificationResolvers = {
       // La calificación de un proyecto exige membresía; la del despliegue no
       // pertenece a ninguno y se resuelve con el permiso global (BLOQUE 02, B7).
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOC_QUALIFICATION,
         objectId: id,

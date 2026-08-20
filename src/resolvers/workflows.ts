@@ -566,6 +566,7 @@ export const workflowResolvers = {
       logger.info("defineWorkflow", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.REVIEW_WORKFLOW,
         objectId: workflowId,
@@ -744,6 +745,7 @@ export const workflowResolvers = {
       logger.info("submitRevision", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOCUMENT_REVISION,
         objectId: revisionId,
@@ -897,6 +899,7 @@ export const workflowResolvers = {
 
       // Fuera del try: un rechazo de autorización no es un error del servicio
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.REVIEW_STEP,
         objectId: stepId,
@@ -1094,6 +1097,7 @@ export const workflowResolvers = {
 
       // Fuera del try: un rechazo de autorización no es un error del servicio
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.REVIEW_STEP,
         objectId: stepId,
@@ -1316,6 +1320,7 @@ export const workflowResolvers = {
       logger.info("acknowledgeStep", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.REVIEW_STEP,
         objectId: stepId,
@@ -1433,6 +1438,7 @@ export const workflowResolvers = {
       logger.info("reassignStep", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.REVIEW_STEP,
         objectId: stepId,
@@ -1528,6 +1534,7 @@ export const workflowResolvers = {
 
       // Fuera del try: un rechazo de autorización no es un error del servicio
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.REVIEW_WORKFLOW,
         objectId: workflowId,

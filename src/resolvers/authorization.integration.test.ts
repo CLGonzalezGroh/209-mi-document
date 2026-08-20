@@ -499,3 +499,145 @@ test("dar de baja la membresía retira el acceso al objeto", async () => {
 
   assert.equal(codigo, "FORBIDDEN")
 })
+
+// --- La puerta de escritura del contrato (BLOQUE 02D, B9) ---
+
+test("un contrato cerrado rechaza la escritura y sigue admitiendo la lectura", async () => {
+  const cerrado: any = await docProjectsResolvers.Mutation.closeDocProject(
+    null,
+    { id: PROYECTO_CON_MEMBRESIA },
+    context,
+  )
+  assert.equal(cerrado.status, "CLOSED")
+  assert.ok(cerrado.closedAt, "el cierre debe registrar su fecha")
+  assert.equal(cerrado.closedById, USER_ID)
+
+  // Escribir se rechaza...
+  assert.equal(
+    await codigoDeError(() =>
+      documentResolvers.Mutation.createDocument(
+        null,
+        {
+          input: {
+            code: `${CODIGO}-CERRADO`,
+            title: "Sobre contrato cerrado",
+            module: ModuleType.PROJECTS,
+            docProjectId: PROYECTO_CON_MEMBRESIA,
+            documentTypeId: 1,
+            assignedOrganizerId: USER_ID,
+          },
+        },
+        context,
+      ),
+    ),
+    "CONFLICT",
+  )
+
+  // Y también se rechaza una escritura sobre un objeto YA EXISTENTE, que llega
+  // a la puerta por el otro camino: `assertObjectAccess`, que deriva el
+  // contrato del objeto en lugar de recibirlo. Los dos puntos de paso tienen
+  // que cerrar, no solo el del alta.
+  assert.equal(
+    await codigoDeError(() =>
+      documentResolvers.Mutation.obsoleteDocument(
+        null,
+        { id: docConMembresia, reason: "sobre contrato cerrado" },
+        context,
+      ),
+    ),
+    "CONFLICT",
+  )
+
+  // ...y leer no.
+  const leido: any = await documentResolvers.Query.documentById(
+    null,
+    { id: docConMembresia },
+    context,
+  )
+  assert.equal(leido.id, docConMembresia)
+
+  // El cierre NO se propaga: el documento que ya existía conserva su estado.
+  assert.equal(leido.terminatedAt ?? null, null)
+
+  const reabierto: any = await docProjectsResolvers.Mutation.reopenDocProject(
+    null,
+    { id: PROYECTO_CON_MEMBRESIA },
+    context,
+  )
+  assert.equal(reabierto.status, "ACTIVE")
+  assert.equal(reabierto.closedAt, null)
+  assert.equal(reabierto.closedById, null)
+
+  // Y la operación queda restituida.
+  const creado: any = await documentResolvers.Mutation.createDocument(
+    null,
+    {
+      input: {
+        code: `${CODIGO}-REABIERTO`,
+        title: "Después de reabrir",
+        module: ModuleType.PROJECTS,
+        docProjectId: PROYECTO_CON_MEMBRESIA,
+        documentTypeId: 1,
+        assignedOrganizerId: USER_ID,
+      },
+    },
+    context,
+  )
+  assert.ok(creado.id)
+
+  const eventos = await prisma.docAuditEvent.findMany({
+    where: {
+      objectId: PROYECTO_CON_MEMBRESIA,
+      action: { in: [AuditAction.CloseDocProject, AuditAction.ReopenDocProject] },
+    },
+  })
+  assert.equal(eventos.length, 2, "cerrar y reabrir dejan su traza")
+})
+
+test("cerrar dos veces se rechaza, y reabrir lo que está abierto también", async () => {
+  await docProjectsResolvers.Mutation.closeDocProject(
+    null,
+    { id: PROYECTO_SIN_MEMBRESIA },
+    context,
+  )
+
+  assert.equal(
+    await codigoDeError(() =>
+      docProjectsResolvers.Mutation.closeDocProject(
+        null,
+        { id: PROYECTO_SIN_MEMBRESIA },
+        context,
+      ),
+    ),
+    "CONFLICT",
+  )
+
+  await docProjectsResolvers.Mutation.reopenDocProject(
+    null,
+    { id: PROYECTO_SIN_MEMBRESIA },
+    context,
+  )
+
+  assert.equal(
+    await codigoDeError(() =>
+      docProjectsResolvers.Mutation.reopenDocProject(
+        null,
+        { id: PROYECTO_SIN_MEMBRESIA },
+        context,
+      ),
+    ),
+    "CONFLICT",
+  )
+})
+
+test("el régimen de publicación no tiene puerta que atravesar", async () => {
+  // Un documento sin contrato se gobierna solo por el permiso global (B1), y
+  // por lo tanto ningún cierre puede alcanzarlo.
+  const leido: any = await documentResolvers.Query.documentById(
+    null,
+    { id: docPublicado },
+    context,
+  )
+  assert.equal(leido.id, docPublicado)
+})
+

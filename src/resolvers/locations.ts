@@ -333,6 +333,7 @@ export const locationResolvers = {
       const userId =
         docProjectId !== undefined
           ? await projectAuthorization({
+            intent: "read",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
               docProjectId,
               context,
@@ -378,6 +379,7 @@ export const locationResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
+        intent: "read",
         requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
         docProjectId,
         context,
@@ -420,6 +422,7 @@ export const locationResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
+        intent: "read",
         requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
         docProjectId,
         context,
@@ -465,6 +468,7 @@ export const locationResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
+        intent: "read",
         requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
         docProjectId,
         context,
@@ -523,6 +527,7 @@ export const locationResolvers = {
       // La ubicación de un proyecto exige membresía; la del despliegue no
       // pertenece a ninguno y se resuelve con el permiso global (BLOQUE 02, B7).
       await assertObjectAccess({
+        intent: "read",
         userId,
         objectType: DocObjectType.DOC_LOCATION,
         objectId: id,
@@ -584,6 +589,7 @@ export const locationResolvers = {
       const userId =
         docProjectId !== undefined
           ? await projectAuthorization({
+            intent: "read",
               requiredPermissions: permisos,
               docProjectId,
               context,
@@ -641,6 +647,7 @@ export const locationResolvers = {
       const userId =
         scope !== null
           ? await projectAuthorization({
+            intent: "write",
               requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_CREATE],
               docProjectId: scope,
               context,
@@ -734,6 +741,7 @@ export const locationResolvers = {
       const fuente = sourceProjectId ?? null
 
       const userId = await projectAuthorization({
+        intent: "write",
         requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_CREATE],
         docProjectId,
         context,
@@ -744,6 +752,7 @@ export const locationResolvers = {
       // habilita leer el catálogo de un proyecto ajeno.
       if (fuente !== null) {
         await projectAuthorization({
+          intent: "write",
           requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
           docProjectId: fuente,
           context,
@@ -883,6 +892,7 @@ export const locationResolvers = {
       logger.info("updateLocation", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOC_LOCATION,
         objectId: id,
@@ -1004,6 +1014,7 @@ export const locationResolvers = {
       logger.info("moveLocation", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOC_LOCATION,
         objectId: id,
@@ -1103,6 +1114,7 @@ export const locationResolvers = {
       logger.info("terminateLocation", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOC_LOCATION,
         objectId: id,
@@ -1159,6 +1171,7 @@ export const locationResolvers = {
       logger.info("activateLocation", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOC_LOCATION,
         objectId: id,
@@ -1227,6 +1240,7 @@ export const locationResolvers = {
       logger.info("deleteLocation", { userId })
 
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOC_LOCATION,
         objectId: id,

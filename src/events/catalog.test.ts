@@ -178,5 +178,14 @@ test("el catálogo cubre las escrituras relevadas más lo que agregaron los bloq
   // una sola acción para los dos dejaría la traza sin decir cuál se sembró.
   //
   //   + SeedClassification
-  assert.equal(AUDIT_ACTIONS.length, 59)
+  //
+  // Y 2 en la fase 7 de BLOQUE 02D, de 59 a 61: cerrar y reabrir el contrato.
+  // Son actos propios y no un `UpdateDocProject` genérico, porque lo que
+  // cambian no es un dato del contrato sino qué admite: cerrado, solo lectura
+  // (B9). Reabrir tiene acción propia por la misma razón, y porque sin ella un
+  // cierre por error dejaría la documentación congelada sin salida.
+  //
+  //   + CloseDocProject
+  //   + ReopenDocProject
+  assert.equal(AUDIT_ACTIONS.length, 61)
 })

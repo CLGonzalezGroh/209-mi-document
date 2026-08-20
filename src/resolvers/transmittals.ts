@@ -332,6 +332,7 @@ export const transmittalResolvers = {
       // Fuera del try: un rechazo de autorización no es un error del servicio.
       // El transmittal lleva su propio docProjectId, y nunca es nulo.
       await assertObjectAccess({
+        intent: "read",
         userId,
         objectType: DocObjectType.TRANSMITTAL,
         objectId: id,
@@ -478,6 +479,7 @@ export const transmittalResolvers = {
     ) => {
       // El proyecto es argumento explícito: doble capa estricta
       const userId = await projectAuthorization({
+        intent: "read",
         requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_LIST],
         docProjectId,
         context,
@@ -549,6 +551,7 @@ export const transmittalResolvers = {
     ) => {
       // El proyecto viene en el input: doble capa estricta, sin nulo posible
       const userId = await projectAuthorization({
+        intent: "write",
         requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_CREATE],
         docProjectId: input.docProjectId,
         context,
@@ -716,6 +719,7 @@ export const transmittalResolvers = {
 
       // Fuera del try: un rechazo de autorización no es un error del servicio.
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.TRANSMITTAL,
         objectId: transmittalId,
@@ -836,6 +840,7 @@ export const transmittalResolvers = {
 
       // Fuera del try, y sobre el transmittal: el ítem no lleva proyecto propio.
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.TRANSMITTAL,
         objectId: item.transmittal.id,
@@ -893,6 +898,7 @@ export const transmittalResolvers = {
       // Fuera del try: un rechazo de autorización no es un error del servicio.
       // El transmittal lleva su propio docProjectId, y nunca es nulo.
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.TRANSMITTAL,
         objectId: id,
@@ -1097,6 +1103,7 @@ export const transmittalResolvers = {
 
       // Fuera del try, y sobre el transmittal: el ítem no lleva proyecto propio.
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.TRANSMITTAL,
         objectId: item.transmittal.id,
@@ -1233,6 +1240,7 @@ export const transmittalResolvers = {
       // Fuera del try: el contexto de la respuesta sale del transmittal por el
       // que el documento salió, a través de su ítem.
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.DOC_TRANSMITTAL_RESPONSE,
         objectId: responseId,
@@ -1334,6 +1342,7 @@ export const transmittalResolvers = {
 
       // Fuera del try: un rechazo de autorización no es un error del servicio.
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.TRANSMITTAL,
         objectId: id,
@@ -1435,6 +1444,7 @@ export const transmittalResolvers = {
       // Fuera del try: un rechazo de autorización no es un error del servicio.
       // El transmittal lleva su propio docProjectId, y nunca es nulo.
       await assertObjectAccess({
+        intent: "write",
         userId,
         objectType: DocObjectType.TRANSMITTAL,
         objectId: id,

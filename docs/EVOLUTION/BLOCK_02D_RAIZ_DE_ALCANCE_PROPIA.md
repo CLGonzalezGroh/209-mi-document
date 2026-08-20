@@ -425,6 +425,26 @@ Es la contracara exacta del hallazgo de la fase 3 sobre el contrato: allá un ca
 
 **Verificado:** `tsc` limpio, **531 pruebas y 0 fallos**, `prisma migrate diff` sin diferencias, y ruta completa sobre base limpia con `pg_dump` idéntico —que acá vale doble, porque es lo único que compara los índices parciales y el `CHECK` entre las dos bases—.
 
+### Fase 7 — completada
+
+**La puerta encontró un solo embudo, y eso la volvió barata.** La mayoría de las mutaciones autoriza con `userAuthorization` y no con `projectAuthorization`, de modo que a primera vista no había dónde ponerla. Pero **los dos caminos terminan en el mismo lugar**: `projectAuthorization`, que recibe el contrato, y `assertObjectAccess`, que lo deriva del objeto. La puerta se implementó una vez y los dos la atraviesan — y la prueba verifica **los dos caminos**, porque cerrar solo el del alta dejaría abierta toda escritura sobre objetos ya existentes.
+
+**La intención se declara en cada llamada y no se infiere.** Ochenta puntos de paso —25 lecturas y 55 escrituras— declaran `intent`, con el mismo criterio con que `docProjectId` no es opcional: *un valor por defecto haría que la puerta se saltee por descuido en lugar de por decisión*. Se descartó derivarla del sufijo del permiso —`:create` escribe, `:list` lee—, que habría ahorrado las ochenta declaraciones a cambio de una regla implícita que nadie ve al leer el resolver.
+
+**La puerta no es una capa de autorización, y el código lo dice.** Va después de la membresía y por separado: la autorización responde *quién puede*; el estado del contrato responde *qué admite*. Confundirlas haría que un contrato cerrado se leyera como un problema de permisos.
+
+**Cerrar y reabrir son actos propios, no un `UpdateDocProject` genérico.** Lo que cambian no es un dato del contrato sino qué admite. Reabrir tiene acción propia por la misma razón, y porque sin ella un cierre por error dejaría la documentación congelada sin salida. El catálogo de auditoría pasa de 59 a 61 acciones.
+
+**Lo que las pruebas verifican, y conviene enumerar porque es donde vive la decisión:**
+
+- un contrato cerrado **rechaza la escritura** —por los dos caminos— y **sigue admitiendo la lectura**;
+- **el cierre no se propaga**: el documento que ya existía conserva su estado;
+- reabrir **restituye la operación**, y el alta que antes fallaba prospera;
+- cerrar dos veces se rechaza, y reabrir lo que está abierto también;
+- **el régimen de publicación no tiene puerta que atravesar**: sin contrato no hay cierre que lo alcance.
+
+**Verificado:** `tsc` limpio, **534 pruebas y 0 fallos**.
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-06, D-07, D-09, D-15, D-19, D-21, D-24, D-28, D-29

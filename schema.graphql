@@ -3393,6 +3393,18 @@ type Mutation {
   ): DocProject!
 
   """
+  Cierra el contrato: desde acá solo admite lectura.
+
+  Es una puerta sobre la escritura y no una máquina de estados: NO se propaga
+  hacia abajo. Una revisión en circuito al momento del cierre queda donde está
+  y deja de poder avanzar. Y no promueve nada.
+  """
+  closeDocProject(id: Int!): DocProject!
+
+  "Reabre un contrato cerrado y restituye la operación"
+  reopenDocProject(id: Int!): DocProject!
+
+  """
   Incorpora un usuario al proyecto, o lo reincorpora si estaba dado de baja.
   Administrativa por el mismo motivo que la anterior.
   """

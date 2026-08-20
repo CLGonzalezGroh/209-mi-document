@@ -81,6 +81,7 @@ export const classificationResolvers = {
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
+        intent: "read",
         requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_LIST],
         docProjectId,
         context,
@@ -157,6 +158,7 @@ export const classificationResolvers = {
       const fuente = sourceProjectId ?? null
 
       const userId = await projectAuthorization({
+        intent: "write",
         requiredPermissions: [
           PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_CREATE,
           PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_CREATE,
@@ -170,6 +172,7 @@ export const classificationResolvers = {
       // habilita leer el catálogo de un proyecto ajeno.
       if (fuente !== null) {
         await projectAuthorization({
+          intent: "write",
           requiredPermissions: [
             PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_LIST,
             PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_LIST,

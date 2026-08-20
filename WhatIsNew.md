@@ -1325,3 +1325,25 @@ Los dos índices únicos parciales de `documents` dejan de condicionarse por el 
 
 **Verificado:** `tsc` limpio, **531 pruebas y 0 fallos** —cuatro nuevas de persistencia, que es lo único que verifica índices parciales y `CHECK`, invisibles para `migrate diff`—, y ruta completa sobre base limpia con `pg_dump` idéntico al de la base incremental.
 
+---
+
+# What's new in María Ingeniería API Documents 2.16.0
+
+2026-08-20
+
+## La raíz de alcance propia del módulo (BLOQUE 02D)
+
+### Fase 7 — el contrato en curso admite operaciones; cerrado, no
+
+Dos estados y **un solo efecto**: `ACTIVE` admite todo, `CLOSED` solo lectura.
+
+**Es una puerta sobre la escritura y no una máquina de estados.** No exige que los circuitos estén terminados y **no se propaga hacia abajo**: una revisión en circuito al momento del cierre queda donde está y deja de poder avanzar. Abandonarla o cancelar su circuito sería inventar desenlaces que nadie decidió. Y no promueve nada.
+
+**Se implementó una vez.** La mayoría de las mutaciones autoriza con `userAuthorization`, pero los dos caminos que llegan al contrato —`projectAuthorization`, que lo recibe, y `assertObjectAccess`, que lo deriva del objeto— terminan en el mismo lugar. Los dos cierran, y la prueba verifica los dos: cerrar solo el del alta dejaría abierta toda escritura sobre objetos existentes.
+
+**La intención se declara en cada llamada**: 80 puntos de paso —25 lecturas y 55 escrituras— con `intent` explícito. Se descartó derivarla del sufijo del permiso, que habría ahorrado las declaraciones a cambio de una regla implícita.
+
+**Dos operaciones nuevas**: `closeDocProject` y `reopenDocProject`, con actor y fecha. Sin reapertura, un cierre por error dejaría la documentación congelada sin salida. El catálogo de auditoría pasa de 59 a 61 acciones.
+
+**Verificado:** `tsc` limpio, **534 pruebas y 0 fallos**.
+
