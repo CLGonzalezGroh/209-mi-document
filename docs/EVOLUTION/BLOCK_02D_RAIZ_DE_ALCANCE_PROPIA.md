@@ -285,6 +285,39 @@ La línea base va primero porque es lo único que puede invalidar el supuesto so
 
 El renombre va después de la contraparte y no antes: son dos cambios de columna sobre las mismas tablas, y hacerlos en el orden inverso obligaría a migrar dos veces la misma fila.
 
+## Ejecución
+
+### Fase 1 — en curso
+
+**Los tres despliegues de testing, medidos el 2026-08-20. Ningún control bloquea.**
+
+| Control | `rbb` | `optimal` | `proion` |
+| ------- | ----- | --------- | -------- |
+| Clases con proyecto declarado | 0 | 0 | 0 |
+| Tipos con proyecto declarado | 0 | 0 | 0 |
+| Escaneados clasificados por una entrada con proyecto | 0 | 0 | 0 |
+| Alcances, ubicaciones, plantillas y calificaciones con proyecto | 0 | 0 | 0 |
+| Configuraciones y membresías de proyecto | 0 | 0 | 0 |
+| Subsistema documental con datos | 0 | 0 | 0 |
+| Aplicación parcial previa | 0 | 0 | 0 |
+
+Línea base informativa:
+
+| Línea base | `rbb` | `optimal` | `proion` |
+| ---------- | ----- | --------- | -------- |
+| Clases / tipos | 0 / 0 | **3 / 4** | 0 / 0 |
+| Declaraciones de alcance / ubicaciones | 0 / 0 | 0 / 0 | 0 / 0 |
+| Escaneados, con clase, con tipo | 0 | 9, 4, 4 | 1, 0, 0 |
+| Áreas | 0 | 3 | 0 |
+| Registros de log | 0 | 32 | 1 |
+| Proyectos distintos referenciados por el legado | 0 | 2 | 1 |
+
+**Los catálogos de `optimal` en testing se movieron desde la última línea base, y es la mejor defensa del control.** `BLOCK_02C` midió ahí **2 clases y 3 tipos** el 2026-08-18; hoy son **3 y 4**. Una clase y un tipo nuevos en dos días. Nada de eso bloquea —los dos nacieron con proyecto nulo, que es el alcance del despliegue— pero desarma el argumento de reutilizar la medición anterior: **los catálogos son objetos vivos que alguien edita**, y una medición de hace dos días no describe la base de hoy. El resto de la línea base de `optimal` —9 escaneados, 4 con clase, 4 con tipo, 3 áreas— es idéntica a la de aquel bloque.
+
+**`rbb` da cero en todo, incluido el log.** Es coherente con que ese despliegue corra únicamente `quality`: la base de documentos existe y está migrada, y nunca se usó.
+
+**Falta producción**: `optimal` y `proion`. La fase no se cierra hasta medirlos, y son los únicos donde el control puede encontrar algo: son las bases con 3.289 archivos escaneados y 57 tipos.
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-06, D-07, D-09, D-15, D-19, D-21, D-24, D-28, D-29
