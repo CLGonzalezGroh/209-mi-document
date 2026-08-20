@@ -99,8 +99,8 @@ export const assertNature = (
  */
 export const responseLinkViolation = (
   nature: TransmittalNature,
-  respondsTo: { projectId: number; nature: TransmittalNature } | null,
-  projectId: number,
+  respondsTo: { docProjectId: number; nature: TransmittalNature } | null,
+  docProjectId: number,
 ): string | null => {
   if (nature === TransmittalNature.EMISSION) {
     return respondsTo
@@ -112,7 +112,7 @@ export const responseLinkViolation = (
     return "Un transmittal de respuesta debe declarar la emisión que contesta"
   }
 
-  if (respondsTo.projectId !== projectId) {
+  if (respondsTo.docProjectId !== docProjectId) {
     return "La emisión que se contesta pertenece a otro proyecto"
   }
 
@@ -164,7 +164,7 @@ export const nextTransmittalCode = (ultimo: string | null): string => {
  * y se calculaba fuera de la transacción leyendo el último registro por `id`, de
  * modo que dos emisiones simultáneas obtenían el mismo número.
  *
- * El árbitro es el índice único `[projectId, code]`, no esta función: acá se
+ * El árbitro es el índice único `[docProjectId, code]`, no esta función: acá se
  * propone el sucesor y la base decide. Por eso el llamador reintenta, y lo hace
  * repitiendo la transacción entera: una violación de unicidad aborta la
  * transacción en PostgreSQL, de modo que reintentar adentro no es posible.
@@ -175,10 +175,10 @@ export const nextTransmittalCode = (ultimo: string | null): string => {
  */
 export const generateTransmittalCode = async (
   client: Prisma.TransactionClient,
-  projectId: number,
+  docProjectId: number,
 ): Promise<string> => {
   const ultimo = await client.transmittal.findFirst({
-    where: { projectId },
+    where: { docProjectId },
     orderBy: { id: "desc" },
     select: { code: true },
   })

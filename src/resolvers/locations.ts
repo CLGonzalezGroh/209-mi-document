@@ -74,7 +74,7 @@ type ExternalReferenceInput = {
  * infiere la firma de índice que eso exige para un tipo literal de objeto.
  */
 type CreateLocationInput = {
-  projectId?: number | null
+  docProjectId?: number | null
   parentId?: number | null
   code: string
   name: string
@@ -155,14 +155,14 @@ const buildWhere = (
  */
 const visibleLocations = async (
   client: Prisma.TransactionClient,
-  projectId: number | null,
+  docProjectId: number | null,
 ) => {
   const where =
-    projectId === null
-      ? { projectId: null }
+    docProjectId === null
+      ? { docProjectId: null }
       : scopeWhere({
-          projectId,
-          mode: await locationScopeMode(client, projectId),
+          docProjectId,
+          mode: await locationScopeMode(client, docProjectId),
         })
 
   return client.docLocation.findMany({
@@ -184,13 +184,13 @@ const visibleLocations = async (
 /** El modo con que un proyecto resuelve el catálogo de ubicación. */
 const locationScopeMode = async (
   client: Prisma.TransactionClient,
-  projectId: number,
+  docProjectId: number,
 ): Promise<DocScopeMode> => {
   const declarado = await client.docCatalogScope.findUnique({
     where: {
-      module_projectId_catalog: {
+      module_docProjectId_catalog: {
         module: ModuleType.PROJECTS,
-        projectId,
+        docProjectId,
         catalog: DocCatalogKind.LOCATION,
       },
     },
@@ -240,7 +240,7 @@ const assertParentAdmitted = async (
 
   const parent = await tx.docLocation.findUnique({
     where: { id: parentId },
-    select: { path: true, projectId: true },
+    select: { path: true, docProjectId: true },
   })
 
   if (!parent) {
@@ -249,7 +249,7 @@ const assertParentAdmitted = async (
     })
   }
 
-  if (!parentScopeAdmitted({ childScope: scope, parentScope: parent.projectId })) {
+  if (!parentScopeAdmitted({ childScope: scope, parentScope: parent.docProjectId })) {
     throw new GraphQLError(
       scope === null
         ? "Una ubicación del despliegue no puede colgar de una de proyecto: el árbol global quedaría dependiendo de un proyecto."
@@ -325,16 +325,16 @@ export const locationResolvers = {
     locations: async (
       _: any,
       {
-        projectId,
+        docProjectId,
         filter,
-      }: { projectId?: number; filter?: LocationFilterInput },
+      }: { docProjectId?: number; filter?: LocationFilterInput },
       context: ResolverContext,
     ) => {
       const userId =
-        projectId !== undefined
+        docProjectId !== undefined
           ? await projectAuthorization({
               requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
-              projectId,
+              docProjectId,
               context,
             })
           : await userAuthorization({
@@ -347,7 +347,7 @@ export const locationResolvers = {
         return await context.orm.docLocation.findMany({
           where: {
             ...(await buildScopedWhere(context.orm, filter)),
-            projectId: projectId ?? null,
+            docProjectId: docProjectId ?? null,
           },
           orderBy: [{ path: "asc" }],
         })
@@ -374,23 +374,23 @@ export const locationResolvers = {
      */
     projectLocations: async (
       _: any,
-      { projectId, filter }: { projectId: number; filter?: LocationFilterInput },
+      { docProjectId, filter }: { docProjectId: number; filter?: LocationFilterInput },
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
-        projectId,
+        docProjectId,
         context,
       })
       logger.info("projectLocations", { userId })
 
       try {
-        const mode = await locationScopeMode(context.orm, projectId)
+        const mode = await locationScopeMode(context.orm, docProjectId)
 
         return await context.orm.docLocation.findMany({
           where: {
             ...(await buildScopedWhere(context.orm, filter)),
-            ...scopeWhere({ projectId, mode }),
+            ...scopeWhere({ docProjectId, mode }),
           },
           orderBy: [{ path: "asc" }],
         })
@@ -416,18 +416,18 @@ export const locationResolvers = {
      */
     locationScope: async (
       _: any,
-      { projectId }: { projectId: number },
+      { docProjectId }: { docProjectId: number },
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
-        projectId,
+        docProjectId,
         context,
       })
       logger.info("locationScope", { userId })
 
       try {
-        return await locationScopeMode(context.orm, projectId)
+        return await locationScopeMode(context.orm, docProjectId)
       } catch (error) {
         return handleError({
           error,
@@ -461,12 +461,12 @@ export const locationResolvers = {
      */
     locationSeedSources: async (
       _: any,
-      { projectId }: { projectId: number },
+      { docProjectId }: { docProjectId: number },
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
-        projectId,
+        docProjectId,
         context,
       })
       logger.info("locationSeedSources", { userId })
@@ -474,26 +474,26 @@ export const locationResolvers = {
       try {
         const membresias = await context.orm.docProjectMember.findMany({
           where: { userId, isActive: true, revokedAt: null },
-          select: { projectId: true },
+          select: { docProjectId: true },
         })
 
         const candidatos = membresias
-          .map((m) => m.projectId)
-          .filter((p) => p !== projectId)
+          .map((m) => m.docProjectId)
+          .filter((p) => p !== docProjectId)
 
         if (candidatos.length === 0) return []
 
         // Un solo agrupamiento en lugar de una consulta por proyecto: la lista
         // alimenta un selector y no debe costar una lectura por opción.
         const conNodos = await context.orm.docLocation.groupBy({
-          by: ["projectId"],
-          where: { projectId: { in: candidatos } },
+          by: ["docProjectId"],
+          where: { docProjectId: { in: candidatos } },
           _count: { _all: true },
         })
 
         return conNodos
-          .map((g) => ({ projectId: g.projectId as number, nodeCount: g._count._all }))
-          .sort((a, b) => a.projectId - b.projectId)
+          .map((g) => ({ docProjectId: g.docProjectId as number, nodeCount: g._count._all }))
+          .sort((a, b) => a.docProjectId - b.docProjectId)
       } catch (error) {
         return handleError({
           error,
@@ -564,16 +564,16 @@ export const locationResolvers = {
      * identifica nada por sí solo, y el mismo nombre puede repetirse en dos
      * plantas.
      *
-     * `projectId` es opcional porque hay documentos sin proyecto —calidad,
+     * `docProjectId` es opcional porque hay documentos sin proyecto —calidad,
      * comercial, activos—, y para ellos el catálogo que rige es el del
      * despliegue. Omitirlo no es un descuido: es el régimen de publicación.
      */
     locationsSelectList: async (
       _: any,
       {
-        projectId,
+        docProjectId,
         filter,
-      }: { projectId?: number; filter?: LocationFilterInput },
+      }: { docProjectId?: number; filter?: LocationFilterInput },
       context: ResolverContext,
     ) => {
       const permisos = [
@@ -582,10 +582,10 @@ export const locationResolvers = {
       ]
 
       const userId =
-        projectId !== undefined
+        docProjectId !== undefined
           ? await projectAuthorization({
               requiredPermissions: permisos,
-              projectId,
+              docProjectId,
               context,
             })
           : await userAuthorization({ requiredPermissions: permisos, context })
@@ -593,12 +593,12 @@ export const locationResolvers = {
 
       try {
         const alcance =
-          projectId !== undefined
+          docProjectId !== undefined
             ? scopeWhere({
-                projectId,
-                mode: await locationScopeMode(context.orm, projectId),
+                docProjectId,
+                mode: await locationScopeMode(context.orm, docProjectId),
               })
-            : { projectId: null }
+            : { docProjectId: null }
 
         const items = await context.orm.docLocation.findMany({
           where: {
@@ -636,13 +636,13 @@ export const locationResolvers = {
       { input }: { input: CreateLocationInput },
       context: ResolverContext,
     ) => {
-      const scope = input.projectId ?? null
+      const scope = input.docProjectId ?? null
 
       const userId =
         scope !== null
           ? await projectAuthorization({
               requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_CREATE],
-              projectId: scope,
+              docProjectId: scope,
               context,
             })
           : await userAuthorization({
@@ -662,7 +662,7 @@ export const locationResolvers = {
 
           const created = await tx.docLocation.create({
             data: {
-              projectId: scope,
+              docProjectId: scope,
               parentId,
               code: input.code.trim(),
               name,
@@ -726,16 +726,16 @@ export const locationResolvers = {
     seedProjectLocations: async (
       _: any,
       {
-        projectId,
+        docProjectId,
         sourceProjectId,
-      }: { projectId: number; sourceProjectId?: number | null },
+      }: { docProjectId: number; sourceProjectId?: number | null },
       context: ResolverContext,
     ) => {
       const fuente = sourceProjectId ?? null
 
       const userId = await projectAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_CREATE],
-        projectId,
+        docProjectId,
         context,
       })
       logger.info("seedProjectLocations", { userId })
@@ -745,13 +745,13 @@ export const locationResolvers = {
       if (fuente !== null) {
         await projectAuthorization({
           requiredPermissions: [PERMISSIONS.DOCUMENTS_LOCATION_LIST],
-          projectId: fuente,
+          docProjectId: fuente,
           context,
         })
       }
 
       try {
-        if (fuente === projectId) {
+        if (fuente === docProjectId) {
           throw new GraphQLError(
             "Un proyecto no se siembra de sí mismo.",
             { extensions: { code: "BAD_USER_INPUT" } },
@@ -760,7 +760,7 @@ export const locationResolvers = {
 
         return await context.orm.$transaction(async (tx) => {
           const origen = await visibleLocations(tx, fuente)
-          const destino = await visibleLocations(tx, projectId)
+          const destino = await visibleLocations(tx, docProjectId)
 
           const plan = planSeed({
             source: origen,
@@ -780,7 +780,7 @@ export const locationResolvers = {
 
             const creado = await tx.docLocation.create({
               data: {
-                projectId,
+                docProjectId,
                 parentId,
                 code: paso.code,
                 name: paso.name,
@@ -831,7 +831,7 @@ export const locationResolvers = {
             objectId: null,
             actorId: userId,
             meta: {
-              projectId,
+              docProjectId,
               sourceProjectId: fuente,
               added: plan.steps.length,
               alreadyPresent: plan.alreadyPresent,
@@ -941,7 +941,7 @@ export const locationResolvers = {
                   rootId: id,
                   parentPath: await assertParentAdmitted(tx, {
                     parentId: current.parentId,
-                    scope: current.projectId,
+                    scope: current.docProjectId,
                   }),
                 })
 
@@ -1036,7 +1036,7 @@ export const locationResolvers = {
 
           const parentPath = await assertParentAdmitted(tx, {
             parentId: destino,
-            scope: current.projectId,
+            scope: current.docProjectId,
           })
 
           await tx.docLocation.update({
@@ -1277,7 +1277,7 @@ export const locationResolvers = {
               code: location.code,
               name: location.name,
               path: location.path,
-              projectId: location.projectId,
+              docProjectId: location.docProjectId,
             },
           })
         })

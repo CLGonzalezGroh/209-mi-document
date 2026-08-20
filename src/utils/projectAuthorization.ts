@@ -27,20 +27,20 @@ const logger = createLogger("projectAuthorization")
  * sería inutilizable, y un objeto que solo filtrara dejaría el acceso abierto.
  *
  * Se adopta el patrón de `projectAuthorization` (ADR-020) de OperMask
- * Digitalization, con la diferencia de que acá `projectId` puede ser nulo.
+ * Digitalization, con la diferencia de que acá `docProjectId` puede ser nulo.
  */
 
 /** Membresía vigente: dada de alta, activa y sin baja registrada. */
 const ACTIVE_MEMBERSHIP = { isActive: true, revokedAt: null } as const
 
 /**
- * Fragmento de filtro aplicable a cualquier modelo que exponga `projectId`.
+ * Fragmento de filtro aplicable a cualquier modelo que exponga `docProjectId`.
  * Se compone anidándolo donde corresponda: los transmittals lo llevan directo,
  * mientras que un workflow lo alcanza a través de su revisión y su documento.
  */
 export type ProjectScope =
-  | { projectId: { in: number[] } }
-  | { OR: [{ projectId: { in: number[] } }, { projectId: null }] }
+  | { docProjectId: { in: number[] } }
+  | { OR: [{ docProjectId: { in: number[] } }, { docProjectId: null }] }
 
 /**
  * Construye el criterio de alcance a partir de las membresías vigentes.
@@ -52,7 +52,7 @@ export type ProjectScope =
  * Corresponde a los listados de documentos y también a los de workflows y pasos:
  * D-03 fija que toda revisión atraviesa un circuito, de modo que un documento
  * publicado tiene workflows sin proyecto. NO corresponde a los transmittals, que
- * son el único objeto cuyo `projectId` es obligatorio en el modelo.
+ * son el único objeto cuyo `docProjectId` es obligatorio en el modelo.
  *
  * Sin membresías y sin esa opción el resultado es vacío, que es lo correcto:
  * quien no es miembro de ningún proyecto no alcanza ningún documento en
@@ -65,10 +65,10 @@ export const buildProjectScope = (
   const uniqueIds = [...new Set(projectIds)].sort((a, b) => a - b)
 
   if (includeWithoutProject) {
-    return { OR: [{ projectId: { in: uniqueIds } }, { projectId: null }] }
+    return { OR: [{ docProjectId: { in: uniqueIds } }, { docProjectId: null }] }
   }
 
-  return { projectId: { in: uniqueIds } }
+  return { docProjectId: { in: uniqueIds } }
 }
 
 /**
@@ -101,10 +101,10 @@ export const listMemberProjectIds = async (
 ): Promise<number[]> => {
   const memberships = await context.orm.docProjectMember.findMany({
     where: { userId, ...ACTIVE_MEMBERSHIP },
-    select: { projectId: true },
+    select: { docProjectId: true },
   })
 
-  return memberships.map(({ projectId }) => projectId)
+  return memberships.map(({ docProjectId }) => docProjectId)
 }
 
 /**
@@ -114,18 +114,18 @@ export const listMemberProjectIds = async (
  * objeto → membresía. Exponerla por separado permite respetarlo, en lugar de
  * leer la base antes de haber verificado el permiso.
  *
- * `projectId` nulo es el régimen de publicación (B1): no hay membresía que exigir.
+ * `docProjectId` nulo es el régimen de publicación (B1): no hay membresía que exigir.
  */
 export const assertProjectMembership = async ({
   userId,
-  projectId,
+  docProjectId,
   context,
 }: {
   userId: number
-  projectId: number | null
+  docProjectId: number | null
   context: ResolverContext
 }): Promise<void> => {
-  if (projectId === null) {
+  if (docProjectId === null) {
     logger.debug("Objeto sin proyecto: rige solo el permiso global", {
       userId,
     })
@@ -133,11 +133,11 @@ export const assertProjectMembership = async ({
   }
 
   const membership = await context.orm.docProjectMember.findFirst({
-    where: { projectId, userId, ...ACTIVE_MEMBERSHIP },
+    where: { docProjectId, userId, ...ACTIVE_MEMBERSHIP },
   })
 
   if (!membership) {
-    logger.auth(`Sin membresía vigente en el proyecto ${projectId}`, {
+    logger.auth(`Sin membresía vigente en el proyecto ${docProjectId}`, {
       userId,
     })
     throw new GraphQLError("No sos miembro de este proyecto", {
@@ -178,7 +178,7 @@ export const assertObjectAccess = async ({
 
   await assertProjectMembership({
     userId,
-    projectId: contexto.projectId,
+    docProjectId: contexto.docProjectId,
     context,
   })
 }
@@ -193,7 +193,7 @@ type ProjectAuthorizationProps = {
    * forma explícita, y no como parámetro opcional, para que nunca se omita por
    * descuido y termine salteando la segunda capa sin que nadie lo decida.
    */
-  projectId: number | null
+  docProjectId: number | null
   context: ResolverContext
 }
 
@@ -203,14 +203,14 @@ type ProjectAuthorizationProps = {
  */
 export const projectAuthorization = async ({
   requiredPermissions,
-  projectId,
+  docProjectId,
   context,
 }: ProjectAuthorizationProps): Promise<number> => {
   // Capa 1: permiso global (valida JWT + consulta a mi-admin)
   const userId = await userAuthorization({ requiredPermissions, context })
 
   // Capa 2: membresía vigente en el proyecto
-  await assertProjectMembership({ userId, projectId, context })
+  await assertProjectMembership({ userId, docProjectId, context })
 
   return userId
 }

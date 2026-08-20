@@ -25,9 +25,9 @@ const logger = createLogger("classification")
 /** Lo que un ámbito ve del catálogo de clasificación, con su alcance resuelto. */
 const visibleClassification = async (
   client: Prisma.TransactionClient,
-  projectId: number | null,
+  docProjectId: number | null,
 ) => {
-  const alcance = await visibleClassificationWhere(client, projectId)
+  const alcance = await visibleClassificationWhere(client, docProjectId)
 
   // El módulo se filtra acá y no en el plan, con el mismo criterio que el
   // alcance: el plan recibe **lo que cada lado ve**, ya resuelto, y por eso no
@@ -77,12 +77,12 @@ export const classificationResolvers = {
      */
     classificationSeedSources: async (
       _: any,
-      { projectId }: { projectId: number },
+      { docProjectId }: { docProjectId: number },
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_LIST],
-        projectId,
+        docProjectId,
         context,
       })
       logger.info("classificationSeedSources", { userId })
@@ -90,12 +90,12 @@ export const classificationResolvers = {
       try {
         const membresias = await context.orm.docProjectMember.findMany({
           where: { userId, isActive: true, revokedAt: null },
-          select: { projectId: true },
+          select: { docProjectId: true },
         })
 
         const candidatos = membresias
-          .map((m) => m.projectId)
-          .filter((p) => p !== projectId)
+          .map((m) => m.docProjectId)
+          .filter((p) => p !== docProjectId)
 
         if (candidatos.length === 0) return []
 
@@ -103,26 +103,26 @@ export const classificationResolvers = {
         // selector y no debe costar una lectura por opción.
         const [clases, tipos] = await Promise.all([
           context.orm.documentClass.groupBy({
-            by: ["projectId"],
-            where: { projectId: { in: candidatos } },
+            by: ["docProjectId"],
+            where: { docProjectId: { in: candidatos } },
             _count: { _all: true },
           }),
           context.orm.documentType.groupBy({
-            by: ["projectId"],
-            where: { projectId: { in: candidatos } },
+            by: ["docProjectId"],
+            where: { docProjectId: { in: candidatos } },
             _count: { _all: true },
           }),
         ])
 
         const total = new Map<number, number>()
         for (const g of [...clases, ...tipos]) {
-          const p = g.projectId as number
+          const p = g.docProjectId as number
           total.set(p, (total.get(p) ?? 0) + g._count._all)
         }
 
         return [...total.entries()]
-          .map(([p, nodeCount]) => ({ projectId: p, nodeCount }))
-          .sort((a, b) => a.projectId - b.projectId)
+          .map(([p, nodeCount]) => ({ docProjectId: p, nodeCount }))
+          .sort((a, b) => a.docProjectId - b.docProjectId)
       } catch (error) {
         return handleError({
           error,
@@ -149,9 +149,9 @@ export const classificationResolvers = {
     seedProjectClassification: async (
       _: any,
       {
-        projectId,
+        docProjectId,
         sourceProjectId,
-      }: { projectId: number; sourceProjectId?: number | null },
+      }: { docProjectId: number; sourceProjectId?: number | null },
       context: ResolverContext,
     ) => {
       const fuente = sourceProjectId ?? null
@@ -161,7 +161,7 @@ export const classificationResolvers = {
           PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_CREATE,
           PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_CREATE,
         ],
-        projectId,
+        docProjectId,
         context,
       })
       logger.info("seedProjectClassification", { userId })
@@ -174,13 +174,13 @@ export const classificationResolvers = {
             PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_LIST,
             PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_LIST,
           ],
-          projectId: fuente,
+          docProjectId: fuente,
           context,
         })
       }
 
       try {
-        if (fuente === projectId) {
+        if (fuente === docProjectId) {
           throw new GraphQLError("Un proyecto no se siembra de sí mismo.", {
             extensions: { code: "BAD_USER_INPUT" },
           })
@@ -188,7 +188,7 @@ export const classificationResolvers = {
 
         return await context.orm.$transaction(async (tx) => {
           const origen = await visibleClassification(tx, fuente)
-          const destino = await visibleClassification(tx, projectId)
+          const destino = await visibleClassification(tx, docProjectId)
 
           const codigoDeClase = new Map(destino.classes.map((c) => [c.id, c.code]))
 
@@ -215,7 +215,7 @@ export const classificationResolvers = {
                 // despliegue —sin módulo— se vuelve de proyectos al copiarse,
                 // porque ese es el alcance en que pasa a vivir.
                 module: ModuleType.PROJECTS,
-                projectId,
+                docProjectId,
                 code: paso.code,
                 name: paso.name,
                 description: paso.description,
@@ -244,7 +244,7 @@ export const classificationResolvers = {
             const creado = await tx.documentType.create({
               data: {
                 module: ModuleType.PROJECTS,
-                projectId,
+                docProjectId,
                 classId:
                   paso.classCode === null
                     ? null
@@ -283,7 +283,7 @@ export const classificationResolvers = {
             objectId: null,
             actorId: userId,
             meta: {
-              projectId,
+              docProjectId,
               sourceProjectId: fuente,
               addedClasses: plan.classSteps.length,
               addedTypes: plan.typeSteps.length,

@@ -12,19 +12,19 @@ import {
 
 const template = (
   id: number,
-  projectId: number | null,
+  docProjectId: number | null,
   documentClassId: number | null,
   documentTypeId: number | null,
   terminatedAt: Date | null = null,
 ): TemplateSnapshot => ({
   id,
-  projectId,
+  docProjectId,
   documentClassId,
   documentTypeId,
   terminatedAt,
 })
 
-const documento = { projectId: 7, documentClassId: 2, documentTypeId: 4 }
+const documento = { docProjectId: 7, documentClassId: 2, documentTypeId: 4 }
 
 // --- Resolución por alcance (B3) ---
 
@@ -65,7 +65,7 @@ test("la plantilla sin proyecto alcanza a los documentos del régimen de publica
 
   assert.equal(
     resolveTemplate(templates, {
-      projectId: null,
+      docProjectId: null,
       documentClassId: null,
       documentTypeId: null,
     })?.id,

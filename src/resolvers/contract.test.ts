@@ -190,6 +190,44 @@ const enumsDelModelo = new Map(
     .map(([k, v]) => [k, Object.keys(v as object).sort()]),
 )
 
+test("solo el legado y el vínculo PMI siguen nombrando `projectId`", () => {
+  // BLOQUE 02D, B7: el alcance del subsistema documental cuelga del contrato y
+  // se llama `docProjectId`. Los únicos que conservan `projectId` son
+  // `ScannedFile` y `Area` —que se van a `212-mi-digitalization`— y el vínculo
+  // del propio contrato con la gestión PMI de `mi-project` (B3).
+  //
+  // El control existe porque el renombre puede quedar a medias sin que nada
+  // falle: `tsc` no lee el SDL, y un campo que el modelo ya no tiene se
+  // resuelve como null en vez de romperse. Un consumidor pediría `projectId` y
+  // recibiría null sin enterarse.
+  const PERMITIDOS = [
+    "type ScannedFile",
+    "type Area",
+    "type DocProject",
+    "input DeclareDocProjectInput",
+    "input AreaFilterInput",
+    "input CreateAreaInput",
+    "input ScannedFileFilterInput",
+    "input CreateScannedFileInput",
+  ]
+
+  const bloques = contrato.split(/\n(?=type |input |enum )/)
+
+  for (const bloque of bloques) {
+    const declara = /\n\s+projectId\s*:/.test(bloque)
+    if (!declara) continue
+
+    const permitido = PERMITIDOS.some((p) => bloque.startsWith(p))
+    const nombre = bloque.split("\n")[0]
+    assert.ok(permitido, `${nombre} todavía declara projectId`)
+  }
+
+  // Las dos operaciones que reciben un proyecto de mi-project, y ninguna más.
+  const operaciones = contrato.match(/^  \w+\([^)]*projectId[^)]*\)/gm) ?? []
+  const nombres = operaciones.map((o) => o.trim().split("(")[0]).sort()
+  assert.deepEqual(nombres, ["areasSelectList", "docProject"])
+})
+
 test("las enumeraciones del contrato coinciden con las del modelo", () => {
   const compartidas = [...enumsDelModelo.keys()].filter((n) =>
     enumsDelContrato.has(n),

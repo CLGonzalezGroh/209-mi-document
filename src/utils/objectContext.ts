@@ -4,7 +4,7 @@ import { DocObjectType, ModuleType } from "../generated/prisma/enums.js"
 /**
  * Contexto de un evento de dominio (BLOQUE 02, B9).
  *
- * `projectId` y `module` se DERIVAN del objeto afectado y **no los informa quien
+ * `docProjectId` y `module` se DERIVAN del objeto afectado y **no los informa quien
  * emite**. Es la misma regla que `BLOCK_01` aplica al tipo de objeto, extendida
  * al contexto, y es lo que impide que reaparezca H-24: el módulo de un
  * transmittal se resuelve por la misma vía que el de cualquier otro objeto, en
@@ -16,11 +16,11 @@ import { DocObjectType, ModuleType } from "../generated/prisma/enums.js"
  */
 
 export type EventContext = {
-  projectId: number | null
+  docProjectId: number | null
   module: ModuleType | null
 }
 
-const SIN_CONTEXTO: EventContext = { projectId: null, module: null }
+const SIN_CONTEXTO: EventContext = { docProjectId: null, module: null }
 
 /**
  * De dónde sale el contexto de cada tipo de objeto. Declarado en un solo lugar,
@@ -40,19 +40,19 @@ const derivadores: Record<
   [DocObjectType.DOCUMENT]: async (client, id) => {
     const doc = await client.document.findUnique({
       where: { id },
-      select: { projectId: true, module: true },
+      select: { docProjectId: true, module: true },
     })
-    return doc && { projectId: doc.projectId, module: doc.module }
+    return doc && { docProjectId: doc.docProjectId, module: doc.module }
   },
 
   [DocObjectType.DOCUMENT_REVISION]: async (client, id) => {
     const revision = await client.documentRevision.findUnique({
       where: { id },
-      select: { document: { select: { projectId: true, module: true } } },
+      select: { document: { select: { docProjectId: true, module: true } } },
     })
     return (
       revision && {
-        projectId: revision.document.projectId,
+        docProjectId: revision.document.docProjectId,
         module: revision.document.module,
       }
     )
@@ -63,13 +63,13 @@ const derivadores: Record<
       where: { id },
       select: {
         revision: {
-          select: { document: { select: { projectId: true, module: true } } },
+          select: { document: { select: { docProjectId: true, module: true } } },
         },
       },
     })
     return (
       version && {
-        projectId: version.revision.document.projectId,
+        docProjectId: version.revision.document.docProjectId,
         module: version.revision.document.module,
       }
     )
@@ -80,13 +80,13 @@ const derivadores: Record<
       where: { id },
       select: {
         revision: {
-          select: { document: { select: { projectId: true, module: true } } },
+          select: { document: { select: { docProjectId: true, module: true } } },
         },
       },
     })
     return (
       workflow && {
-        projectId: workflow.revision.document.projectId,
+        docProjectId: workflow.revision.document.docProjectId,
         module: workflow.revision.document.module,
       }
     )
@@ -100,7 +100,7 @@ const derivadores: Record<
           select: {
             revision: {
               select: {
-                document: { select: { projectId: true, module: true } },
+                document: { select: { docProjectId: true, module: true } },
               },
             },
           },
@@ -109,7 +109,7 @@ const derivadores: Record<
     })
     return (
       step && {
-        projectId: step.workflow.revision.document.projectId,
+        docProjectId: step.workflow.revision.document.docProjectId,
         module: step.workflow.revision.document.module,
       }
     )
@@ -123,11 +123,11 @@ const derivadores: Record<
   [DocObjectType.TRANSMITTAL]: async (client, id) => {
     const transmittal = await client.transmittal.findUnique({
       where: { id },
-      select: { projectId: true },
+      select: { docProjectId: true },
     })
     return (
       transmittal && {
-        projectId: transmittal.projectId,
+        docProjectId: transmittal.docProjectId,
         module: ModuleType.PROJECTS,
       }
     )
@@ -144,35 +144,37 @@ const derivadores: Record<
   [DocObjectType.DOCUMENT_CLASS]: async (client, id) => {
     const clase = await client.documentClass.findUnique({
       where: { id },
-      select: { module: true, projectId: true },
+      select: { module: true, docProjectId: true },
     })
-    return clase && { projectId: clase.projectId, module: clase.module }
+    return clase && { docProjectId: clase.docProjectId, module: clase.module }
   },
 
   [DocObjectType.DOCUMENT_TYPE]: async (client, id) => {
     const tipo = await client.documentType.findUnique({
       where: { id },
-      select: { module: true, projectId: true },
+      select: { module: true, docProjectId: true },
     })
-    return tipo && { projectId: tipo.projectId, module: tipo.module }
+    return tipo && { docProjectId: tipo.docProjectId, module: tipo.module }
   },
 
   // La configuración y la membresía pertenecen a un proyecto por definición, y
   // no a un módulo: son el contexto del proyecto, no documentación.
   [DocObjectType.DOC_PROJECT]: async (client, id) => {
-    const settings = await client.docProject.findUnique({
+    // El contexto de un contrato es él mismo: ya no hay que preguntarle a qué
+    // proyecto pertenece, porque ES la raíz de alcance (BLOQUE 02D, B1).
+    const contrato = await client.docProject.findUnique({
       where: { id },
-      select: { projectId: true },
+      select: { id: true },
     })
-    return settings && { projectId: settings.projectId, module: null }
+    return contrato && { docProjectId: contrato.id, module: null }
   },
 
   [DocObjectType.DOC_PROJECT_MEMBER]: async (client, id) => {
     const member = await client.docProjectMember.findUnique({
       where: { id },
-      select: { projectId: true },
+      select: { docProjectId: true },
     })
-    return member && { projectId: member.projectId, module: null }
+    return member && { docProjectId: member.docProjectId, module: null }
   },
 
   // La firma cuelga del paso, de modo que su contexto es el del circuito: un
@@ -187,7 +189,7 @@ const derivadores: Record<
               select: {
                 revision: {
                   select: {
-                    document: { select: { projectId: true, module: true } },
+                    document: { select: { docProjectId: true, module: true } },
                   },
                 },
               },
@@ -198,7 +200,7 @@ const derivadores: Record<
     })
     return (
       signature && {
-        projectId: signature.step.workflow.revision.document.projectId,
+        docProjectId: signature.step.workflow.revision.document.docProjectId,
         module: signature.step.workflow.revision.document.module,
       }
     )
@@ -210,9 +212,9 @@ const derivadores: Record<
   [DocObjectType.DOC_WORKFLOW_TEMPLATE]: async (client, id) => {
     const template = await client.docWorkflowTemplate.findUnique({
       where: { id },
-      select: { projectId: true },
+      select: { docProjectId: true },
     })
-    return template && { projectId: template.projectId, module: null }
+    return template && { docProjectId: template.docProjectId, module: null }
   },
 
   // El acto de reemplazo toma el contexto de CUALQUIERA de sus documentos, y no
@@ -227,7 +229,7 @@ const derivadores: Record<
         items: {
           take: 1,
           select: {
-            document: { select: { projectId: true, module: true } },
+            document: { select: { docProjectId: true, module: true } },
           },
         },
       },
@@ -235,7 +237,7 @@ const derivadores: Record<
     if (!acto) return null
 
     const doc = acto.items[0]?.document
-    return doc ? { projectId: doc.projectId, module: doc.module } : SIN_CONTEXTO
+    return doc ? { docProjectId: doc.docProjectId, module: doc.module } : SIN_CONTEXTO
   },
 
   // La configuración del despliegue no pertenece a ningún proyecto ni a ningún
@@ -245,7 +247,7 @@ const derivadores: Record<
       where: { id },
       select: { id: true },
     })
-    return settings && { projectId: null, module: null }
+    return settings && { docProjectId: null, module: null }
   },
 
   // La calificación lleva su proyecto en el alcance, y puede no tener ninguno:
@@ -255,9 +257,9 @@ const derivadores: Record<
   [DocObjectType.DOC_QUALIFICATION]: async (client, id) => {
     const qualification = await client.docQualification.findUnique({
       where: { id },
-      select: { projectId: true },
+      select: { docProjectId: true },
     })
-    return qualification && { projectId: qualification.projectId, module: null }
+    return qualification && { docProjectId: qualification.docProjectId, module: null }
   },
 
   // El nodo de ubicación lleva su proyecto en el alcance, y puede no tener
@@ -272,9 +274,9 @@ const derivadores: Record<
   [DocObjectType.DOC_LOCATION]: async (client, id) => {
     const location = await client.docLocation.findUnique({
       where: { id },
-      select: { projectId: true },
+      select: { docProjectId: true },
     })
-    return location && { projectId: location.projectId, module: null }
+    return location && { docProjectId: location.docProjectId, module: null }
   },
 
   // La declaración de alcance pertenece a un proyecto por definición: es cómo
@@ -283,9 +285,9 @@ const derivadores: Record<
   [DocObjectType.DOC_CATALOG_SCOPE]: async (client, id) => {
     const scope = await client.docCatalogScope.findUnique({
       where: { id },
-      select: { projectId: true },
+      select: { docProjectId: true },
     })
-    return scope && { projectId: scope.projectId, module: null }
+    return scope && { docProjectId: scope.docProjectId, module: null }
   },
 
   // La respuesta toma el contexto del transmittal por el que el documento salió,
@@ -296,13 +298,13 @@ const derivadores: Record<
       where: { id },
       select: {
         transmittalItem: {
-          select: { transmittal: { select: { projectId: true } } },
+          select: { transmittal: { select: { docProjectId: true } } },
         },
       },
     })
     return (
       respuesta && {
-        projectId: respuesta.transmittalItem.transmittal.projectId,
+        docProjectId: respuesta.transmittalItem.transmittal.docProjectId,
         module: ModuleType.PROJECTS,
       }
     )

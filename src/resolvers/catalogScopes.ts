@@ -39,12 +39,12 @@ export const catalogScopeResolvers = {
      */
     catalogScopes: async (
       _: any,
-      { projectId }: { projectId: number },
+      { docProjectId }: { docProjectId: number },
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_PROJECT_SETTINGS_READ],
-        projectId,
+        docProjectId,
         context,
       })
       logger.info("catalogScopes", { userId })
@@ -52,9 +52,9 @@ export const catalogScopeResolvers = {
       try {
         return await context.orm.docCatalogScope.findMany({
           // El módulo se declara además del proyecto (BLOQUE 02C, B6): un
-          // `projectId` suelto alcanzaría hoy, pero dejaría la consulta
+          // `docProjectId` suelto alcanzaría hoy, pero dejaría la consulta
           // dependiendo de que ninguna otra fila lo repita.
-          where: { module: ModuleType.PROJECTS, projectId },
+          where: { module: ModuleType.PROJECTS, docProjectId },
           orderBy: { catalog: "asc" },
         })
       } catch (error) {
@@ -93,7 +93,7 @@ export const catalogScopeResolvers = {
         input,
       }: {
         input: {
-          projectId: number
+          docProjectId: number
           catalog: DocCatalogKind
           mode: DocScopeMode
         }
@@ -102,7 +102,7 @@ export const catalogScopeResolvers = {
     ) => {
       const userId = await projectAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_PROJECT_SETTINGS_UPDATE],
-        projectId: input.projectId,
+        docProjectId: input.docProjectId,
         context,
       })
       logger.info("declareCatalogScope", { userId })
@@ -121,8 +121,8 @@ export const catalogScopeResolvers = {
           ) {
             const colgados = await tx.documentType.findMany({
               where: {
-                projectId: input.projectId,
-                class: { projectId: null },
+                docProjectId: input.docProjectId,
+                class: { docProjectId: null },
               },
               select: { code: true },
             })
@@ -142,9 +142,9 @@ export const catalogScopeResolvers = {
             input.mode === DocScopeMode.OWN
           ) {
             const nodes = await tx.docLocation.findMany({
-              select: { id: true, parentId: true, projectId: true, path: true },
+              select: { id: true, parentId: true, docProjectId: true, path: true },
             })
-            const colgados = crossScopeChildren(nodes, input.projectId)
+            const colgados = crossScopeChildren(nodes, input.docProjectId)
 
             if (colgados.length > 0) {
               throw new GraphQLError(
@@ -158,9 +158,9 @@ export const catalogScopeResolvers = {
 
           const declarado = await tx.docCatalogScope.upsert({
             where: {
-              module_projectId_catalog: {
+              module_docProjectId_catalog: {
                 module: ModuleType.PROJECTS,
-                projectId: input.projectId,
+                docProjectId: input.docProjectId,
                 catalog: input.catalog,
               },
             },
@@ -170,7 +170,7 @@ export const catalogScopeResolvers = {
               // declaración por módulo tendrá su propia operación cuando exista
               // quién la administre; la estructura ya la admite.
               module: ModuleType.PROJECTS,
-              projectId: input.projectId,
+              docProjectId: input.docProjectId,
               catalog: input.catalog,
               mode: input.mode,
               createdById: userId,

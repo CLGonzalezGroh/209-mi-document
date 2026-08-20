@@ -44,13 +44,13 @@ export const CLASSIFICATION_MESSAGE: Record<ClassificationRejection, string> = {
 /** El modo con que un proyecto resuelve el catálogo de clasificación. */
 export const classificationScopeMode = async (
   client: Prisma.TransactionClient,
-  projectId: number,
+  docProjectId: number,
 ): Promise<DocScopeMode> => {
   const declarado = await client.docCatalogScope.findUnique({
     where: {
-      module_projectId_catalog: {
+      module_docProjectId_catalog: {
         module: ModuleType.PROJECTS,
-        projectId,
+        docProjectId,
         catalog: DocCatalogKind.CLASSIFICATION,
       },
     },
@@ -73,13 +73,13 @@ export const classificationScopeMode = async (
  */
 export const visibleClassificationWhere = async (
   client: Prisma.TransactionClient,
-  projectId: number | null | undefined,
-): Promise<{ projectId: number | null } | { OR: [{ projectId: number }, { projectId: null }] }> =>
-  projectId === null || projectId === undefined
-    ? { projectId: null }
+  docProjectId: number | null | undefined,
+): Promise<{ docProjectId: number | null } | { OR: [{ docProjectId: number }, { docProjectId: null }] }> =>
+  docProjectId === null || docProjectId === undefined
+    ? { docProjectId: null }
     : scopeWhere({
-        projectId,
-        mode: await classificationScopeMode(client, projectId),
+        docProjectId,
+        mode: await classificationScopeMode(client, docProjectId),
       })
 
 /**
@@ -91,7 +91,7 @@ export const visibleClassificationWhere = async (
  * con una entrada que su proyecto no ve, y el selector sería una sugerencia en
  * lugar de un límite.
  *
- * `projectId` nulo es el régimen de publicación —calidad, comercial, activos—,
+ * `docProjectId` nulo es el régimen de publicación —calidad, comercial, activos—,
  * que resuelve el catálogo del despliegue **y solo él**: no hereda de ningún
  * proyecto porque no pertenece a ninguno.
  *
@@ -104,11 +104,11 @@ export const visibleClassificationWhere = async (
 export const assertClassificationInScope = async (
   client: Prisma.TransactionClient,
   {
-    projectId,
+    docProjectId,
     documentClassId,
     documentTypeId,
   }: {
-    projectId: number | null
+    docProjectId: number | null
     documentClassId?: number | null
     documentTypeId?: number | null
   },
@@ -121,20 +121,20 @@ export const assertClassificationInScope = async (
   }
 
   const mode =
-    projectId === null ? null : await classificationScopeMode(client, projectId)
+    docProjectId === null ? null : await classificationScopeMode(client, docProjectId)
 
   const alcanza = (entryScope: number | null): boolean =>
-    projectId === null || mode === null
+    docProjectId === null || mode === null
       ? entryScope === null
-      : entryVisible(entryScope, { projectId, mode })
+      : entryVisible(entryScope, { docProjectId, mode })
 
   if (documentClassId !== undefined && documentClassId !== null) {
     const clase = await client.documentClass.findUnique({
       where: { id: documentClassId },
-      select: { projectId: true, terminatedAt: true },
+      select: { docProjectId: true, terminatedAt: true },
     })
 
-    if (!clase || !alcanza(clase.projectId)) {
+    if (!clase || !alcanza(clase.docProjectId)) {
       throw new GraphQLError(CLASSIFICATION_MESSAGE.CLASS_OUT_OF_SCOPE, {
         extensions: { code: "BAD_USER_INPUT" },
       })
@@ -150,10 +150,10 @@ export const assertClassificationInScope = async (
   if (documentTypeId !== undefined && documentTypeId !== null) {
     const tipo = await client.documentType.findUnique({
       where: { id: documentTypeId },
-      select: { projectId: true, terminatedAt: true },
+      select: { docProjectId: true, terminatedAt: true },
     })
 
-    if (!tipo || !alcanza(tipo.projectId)) {
+    if (!tipo || !alcanza(tipo.docProjectId)) {
       throw new GraphQLError(CLASSIFICATION_MESSAGE.TYPE_OUT_OF_SCOPE, {
         extensions: { code: "BAD_USER_INPUT" },
       })
@@ -184,7 +184,7 @@ export const assertClassScopeAdmitted = async (
 
   const clase = await client.documentClass.findUnique({
     where: { id: classId },
-    select: { projectId: true },
+    select: { docProjectId: true },
   })
 
   if (!clase) {
@@ -193,7 +193,7 @@ export const assertClassScopeAdmitted = async (
     })
   }
 
-  if (!parentScopeAdmitted({ childScope: typeScope, parentScope: clase.projectId })) {
+  if (!parentScopeAdmitted({ childScope: typeScope, parentScope: clase.docProjectId })) {
     throw new GraphQLError(CLASSIFICATION_MESSAGE.CLASS_SCOPE_CROSSING, {
       extensions: { code: "BAD_USER_INPUT" },
     })

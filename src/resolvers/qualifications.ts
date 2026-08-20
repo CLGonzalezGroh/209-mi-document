@@ -24,7 +24,7 @@ import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
 const logger = createLogger("qualifications")
 
 interface QualificationFilterInput {
-  projectId?: number
+  docProjectId?: number
   terminatedFilter?: TerminatedFilter
 }
 
@@ -48,10 +48,10 @@ export const qualificationResolvers = {
       context: ResolverContext,
     ) => {
       const userId =
-        filter?.projectId !== undefined
+        filter?.docProjectId !== undefined
           ? await projectAuthorization({
               requiredPermissions: [PERMISSIONS.DOCUMENTS_QUALIFICATION_LIST],
-              projectId: filter.projectId,
+              docProjectId: filter.docProjectId,
               context,
             })
           : await userAuthorization({
@@ -62,7 +62,7 @@ export const qualificationResolvers = {
 
       try {
         const where: any = {
-          projectId: filter?.projectId ?? null,
+          docProjectId: filter?.docProjectId ?? null,
         }
 
         if (filter?.terminatedFilter === TerminatedFilter.ACTIVE) {
@@ -147,26 +147,26 @@ export const qualificationResolvers = {
      */
     projectQualifications: async (
       _: any,
-      { projectId }: { projectId: number },
+      { docProjectId }: { docProjectId: number },
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_QUALIFICATION_LIST],
-        projectId,
+        docProjectId,
         context,
       })
       logger.info("projectQualifications", { userId })
 
       try {
         const catalogo = await context.orm.docQualification.findMany({
-          where: { OR: [{ projectId }, { projectId: null }] },
+          where: { OR: [{ docProjectId }, { docProjectId: null }] },
           orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
         })
 
         // El alcance se decide sobre el catálogo COMPLETO y la baja lógica se
         // filtra después: dar de baja la última calificación propia no devuelve
         // el proyecto al catálogo del despliegue.
-        return resolveScope(catalogo, projectId).filter(
+        return resolveScope(catalogo, docProjectId).filter(
           (q) => q.terminatedAt === null,
         )
       } catch (error) {
@@ -186,7 +186,7 @@ export const qualificationResolvers = {
 
     qualificationsSelectList: async (
       _: any,
-      { projectId }: { projectId: number },
+      { docProjectId }: { docProjectId: number },
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
@@ -194,18 +194,18 @@ export const qualificationResolvers = {
           PERMISSIONS.DOCUMENTS_QUALIFICATION_SELECT,
           PERMISSIONS.COMMON_SELECT_LIST_ACCESS,
         ],
-        projectId,
+        docProjectId,
         context,
       })
       logger.info("qualificationsSelectList", { userId })
 
       try {
         const catalogo = await context.orm.docQualification.findMany({
-          where: { OR: [{ projectId }, { projectId: null }] },
+          where: { OR: [{ docProjectId }, { docProjectId: null }] },
           orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
         })
 
-        return resolveScope(catalogo, projectId)
+        return resolveScope(catalogo, docProjectId)
           .filter((q) => q.terminatedAt === null)
           .map(
             (q): SelectOption => ({
@@ -235,7 +235,7 @@ export const qualificationResolvers = {
         input,
       }: {
         input: {
-          projectId?: number
+          docProjectId?: number
           code: string
           label: string
           effect: QualificationEffect
@@ -245,10 +245,10 @@ export const qualificationResolvers = {
       context: ResolverContext,
     ) => {
       const userId =
-        input.projectId !== undefined
+        input.docProjectId !== undefined
           ? await projectAuthorization({
               requiredPermissions: [PERMISSIONS.DOCUMENTS_QUALIFICATION_CREATE],
-              projectId: input.projectId,
+              docProjectId: input.docProjectId,
               context,
             })
           : await userAuthorization({
@@ -261,7 +261,7 @@ export const qualificationResolvers = {
         return await context.orm.$transaction(async (tx) => {
           const created = await tx.docQualification.create({
             data: {
-              projectId: input.projectId ?? null,
+              docProjectId: input.docProjectId ?? null,
               code: input.code,
               label: input.label,
               effect: input.effect,

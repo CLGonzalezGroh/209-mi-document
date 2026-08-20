@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import test, { after, before } from "node:test"
 import { readFileSync } from "node:fs"
 import { prisma } from "../lib/prisma.js"
+import { asegurarContratos, borrarContratos } from "./testContracts.js"
 import {
   DocCatalogKind,
   DocFileRole,
@@ -28,6 +29,9 @@ import {
 
 const CODIGO = "TEST-CONSTRAINTS"
 const PROYECTO = -424405
+
+/** Contratos de prueba. El id negativo es la convención de fixtures. */
+const CONTRATOS = [-424442, -424441, -424440, -424409, -424408, -424407, -424406, -424405]
 
 let documentTypeId: number
 let documentId: number
@@ -91,7 +95,7 @@ const limpiar = async () => {
     where: { code: { startsWith: `${CODIGO}-L` } },
   })
   await prisma.docCatalogScope.deleteMany({
-    where: { projectId: { in: [-424406, -424407, -424408, -424409] } },
+    where: { docProjectId: { in: [-424406, -424407, -424408, -424409] } },
   })
   // La declaración de MÓDULO no tiene proyecto, de modo que la limpieza de
   // arriba no la alcanza (BLOQUE 02C, B6). Se borra por su forma exacta y no
@@ -99,13 +103,13 @@ const limpiar = async () => {
   // día que exista esta prueba no debe barrer las suyas.
   await prisma.docCatalogScope.deleteMany({
     where: {
-      projectId: null,
+      docProjectId: null,
       module: ModuleType.QUALITY,
       catalog: DocCatalogKind.CLASSIFICATION,
     },
   })
   await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
-  await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: PROYECTO } })
+  await prisma.docWorkflowTemplate.deleteMany({ where: { docProjectId: PROYECTO } })
   await prisma.documentType.deleteMany({
     where: { code: { startsWith: `${CODIGO}-T` } },
   })
@@ -117,6 +121,11 @@ const limpiar = async () => {
 before(async () => {
   await limpiar()
 
+  // Todo alcance por contrato exige que el contrato exista desde que lleva
+  // clave foránea (BLOQUE 02D, B7). Los identificadores negativos siguen siendo
+  // la convención de fixtures: ahora nombran al contrato y no al proyecto.
+  await asegurarContratos(prisma, CONTRATOS)
+
   const tipo = await prisma.documentType.create({
     data: { name: `${CODIGO} tipo base`, code: `${CODIGO}-T0` },
   })
@@ -127,7 +136,7 @@ before(async () => {
       code: `${CODIGO}-1`,
       currentTitle: "Documento de restricciones",
       module: ModuleType.PROJECTS,
-      projectId: PROYECTO,
+      docProjectId: PROYECTO,
       currentDocumentTypeId: documentTypeId,
       createdById: 1,
     },
@@ -137,6 +146,7 @@ before(async () => {
 
 after(async () => {
   await limpiar()
+  await borrarContratos(prisma, CONTRATOS)
   await prisma.$disconnect()
 })
 
@@ -322,7 +332,7 @@ test("dos tipos sin módulo ni clase con el mismo código se rechazan", async ()
 
 test("dos plantillas con el mismo alcance nulo se rechazan", async () => {
   await prisma.docWorkflowTemplate.create({
-    data: { name: `${CODIGO} plantilla`, projectId: PROYECTO, createdById: 1 },
+    data: { name: `${CODIGO} plantilla`, docProjectId: PROYECTO, createdById: 1 },
   })
 
   assert.equal(
@@ -330,7 +340,7 @@ test("dos plantillas con el mismo alcance nulo se rechazan", async () => {
       prisma.docWorkflowTemplate.create({
         data: {
           name: `${CODIGO} repetida`,
-          projectId: PROYECTO,
+          docProjectId: PROYECTO,
           createdById: 1,
         },
       }),
@@ -347,7 +357,7 @@ test("el refinamiento por clase es otro alcance y se admite", async () => {
   const refinada = await prisma.docWorkflowTemplate.create({
     data: {
       name: `${CODIGO} por clase`,
-      projectId: PROYECTO,
+      docProjectId: PROYECTO,
       documentClassId: clase.id,
       createdById: 1,
     },
@@ -579,7 +589,7 @@ const crearUbicacion = (
   code: string,
   extra: {
     parentId?: number | null
-    projectId?: number | null
+    docProjectId?: number | null
     name?: string
     externalOrigin?: DocLocationOrigin | null
     externalRef?: string | null
@@ -591,7 +601,7 @@ const crearUbicacion = (
       name: extra.name ?? code,
       path: extra.name ?? code,
       parentId: extra.parentId ?? null,
-      projectId: extra.projectId ?? null,
+      docProjectId: extra.docProjectId ?? null,
       externalOrigin: extra.externalOrigin ?? null,
       externalRef: extra.externalRef ?? null,
       createdById: 1,
@@ -616,8 +626,8 @@ test("dos proyectos nombran igual su propio nodo raíz", async () => {
   const A = -424406
   const B = -424407
 
-  const enA = await crearUbicacion(`${CODIGO}-LS`, { projectId: A })
-  const enB = await crearUbicacion(`${CODIGO}-LS`, { projectId: B })
+  const enA = await crearUbicacion(`${CODIGO}-LS`, { docProjectId: A })
+  const enB = await crearUbicacion(`${CODIGO}-LS`, { docProjectId: B })
   const enDespliegue = await crearUbicacion(`${CODIGO}-LS`)
 
   assert.equal(new Set([enA.id, enB.id, enDespliegue.id]).size, 3)
@@ -625,7 +635,7 @@ test("dos proyectos nombran igual su propio nodo raíz", async () => {
   // Y dentro del mismo alcance sigue sin repetirse.
   assert.equal(
     await rechazaPorUnicidad(() =>
-      crearUbicacion(`${CODIGO}-LS`, { projectId: A }),
+      crearUbicacion(`${CODIGO}-LS`, { docProjectId: A }),
     ),
     true,
   )
@@ -638,11 +648,11 @@ test("un nodo de proyecto cuelga de uno del despliegue: eso es ampliar", async (
   const area = await crearUbicacion(`${CODIGO}-LG`)
   const ampliacion = await crearUbicacion(`${CODIGO}-LU`, {
     parentId: area.id,
-    projectId: -424408,
+    docProjectId: -424408,
   })
 
   assert.equal(ampliacion.parentId, area.id)
-  assert.equal(ampliacion.projectId, -424408)
+  assert.equal(ampliacion.docProjectId, -424408)
 })
 
 test("el alcance de un catálogo se declara una sola vez por ámbito", async () => {
@@ -652,7 +662,7 @@ test("el alcance de un catálogo se declara una sola vez por ámbito", async () 
     prisma.docCatalogScope.create({
       data: {
         module: ModuleType.PROJECTS,
-        projectId: proyecto,
+        docProjectId: proyecto,
         catalog: DocCatalogKind.LOCATION,
         mode,
         createdById: 1,
@@ -668,7 +678,7 @@ test("el alcance de un catálogo se declara una sola vez por ámbito", async () 
   const otro = await prisma.docCatalogScope.create({
     data: {
       module: ModuleType.PROJECTS,
-      projectId: proyecto,
+      docProjectId: proyecto,
       catalog: DocCatalogKind.CLASSIFICATION,
       mode: DocScopeMode.OWN,
       createdById: 1,
@@ -690,7 +700,7 @@ test("el módulo declara su alcance sin proyecto, y no choca con el de un proyec
     },
   })
 
-  assert.equal(calidad.projectId, null)
+  assert.equal(calidad.docProjectId, null)
 
   // Y la unicidad lo alcanza con NULLS NOT DISTINCT: sin la cláusula, dos
   // declaraciones de módulo no se considerarían duplicadas.
@@ -787,13 +797,13 @@ test("dos clases con el mismo código y sin módulo ni proyecto no conviven", as
 test("dos proyectos pueden tener el mismo código de clase", async () => {
   // La unicidad incorpora el alcance: es lo que permite que dos clientes
   // nombren igual su propia clase.
-  const enProyecto = (projectId: number) =>
+  const enProyecto = (docProjectId: number) =>
     prisma.documentClass.create({
       data: {
-        name: `${CODIGO} clase de ${projectId}`,
+        name: `${CODIGO} clase de ${docProjectId}`,
         code: `${CODIGO}-CSCOPE`,
         module: ModuleType.PROJECTS,
-        projectId,
+        docProjectId,
         updatedById: 1,
       },
     })
@@ -843,7 +853,7 @@ test("una entrada con proyecto exige el módulo de proyectos", async () => {
           name: `${CODIGO} clase mal`,
           code: `${CODIGO}-CMAL`,
           module: ModuleType.QUALITY,
-          projectId: -424442,
+          docProjectId: -424442,
           updatedById: 1,
         },
       }),
@@ -858,7 +868,7 @@ test("una entrada con proyecto exige el módulo de proyectos", async () => {
           name: `${CODIGO} tipo mal`,
           code: `${CODIGO}-TMAL`,
           module: ModuleType.QUALITY,
-          projectId: -424442,
+          docProjectId: -424442,
           updatedById: 1,
         },
       }),

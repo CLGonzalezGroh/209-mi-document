@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import test, { after, before } from "node:test"
 import jwt from "jsonwebtoken"
 import { prisma } from "../lib/prisma.js"
+import { asegurarContratos, borrarContratos } from "../utils/testContracts.js"
 import { ResolverContext } from "../types.js"
 import {
   DocFileRole,
@@ -53,11 +54,11 @@ let documentTypeId: number
 
 const limpiar = async () => {
   await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
-  await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: PROYECTO } })
-  await prisma.docProjectMember.deleteMany({ where: { projectId: PROYECTO } })
+  await prisma.docWorkflowTemplate.deleteMany({ where: { docProjectId: PROYECTO } })
+  await prisma.docProjectMember.deleteMany({ where: { docProjectId: PROYECTO } })
   await prisma.docProject.deleteMany({ where: { projectId: PROYECTO } })
-  await prisma.docAuditEvent.deleteMany({ where: { projectId: PROYECTO } })
-  await prisma.docWorkflowEvent.deleteMany({ where: { projectId: PROYECTO } })
+  await prisma.docAuditEvent.deleteMany({ where: { docProjectId: PROYECTO } })
+  await prisma.docWorkflowEvent.deleteMany({ where: { docProjectId: PROYECTO } })
 }
 
 before(async () => {
@@ -83,6 +84,10 @@ before(async () => {
   const tipo = await prisma.documentType.findFirstOrThrow({ select: { id: true } })
   documentTypeId = tipo.id
 
+  // El contrato existe antes de declararlo, con id igual a la constante (ver
+  // testContracts): la mutación hace upsert por código y cae sobre esta fila.
+  await asegurarContratos(prisma, [PROYECTO], DocumentRole.ISSUER)
+
   await docProjectsResolvers.Mutation.declareDocProject(
     null,
     {
@@ -100,7 +105,7 @@ before(async () => {
   await projectMemberResolvers.Mutation.assignDocProjectMember(
     null,
     {
-      input: { projectId: PROYECTO, userId: USER_ID, side: DocProjectSide.HOST },
+      input: { docProjectId: PROYECTO, userId: USER_ID, side: DocProjectSide.HOST },
     },
     context,
   )
@@ -121,7 +126,7 @@ const crear = (sufijo: string, initialVersion?: any) =>
         code: `${CODIGO}-${sufijo}`,
         title: `Documento ${sufijo}`,
         module: ModuleType.PROJECTS,
-        projectId: PROYECTO,
+        docProjectId: PROYECTO,
         documentTypeId,
         ...(initialVersion && { initialVersion }),
       },
@@ -713,7 +718,7 @@ test("el código informado se rechaza bajo un esquema calculado, y se exige bajo
           code: `${CODIGO}-${sufijo}`,
           title: `Documento ${sufijo}`,
           module: ModuleType.PROJECTS,
-          projectId: PROYECTO,
+          docProjectId: PROYECTO,
           documentTypeId,
           ...input,
         },
@@ -829,7 +834,7 @@ test("los pendientes ajenos exigen el permiso especial y los propios no (H-07)",
 
 test("la traza registra las acciones nuevas del ciclo", async () => {
   const acciones = await prisma.docAuditEvent.findMany({
-    where: { projectId: PROYECTO },
+    where: { docProjectId: PROYECTO },
     select: { action: true },
     distinct: ["action"],
   })
@@ -954,7 +959,7 @@ test("el alta propone la plantilla resuelta por alcance, y el armado puede no se
   const plantilla = await prisma.docWorkflowTemplate.create({
     data: {
       name: `${CODIGO} plantilla de proyecto`,
-      projectId: PROYECTO,
+      docProjectId: PROYECTO,
       createdById: USER_ID,
       steps: {
         create: [
@@ -1370,7 +1375,7 @@ test("la firma acredita el conjunto completo, incluida la fuente que nadie revis
 test("la traza registra las acciones y transiciones de la titularidad por nivel", async () => {
   const acciones = (
     await prisma.docAuditEvent.findMany({
-      where: { projectId: PROYECTO },
+      where: { docProjectId: PROYECTO },
       select: { action: true },
       distinct: ["action"],
     })
@@ -1390,7 +1395,7 @@ test("la traza registra las acciones y transiciones de la titularidad por nivel"
 
   const transiciones = (
     await prisma.docWorkflowEvent.findMany({
-      where: { projectId: PROYECTO },
+      where: { docProjectId: PROYECTO },
       select: { name: true },
       distinct: ["name"],
     })
@@ -1404,7 +1409,7 @@ test("el acto de reemplazo cuelga de sí mismo y no de un documento cualquiera",
   // Toca varios documentos: colgar su traza de uno obligaría a elegir cuál, y la
   // elección sería arbitraria (BLOQUE 03B, fase F).
   const evento = await prisma.docAuditEvent.findFirstOrThrow({
-    where: { action: AuditAction.ReplaceDocuments, projectId: PROYECTO },
+    where: { action: AuditAction.ReplaceDocuments, docProjectId: PROYECTO },
   })
 
   assert.equal(evento.objectType, DocObjectType.DOC_REPLACEMENT)
@@ -1415,7 +1420,7 @@ test("el acto de reemplazo cuelga de sí mismo y no de un documento cualquiera",
   assert.equal(acto.items.length, 3)
 
   // Y el contexto se derivó de los documentos que agrupa, no se informó a mano
-  assert.equal(evento.projectId, PROYECTO)
+  assert.equal(evento.docProjectId, PROYECTO)
   assert.equal(evento.module, ModuleType.PROJECTS)
 })
 
@@ -1423,11 +1428,11 @@ test("la copia de trabajo deja su traza en la revisión, con su contexto", async
   // No tiene tipo de objeto propio: no es un objeto del dominio sino el conjunto
   // en preparación de esa revisión, y lo que se consulta es qué le pasó a ella.
   const evento = await prisma.docAuditEvent.findFirstOrThrow({
-    where: { action: AuditAction.ConfirmWorkingCopy, projectId: PROYECTO },
+    where: { action: AuditAction.ConfirmWorkingCopy, docProjectId: PROYECTO },
   })
 
   assert.equal(evento.objectType, DocObjectType.DOCUMENT_REVISION)
-  assert.equal(evento.projectId, PROYECTO)
+  assert.equal(evento.docProjectId, PROYECTO)
   const meta = evento.meta as any
   assert.ok(meta.versionId)
   assert.ok(meta.archivos >= 1)

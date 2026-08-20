@@ -30,7 +30,7 @@ export type DocumentAvgAggregateOutputType = {
   id: number | null
   createdById: number | null
   updatedById: number | null
-  projectId: number | null
+  docProjectId: number | null
   currentDocumentTypeId: number | null
   currentDocumentClassId: number | null
   obsoletedById: number | null
@@ -42,7 +42,7 @@ export type DocumentSumAggregateOutputType = {
   id: number | null
   createdById: number | null
   updatedById: number | null
-  projectId: number | null
+  docProjectId: number | null
   currentDocumentTypeId: number | null
   currentDocumentClassId: number | null
   obsoletedById: number | null
@@ -61,7 +61,7 @@ export type DocumentMinAggregateOutputType = {
   code: string | null
   description: string | null
   module: $Enums.ModuleType | null
-  projectId: number | null
+  docProjectId: number | null
   currentTitle: string | null
   currentDocumentTypeId: number | null
   currentDocumentClassId: number | null
@@ -84,7 +84,7 @@ export type DocumentMaxAggregateOutputType = {
   code: string | null
   description: string | null
   module: $Enums.ModuleType | null
-  projectId: number | null
+  docProjectId: number | null
   currentTitle: string | null
   currentDocumentTypeId: number | null
   currentDocumentClassId: number | null
@@ -107,7 +107,7 @@ export type DocumentCountAggregateOutputType = {
   code: number
   description: number
   module: number
-  projectId: number
+  docProjectId: number
   currentTitle: number
   currentDocumentTypeId: number
   currentDocumentClassId: number
@@ -125,7 +125,7 @@ export type DocumentAvgAggregateInputType = {
   id?: true
   createdById?: true
   updatedById?: true
-  projectId?: true
+  docProjectId?: true
   currentDocumentTypeId?: true
   currentDocumentClassId?: true
   obsoletedById?: true
@@ -137,7 +137,7 @@ export type DocumentSumAggregateInputType = {
   id?: true
   createdById?: true
   updatedById?: true
-  projectId?: true
+  docProjectId?: true
   currentDocumentTypeId?: true
   currentDocumentClassId?: true
   obsoletedById?: true
@@ -156,7 +156,7 @@ export type DocumentMinAggregateInputType = {
   code?: true
   description?: true
   module?: true
-  projectId?: true
+  docProjectId?: true
   currentTitle?: true
   currentDocumentTypeId?: true
   currentDocumentClassId?: true
@@ -179,7 +179,7 @@ export type DocumentMaxAggregateInputType = {
   code?: true
   description?: true
   module?: true
-  projectId?: true
+  docProjectId?: true
   currentTitle?: true
   currentDocumentTypeId?: true
   currentDocumentClassId?: true
@@ -202,7 +202,7 @@ export type DocumentCountAggregateInputType = {
   code?: true
   description?: true
   module?: true
-  projectId?: true
+  docProjectId?: true
   currentTitle?: true
   currentDocumentTypeId?: true
   currentDocumentClassId?: true
@@ -312,7 +312,7 @@ export type DocumentGroupByOutputType = {
   code: string
   description: string | null
   module: $Enums.ModuleType
-  projectId: number | null
+  docProjectId: number | null
   currentTitle: string
   currentDocumentTypeId: number
   currentDocumentClassId: number | null
@@ -358,7 +358,7 @@ export type DocumentWhereInput = {
   code?: Prisma.StringFilter<"Document"> | string
   description?: Prisma.StringNullableFilter<"Document"> | string | null
   module?: Prisma.EnumModuleTypeFilter<"Document"> | $Enums.ModuleType
-  projectId?: Prisma.IntNullableFilter<"Document"> | number | null
+  docProjectId?: Prisma.IntNullableFilter<"Document"> | number | null
   currentTitle?: Prisma.StringFilter<"Document"> | string
   currentDocumentTypeId?: Prisma.IntFilter<"Document"> | number
   currentDocumentClassId?: Prisma.IntNullableFilter<"Document"> | number | null
@@ -368,6 +368,7 @@ export type DocumentWhereInput = {
   locationId?: Prisma.IntNullableFilter<"Document"> | number | null
   locationPath?: Prisma.StringNullableFilter<"Document"> | string | null
   projectTaskId?: Prisma.IntNullableFilter<"Document"> | number | null
+  docProject?: Prisma.XOR<Prisma.DocProjectNullableScalarRelationFilter, Prisma.DocProjectWhereInput> | null
   currentDocumentType?: Prisma.XOR<Prisma.DocumentTypeScalarRelationFilter, Prisma.DocumentTypeWhereInput>
   currentDocumentClass?: Prisma.XOR<Prisma.DocumentClassNullableScalarRelationFilter, Prisma.DocumentClassWhereInput> | null
   location?: Prisma.XOR<Prisma.DocLocationNullableScalarRelationFilter, Prisma.DocLocationWhereInput> | null
@@ -387,7 +388,7 @@ export type DocumentOrderByWithRelationInput = {
   code?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   module?: Prisma.SortOrder
-  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProjectId?: Prisma.SortOrderInput | Prisma.SortOrder
   currentTitle?: Prisma.SortOrder
   currentDocumentTypeId?: Prisma.SortOrder
   currentDocumentClassId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -397,6 +398,7 @@ export type DocumentOrderByWithRelationInput = {
   locationId?: Prisma.SortOrderInput | Prisma.SortOrder
   locationPath?: Prisma.SortOrderInput | Prisma.SortOrder
   projectTaskId?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProject?: Prisma.DocProjectOrderByWithRelationInput
   currentDocumentType?: Prisma.DocumentTypeOrderByWithRelationInput
   currentDocumentClass?: Prisma.DocumentClassOrderByWithRelationInput
   location?: Prisma.DocLocationOrderByWithRelationInput
@@ -419,7 +421,7 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   code?: Prisma.StringFilter<"Document"> | string
   description?: Prisma.StringNullableFilter<"Document"> | string | null
   module?: Prisma.EnumModuleTypeFilter<"Document"> | $Enums.ModuleType
-  projectId?: Prisma.IntNullableFilter<"Document"> | number | null
+  docProjectId?: Prisma.IntNullableFilter<"Document"> | number | null
   currentTitle?: Prisma.StringFilter<"Document"> | string
   currentDocumentTypeId?: Prisma.IntFilter<"Document"> | number
   currentDocumentClassId?: Prisma.IntNullableFilter<"Document"> | number | null
@@ -429,6 +431,7 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   locationId?: Prisma.IntNullableFilter<"Document"> | number | null
   locationPath?: Prisma.StringNullableFilter<"Document"> | string | null
   projectTaskId?: Prisma.IntNullableFilter<"Document"> | number | null
+  docProject?: Prisma.XOR<Prisma.DocProjectNullableScalarRelationFilter, Prisma.DocProjectWhereInput> | null
   currentDocumentType?: Prisma.XOR<Prisma.DocumentTypeScalarRelationFilter, Prisma.DocumentTypeWhereInput>
   currentDocumentClass?: Prisma.XOR<Prisma.DocumentClassNullableScalarRelationFilter, Prisma.DocumentClassWhereInput> | null
   location?: Prisma.XOR<Prisma.DocLocationNullableScalarRelationFilter, Prisma.DocLocationWhereInput> | null
@@ -448,7 +451,7 @@ export type DocumentOrderByWithAggregationInput = {
   code?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   module?: Prisma.SortOrder
-  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProjectId?: Prisma.SortOrderInput | Prisma.SortOrder
   currentTitle?: Prisma.SortOrder
   currentDocumentTypeId?: Prisma.SortOrder
   currentDocumentClassId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -479,7 +482,7 @@ export type DocumentScalarWhereWithAggregatesInput = {
   code?: Prisma.StringWithAggregatesFilter<"Document"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
   module?: Prisma.EnumModuleTypeWithAggregatesFilter<"Document"> | $Enums.ModuleType
-  projectId?: Prisma.IntNullableWithAggregatesFilter<"Document"> | number | null
+  docProjectId?: Prisma.IntNullableWithAggregatesFilter<"Document"> | number | null
   currentTitle?: Prisma.StringWithAggregatesFilter<"Document"> | string
   currentDocumentTypeId?: Prisma.IntWithAggregatesFilter<"Document"> | number
   currentDocumentClassId?: Prisma.IntNullableWithAggregatesFilter<"Document"> | number | null
@@ -501,13 +504,13 @@ export type DocumentCreateInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
   currentTitle: string
   obsoletedAt?: Date | string | null
   obsoletedById?: number | null
   obsoleteReason?: string | null
   locationPath?: string | null
   projectTaskId?: number | null
+  docProject?: Prisma.DocProjectCreateNestedOneWithoutDocumentsInput
   currentDocumentType: Prisma.DocumentTypeCreateNestedOneWithoutDocumentsInput
   currentDocumentClass?: Prisma.DocumentClassCreateNestedOneWithoutDocumentsInput
   location?: Prisma.DocLocationCreateNestedOneWithoutDocumentsInput
@@ -527,7 +530,7 @@ export type DocumentUncheckedCreateInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
+  docProjectId?: number | null
   currentTitle: string
   currentDocumentTypeId: number
   currentDocumentClassId?: number | null
@@ -552,13 +555,13 @@ export type DocumentUpdateInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   obsoletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   obsoletedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   obsoleteReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projectTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProject?: Prisma.DocProjectUpdateOneWithoutDocumentsNestedInput
   currentDocumentType?: Prisma.DocumentTypeUpdateOneRequiredWithoutDocumentsNestedInput
   currentDocumentClass?: Prisma.DocumentClassUpdateOneWithoutDocumentsNestedInput
   location?: Prisma.DocLocationUpdateOneWithoutDocumentsNestedInput
@@ -578,7 +581,7 @@ export type DocumentUncheckedUpdateInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   currentDocumentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
   currentDocumentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -604,7 +607,7 @@ export type DocumentCreateManyInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
+  docProjectId?: number | null
   currentTitle: string
   currentDocumentTypeId: number
   currentDocumentClassId?: number | null
@@ -626,7 +629,6 @@ export type DocumentUpdateManyMutationInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   obsoletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   obsoletedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -646,7 +648,7 @@ export type DocumentUncheckedUpdateManyInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   currentDocumentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
   currentDocumentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -679,7 +681,7 @@ export type DocumentCountOrderByAggregateInput = {
   code?: Prisma.SortOrder
   description?: Prisma.SortOrder
   module?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   currentTitle?: Prisma.SortOrder
   currentDocumentTypeId?: Prisma.SortOrder
   currentDocumentClassId?: Prisma.SortOrder
@@ -695,7 +697,7 @@ export type DocumentAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   currentDocumentTypeId?: Prisma.SortOrder
   currentDocumentClassId?: Prisma.SortOrder
   obsoletedById?: Prisma.SortOrder
@@ -714,7 +716,7 @@ export type DocumentMaxOrderByAggregateInput = {
   code?: Prisma.SortOrder
   description?: Prisma.SortOrder
   module?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   currentTitle?: Prisma.SortOrder
   currentDocumentTypeId?: Prisma.SortOrder
   currentDocumentClassId?: Prisma.SortOrder
@@ -737,7 +739,7 @@ export type DocumentMinOrderByAggregateInput = {
   code?: Prisma.SortOrder
   description?: Prisma.SortOrder
   module?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   currentTitle?: Prisma.SortOrder
   currentDocumentTypeId?: Prisma.SortOrder
   currentDocumentClassId?: Prisma.SortOrder
@@ -753,7 +755,7 @@ export type DocumentSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   currentDocumentTypeId?: Prisma.SortOrder
   currentDocumentClassId?: Prisma.SortOrder
   obsoletedById?: Prisma.SortOrder
@@ -896,6 +898,48 @@ export type DocumentUpdateOneRequiredWithoutReplacementItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentUpdateToOneWithWhereWithoutReplacementItemsInput, Prisma.DocumentUpdateWithoutReplacementItemsInput>, Prisma.DocumentUncheckedUpdateWithoutReplacementItemsInput>
 }
 
+export type DocumentCreateNestedManyWithoutDocProjectInput = {
+  create?: Prisma.XOR<Prisma.DocumentCreateWithoutDocProjectInput, Prisma.DocumentUncheckedCreateWithoutDocProjectInput> | Prisma.DocumentCreateWithoutDocProjectInput[] | Prisma.DocumentUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutDocProjectInput | Prisma.DocumentCreateOrConnectWithoutDocProjectInput[]
+  createMany?: Prisma.DocumentCreateManyDocProjectInputEnvelope
+  connect?: Prisma.DocumentWhereUniqueInput | Prisma.DocumentWhereUniqueInput[]
+}
+
+export type DocumentUncheckedCreateNestedManyWithoutDocProjectInput = {
+  create?: Prisma.XOR<Prisma.DocumentCreateWithoutDocProjectInput, Prisma.DocumentUncheckedCreateWithoutDocProjectInput> | Prisma.DocumentCreateWithoutDocProjectInput[] | Prisma.DocumentUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutDocProjectInput | Prisma.DocumentCreateOrConnectWithoutDocProjectInput[]
+  createMany?: Prisma.DocumentCreateManyDocProjectInputEnvelope
+  connect?: Prisma.DocumentWhereUniqueInput | Prisma.DocumentWhereUniqueInput[]
+}
+
+export type DocumentUpdateManyWithoutDocProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentCreateWithoutDocProjectInput, Prisma.DocumentUncheckedCreateWithoutDocProjectInput> | Prisma.DocumentCreateWithoutDocProjectInput[] | Prisma.DocumentUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutDocProjectInput | Prisma.DocumentCreateOrConnectWithoutDocProjectInput[]
+  upsert?: Prisma.DocumentUpsertWithWhereUniqueWithoutDocProjectInput | Prisma.DocumentUpsertWithWhereUniqueWithoutDocProjectInput[]
+  createMany?: Prisma.DocumentCreateManyDocProjectInputEnvelope
+  set?: Prisma.DocumentWhereUniqueInput | Prisma.DocumentWhereUniqueInput[]
+  disconnect?: Prisma.DocumentWhereUniqueInput | Prisma.DocumentWhereUniqueInput[]
+  delete?: Prisma.DocumentWhereUniqueInput | Prisma.DocumentWhereUniqueInput[]
+  connect?: Prisma.DocumentWhereUniqueInput | Prisma.DocumentWhereUniqueInput[]
+  update?: Prisma.DocumentUpdateWithWhereUniqueWithoutDocProjectInput | Prisma.DocumentUpdateWithWhereUniqueWithoutDocProjectInput[]
+  updateMany?: Prisma.DocumentUpdateManyWithWhereWithoutDocProjectInput | Prisma.DocumentUpdateManyWithWhereWithoutDocProjectInput[]
+  deleteMany?: Prisma.DocumentScalarWhereInput | Prisma.DocumentScalarWhereInput[]
+}
+
+export type DocumentUncheckedUpdateManyWithoutDocProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentCreateWithoutDocProjectInput, Prisma.DocumentUncheckedCreateWithoutDocProjectInput> | Prisma.DocumentCreateWithoutDocProjectInput[] | Prisma.DocumentUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutDocProjectInput | Prisma.DocumentCreateOrConnectWithoutDocProjectInput[]
+  upsert?: Prisma.DocumentUpsertWithWhereUniqueWithoutDocProjectInput | Prisma.DocumentUpsertWithWhereUniqueWithoutDocProjectInput[]
+  createMany?: Prisma.DocumentCreateManyDocProjectInputEnvelope
+  set?: Prisma.DocumentWhereUniqueInput | Prisma.DocumentWhereUniqueInput[]
+  disconnect?: Prisma.DocumentWhereUniqueInput | Prisma.DocumentWhereUniqueInput[]
+  delete?: Prisma.DocumentWhereUniqueInput | Prisma.DocumentWhereUniqueInput[]
+  connect?: Prisma.DocumentWhereUniqueInput | Prisma.DocumentWhereUniqueInput[]
+  update?: Prisma.DocumentUpdateWithWhereUniqueWithoutDocProjectInput | Prisma.DocumentUpdateWithWhereUniqueWithoutDocProjectInput[]
+  updateMany?: Prisma.DocumentUpdateManyWithWhereWithoutDocProjectInput | Prisma.DocumentUpdateManyWithWhereWithoutDocProjectInput[]
+  deleteMany?: Prisma.DocumentScalarWhereInput | Prisma.DocumentScalarWhereInput[]
+}
+
 export type DocumentCreateNestedManyWithoutLocationInput = {
   create?: Prisma.XOR<Prisma.DocumentCreateWithoutLocationInput, Prisma.DocumentUncheckedCreateWithoutLocationInput> | Prisma.DocumentCreateWithoutLocationInput[] | Prisma.DocumentUncheckedCreateWithoutLocationInput[]
   connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutLocationInput | Prisma.DocumentCreateOrConnectWithoutLocationInput[]
@@ -948,13 +992,13 @@ export type DocumentCreateWithoutCurrentDocumentClassInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
   currentTitle: string
   obsoletedAt?: Date | string | null
   obsoletedById?: number | null
   obsoleteReason?: string | null
   locationPath?: string | null
   projectTaskId?: number | null
+  docProject?: Prisma.DocProjectCreateNestedOneWithoutDocumentsInput
   currentDocumentType: Prisma.DocumentTypeCreateNestedOneWithoutDocumentsInput
   location?: Prisma.DocLocationCreateNestedOneWithoutDocumentsInput
   revisions?: Prisma.DocumentRevisionCreateNestedManyWithoutDocumentInput
@@ -973,7 +1017,7 @@ export type DocumentUncheckedCreateWithoutCurrentDocumentClassInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
+  docProjectId?: number | null
   currentTitle: string
   currentDocumentTypeId: number
   obsoletedAt?: Date | string | null
@@ -1027,7 +1071,7 @@ export type DocumentScalarWhereInput = {
   code?: Prisma.StringFilter<"Document"> | string
   description?: Prisma.StringNullableFilter<"Document"> | string | null
   module?: Prisma.EnumModuleTypeFilter<"Document"> | $Enums.ModuleType
-  projectId?: Prisma.IntNullableFilter<"Document"> | number | null
+  docProjectId?: Prisma.IntNullableFilter<"Document"> | number | null
   currentTitle?: Prisma.StringFilter<"Document"> | string
   currentDocumentTypeId?: Prisma.IntFilter<"Document"> | number
   currentDocumentClassId?: Prisma.IntNullableFilter<"Document"> | number | null
@@ -1049,13 +1093,13 @@ export type DocumentCreateWithoutCurrentDocumentTypeInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
   currentTitle: string
   obsoletedAt?: Date | string | null
   obsoletedById?: number | null
   obsoleteReason?: string | null
   locationPath?: string | null
   projectTaskId?: number | null
+  docProject?: Prisma.DocProjectCreateNestedOneWithoutDocumentsInput
   currentDocumentClass?: Prisma.DocumentClassCreateNestedOneWithoutDocumentsInput
   location?: Prisma.DocLocationCreateNestedOneWithoutDocumentsInput
   revisions?: Prisma.DocumentRevisionCreateNestedManyWithoutDocumentInput
@@ -1074,7 +1118,7 @@ export type DocumentUncheckedCreateWithoutCurrentDocumentTypeInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
+  docProjectId?: number | null
   currentTitle: string
   currentDocumentClassId?: number | null
   obsoletedAt?: Date | string | null
@@ -1124,13 +1168,13 @@ export type DocumentCreateWithoutTaskDocumentRefsInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
   currentTitle: string
   obsoletedAt?: Date | string | null
   obsoletedById?: number | null
   obsoleteReason?: string | null
   locationPath?: string | null
   projectTaskId?: number | null
+  docProject?: Prisma.DocProjectCreateNestedOneWithoutDocumentsInput
   currentDocumentType: Prisma.DocumentTypeCreateNestedOneWithoutDocumentsInput
   currentDocumentClass?: Prisma.DocumentClassCreateNestedOneWithoutDocumentsInput
   location?: Prisma.DocLocationCreateNestedOneWithoutDocumentsInput
@@ -1149,7 +1193,7 @@ export type DocumentUncheckedCreateWithoutTaskDocumentRefsInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
+  docProjectId?: number | null
   currentTitle: string
   currentDocumentTypeId: number
   currentDocumentClassId?: number | null
@@ -1189,13 +1233,13 @@ export type DocumentUpdateWithoutTaskDocumentRefsInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   obsoletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   obsoletedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   obsoleteReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projectTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProject?: Prisma.DocProjectUpdateOneWithoutDocumentsNestedInput
   currentDocumentType?: Prisma.DocumentTypeUpdateOneRequiredWithoutDocumentsNestedInput
   currentDocumentClass?: Prisma.DocumentClassUpdateOneWithoutDocumentsNestedInput
   location?: Prisma.DocLocationUpdateOneWithoutDocumentsNestedInput
@@ -1214,7 +1258,7 @@ export type DocumentUncheckedUpdateWithoutTaskDocumentRefsInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   currentDocumentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
   currentDocumentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1238,13 +1282,13 @@ export type DocumentCreateWithoutRevisionsInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
   currentTitle: string
   obsoletedAt?: Date | string | null
   obsoletedById?: number | null
   obsoleteReason?: string | null
   locationPath?: string | null
   projectTaskId?: number | null
+  docProject?: Prisma.DocProjectCreateNestedOneWithoutDocumentsInput
   currentDocumentType: Prisma.DocumentTypeCreateNestedOneWithoutDocumentsInput
   currentDocumentClass?: Prisma.DocumentClassCreateNestedOneWithoutDocumentsInput
   location?: Prisma.DocLocationCreateNestedOneWithoutDocumentsInput
@@ -1263,7 +1307,7 @@ export type DocumentUncheckedCreateWithoutRevisionsInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
+  docProjectId?: number | null
   currentTitle: string
   currentDocumentTypeId: number
   currentDocumentClassId?: number | null
@@ -1303,13 +1347,13 @@ export type DocumentUpdateWithoutRevisionsInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   obsoletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   obsoletedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   obsoleteReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projectTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProject?: Prisma.DocProjectUpdateOneWithoutDocumentsNestedInput
   currentDocumentType?: Prisma.DocumentTypeUpdateOneRequiredWithoutDocumentsNestedInput
   currentDocumentClass?: Prisma.DocumentClassUpdateOneWithoutDocumentsNestedInput
   location?: Prisma.DocLocationUpdateOneWithoutDocumentsNestedInput
@@ -1328,7 +1372,7 @@ export type DocumentUncheckedUpdateWithoutRevisionsInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   currentDocumentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
   currentDocumentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1352,13 +1396,13 @@ export type DocumentCreateWithoutReplacementItemsInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
   currentTitle: string
   obsoletedAt?: Date | string | null
   obsoletedById?: number | null
   obsoleteReason?: string | null
   locationPath?: string | null
   projectTaskId?: number | null
+  docProject?: Prisma.DocProjectCreateNestedOneWithoutDocumentsInput
   currentDocumentType: Prisma.DocumentTypeCreateNestedOneWithoutDocumentsInput
   currentDocumentClass?: Prisma.DocumentClassCreateNestedOneWithoutDocumentsInput
   location?: Prisma.DocLocationCreateNestedOneWithoutDocumentsInput
@@ -1377,7 +1421,7 @@ export type DocumentUncheckedCreateWithoutReplacementItemsInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
+  docProjectId?: number | null
   currentTitle: string
   currentDocumentTypeId: number
   currentDocumentClassId?: number | null
@@ -1417,13 +1461,13 @@ export type DocumentUpdateWithoutReplacementItemsInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   obsoletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   obsoletedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   obsoleteReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projectTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProject?: Prisma.DocProjectUpdateOneWithoutDocumentsNestedInput
   currentDocumentType?: Prisma.DocumentTypeUpdateOneRequiredWithoutDocumentsNestedInput
   currentDocumentClass?: Prisma.DocumentClassUpdateOneWithoutDocumentsNestedInput
   location?: Prisma.DocLocationUpdateOneWithoutDocumentsNestedInput
@@ -1442,7 +1486,7 @@ export type DocumentUncheckedUpdateWithoutReplacementItemsInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   currentDocumentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
   currentDocumentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1456,6 +1500,81 @@ export type DocumentUncheckedUpdateWithoutReplacementItemsInput = {
   taskDocumentRefs?: Prisma.TaskDocumentReferenceUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
+export type DocumentCreateWithoutDocProjectInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  code: string
+  description?: string | null
+  module: $Enums.ModuleType
+  currentTitle: string
+  obsoletedAt?: Date | string | null
+  obsoletedById?: number | null
+  obsoleteReason?: string | null
+  locationPath?: string | null
+  projectTaskId?: number | null
+  currentDocumentType: Prisma.DocumentTypeCreateNestedOneWithoutDocumentsInput
+  currentDocumentClass?: Prisma.DocumentClassCreateNestedOneWithoutDocumentsInput
+  location?: Prisma.DocLocationCreateNestedOneWithoutDocumentsInput
+  revisions?: Prisma.DocumentRevisionCreateNestedManyWithoutDocumentInput
+  taskDocumentRefs?: Prisma.TaskDocumentReferenceCreateNestedManyWithoutDocumentInput
+  replacementItems?: Prisma.DocReplacementItemCreateNestedManyWithoutDocumentInput
+}
+
+export type DocumentUncheckedCreateWithoutDocProjectInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  code: string
+  description?: string | null
+  module: $Enums.ModuleType
+  currentTitle: string
+  currentDocumentTypeId: number
+  currentDocumentClassId?: number | null
+  obsoletedAt?: Date | string | null
+  obsoletedById?: number | null
+  obsoleteReason?: string | null
+  locationId?: number | null
+  locationPath?: string | null
+  projectTaskId?: number | null
+  revisions?: Prisma.DocumentRevisionUncheckedCreateNestedManyWithoutDocumentInput
+  taskDocumentRefs?: Prisma.TaskDocumentReferenceUncheckedCreateNestedManyWithoutDocumentInput
+  replacementItems?: Prisma.DocReplacementItemUncheckedCreateNestedManyWithoutDocumentInput
+}
+
+export type DocumentCreateOrConnectWithoutDocProjectInput = {
+  where: Prisma.DocumentWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocumentCreateWithoutDocProjectInput, Prisma.DocumentUncheckedCreateWithoutDocProjectInput>
+}
+
+export type DocumentCreateManyDocProjectInputEnvelope = {
+  data: Prisma.DocumentCreateManyDocProjectInput | Prisma.DocumentCreateManyDocProjectInput[]
+  skipDuplicates?: boolean
+}
+
+export type DocumentUpsertWithWhereUniqueWithoutDocProjectInput = {
+  where: Prisma.DocumentWhereUniqueInput
+  update: Prisma.XOR<Prisma.DocumentUpdateWithoutDocProjectInput, Prisma.DocumentUncheckedUpdateWithoutDocProjectInput>
+  create: Prisma.XOR<Prisma.DocumentCreateWithoutDocProjectInput, Prisma.DocumentUncheckedCreateWithoutDocProjectInput>
+}
+
+export type DocumentUpdateWithWhereUniqueWithoutDocProjectInput = {
+  where: Prisma.DocumentWhereUniqueInput
+  data: Prisma.XOR<Prisma.DocumentUpdateWithoutDocProjectInput, Prisma.DocumentUncheckedUpdateWithoutDocProjectInput>
+}
+
+export type DocumentUpdateManyWithWhereWithoutDocProjectInput = {
+  where: Prisma.DocumentScalarWhereInput
+  data: Prisma.XOR<Prisma.DocumentUpdateManyMutationInput, Prisma.DocumentUncheckedUpdateManyWithoutDocProjectInput>
+}
+
 export type DocumentCreateWithoutLocationInput = {
   createdAt?: Date | string
   createdById: number
@@ -1466,13 +1585,13 @@ export type DocumentCreateWithoutLocationInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
   currentTitle: string
   obsoletedAt?: Date | string | null
   obsoletedById?: number | null
   obsoleteReason?: string | null
   locationPath?: string | null
   projectTaskId?: number | null
+  docProject?: Prisma.DocProjectCreateNestedOneWithoutDocumentsInput
   currentDocumentType: Prisma.DocumentTypeCreateNestedOneWithoutDocumentsInput
   currentDocumentClass?: Prisma.DocumentClassCreateNestedOneWithoutDocumentsInput
   revisions?: Prisma.DocumentRevisionCreateNestedManyWithoutDocumentInput
@@ -1491,7 +1610,7 @@ export type DocumentUncheckedCreateWithoutLocationInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
+  docProjectId?: number | null
   currentTitle: string
   currentDocumentTypeId: number
   currentDocumentClassId?: number | null
@@ -1542,7 +1661,7 @@ export type DocumentCreateManyCurrentDocumentClassInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
+  docProjectId?: number | null
   currentTitle: string
   currentDocumentTypeId: number
   obsoletedAt?: Date | string | null
@@ -1563,13 +1682,13 @@ export type DocumentUpdateWithoutCurrentDocumentClassInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   obsoletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   obsoletedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   obsoleteReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projectTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProject?: Prisma.DocProjectUpdateOneWithoutDocumentsNestedInput
   currentDocumentType?: Prisma.DocumentTypeUpdateOneRequiredWithoutDocumentsNestedInput
   location?: Prisma.DocLocationUpdateOneWithoutDocumentsNestedInput
   revisions?: Prisma.DocumentRevisionUpdateManyWithoutDocumentNestedInput
@@ -1588,7 +1707,7 @@ export type DocumentUncheckedUpdateWithoutCurrentDocumentClassInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   currentDocumentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
   obsoletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1613,7 +1732,7 @@ export type DocumentUncheckedUpdateManyWithoutCurrentDocumentClassInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   currentDocumentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
   obsoletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1635,7 +1754,7 @@ export type DocumentCreateManyCurrentDocumentTypeInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
+  docProjectId?: number | null
   currentTitle: string
   currentDocumentClassId?: number | null
   obsoletedAt?: Date | string | null
@@ -1656,13 +1775,13 @@ export type DocumentUpdateWithoutCurrentDocumentTypeInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   obsoletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   obsoletedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   obsoleteReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projectTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProject?: Prisma.DocProjectUpdateOneWithoutDocumentsNestedInput
   currentDocumentClass?: Prisma.DocumentClassUpdateOneWithoutDocumentsNestedInput
   location?: Prisma.DocLocationUpdateOneWithoutDocumentsNestedInput
   revisions?: Prisma.DocumentRevisionUpdateManyWithoutDocumentNestedInput
@@ -1681,7 +1800,7 @@ export type DocumentUncheckedUpdateWithoutCurrentDocumentTypeInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   currentDocumentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   obsoletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1706,8 +1825,101 @@ export type DocumentUncheckedUpdateManyWithoutCurrentDocumentTypeInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
+  currentDocumentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  obsoletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  obsoletedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  obsoleteReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projectTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+}
+
+export type DocumentCreateManyDocProjectInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  code: string
+  description?: string | null
+  module: $Enums.ModuleType
+  currentTitle: string
+  currentDocumentTypeId: number
+  currentDocumentClassId?: number | null
+  obsoletedAt?: Date | string | null
+  obsoletedById?: number | null
+  obsoleteReason?: string | null
+  locationId?: number | null
+  locationPath?: string | null
+  projectTaskId?: number | null
+}
+
+export type DocumentUpdateWithoutDocProjectInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
+  currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
+  obsoletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  obsoletedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  obsoleteReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projectTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currentDocumentType?: Prisma.DocumentTypeUpdateOneRequiredWithoutDocumentsNestedInput
+  currentDocumentClass?: Prisma.DocumentClassUpdateOneWithoutDocumentsNestedInput
+  location?: Prisma.DocLocationUpdateOneWithoutDocumentsNestedInput
+  revisions?: Prisma.DocumentRevisionUpdateManyWithoutDocumentNestedInput
+  taskDocumentRefs?: Prisma.TaskDocumentReferenceUpdateManyWithoutDocumentNestedInput
+  replacementItems?: Prisma.DocReplacementItemUpdateManyWithoutDocumentNestedInput
+}
+
+export type DocumentUncheckedUpdateWithoutDocProjectInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
+  currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
+  currentDocumentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
+  currentDocumentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  obsoletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  obsoletedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  obsoleteReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projectTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  revisions?: Prisma.DocumentRevisionUncheckedUpdateManyWithoutDocumentNestedInput
+  taskDocumentRefs?: Prisma.TaskDocumentReferenceUncheckedUpdateManyWithoutDocumentNestedInput
+  replacementItems?: Prisma.DocReplacementItemUncheckedUpdateManyWithoutDocumentNestedInput
+}
+
+export type DocumentUncheckedUpdateManyWithoutDocProjectInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
+  currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
+  currentDocumentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
   currentDocumentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   obsoletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   obsoletedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1728,7 +1940,7 @@ export type DocumentCreateManyLocationInput = {
   code: string
   description?: string | null
   module: $Enums.ModuleType
-  projectId?: number | null
+  docProjectId?: number | null
   currentTitle: string
   currentDocumentTypeId: number
   currentDocumentClassId?: number | null
@@ -1749,13 +1961,13 @@ export type DocumentUpdateWithoutLocationInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   obsoletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   obsoletedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   obsoleteReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   projectTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProject?: Prisma.DocProjectUpdateOneWithoutDocumentsNestedInput
   currentDocumentType?: Prisma.DocumentTypeUpdateOneRequiredWithoutDocumentsNestedInput
   currentDocumentClass?: Prisma.DocumentClassUpdateOneWithoutDocumentsNestedInput
   revisions?: Prisma.DocumentRevisionUpdateManyWithoutDocumentNestedInput
@@ -1774,7 +1986,7 @@ export type DocumentUncheckedUpdateWithoutLocationInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   currentDocumentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
   currentDocumentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1799,7 +2011,7 @@ export type DocumentUncheckedUpdateManyWithoutLocationInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentTitle?: Prisma.StringFieldUpdateOperationsInput | string
   currentDocumentTypeId?: Prisma.IntFieldUpdateOperationsInput | number
   currentDocumentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1870,7 +2082,7 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   code?: boolean
   description?: boolean
   module?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   currentTitle?: boolean
   currentDocumentTypeId?: boolean
   currentDocumentClassId?: boolean
@@ -1880,6 +2092,7 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   locationId?: boolean
   locationPath?: boolean
   projectTaskId?: boolean
+  docProject?: boolean | Prisma.Document$docProjectArgs<ExtArgs>
   currentDocumentType?: boolean | Prisma.DocumentTypeDefaultArgs<ExtArgs>
   currentDocumentClass?: boolean | Prisma.Document$currentDocumentClassArgs<ExtArgs>
   location?: boolean | Prisma.Document$locationArgs<ExtArgs>
@@ -1900,7 +2113,7 @@ export type DocumentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   code?: boolean
   description?: boolean
   module?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   currentTitle?: boolean
   currentDocumentTypeId?: boolean
   currentDocumentClassId?: boolean
@@ -1910,6 +2123,7 @@ export type DocumentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   locationId?: boolean
   locationPath?: boolean
   projectTaskId?: boolean
+  docProject?: boolean | Prisma.Document$docProjectArgs<ExtArgs>
   currentDocumentType?: boolean | Prisma.DocumentTypeDefaultArgs<ExtArgs>
   currentDocumentClass?: boolean | Prisma.Document$currentDocumentClassArgs<ExtArgs>
   location?: boolean | Prisma.Document$locationArgs<ExtArgs>
@@ -1926,7 +2140,7 @@ export type DocumentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   code?: boolean
   description?: boolean
   module?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   currentTitle?: boolean
   currentDocumentTypeId?: boolean
   currentDocumentClassId?: boolean
@@ -1936,6 +2150,7 @@ export type DocumentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   locationId?: boolean
   locationPath?: boolean
   projectTaskId?: boolean
+  docProject?: boolean | Prisma.Document$docProjectArgs<ExtArgs>
   currentDocumentType?: boolean | Prisma.DocumentTypeDefaultArgs<ExtArgs>
   currentDocumentClass?: boolean | Prisma.Document$currentDocumentClassArgs<ExtArgs>
   location?: boolean | Prisma.Document$locationArgs<ExtArgs>
@@ -1952,7 +2167,7 @@ export type DocumentSelectScalar = {
   code?: boolean
   description?: boolean
   module?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   currentTitle?: boolean
   currentDocumentTypeId?: boolean
   currentDocumentClassId?: boolean
@@ -1964,8 +2179,9 @@ export type DocumentSelectScalar = {
   projectTaskId?: boolean
 }
 
-export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "code" | "description" | "module" | "projectId" | "currentTitle" | "currentDocumentTypeId" | "currentDocumentClassId" | "obsoletedAt" | "obsoletedById" | "obsoleteReason" | "locationId" | "locationPath" | "projectTaskId", ExtArgs["result"]["document"]>
+export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "code" | "description" | "module" | "docProjectId" | "currentTitle" | "currentDocumentTypeId" | "currentDocumentClassId" | "obsoletedAt" | "obsoletedById" | "obsoleteReason" | "locationId" | "locationPath" | "projectTaskId", ExtArgs["result"]["document"]>
 export type DocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.Document$docProjectArgs<ExtArgs>
   currentDocumentType?: boolean | Prisma.DocumentTypeDefaultArgs<ExtArgs>
   currentDocumentClass?: boolean | Prisma.Document$currentDocumentClassArgs<ExtArgs>
   location?: boolean | Prisma.Document$locationArgs<ExtArgs>
@@ -1975,11 +2191,13 @@ export type DocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   _count?: boolean | Prisma.DocumentCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DocumentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.Document$docProjectArgs<ExtArgs>
   currentDocumentType?: boolean | Prisma.DocumentTypeDefaultArgs<ExtArgs>
   currentDocumentClass?: boolean | Prisma.Document$currentDocumentClassArgs<ExtArgs>
   location?: boolean | Prisma.Document$locationArgs<ExtArgs>
 }
 export type DocumentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.Document$docProjectArgs<ExtArgs>
   currentDocumentType?: boolean | Prisma.DocumentTypeDefaultArgs<ExtArgs>
   currentDocumentClass?: boolean | Prisma.Document$currentDocumentClassArgs<ExtArgs>
   location?: boolean | Prisma.Document$locationArgs<ExtArgs>
@@ -1988,6 +2206,7 @@ export type DocumentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
 export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Document"
   objects: {
+    docProject: Prisma.$DocProjectPayload<ExtArgs> | null
     currentDocumentType: Prisma.$DocumentTypePayload<ExtArgs>
     currentDocumentClass: Prisma.$DocumentClassPayload<ExtArgs> | null
     location: Prisma.$DocLocationPayload<ExtArgs> | null
@@ -2006,7 +2225,7 @@ export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     code: string
     description: string | null
     module: $Enums.ModuleType
-    projectId: number | null
+    docProjectId: number | null
     currentTitle: string
     currentDocumentTypeId: number
     currentDocumentClassId: number | null
@@ -2410,6 +2629,7 @@ readonly fields: DocumentFieldRefs;
  */
 export interface Prisma__DocumentClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  docProject<T extends Prisma.Document$docProjectArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Document$docProjectArgs<ExtArgs>>): Prisma.Prisma__DocProjectClient<runtime.Types.Result.GetResult<Prisma.$DocProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   currentDocumentType<T extends Prisma.DocumentTypeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocumentTypeDefaultArgs<ExtArgs>>): Prisma.Prisma__DocumentTypeClient<runtime.Types.Result.GetResult<Prisma.$DocumentTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   currentDocumentClass<T extends Prisma.Document$currentDocumentClassArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Document$currentDocumentClassArgs<ExtArgs>>): Prisma.Prisma__DocumentClassClient<runtime.Types.Result.GetResult<Prisma.$DocumentClassPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   location<T extends Prisma.Document$locationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Document$locationArgs<ExtArgs>>): Prisma.Prisma__DocLocationClient<runtime.Types.Result.GetResult<Prisma.$DocLocationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -2455,7 +2675,7 @@ export interface DocumentFieldRefs {
   readonly code: Prisma.FieldRef<"Document", 'String'>
   readonly description: Prisma.FieldRef<"Document", 'String'>
   readonly module: Prisma.FieldRef<"Document", 'ModuleType'>
-  readonly projectId: Prisma.FieldRef<"Document", 'Int'>
+  readonly docProjectId: Prisma.FieldRef<"Document", 'Int'>
   readonly currentTitle: Prisma.FieldRef<"Document", 'String'>
   readonly currentDocumentTypeId: Prisma.FieldRef<"Document", 'Int'>
   readonly currentDocumentClassId: Prisma.FieldRef<"Document", 'Int'>
@@ -2863,6 +3083,25 @@ export type DocumentDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many Documents to delete.
    */
   limit?: number
+}
+
+/**
+ * Document.docProject
+ */
+export type Document$docProjectArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocProject
+   */
+  select?: Prisma.DocProjectSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocProject
+   */
+  omit?: Prisma.DocProjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectInclude<ExtArgs> | null
+  where?: Prisma.DocProjectWhereInput
 }
 
 /**

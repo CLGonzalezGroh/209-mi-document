@@ -30,12 +30,12 @@ export const eventResolvers = {
         objectType,
         objectId,
         module,
-        projectId,
+        docProjectId,
       }: {
         objectType: DocObjectType
         objectId: number
         module?: ModuleType
-        projectId?: number
+        docProjectId?: number
       },
       context: ResolverContext,
     ) => {
@@ -62,7 +62,7 @@ export const eventResolvers = {
             objectType,
             objectId,
             ...(module !== undefined && { module }),
-            ...(projectId !== undefined && { projectId }),
+            ...(docProjectId !== undefined && { docProjectId }),
           },
           orderBy: [{ createdAt: "asc" }, { id: "asc" }],
         })
@@ -85,12 +85,12 @@ export const eventResolvers = {
         objectType,
         objectId,
         module,
-        projectId,
+        docProjectId,
       }: {
         objectType: DocObjectType
         objectId: number
         module?: ModuleType
-        projectId?: number
+        docProjectId?: number
       },
       context: ResolverContext,
     ) => {
@@ -117,7 +117,7 @@ export const eventResolvers = {
             objectType,
             objectId,
             ...(module !== undefined && { module }),
-            ...(projectId !== undefined && { projectId }),
+            ...(docProjectId !== undefined && { docProjectId }),
           },
           orderBy: [{ createdAt: "asc" }, { id: "asc" }],
         })

@@ -208,7 +208,8 @@ model DocumentClass {
   // Un CHECK exige `module = PROJECTS` cuando hay proyecto, con la forma del
   // invariante que D-06 fija para `Document`: el proyecto solo tiene sentido
   // como alcance dentro del módulo que lo tiene.
-  projectId Int?
+  docProjectId Int?
+  docProject   DocProject? @relation(fields: [docProjectId], references: [id], onDelete: Restrict)
 
   // Relaciones
   documentTypes     DocumentType[]
@@ -227,9 +228,9 @@ model DocumentClass {
   // BLOQUE 02C incorpora el alcance a la tupla: dos proyectos pueden nombrar
   // igual su propia clase, y un proyecto puede agregar un código que el
   // despliegue no tiene sin chocar con otro proyecto.
-  @@unique([name, module, projectId]) // NULLS NOT DISTINCT en la base
-  @@unique([code, module, projectId]) // NULLS NOT DISTINCT en la base
-  @@index([projectId])
+  @@unique([name, module, docProjectId]) // NULLS NOT DISTINCT en la base
+  @@unique([code, module, docProjectId]) // NULLS NOT DISTINCT en la base
+  @@index([docProjectId])
   @@map("document_classes")
 }
 
@@ -262,7 +263,8 @@ model DocumentType {
   // una clase del despliegue —eso es ampliar—, y uno del despliegue no puede
   // colgar de una clase de proyecto. No es expresable en un CHECK, porque exige
   // mirar la clase referenciada, y vive en la operación con su prueba.
-  projectId Int?
+  docProjectId Int?
+  docProject   DocProject? @relation(fields: [docProjectId], references: [id], onDelete: Restrict)
 
   // Relaciones
   class             DocumentClass?        @relation(fields: [classId], references: [id])
@@ -275,10 +277,10 @@ model DocumentType {
   // con NULLS NOT DISTINCT en la migración. Con classId o module nulos la
   // restricción anterior no impedía el duplicado. BLOQUE 02C agrega el alcance
   // a la tupla, que es la tercera columna anulable de la misma clave.
-  @@unique([name, classId, module, projectId]) // NULLS NOT DISTINCT en la base
-  @@unique([code, classId, module, projectId]) // NULLS NOT DISTINCT en la base
+  @@unique([name, classId, module, docProjectId]) // NULLS NOT DISTINCT en la base
+  @@unique([code, classId, module, docProjectId]) // NULLS NOT DISTINCT en la base
   @@index([classId])
-  @@index([projectId])
+  @@index([docProjectId])
   @@map("document_types")
 }
 
@@ -311,7 +313,8 @@ model Document {
   // Obligatorio por invariante cuando module = PROJECTS.
   // Nulo NO es una ausencia: identifica el régimen de publicación, documentación
   // que no circula y se gobierna por permiso global y clasificación.
-  projectId Int?
+  docProjectId Int?
+  docProject   DocProject? @relation(fields: [docProjectId], references: [id], onDelete: Restrict)
 
   // Metadata de identificación: COPIA de la revisión en curso, no dato propio
   // (BLOQUE 03B, B1 y B2). El dato vive en DocumentRevision, porque está impreso
@@ -390,7 +393,7 @@ model Document {
   // Único por proyecto para los documentos en circulación; único por módulo para
   // los publicados. Reemplaza a [code, module, entityType, entityId], cuya tupla
   // con columnas anulables no impedía duplicados (H-19).
-  @@index([projectId])
+  @@index([docProjectId])
   @@index([module])
   @@index([currentDocumentClassId])
   @@index([projectTaskId])
@@ -464,8 +467,8 @@ model DocumentRevision {
   abandonReason String?
 
   // Relaciones
-  document         Document           @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  documentType DocumentType @relation(fields: [documentTypeId], references: [id])
+  document         Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentType     DocumentType      @relation(fields: [documentTypeId], references: [id])
   // `Restrict` explícito y NO el `SetNull` que Prisma pone por defecto en una
   // relación opcional (BLOQUE 02C, B5). La base ya lo declara así desde
   // BLOQUE 03B; lo que estaba mal era el modelo, de modo que un
@@ -473,7 +476,7 @@ model DocumentRevision {
   // Acá la consecuencia es peor que en la ubicación: la clase integra el
   // payload de la firma (D-05, D-23), y borrarla habría vaciado en silencio la
   // clasificación de revisiones firmadas.
-  documentClass DocumentClass? @relation(fields: [documentClassId], references: [id], onDelete: Restrict)
+  documentClass    DocumentClass?    @relation(fields: [documentClassId], references: [id], onDelete: Restrict)
   versions         DocumentVersion[]
   workflows        ReviewWorkflow[] // Varios circuitos sucesivos (D-11, B2)
   transmittalItems TransmittalItem[]
@@ -507,8 +510,8 @@ model DocumentVersion {
   comment String? // "Corrección del conexionado en la página 5". Opcional (B4)
 
   // Relaciones
-  revision DocumentRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
-  files    DocVersionFile[]
+  revision    DocumentRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  files       DocVersionFile[]
   // La copia de trabajo que la produjo, cuando nació de una (B12)
   workingCopy DocWorkingCopy?
 
@@ -563,7 +566,7 @@ model DocWorkingCopy {
   // Confirmación: el conjunto se convierte en la versión siguiente.
   confirmedAt   DateTime?
   confirmedById Int?
-  versionId     Int? @unique // La versión que produjo, cuando se confirmó
+  versionId     Int?      @unique // La versión que produjo, cuando se confirmó
 
   // Descarte: se abandona sin producir versión. Palabra propia del nivel (B11).
   discardedAt   DateTime?
@@ -780,8 +783,9 @@ model Transmittal {
   // la mitad de H-16: el transmittal pertenece a un proyecto, que es la unidad
   // contractual. La otra mitad —el cálculo fuera de la transacción— la cierra
   // el resolver, con este índice como árbitro.
-  code      String // "TR-001", por proyecto
-  projectId Int // Referencia externa al subgraph projects
+  code         String // "TR-001", por proyecto
+  docProjectId Int // Referencia externa al subgraph projects
+  docProject   DocProject @relation(fields: [docProjectId], references: [id], onDelete: Restrict)
 
   nature TransmittalNature
   status TransmittalStatus @default(DRAFT)
@@ -846,8 +850,8 @@ model Transmittal {
   // emisión que contesta (B5).
   carriedResponses DocTransmittalResponse[] @relation("CarriedResponses")
 
-  @@unique([projectId, code])
-  @@index([projectId])
+  @@unique([docProjectId, code])
+  @@index([docProjectId])
   @@index([respondsToTransmittalId])
   @@map("transmittals")
 }
@@ -931,8 +935,8 @@ model DocProject {
   name        String
   description String?
 
-  status   DocProjectStatus @default(ACTIVE)
-  closedAt DateTime?
+  status     DocProjectStatus @default(ACTIVE)
+  closedAt   DateTime?
   closedById Int?
 
   // ── Gestión PMI ────────────────────────────────────────────────────────────
@@ -977,6 +981,21 @@ model DocProject {
   locationEnabled  Boolean @default(true)
   locationRequired Boolean @default(false)
   locationLabel    String?
+
+  // Lo que cuelga del contrato con clave foránea real (BLOQUE 02D, B7). Las dos
+  // tablas de eventos NO están: llevan `docProjectId` como columna de alcance
+  // sin FK, con el criterio de ADR-022 de digitalización —FK en las raíces, y
+  // columna de scoping en lo que solo denormaliza el contexto—. Un registro
+  // inmutable de auditoría no debe depender del ciclo de vida de lo que audita.
+  documents         Document[]
+  transmittals      Transmittal[]
+  members           DocProjectMember[]
+  documentClasses   DocumentClass[]
+  documentTypes     DocumentType[]
+  locations         DocLocation[]
+  qualifications    DocQualification[]
+  catalogScopes     DocCatalogScope[]
+  workflowTemplates DocWorkflowTemplate[]
 
   @@index([projectId])
   @@index([status])
@@ -1029,7 +1048,8 @@ model DocWorkflowTemplate {
   description String?
 
   // Alcance. Referencia externa sin FK para projectId: Project vive en mi-project.
-  projectId       Int?
+  docProjectId    Int?
+  docProject      DocProject? @relation(fields: [docProjectId], references: [id], onDelete: Restrict)
   documentClassId Int?
   documentTypeId  Int?
 
@@ -1043,8 +1063,8 @@ model DocWorkflowTemplate {
   // Sin la cláusula, la tupla con columnas anulables repetiría el defecto de H-19.
   // Acá corresponde y en B2 de BLOQUE 02 no: allá una sola tupla expresaba dos
   // reglas distintas; acá es una única regla con refinamientos opcionales.
-  @@unique([projectId, documentClassId, documentTypeId], map: "doc_workflow_templates_scope_key") // NULLS NOT DISTINCT en la base
-  @@index([projectId])
+  @@unique([docProjectId, documentClassId, documentTypeId], map: "doc_workflow_templates_scope_key") // NULLS NOT DISTINCT en la base
+  @@index([docProjectId])
   @@index([documentClassId])
   @@index([documentTypeId])
   @@map("doc_workflow_templates")
@@ -1095,8 +1115,9 @@ model DocProjectMember {
   isSys       Boolean   @default(false)
 
   // Referencias externas sin FK: Project vive en mi-project, User en mi-admin
-  projectId Int
-  userId    Int
+  docProjectId Int
+  docProject   DocProject @relation(fields: [docProjectId], references: [id], onDelete: Restrict)
+  userId       Int
 
   // En proyectos INTERNAL todos los miembros son HOST, incluidas las personas
   // ajenas a la organización que participen del desarrollo (D-19).
@@ -1108,8 +1129,8 @@ model DocProjectMember {
   revokedAt    DateTime?
   revokedById  Int?
 
-  @@unique([projectId, userId])
-  @@index([projectId])
+  @@unique([docProjectId, userId])
+  @@index([docProjectId])
   @@index([userId])
   @@map("doc_project_members")
 }
@@ -1163,7 +1184,8 @@ model DocQualification {
   // propia usa las suyas y SOLO las suyas. La lista de calificaciones es la del
   // contrato, y una lista mezclada —cuatro del despliegue más tres del cliente—
   // no es la de nadie y admite calificar con un valor que la contraparte no usa.
-  projectId Int?
+  docProjectId Int?
+  docProject   DocProject? @relation(fields: [docProjectId], references: [id], onDelete: Restrict)
 
   code   String // El de la contraparte: "A", "B", "1", "APROBADO"...
   label  String // El rótulo que el usuario ve, tal como lo escribe el cliente
@@ -1178,8 +1200,8 @@ model DocQualification {
   // Relaciones
   responses DocTransmittalResponse[]
 
-  @@unique([code, projectId], map: "doc_qualifications_code_scope_key") // NULLS NOT DISTINCT en la base
-  @@index([projectId])
+  @@unique([code, docProjectId], map: "doc_qualifications_code_scope_key") // NULLS NOT DISTINCT en la base
+  @@index([docProjectId])
   @@map("doc_qualifications")
 }
 
@@ -1236,9 +1258,9 @@ model DocTransmittalResponse {
   responseTransmittalId Int?
 
   // Relaciones
-  transmittalItem     TransmittalItem  @relation(fields: [transmittalItemId], references: [id], onDelete: Cascade)
-  qualification       DocQualification @relation(fields: [qualificationId], references: [id])
-  responseTransmittal Transmittal?     @relation("CarriedResponses", fields: [responseTransmittalId], references: [id])
+  transmittalItem     TransmittalItem   @relation(fields: [transmittalItemId], references: [id], onDelete: Cascade)
+  qualification       DocQualification  @relation(fields: [qualificationId], references: [id])
+  responseTransmittal Transmittal?      @relation("CarriedResponses", fields: [responseTransmittalId], references: [id])
   files               DocResponseFile[]
 
   @@index([qualificationId])
@@ -1337,14 +1359,15 @@ model DocCatalogScope {
   // descarta— porque un proyecto siempre pertenece al módulo de proyectos: los
   // ejes conviven en lugar de excluirse. Referencia externa sin FK: Project
   // vive en mi-project.
-  module    ModuleType
-  projectId Int?
+  module       ModuleType
+  docProjectId Int?
+  docProject   DocProject? @relation(fields: [docProjectId], references: [id], onDelete: Restrict)
 
   catalog DocCatalogKind
   mode    DocScopeMode
 
-  @@unique([module, projectId, catalog]) // NULLS NOT DISTINCT en la base
-  @@index([projectId])
+  @@unique([module, docProjectId, catalog]) // NULLS NOT DISTINCT en la base
+  @@index([docProjectId])
   @@map("doc_catalog_scopes")
 }
 
@@ -1392,7 +1415,8 @@ model DocLocation {
   // revés no, porque volvería el árbol global dependiente de un proyecto. La
   // invariante no es expresable en un CHECK —exige mirar el padre— y vive en la
   // operación, con su prueba.
-  projectId Int?
+  docProjectId Int?
+  docProject   DocProject? @relation(fields: [docProjectId], references: [id], onDelete: Restrict)
 
   // Jerarquía. Nulo = nodo raíz.
   parentId Int?
@@ -1438,10 +1462,10 @@ model DocLocation {
   // El alcance entra en la tupla porque dos proyectos pueden nombrar igual su
   // propio nodo, y porque un proyecto puede agregar un código que el despliegue
   // no tiene sin chocar con otro proyecto.
-  @@unique([code, parentId, projectId], map: "doc_locations_code_level_key") // NULLS NOT DISTINCT en la base
+  @@unique([code, parentId, docProjectId], map: "doc_locations_code_level_key") // NULLS NOT DISTINCT en la base
   @@index([parentId])
   @@index([path])
-  @@index([projectId])
+  @@index([docProjectId])
   @@map("doc_locations")
 }
 
@@ -1516,11 +1540,11 @@ model DocWorkflowEvent {
   // module la aísla por módulo, y es el único eje cuando no hay proyecto.
   // Nulos en los catálogos, que no pertenecen a ningún proyecto y cuyo módulo
   // es opcional, y en los documentos del régimen de publicación.
-  projectId Int?
-  module    ModuleType?
+  docProjectId Int?
+  module       ModuleType?
 
   @@index([objectType, objectId, createdAt])
-  @@index([projectId, createdAt])
+  @@index([docProjectId, createdAt])
   @@index([module, createdAt])
   @@map("doc_workflow_events")
 }
@@ -1539,12 +1563,12 @@ model DocAuditEvent {
 
   // Contexto del objeto afectado (BLOQUE 02, B9). Mismo criterio que en
   // DocWorkflowEvent: derivados del objeto, nunca informados por quien emite.
-  projectId Int?
-  module    ModuleType?
+  docProjectId Int?
+  module       ModuleType?
 
   @@index([objectType, objectId, createdAt])
   @@index([createdById, createdAt])
-  @@index([projectId, createdAt])
+  @@index([docProjectId, createdAt])
   @@index([module, createdAt])
   @@map("doc_audit_events")
 }

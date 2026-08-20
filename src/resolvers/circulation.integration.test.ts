@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import test, { after, before } from "node:test"
 import jwt from "jsonwebtoken"
 import { prisma } from "../lib/prisma.js"
+import { asegurarContratos, borrarContratos } from "../utils/testContracts.js"
 import { ResolverContext } from "../types.js"
 import {
   DocFileRole,
@@ -48,22 +49,30 @@ const INTERNO = -424412
 
 let context: ResolverContext
 
+/** Contrato de otro alcance, para probar que la calificación no cruza. */
+const AJENO = -424499
+
 const PROYECTOS = [EMISOR, RECEPTOR, INTERNO]
 
 const CODIGO = "TEST-BLOCK04"
 
 const limpiar = async () => {
-  await prisma.transmittal.deleteMany({ where: { projectId: { in: PROYECTOS } } })
+  await prisma.transmittal.deleteMany({ where: { docProjectId: { in: PROYECTOS } } })
   await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
-  await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: { in: PROYECTOS } } })
-  await prisma.docProjectMember.deleteMany({ where: { projectId: { in: PROYECTOS } } })
+  await prisma.docWorkflowTemplate.deleteMany({ where: { docProjectId: { in: PROYECTOS } } })
+  await prisma.docProjectMember.deleteMany({ where: { docProjectId: { in: PROYECTOS } } })
   await prisma.docProject.deleteMany({ where: { projectId: { in: PROYECTOS } } })
-  await prisma.docAuditEvent.deleteMany({ where: { projectId: { in: PROYECTOS } } })
-  await prisma.docWorkflowEvent.deleteMany({ where: { projectId: { in: PROYECTOS } } })
+  await prisma.docAuditEvent.deleteMany({ where: { docProjectId: { in: PROYECTOS } } })
+  await prisma.docWorkflowEvent.deleteMany({ where: { docProjectId: { in: PROYECTOS } } })
 }
 
 const declarar = async (projectId: number, documentRole: DocumentRole) => {
-  await docProjectsResolvers.Mutation.declareDocProject(
+  // El contrato existe antes de declararlo, con id igual a la constante: la
+  // mutación hace upsert POR CÓDIGO y cae sobre esta misma fila, de modo que
+  // todo lo que la prueba cuelga de `docProjectId` sigue siendo válido.
+  await asegurarContratos(prisma, [projectId], documentRole)
+
+  const contrato: any = await docProjectsResolvers.Mutation.declareDocProject(
     null,
     {
       input: {
@@ -81,7 +90,7 @@ const declarar = async (projectId: number, documentRole: DocumentRole) => {
   )
   await projectMemberResolvers.Mutation.assignDocProjectMember(
     null,
-    { input: { projectId, userId: USER_ID, side: DocProjectSide.HOST } },
+    { input: { docProjectId: contrato.id, userId: USER_ID, side: DocProjectSide.HOST } },
     context,
   )
 }
@@ -112,13 +121,13 @@ after(async () => {
 })
 
 const crear = (
-  projectId: number,
+  docProjectId: number,
   nature: TransmittalNature,
   extra: Record<string, unknown> = {},
 ) =>
   transmittalResolvers.Mutation.createTransmittal(
     null,
-    { input: { projectId, nature, items: [], ...extra } as any },
+    { input: { docProjectId, nature, items: [], ...extra } as any },
     context,
   ) as Promise<any>
 
@@ -226,7 +235,7 @@ test("el sentido se deriva del rol y de la naturaleza, y no se guarda", async ()
 // --- El código, por proyecto y transaccional (B2) ---
 
 test("la numeración corre por proyecto y arranca en TR-001 en cada uno", async () => {
-  await prisma.transmittal.deleteMany({ where: { projectId: { in: PROYECTOS } } })
+  await prisma.transmittal.deleteMany({ where: { docProjectId: { in: PROYECTOS } } })
 
   const primeroEmisor = await crear(EMISOR, TransmittalNature.EMISSION)
   const primeroReceptor = await crear(RECEPTOR, TransmittalNature.EMISSION)
@@ -241,7 +250,7 @@ test("dos creaciones concurrentes en el mismo proyecto no comparten código", as
   // Es la otra mitad de H-16: el código se calculaba fuera de la transacción,
   // de modo que dos emisiones simultáneas obtenían el mismo número. El árbitro
   // es el índice único, y el resolver reintenta la transacción entera.
-  await prisma.transmittal.deleteMany({ where: { projectId: EMISOR } })
+  await prisma.transmittal.deleteMany({ where: { docProjectId: EMISOR } })
 
   const creados = await Promise.all(
     Array.from({ length: 5 }, () => crear(EMISOR, TransmittalNature.EMISSION)),
@@ -254,8 +263,8 @@ test("dos creaciones concurrentes en el mismo proyecto no comparten código", as
 
 test("dos proyectos pueden tener el mismo código", async () => {
   const [delEmisor, delReceptor] = await Promise.all([
-    prisma.transmittal.findFirst({ where: { projectId: EMISOR, code: "TR-001" } }),
-    prisma.transmittal.findFirst({ where: { projectId: RECEPTOR, code: "TR-001" } }),
+    prisma.transmittal.findFirst({ where: { docProjectId: EMISOR, code: "TR-001" } }),
+    prisma.transmittal.findFirst({ where: { docProjectId: RECEPTOR, code: "TR-001" } }),
   ])
 
   assert.ok(delEmisor)
@@ -268,7 +277,7 @@ test("dos proyectos pueden tener el mismo código", async () => {
 // ════════════════════════════════════════════════════════════
 
 /** Documento nuevo con su revisión en borrador. */
-const documento = async (projectId: number, sufijo: string) => {
+const documento = async (docProjectId: number, sufijo: string) => {
   const doc = (await documentResolvers.Mutation.createDocument(
     null,
     {
@@ -276,7 +285,7 @@ const documento = async (projectId: number, sufijo: string) => {
         code: `${CODIGO}-${sufijo}`,
         title: `Documento ${sufijo}`,
         module: ModuleType.PROJECTS,
-        projectId,
+        docProjectId,
         documentTypeId,
       },
     },
@@ -336,11 +345,11 @@ const aprobar = async (revisionId: number) => {
 }
 
 const conItem = (
-  projectId: number,
+  docProjectId: number,
   revisionId: number,
   purposeCode: PurposeCode,
 ) =>
-  crear(projectId, TransmittalNature.EMISSION, {
+  crear(docProjectId, TransmittalNature.EMISSION, {
     items: [{ documentRevisionId: revisionId, purposeCode }],
   })
 
@@ -678,7 +687,7 @@ const emitido = async (
 
 const calificacion = async (code: string) =>
   prisma.docQualification.findFirstOrThrow({
-    where: { code, projectId: null },
+    where: { code, docProjectId: null },
     select: { id: true },
   })
 
@@ -775,9 +784,13 @@ test("no se responde un documento que todavía no fue emitido", async () => {
 test("la calificación debe pertenecer al catálogo vigente del proyecto", async () => {
   const { item } = await emitido("RESP-F")
 
+  // El contrato ajeno tiene que existir: la calificación le cuelga con clave
+  // foránea desde BLOQUE 02D, B7.
+  await asegurarContratos(prisma, [AJENO])
+
   const ajena = await prisma.docQualification.create({
     data: {
-      projectId: -424499,
+      docProjectId: AJENO,
       code: "AJENA",
       label: "De otro proyecto",
       effect: "ACCEPTED",
@@ -791,6 +804,7 @@ test("la calificación debe pertenecer al catálogo vigente del proyecto", async
   )
 
   await prisma.docQualification.delete({ where: { id: ajena.id } })
+  await borrarContratos(prisma, [AJENO])
 })
 
 // --- Autoría diferenciada (H-33, D-12) ---
@@ -1105,12 +1119,12 @@ const recibido = async (sufijo: string) => {
  * proyecto, clase —disciplina, en proyectos— y tipo.
  */
 const conPlantilla = async (pasos: StepType[]) => {
-  await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: RECEPTOR } })
+  await prisma.docWorkflowTemplate.deleteMany({ where: { docProjectId: RECEPTOR } })
 
   return prisma.docWorkflowTemplate.create({
     data: {
       name: "Matriz del proyecto",
-      projectId: RECEPTOR,
+      docProjectId: RECEPTOR,
       createdById: USER_ID,
       steps: {
         create: pasos.map((stepType, i) => ({
@@ -1124,7 +1138,7 @@ const conPlantilla = async (pasos: StepType[]) => {
 }
 
 const sinPlantilla = () =>
-  prisma.docWorkflowTemplate.deleteMany({ where: { projectId: RECEPTOR } })
+  prisma.docWorkflowTemplate.deleteMany({ where: { docProjectId: RECEPTOR } })
 
 /**
  * Emisión entrante en un proyecto SIN plantilla, para ejercitar el armado
@@ -1491,11 +1505,11 @@ test("sin plantilla el armado queda pendiente, y la planta lo resuelve a mano", 
 test("una plantilla con un paso sin actor no alcanza para armar sola", async () => {
   // Un solo paso sin actor deja el armado con algo que decidir, y entonces no
   // puede resolverlo el sistema.
-  await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: RECEPTOR } })
+  await prisma.docWorkflowTemplate.deleteMany({ where: { docProjectId: RECEPTOR } })
   await prisma.docWorkflowTemplate.create({
     data: {
       name: "Matriz incompleta",
-      projectId: RECEPTOR,
+      docProjectId: RECEPTOR,
       createdById: USER_ID,
       steps: {
         create: [
@@ -1530,10 +1544,10 @@ test("en modo Emisor emitir no arma nada", async () => {
 // FASE 7 — El documento pendiente, derivado
 // ════════════════════════════════════════════════════════════
 
-const pendientes = async (projectId: number) =>
+const pendientes = async (docProjectId: number) =>
   (await documentResolvers.Query.pendingDocuments(
     null,
-    { projectId },
+    { docProjectId },
     context,
   )) as any[]
 
@@ -1702,21 +1716,21 @@ test("criterio 13: la corrección registra al actor, además del valor anterior"
 })
 
 test("criterio 17: el proyecto sin calificaciones propias resuelve las del despliegue", async () => {
-  await prisma.docQualification.deleteMany({ where: { projectId: EMISOR } })
+  await prisma.docQualification.deleteMany({ where: { docProjectId: EMISOR } })
 
   const delDespliegue = (await qualificationResolvers.Query.projectQualifications(
     null,
-    { projectId: EMISOR },
+    { docProjectId: EMISOR },
     context,
   )) as any[]
   assert.ok(delDespliegue.length >= 4)
-  assert.ok(delDespliegue.every((q) => q.projectId === null))
+  assert.ok(delDespliegue.every((q) => q.docProjectId === null))
 
   const propia = await qualificationResolvers.Mutation.createQualification(
     null,
     {
       input: {
-        projectId: EMISOR,
+        docProjectId: EMISOR,
         code: "PROPIA",
         label: "Calificación del cliente",
         effect: "ACCEPTED",
@@ -1727,7 +1741,7 @@ test("criterio 17: el proyecto sin calificaciones propias resuelve las del despl
 
   const propias = (await qualificationResolvers.Query.projectQualifications(
     null,
-    { projectId: EMISOR },
+    { docProjectId: EMISOR },
     context,
   )) as any[]
   assert.deepEqual(
@@ -1736,7 +1750,7 @@ test("criterio 17: el proyecto sin calificaciones propias resuelve las del despl
     "declarada una propia, el proyecto usa las suyas y solo las suyas",
   )
 
-  await prisma.docQualification.deleteMany({ where: { projectId: EMISOR } })
+  await prisma.docQualification.deleteMany({ where: { docProjectId: EMISOR } })
 })
 
 test("criterio 18: la calificación que rechaza deja el paso rechazado", async () => {

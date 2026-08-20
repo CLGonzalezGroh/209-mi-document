@@ -104,7 +104,7 @@ export const replacementResolvers = {
               id: true,
               code: true,
               module: true,
-              projectId: true,
+              docProjectId: true,
               obsoletedAt: true,
             },
           })
@@ -120,7 +120,7 @@ export const replacementResolvers = {
           // cruza de uno a otro no es reemplazo sino promoción, que es otra cosa
           // y no pertenece a este módulo (B10).
           const ambito = (d: (typeof documentos)[number]) =>
-            d.projectId === null ? `module:${d.module}` : `project:${d.projectId}`
+            d.docProjectId === null ? `module:${d.module}` : `project:${d.docProjectId}`
           const ambitos = new Set(documentos.map(ambito))
           if (ambitos.size > 1) {
             throw new GraphQLError(

@@ -415,19 +415,19 @@ export const documentResolvers = {
      */
     pendingDocuments: async (
       _: any,
-      { projectId }: { projectId: number },
+      { docProjectId }: { docProjectId: number },
       context: ResolverContext,
     ) => {
       const userId = await projectAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_LIST],
-        projectId,
+        docProjectId,
         context,
       })
       logger.info("pendingDocuments", { userId })
 
       try {
         const settings = await context.orm.docProject.findUnique({
-          where: { projectId },
+          where: { id: docProjectId },
           select: { documentRole: true },
         })
 
@@ -442,7 +442,7 @@ export const documentResolvers = {
         // lenguaje, con el riesgo de que las dos versiones se separen.
         const documentos = await context.orm.document.findMany({
           where: {
-            projectId,
+            docProjectId,
             terminatedAt: null,
             obsoletedAt: null,
             revisions: { some: { status: { not: RevisionStatus.ABANDONED } } },
@@ -495,7 +495,7 @@ export const documentResolvers = {
           title: string
           description?: string
           module: ModuleType
-          projectId?: number
+          docProjectId?: number
           documentTypeId: number
           documentClassId?: number
           // El armador del primer circuito (B3). Obligatorio, con el valor por
@@ -525,13 +525,13 @@ export const documentResolvers = {
     ) => {
       // El invariante de B1 se exige ANTES de autorizar por proyecto: no tiene
       // sentido verificar membresía sobre un contexto que no es representable.
-      assertDocumentContext(input.module, input.projectId)
+      assertDocumentContext(input.module, input.docProjectId)
 
       // El proyecto viene en el input, de modo que la doble capa es estricta.
       // Nulo cuando el módulo no es PROJECTS: régimen de publicación (B1).
       const userId = await projectAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CREATE],
-        projectId: input.projectId ?? null,
+        docProjectId: input.docProjectId ?? null,
         context,
       })
       logger.info("createDocument", { userId })
@@ -543,7 +543,7 @@ export const documentResolvers = {
           const planned = await planRevision(tx, {
             documentId: null,
             scope: {
-              projectId: input.projectId ?? null,
+              docProjectId: input.docProjectId ?? null,
               documentClassId: input.documentClassId ?? null,
               documentTypeId: input.documentTypeId,
             },
@@ -564,7 +564,7 @@ export const documentResolvers = {
           // límite: quien conoce un identificador clasificaría con una entrada
           // que su proyecto no ve.
           await assertClassificationInScope(tx, {
-            projectId: input.projectId ?? null,
+            docProjectId: input.docProjectId ?? null,
             documentClassId: input.documentClassId ?? null,
             documentTypeId: input.documentTypeId,
           })
@@ -573,7 +573,7 @@ export const documentResolvers = {
           // su ruta se guarda como snapshot (BLOQUE 02B, B3).
           const locationPath = await resolveDocumentLocation(tx, {
             locationId: input.locationId ?? null,
-            projectId: input.projectId ?? null,
+            docProjectId: input.docProjectId ?? null,
           })
 
           // No existe documento sin circuito: existe circuito en armado (B3).
@@ -584,7 +584,7 @@ export const documentResolvers = {
               code: input.code,
               description: input.description,
               module: input.module,
-              projectId: input.projectId,
+              docProjectId: input.docProjectId,
               // Copia de la revisión en curso, que acá es la que nace (B2).
               currentTitle: input.title,
               currentDocumentTypeId: input.documentTypeId,
@@ -950,12 +950,12 @@ export const documentResolvers = {
               ? undefined
               : await resolveDocumentLocation(tx, {
                   locationId: input.locationId,
-                  projectId: (
+                  docProjectId: (
                     await tx.document.findUniqueOrThrow({
                       where: { id },
-                      select: { projectId: true },
+                      select: { docProjectId: true },
                     })
-                  ).projectId,
+                  ).docProjectId,
                 })
 
           const updated = await tx.document.update({

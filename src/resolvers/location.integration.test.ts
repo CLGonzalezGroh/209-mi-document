@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import test, { after, before } from "node:test"
 import jwt from "jsonwebtoken"
 import { prisma } from "../lib/prisma.js"
+import { asegurarContratos, borrarContratos } from "../utils/testContracts.js"
 import { ResolverContext } from "../types.js"
 import {
   DocCatalogKind,
@@ -57,16 +58,16 @@ const limpiar = async () => {
     })
   }
   await prisma.docCatalogScope.deleteMany({
-    where: { projectId: { in: PROYECTOS } },
+    where: { docProjectId: { in: PROYECTOS } },
   })
   await prisma.docProjectMember.deleteMany({
-    where: { projectId: { in: PROYECTOS } },
+    where: { docProjectId: { in: PROYECTOS } },
   })
   await prisma.docProject.deleteMany({
     where: { projectId: { in: PROYECTOS } },
   })
   await prisma.docAuditEvent.deleteMany({
-    where: { projectId: { in: PROYECTOS } },
+    where: { docProjectId: { in: PROYECTOS } },
   })
 }
 
@@ -75,7 +76,12 @@ const declarar = async (
   conMembresia = true,
   ubicacion: { locationEnabled?: boolean; locationRequired?: boolean } = {},
 ) => {
-  await docProjectsResolvers.Mutation.declareDocProject(
+  // El contrato existe antes de declararlo, con id igual a la constante: la
+  // mutación hace upsert POR CÓDIGO y cae sobre esta misma fila, de modo que
+  // todo lo que la prueba cuelga de `docProjectId` sigue siendo válido.
+  await asegurarContratos(prisma, [projectId], DocumentRole.INTERNAL)
+
+  const contrato: any = await docProjectsResolvers.Mutation.declareDocProject(
     null,
     {
       input: {
@@ -92,7 +98,7 @@ const declarar = async (
   if (conMembresia) {
     await projectMemberResolvers.Mutation.assignDocProjectMember(
       null,
-      { input: { projectId, userId: USER_ID, side: DocProjectSide.HOST } },
+      { input: { docProjectId: contrato.id, userId: USER_ID, side: DocProjectSide.HOST } },
       context,
     )
   }
@@ -105,24 +111,24 @@ const crear = (input: Record<string, unknown>) =>
     context,
   ) as Promise<any>
 
-const sembrar = (projectId: number, sourceProjectId?: number) =>
+const sembrar = (docProjectId: number, sourceProjectId?: number) =>
   locationResolvers.Mutation.seedProjectLocations(
     null,
-    { projectId, sourceProjectId },
+    { docProjectId, sourceProjectId },
     context,
   ) as Promise<any>
 
-const declararAlcance = (projectId: number, mode: DocScopeMode) =>
+const declararAlcance = (docProjectId: number, mode: DocScopeMode) =>
   catalogScopeResolvers.Mutation.declareCatalogScope(
     null,
-    { input: { projectId, catalog: DocCatalogKind.LOCATION, mode } },
+    { input: { docProjectId, catalog: DocCatalogKind.LOCATION, mode } },
     context,
   ) as Promise<any>
 
-const rutasDe = async (projectId: number) => {
+const rutasDe = async (docProjectId: number) => {
   const nodos = (await locationResolvers.Query.projectLocations(
     null,
-    { projectId },
+    { docProjectId },
     context,
   )) as any[]
   return nodos.map((n) => n.path).sort()
@@ -170,7 +176,7 @@ test("el árbol del despliegue compone la ruta con su ascendencia", async () => 
   assert.equal(planta.path, "Planta Urea")
   assert.equal(area.path, "Planta Urea / Área 100")
   assert.equal(unidad.path, "Planta Urea / Área 100 / Unidad 110")
-  assert.equal(planta.projectId, null)
+  assert.equal(planta.docProjectId, null)
 })
 
 // --- El cruce de alcances (B1) ---
@@ -180,10 +186,10 @@ test("un proyecto amplía el árbol del despliegue colgando de un nodo global", 
     code: "U2",
     name: "Unidad 120",
     parentId: area.id,
-    projectId: PLANTA,
+    docProjectId: PLANTA,
   })
 
-  assert.equal(ampliacion.projectId, PLANTA)
+  assert.equal(ampliacion.docProjectId, PLANTA)
   assert.equal(ampliacion.path, "Planta Urea / Área 100 / Unidad 120")
 })
 
@@ -209,7 +215,7 @@ test("un proyecto no puede colgar del árbol de otro proyecto", async () => {
         code: "X2",
         name: "Ajena",
         parentId: ampliacion.id,
-        projectId: INGENIERIA,
+        docProjectId: INGENIERIA,
       }),
     /su propio árbol/,
   )
@@ -226,7 +232,7 @@ test("sin declarar nada, el proyecto hereda y ve lo propio más lo del despliegu
   ])
 
   assert.equal(
-    await locationResolvers.Query.locationScope(null, { projectId: PLANTA }, context),
+    await locationResolvers.Query.locationScope(null, { docProjectId: PLANTA }, context),
     DocScopeMode.INHERIT,
   )
 })
@@ -256,7 +262,7 @@ test("un proyecto sin ampliaciones declara propio y deja de ver el despliegue", 
   assert.equal(
     await locationResolvers.Query.locationScope(
       null,
-      { projectId: INGENIERIA },
+      { docProjectId: INGENIERIA },
       context,
     ),
     DocScopeMode.OWN,
@@ -265,7 +271,7 @@ test("un proyecto sin ampliaciones declara propio y deja de ver el despliegue", 
 })
 
 test("mover la ampliación a un nodo propio habilita declarar propio", async () => {
-  const raiz = await crear({ code: "R", name: "Sitio propio", projectId: PLANTA })
+  const raiz = await crear({ code: "R", name: "Sitio propio", docProjectId: PLANTA })
   const ampliacion = await prisma.docLocation.findFirstOrThrow({
     where: { code: `${CODIGO}-U2` },
   })
@@ -287,7 +293,7 @@ test("mover la ampliación a un nodo propio habilita declarar propio", async () 
   // Se vuelve atrás declarándolo, y la fila queda: es lo que la traza necesita.
   await declararAlcance(PLANTA, DocScopeMode.INHERIT)
   assert.equal(
-    await prisma.docCatalogScope.count({ where: { projectId: PLANTA } }),
+    await prisma.docCatalogScope.count({ where: { docProjectId: PLANTA } }),
     1,
   )
 })
@@ -310,11 +316,11 @@ test("sembrar desde el despliegue crea el árbol en el proyecto, con su jerarqu�
   // La jerarquía se reconstruyó de verdad, y no solo las rutas: es lo que el
   // plan puro no puede verificar.
   const copiada = await prisma.docLocation.findFirstOrThrow({
-    where: { projectId: INGENIERIA, name: "Unidad 110" },
+    where: { docProjectId: INGENIERIA, name: "Unidad 110" },
     include: { parent: true },
   })
   assert.equal(copiada.parent?.name, "Área 100")
-  assert.equal(copiada.parent?.projectId, INGENIERIA)
+  assert.equal(copiada.parent?.docProjectId, INGENIERIA)
 
   // La referencia externa viaja: identifica el mismo objeto real.
   assert.equal(copiada.externalOrigin, DocLocationOrigin.ASSETS)
@@ -327,7 +333,7 @@ test("sembrar dos veces no duplica", async () => {
   assert.equal(resultado.added, 0)
   assert.equal(resultado.alreadyPresent, 3)
   assert.equal(
-    await prisma.docLocation.count({ where: { projectId: INGENIERIA } }),
+    await prisma.docLocation.count({ where: { docProjectId: INGENIERIA } }),
     3,
   )
 })
@@ -370,7 +376,7 @@ test("sembrar en un proyecto que hereda esas rutas no agrega nada", async () => 
 
   // Y no quedó ninguna copia propia de un nodo global.
   const propias = await prisma.docLocation.findMany({
-    where: { projectId: PLANTA },
+    where: { docProjectId: PLANTA },
     select: { path: true },
   })
   assert.equal(
@@ -389,12 +395,12 @@ test("una fuente solapada agrega solo lo que falta", async () => {
   assert.equal(resultado.alreadyPresent, 3)
 
   const copiada = await prisma.docLocation.findFirstOrThrow({
-    where: { projectId: INGENIERIA, name: "Área 200" },
+    where: { docProjectId: INGENIERIA, name: "Área 200" },
     include: { parent: true },
   })
   // Colgada del nodo que el destino ya tenía, y no de una copia nueva.
   assert.equal(copiada.parent?.name, "Planta Urea")
-  assert.equal(copiada.parent?.projectId, INGENIERIA)
+  assert.equal(copiada.parent?.docProjectId, INGENIERIA)
 })
 
 test("un proyecto no se siembra de sí mismo", async () => {
@@ -430,7 +436,7 @@ let documentTypeId: number
 
 const crearDocumento = async (
   sufijo: string,
-  projectId: number,
+  docProjectId: number,
   locationId?: number | null,
 ) =>
   (await documentResolvers.Mutation.createDocument(
@@ -440,7 +446,7 @@ const crearDocumento = async (
         code: `${CODIGO}-${sufijo}`,
         title: `Documento ${sufijo}`,
         module: ModuleType.PROJECTS,
-        projectId,
+        docProjectId,
         documentTypeId,
         assignedOrganizerId: USER_ID,
         ...(locationId !== undefined && { locationId }),
@@ -506,7 +512,7 @@ test("un proyecto puede exigir la ubicación", async () => {
   // Con una de su propio catálogo, entra. `OTRO_CLIENTE` declaró propio en la
   // fase 3 y tiene su copia del árbol.
   const propia = await prisma.docLocation.findFirstOrThrow({
-    where: { projectId: OTRO_CLIENTE, name: "Área 100" },
+    where: { docProjectId: OTRO_CLIENTE, name: "Área 100" },
   })
   const doc = await crearDocumento("D7", OTRO_CLIENTE, propia.id)
   assert.equal(doc.locationPath, "Planta Urea / Área 100")
@@ -516,7 +522,7 @@ test("con el atributo deshabilitado no se declara ubicación", async () => {
   await declarar(OTRO_CLIENTE, true, { locationEnabled: false })
 
   const propia = await prisma.docLocation.findFirstOrThrow({
-    where: { projectId: OTRO_CLIENTE, name: "Área 100" },
+    where: { docProjectId: OTRO_CLIENTE, name: "Área 100" },
   })
   await assert.rejects(
     () => crearDocumento("D8", OTRO_CLIENTE, propia.id),
@@ -723,9 +729,9 @@ test("el catálogo también se lista por rama", async () => {
 test("las dos fuentes producen el mismo árbol en el destino (criterio 2)", async () => {
   // `INGENIERIA` se sembró del despliegue y `OTRO_CLIENTE` de `INGENIERIA`: si el
   // mecanismo es uno, los dos catálogos deben coincidir en rutas y en jerarquía.
-  const arbolDe = async (projectId: number) => {
+  const arbolDe = async (docProjectId: number) => {
     const nodos = await prisma.docLocation.findMany({
-      where: { projectId },
+      where: { docProjectId },
       include: { parent: { select: { path: true } } },
       orderBy: { path: "asc" },
     })
@@ -745,11 +751,11 @@ test("las dos fuentes producen el mismo árbol en el destino (criterio 2)", asyn
 test("solo se ofrecen como fuente los proyectos que el usuario alcanza (criterio 4)", async () => {
   const fuentes = (await locationResolvers.Query.locationSeedSources(
     null,
-    { projectId: PLANTA },
+    { docProjectId: PLANTA },
     context,
   )) as any[]
 
-  const ids = fuentes.map((f) => f.projectId)
+  const ids = fuentes.map((f) => f.docProjectId)
 
   // `AJENO` no tiene membresía del usuario: no figura, aunque tuviera catálogo.
   assert.equal(ids.includes(AJENO), false)
@@ -757,7 +763,7 @@ test("solo se ofrecen como fuente los proyectos que el usuario alcanza (criterio
   assert.equal(ids.includes(PLANTA), false)
   // Los que sí alcanza y tienen catálogo propio, con su aporte.
   assert.ok(ids.includes(INGENIERIA))
-  assert.ok(fuentes.find((f) => f.projectId === INGENIERIA).nodeCount >= 3)
+  assert.ok(fuentes.find((f) => f.docProjectId === INGENIERIA).nodeCount >= 3)
 })
 
 test("un proyecto sin catálogo propio no se ofrece como fuente", async () => {
@@ -769,16 +775,16 @@ test("un proyecto sin catálogo propio no se ofrece como fuente", async () => {
 
   const fuentes = (await locationResolvers.Query.locationSeedSources(
     null,
-    { projectId: PLANTA },
+    { docProjectId: PLANTA },
     context,
   )) as any[]
 
   assert.equal(
-    fuentes.some((f) => f.projectId === VACIO),
+    fuentes.some((f) => f.docProjectId === VACIO),
     false,
   )
 
-  await prisma.docProjectMember.deleteMany({ where: { projectId: VACIO } })
+  await prisma.docProjectMember.deleteMany({ where: { docProjectId: VACIO } })
   await prisma.docProject.deleteMany({ where: { projectId: VACIO } })
 })
 
@@ -815,7 +821,10 @@ test("los tres roles atraviesan el alta sin declarar ubicación (criterio 7)", a
     [EMISOR, DocumentRole.ISSUER],
     [RECEPTOR, DocumentRole.RECEIVER],
   ] as const) {
-    await docProjectsResolvers.Mutation.declareDocProject(
+    // El contrato existe antes de declararlo, con id igual a la constante.
+    await asegurarContratos(prisma, [projectId], rol)
+
+    const contrato: any = await docProjectsResolvers.Mutation.declareDocProject(
       null,
       {
         input: {
@@ -831,19 +840,19 @@ test("los tres roles atraviesan el alta sin declarar ubicación (criterio 7)", a
     )
     await projectMemberResolvers.Mutation.assignDocProjectMember(
       null,
-      { input: { projectId, userId: USER_ID, side: DocProjectSide.HOST } },
+      { input: { docProjectId: contrato.id, userId: USER_ID, side: DocProjectSide.HOST } },
       context,
     )
 
-    const doc = await crearDocumento(`ROL-${rol}`, projectId)
+    const doc = await crearDocumento(`ROL-${rol}`, contrato.id)
     assert.equal(doc.locationId, null, `el rol ${rol} exigió ubicación`)
   }
 
   await prisma.document.deleteMany({
-    where: { projectId: { in: [EMISOR, RECEPTOR] } },
+    where: { docProjectId: { in: [EMISOR, RECEPTOR] } },
   })
   await prisma.docProjectMember.deleteMany({
-    where: { projectId: { in: [EMISOR, RECEPTOR] } },
+    where: { docProjectId: { in: [EMISOR, RECEPTOR] } },
   })
   await prisma.docProject.deleteMany({
     where: { projectId: { in: [EMISOR, RECEPTOR] } },

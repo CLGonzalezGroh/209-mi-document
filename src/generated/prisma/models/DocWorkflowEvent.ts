@@ -30,14 +30,14 @@ export type DocWorkflowEventAvgAggregateOutputType = {
   id: number | null
   createdById: number | null
   objectId: number | null
-  projectId: number | null
+  docProjectId: number | null
 }
 
 export type DocWorkflowEventSumAggregateOutputType = {
   id: number | null
   createdById: number | null
   objectId: number | null
-  projectId: number | null
+  docProjectId: number | null
 }
 
 export type DocWorkflowEventMinAggregateOutputType = {
@@ -49,7 +49,7 @@ export type DocWorkflowEventMinAggregateOutputType = {
   name: string | null
   fromState: string | null
   toState: string | null
-  projectId: number | null
+  docProjectId: number | null
   module: $Enums.ModuleType | null
 }
 
@@ -62,7 +62,7 @@ export type DocWorkflowEventMaxAggregateOutputType = {
   name: string | null
   fromState: string | null
   toState: string | null
-  projectId: number | null
+  docProjectId: number | null
   module: $Enums.ModuleType | null
 }
 
@@ -75,7 +75,7 @@ export type DocWorkflowEventCountAggregateOutputType = {
   name: number
   fromState: number
   toState: number
-  projectId: number
+  docProjectId: number
   module: number
   _all: number
 }
@@ -85,14 +85,14 @@ export type DocWorkflowEventAvgAggregateInputType = {
   id?: true
   createdById?: true
   objectId?: true
-  projectId?: true
+  docProjectId?: true
 }
 
 export type DocWorkflowEventSumAggregateInputType = {
   id?: true
   createdById?: true
   objectId?: true
-  projectId?: true
+  docProjectId?: true
 }
 
 export type DocWorkflowEventMinAggregateInputType = {
@@ -104,7 +104,7 @@ export type DocWorkflowEventMinAggregateInputType = {
   name?: true
   fromState?: true
   toState?: true
-  projectId?: true
+  docProjectId?: true
   module?: true
 }
 
@@ -117,7 +117,7 @@ export type DocWorkflowEventMaxAggregateInputType = {
   name?: true
   fromState?: true
   toState?: true
-  projectId?: true
+  docProjectId?: true
   module?: true
 }
 
@@ -130,7 +130,7 @@ export type DocWorkflowEventCountAggregateInputType = {
   name?: true
   fromState?: true
   toState?: true
-  projectId?: true
+  docProjectId?: true
   module?: true
   _all?: true
 }
@@ -230,7 +230,7 @@ export type DocWorkflowEventGroupByOutputType = {
   name: string
   fromState: string | null
   toState: string | null
-  projectId: number | null
+  docProjectId: number | null
   module: $Enums.ModuleType | null
   _count: DocWorkflowEventCountAggregateOutputType | null
   _avg: DocWorkflowEventAvgAggregateOutputType | null
@@ -266,7 +266,7 @@ export type DocWorkflowEventWhereInput = {
   name?: Prisma.StringFilter<"DocWorkflowEvent"> | string
   fromState?: Prisma.StringNullableFilter<"DocWorkflowEvent"> | string | null
   toState?: Prisma.StringNullableFilter<"DocWorkflowEvent"> | string | null
-  projectId?: Prisma.IntNullableFilter<"DocWorkflowEvent"> | number | null
+  docProjectId?: Prisma.IntNullableFilter<"DocWorkflowEvent"> | number | null
   module?: Prisma.EnumModuleTypeNullableFilter<"DocWorkflowEvent"> | $Enums.ModuleType | null
 }
 
@@ -279,7 +279,7 @@ export type DocWorkflowEventOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   fromState?: Prisma.SortOrderInput | Prisma.SortOrder
   toState?: Prisma.SortOrderInput | Prisma.SortOrder
-  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProjectId?: Prisma.SortOrderInput | Prisma.SortOrder
   module?: Prisma.SortOrderInput | Prisma.SortOrder
 }
 
@@ -295,7 +295,7 @@ export type DocWorkflowEventWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"DocWorkflowEvent"> | string
   fromState?: Prisma.StringNullableFilter<"DocWorkflowEvent"> | string | null
   toState?: Prisma.StringNullableFilter<"DocWorkflowEvent"> | string | null
-  projectId?: Prisma.IntNullableFilter<"DocWorkflowEvent"> | number | null
+  docProjectId?: Prisma.IntNullableFilter<"DocWorkflowEvent"> | number | null
   module?: Prisma.EnumModuleTypeNullableFilter<"DocWorkflowEvent"> | $Enums.ModuleType | null
 }, "id">
 
@@ -308,7 +308,7 @@ export type DocWorkflowEventOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   fromState?: Prisma.SortOrderInput | Prisma.SortOrder
   toState?: Prisma.SortOrderInput | Prisma.SortOrder
-  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProjectId?: Prisma.SortOrderInput | Prisma.SortOrder
   module?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DocWorkflowEventCountOrderByAggregateInput
   _avg?: Prisma.DocWorkflowEventAvgOrderByAggregateInput
@@ -329,7 +329,7 @@ export type DocWorkflowEventScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"DocWorkflowEvent"> | string
   fromState?: Prisma.StringNullableWithAggregatesFilter<"DocWorkflowEvent"> | string | null
   toState?: Prisma.StringNullableWithAggregatesFilter<"DocWorkflowEvent"> | string | null
-  projectId?: Prisma.IntNullableWithAggregatesFilter<"DocWorkflowEvent"> | number | null
+  docProjectId?: Prisma.IntNullableWithAggregatesFilter<"DocWorkflowEvent"> | number | null
   module?: Prisma.EnumModuleTypeNullableWithAggregatesFilter<"DocWorkflowEvent"> | $Enums.ModuleType | null
 }
 
@@ -341,7 +341,7 @@ export type DocWorkflowEventCreateInput = {
   name: string
   fromState?: string | null
   toState?: string | null
-  projectId?: number | null
+  docProjectId?: number | null
   module?: $Enums.ModuleType | null
 }
 
@@ -354,7 +354,7 @@ export type DocWorkflowEventUncheckedCreateInput = {
   name: string
   fromState?: string | null
   toState?: string | null
-  projectId?: number | null
+  docProjectId?: number | null
   module?: $Enums.ModuleType | null
 }
 
@@ -366,7 +366,7 @@ export type DocWorkflowEventUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   fromState?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toState?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
 }
 
@@ -379,7 +379,7 @@ export type DocWorkflowEventUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   fromState?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toState?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
 }
 
@@ -392,7 +392,7 @@ export type DocWorkflowEventCreateManyInput = {
   name: string
   fromState?: string | null
   toState?: string | null
-  projectId?: number | null
+  docProjectId?: number | null
   module?: $Enums.ModuleType | null
 }
 
@@ -404,7 +404,7 @@ export type DocWorkflowEventUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   fromState?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toState?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
 }
 
@@ -417,7 +417,7 @@ export type DocWorkflowEventUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   fromState?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   toState?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
 }
 
@@ -430,7 +430,7 @@ export type DocWorkflowEventCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   fromState?: Prisma.SortOrder
   toState?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   module?: Prisma.SortOrder
 }
 
@@ -438,7 +438,7 @@ export type DocWorkflowEventAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   objectId?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
 }
 
 export type DocWorkflowEventMaxOrderByAggregateInput = {
@@ -450,7 +450,7 @@ export type DocWorkflowEventMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   fromState?: Prisma.SortOrder
   toState?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   module?: Prisma.SortOrder
 }
 
@@ -463,7 +463,7 @@ export type DocWorkflowEventMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   fromState?: Prisma.SortOrder
   toState?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   module?: Prisma.SortOrder
 }
 
@@ -471,7 +471,7 @@ export type DocWorkflowEventSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   objectId?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
 }
 
 export type EnumDocObjectTypeFieldUpdateOperationsInput = {
@@ -489,7 +489,7 @@ export type DocWorkflowEventSelect<ExtArgs extends runtime.Types.Extensions.Inte
   name?: boolean
   fromState?: boolean
   toState?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   module?: boolean
 }, ExtArgs["result"]["docWorkflowEvent"]>
 
@@ -502,7 +502,7 @@ export type DocWorkflowEventSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   name?: boolean
   fromState?: boolean
   toState?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   module?: boolean
 }, ExtArgs["result"]["docWorkflowEvent"]>
 
@@ -515,7 +515,7 @@ export type DocWorkflowEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   name?: boolean
   fromState?: boolean
   toState?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   module?: boolean
 }, ExtArgs["result"]["docWorkflowEvent"]>
 
@@ -528,11 +528,11 @@ export type DocWorkflowEventSelectScalar = {
   name?: boolean
   fromState?: boolean
   toState?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   module?: boolean
 }
 
-export type DocWorkflowEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "objectType" | "objectId" | "name" | "fromState" | "toState" | "projectId" | "module", ExtArgs["result"]["docWorkflowEvent"]>
+export type DocWorkflowEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "objectType" | "objectId" | "name" | "fromState" | "toState" | "docProjectId" | "module", ExtArgs["result"]["docWorkflowEvent"]>
 
 export type $DocWorkflowEventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DocWorkflowEvent"
@@ -546,7 +546,7 @@ export type $DocWorkflowEventPayload<ExtArgs extends runtime.Types.Extensions.In
     name: string
     fromState: string | null
     toState: string | null
-    projectId: number | null
+    docProjectId: number | null
     module: $Enums.ModuleType | null
   }, ExtArgs["result"]["docWorkflowEvent"]>
   composites: {}
@@ -979,7 +979,7 @@ export interface DocWorkflowEventFieldRefs {
   readonly name: Prisma.FieldRef<"DocWorkflowEvent", 'String'>
   readonly fromState: Prisma.FieldRef<"DocWorkflowEvent", 'String'>
   readonly toState: Prisma.FieldRef<"DocWorkflowEvent", 'String'>
-  readonly projectId: Prisma.FieldRef<"DocWorkflowEvent", 'Int'>
+  readonly docProjectId: Prisma.FieldRef<"DocWorkflowEvent", 'Int'>
   readonly module: Prisma.FieldRef<"DocWorkflowEvent", 'ModuleType'>
 }
     

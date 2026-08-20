@@ -11,7 +11,7 @@ import { DocumentRole, StepType } from "../generated/prisma/enums.js"
 
 /** Alcance de una plantilla, y también la tupla del documento contra la que se resuelve. */
 export type TemplateScope = {
-  projectId: number | null
+  docProjectId: number | null
   documentClassId: number | null
   documentTypeId: number | null
 }
@@ -32,7 +32,7 @@ export type TemplateSnapshot = TemplateScope & {
 const specificity = (template: TemplateScope): number => {
   if (template.documentTypeId !== null) return 3
   if (template.documentClassId !== null) return 2
-  if (template.projectId !== null) return 1
+  if (template.docProjectId !== null) return 1
   return 0
 }
 
@@ -54,7 +54,7 @@ export const resolveTemplate = <T extends TemplateSnapshot>(
   const applicable = templates.filter(
     (t) =>
       t.terminatedAt === null &&
-      (t.projectId === null || t.projectId === document.projectId) &&
+      (t.docProjectId === null || t.docProjectId === document.docProjectId) &&
       (t.documentClassId === null ||
         t.documentClassId === document.documentClassId) &&
       (t.documentTypeId === null ||

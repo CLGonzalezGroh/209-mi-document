@@ -29,7 +29,7 @@ export type AggregateDocProjectMember = {
 export type DocProjectMemberAvgAggregateOutputType = {
   id: number | null
   updatedById: number | null
-  projectId: number | null
+  docProjectId: number | null
   userId: number | null
   assignedById: number | null
   revokedById: number | null
@@ -38,7 +38,7 @@ export type DocProjectMemberAvgAggregateOutputType = {
 export type DocProjectMemberSumAggregateOutputType = {
   id: number | null
   updatedById: number | null
-  projectId: number | null
+  docProjectId: number | null
   userId: number | null
   assignedById: number | null
   revokedById: number | null
@@ -50,7 +50,7 @@ export type DocProjectMemberMinAggregateOutputType = {
   updatedAt: Date | null
   updatedById: number | null
   isSys: boolean | null
-  projectId: number | null
+  docProjectId: number | null
   userId: number | null
   side: $Enums.DocProjectSide | null
   assignedAt: Date | null
@@ -66,7 +66,7 @@ export type DocProjectMemberMaxAggregateOutputType = {
   updatedAt: Date | null
   updatedById: number | null
   isSys: boolean | null
-  projectId: number | null
+  docProjectId: number | null
   userId: number | null
   side: $Enums.DocProjectSide | null
   assignedAt: Date | null
@@ -82,7 +82,7 @@ export type DocProjectMemberCountAggregateOutputType = {
   updatedAt: number
   updatedById: number
   isSys: number
-  projectId: number
+  docProjectId: number
   userId: number
   side: number
   assignedAt: number
@@ -97,7 +97,7 @@ export type DocProjectMemberCountAggregateOutputType = {
 export type DocProjectMemberAvgAggregateInputType = {
   id?: true
   updatedById?: true
-  projectId?: true
+  docProjectId?: true
   userId?: true
   assignedById?: true
   revokedById?: true
@@ -106,7 +106,7 @@ export type DocProjectMemberAvgAggregateInputType = {
 export type DocProjectMemberSumAggregateInputType = {
   id?: true
   updatedById?: true
-  projectId?: true
+  docProjectId?: true
   userId?: true
   assignedById?: true
   revokedById?: true
@@ -118,7 +118,7 @@ export type DocProjectMemberMinAggregateInputType = {
   updatedAt?: true
   updatedById?: true
   isSys?: true
-  projectId?: true
+  docProjectId?: true
   userId?: true
   side?: true
   assignedAt?: true
@@ -134,7 +134,7 @@ export type DocProjectMemberMaxAggregateInputType = {
   updatedAt?: true
   updatedById?: true
   isSys?: true
-  projectId?: true
+  docProjectId?: true
   userId?: true
   side?: true
   assignedAt?: true
@@ -150,7 +150,7 @@ export type DocProjectMemberCountAggregateInputType = {
   updatedAt?: true
   updatedById?: true
   isSys?: true
-  projectId?: true
+  docProjectId?: true
   userId?: true
   side?: true
   assignedAt?: true
@@ -253,7 +253,7 @@ export type DocProjectMemberGroupByOutputType = {
   updatedAt: Date | null
   updatedById: number
   isSys: boolean
-  projectId: number
+  docProjectId: number
   userId: number
   side: $Enums.DocProjectSide
   assignedAt: Date
@@ -292,7 +292,7 @@ export type DocProjectMemberWhereInput = {
   updatedAt?: Prisma.DateTimeNullableFilter<"DocProjectMember"> | Date | string | null
   updatedById?: Prisma.IntFilter<"DocProjectMember"> | number
   isSys?: Prisma.BoolFilter<"DocProjectMember"> | boolean
-  projectId?: Prisma.IntFilter<"DocProjectMember"> | number
+  docProjectId?: Prisma.IntFilter<"DocProjectMember"> | number
   userId?: Prisma.IntFilter<"DocProjectMember"> | number
   side?: Prisma.EnumDocProjectSideFilter<"DocProjectMember"> | $Enums.DocProjectSide
   assignedAt?: Prisma.DateTimeFilter<"DocProjectMember"> | Date | string
@@ -300,6 +300,7 @@ export type DocProjectMemberWhereInput = {
   isActive?: Prisma.BoolFilter<"DocProjectMember"> | boolean
   revokedAt?: Prisma.DateTimeNullableFilter<"DocProjectMember"> | Date | string | null
   revokedById?: Prisma.IntNullableFilter<"DocProjectMember"> | number | null
+  docProject?: Prisma.XOR<Prisma.DocProjectScalarRelationFilter, Prisma.DocProjectWhereInput>
 }
 
 export type DocProjectMemberOrderByWithRelationInput = {
@@ -308,7 +309,7 @@ export type DocProjectMemberOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   isSys?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   side?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
@@ -316,11 +317,12 @@ export type DocProjectMemberOrderByWithRelationInput = {
   isActive?: Prisma.SortOrder
   revokedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   revokedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProject?: Prisma.DocProjectOrderByWithRelationInput
 }
 
 export type DocProjectMemberWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  projectId_userId?: Prisma.DocProjectMemberProjectIdUserIdCompoundUniqueInput
+  docProjectId_userId?: Prisma.DocProjectMemberDocProjectIdUserIdCompoundUniqueInput
   AND?: Prisma.DocProjectMemberWhereInput | Prisma.DocProjectMemberWhereInput[]
   OR?: Prisma.DocProjectMemberWhereInput[]
   NOT?: Prisma.DocProjectMemberWhereInput | Prisma.DocProjectMemberWhereInput[]
@@ -328,7 +330,7 @@ export type DocProjectMemberWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeNullableFilter<"DocProjectMember"> | Date | string | null
   updatedById?: Prisma.IntFilter<"DocProjectMember"> | number
   isSys?: Prisma.BoolFilter<"DocProjectMember"> | boolean
-  projectId?: Prisma.IntFilter<"DocProjectMember"> | number
+  docProjectId?: Prisma.IntFilter<"DocProjectMember"> | number
   userId?: Prisma.IntFilter<"DocProjectMember"> | number
   side?: Prisma.EnumDocProjectSideFilter<"DocProjectMember"> | $Enums.DocProjectSide
   assignedAt?: Prisma.DateTimeFilter<"DocProjectMember"> | Date | string
@@ -336,7 +338,8 @@ export type DocProjectMemberWhereUniqueInput = Prisma.AtLeast<{
   isActive?: Prisma.BoolFilter<"DocProjectMember"> | boolean
   revokedAt?: Prisma.DateTimeNullableFilter<"DocProjectMember"> | Date | string | null
   revokedById?: Prisma.IntNullableFilter<"DocProjectMember"> | number | null
-}, "id" | "projectId_userId">
+  docProject?: Prisma.XOR<Prisma.DocProjectScalarRelationFilter, Prisma.DocProjectWhereInput>
+}, "id" | "docProjectId_userId">
 
 export type DocProjectMemberOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -344,7 +347,7 @@ export type DocProjectMemberOrderByWithAggregationInput = {
   updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   isSys?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   side?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
@@ -368,7 +371,7 @@ export type DocProjectMemberScalarWhereWithAggregatesInput = {
   updatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DocProjectMember"> | Date | string | null
   updatedById?: Prisma.IntWithAggregatesFilter<"DocProjectMember"> | number
   isSys?: Prisma.BoolWithAggregatesFilter<"DocProjectMember"> | boolean
-  projectId?: Prisma.IntWithAggregatesFilter<"DocProjectMember"> | number
+  docProjectId?: Prisma.IntWithAggregatesFilter<"DocProjectMember"> | number
   userId?: Prisma.IntWithAggregatesFilter<"DocProjectMember"> | number
   side?: Prisma.EnumDocProjectSideWithAggregatesFilter<"DocProjectMember"> | $Enums.DocProjectSide
   assignedAt?: Prisma.DateTimeWithAggregatesFilter<"DocProjectMember"> | Date | string
@@ -383,7 +386,6 @@ export type DocProjectMemberCreateInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   isSys?: boolean
-  projectId: number
   userId: number
   side: $Enums.DocProjectSide
   assignedAt?: Date | string
@@ -391,6 +393,7 @@ export type DocProjectMemberCreateInput = {
   isActive?: boolean
   revokedAt?: Date | string | null
   revokedById?: number | null
+  docProject: Prisma.DocProjectCreateNestedOneWithoutMembersInput
 }
 
 export type DocProjectMemberUncheckedCreateInput = {
@@ -399,7 +402,7 @@ export type DocProjectMemberUncheckedCreateInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   isSys?: boolean
-  projectId: number
+  docProjectId: number
   userId: number
   side: $Enums.DocProjectSide
   assignedAt?: Date | string
@@ -414,7 +417,6 @@ export type DocProjectMemberUpdateInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.IntFieldUpdateOperationsInput | number
   side?: Prisma.EnumDocProjectSideFieldUpdateOperationsInput | $Enums.DocProjectSide
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -422,6 +424,7 @@ export type DocProjectMemberUpdateInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProject?: Prisma.DocProjectUpdateOneRequiredWithoutMembersNestedInput
 }
 
 export type DocProjectMemberUncheckedUpdateInput = {
@@ -430,7 +433,7 @@ export type DocProjectMemberUncheckedUpdateInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  docProjectId?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.IntFieldUpdateOperationsInput | number
   side?: Prisma.EnumDocProjectSideFieldUpdateOperationsInput | $Enums.DocProjectSide
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -446,7 +449,7 @@ export type DocProjectMemberCreateManyInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   isSys?: boolean
-  projectId: number
+  docProjectId: number
   userId: number
   side: $Enums.DocProjectSide
   assignedAt?: Date | string
@@ -461,7 +464,6 @@ export type DocProjectMemberUpdateManyMutationInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.IntFieldUpdateOperationsInput | number
   side?: Prisma.EnumDocProjectSideFieldUpdateOperationsInput | $Enums.DocProjectSide
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -477,7 +479,7 @@ export type DocProjectMemberUncheckedUpdateManyInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  docProjectId?: Prisma.IntFieldUpdateOperationsInput | number
   userId?: Prisma.IntFieldUpdateOperationsInput | number
   side?: Prisma.EnumDocProjectSideFieldUpdateOperationsInput | $Enums.DocProjectSide
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -487,8 +489,18 @@ export type DocProjectMemberUncheckedUpdateManyInput = {
   revokedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
-export type DocProjectMemberProjectIdUserIdCompoundUniqueInput = {
-  projectId: number
+export type DocProjectMemberListRelationFilter = {
+  every?: Prisma.DocProjectMemberWhereInput
+  some?: Prisma.DocProjectMemberWhereInput
+  none?: Prisma.DocProjectMemberWhereInput
+}
+
+export type DocProjectMemberOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type DocProjectMemberDocProjectIdUserIdCompoundUniqueInput = {
+  docProjectId: number
   userId: number
 }
 
@@ -498,7 +510,7 @@ export type DocProjectMemberCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   isSys?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   side?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
@@ -511,7 +523,7 @@ export type DocProjectMemberCountOrderByAggregateInput = {
 export type DocProjectMemberAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   assignedById?: Prisma.SortOrder
   revokedById?: Prisma.SortOrder
@@ -523,7 +535,7 @@ export type DocProjectMemberMaxOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   isSys?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   side?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
@@ -539,7 +551,7 @@ export type DocProjectMemberMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   isSys?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   side?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
@@ -552,14 +564,189 @@ export type DocProjectMemberMinOrderByAggregateInput = {
 export type DocProjectMemberSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   assignedById?: Prisma.SortOrder
   revokedById?: Prisma.SortOrder
 }
 
+export type DocProjectMemberCreateNestedManyWithoutDocProjectInput = {
+  create?: Prisma.XOR<Prisma.DocProjectMemberCreateWithoutDocProjectInput, Prisma.DocProjectMemberUncheckedCreateWithoutDocProjectInput> | Prisma.DocProjectMemberCreateWithoutDocProjectInput[] | Prisma.DocProjectMemberUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocProjectMemberCreateOrConnectWithoutDocProjectInput | Prisma.DocProjectMemberCreateOrConnectWithoutDocProjectInput[]
+  createMany?: Prisma.DocProjectMemberCreateManyDocProjectInputEnvelope
+  connect?: Prisma.DocProjectMemberWhereUniqueInput | Prisma.DocProjectMemberWhereUniqueInput[]
+}
+
+export type DocProjectMemberUncheckedCreateNestedManyWithoutDocProjectInput = {
+  create?: Prisma.XOR<Prisma.DocProjectMemberCreateWithoutDocProjectInput, Prisma.DocProjectMemberUncheckedCreateWithoutDocProjectInput> | Prisma.DocProjectMemberCreateWithoutDocProjectInput[] | Prisma.DocProjectMemberUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocProjectMemberCreateOrConnectWithoutDocProjectInput | Prisma.DocProjectMemberCreateOrConnectWithoutDocProjectInput[]
+  createMany?: Prisma.DocProjectMemberCreateManyDocProjectInputEnvelope
+  connect?: Prisma.DocProjectMemberWhereUniqueInput | Prisma.DocProjectMemberWhereUniqueInput[]
+}
+
+export type DocProjectMemberUpdateManyWithoutDocProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.DocProjectMemberCreateWithoutDocProjectInput, Prisma.DocProjectMemberUncheckedCreateWithoutDocProjectInput> | Prisma.DocProjectMemberCreateWithoutDocProjectInput[] | Prisma.DocProjectMemberUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocProjectMemberCreateOrConnectWithoutDocProjectInput | Prisma.DocProjectMemberCreateOrConnectWithoutDocProjectInput[]
+  upsert?: Prisma.DocProjectMemberUpsertWithWhereUniqueWithoutDocProjectInput | Prisma.DocProjectMemberUpsertWithWhereUniqueWithoutDocProjectInput[]
+  createMany?: Prisma.DocProjectMemberCreateManyDocProjectInputEnvelope
+  set?: Prisma.DocProjectMemberWhereUniqueInput | Prisma.DocProjectMemberWhereUniqueInput[]
+  disconnect?: Prisma.DocProjectMemberWhereUniqueInput | Prisma.DocProjectMemberWhereUniqueInput[]
+  delete?: Prisma.DocProjectMemberWhereUniqueInput | Prisma.DocProjectMemberWhereUniqueInput[]
+  connect?: Prisma.DocProjectMemberWhereUniqueInput | Prisma.DocProjectMemberWhereUniqueInput[]
+  update?: Prisma.DocProjectMemberUpdateWithWhereUniqueWithoutDocProjectInput | Prisma.DocProjectMemberUpdateWithWhereUniqueWithoutDocProjectInput[]
+  updateMany?: Prisma.DocProjectMemberUpdateManyWithWhereWithoutDocProjectInput | Prisma.DocProjectMemberUpdateManyWithWhereWithoutDocProjectInput[]
+  deleteMany?: Prisma.DocProjectMemberScalarWhereInput | Prisma.DocProjectMemberScalarWhereInput[]
+}
+
+export type DocProjectMemberUncheckedUpdateManyWithoutDocProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.DocProjectMemberCreateWithoutDocProjectInput, Prisma.DocProjectMemberUncheckedCreateWithoutDocProjectInput> | Prisma.DocProjectMemberCreateWithoutDocProjectInput[] | Prisma.DocProjectMemberUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocProjectMemberCreateOrConnectWithoutDocProjectInput | Prisma.DocProjectMemberCreateOrConnectWithoutDocProjectInput[]
+  upsert?: Prisma.DocProjectMemberUpsertWithWhereUniqueWithoutDocProjectInput | Prisma.DocProjectMemberUpsertWithWhereUniqueWithoutDocProjectInput[]
+  createMany?: Prisma.DocProjectMemberCreateManyDocProjectInputEnvelope
+  set?: Prisma.DocProjectMemberWhereUniqueInput | Prisma.DocProjectMemberWhereUniqueInput[]
+  disconnect?: Prisma.DocProjectMemberWhereUniqueInput | Prisma.DocProjectMemberWhereUniqueInput[]
+  delete?: Prisma.DocProjectMemberWhereUniqueInput | Prisma.DocProjectMemberWhereUniqueInput[]
+  connect?: Prisma.DocProjectMemberWhereUniqueInput | Prisma.DocProjectMemberWhereUniqueInput[]
+  update?: Prisma.DocProjectMemberUpdateWithWhereUniqueWithoutDocProjectInput | Prisma.DocProjectMemberUpdateWithWhereUniqueWithoutDocProjectInput[]
+  updateMany?: Prisma.DocProjectMemberUpdateManyWithWhereWithoutDocProjectInput | Prisma.DocProjectMemberUpdateManyWithWhereWithoutDocProjectInput[]
+  deleteMany?: Prisma.DocProjectMemberScalarWhereInput | Prisma.DocProjectMemberScalarWhereInput[]
+}
+
 export type EnumDocProjectSideFieldUpdateOperationsInput = {
   set?: $Enums.DocProjectSide
+}
+
+export type DocProjectMemberCreateWithoutDocProjectInput = {
+  createdAt?: Date | string
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  userId: number
+  side: $Enums.DocProjectSide
+  assignedAt?: Date | string
+  assignedById: number
+  isActive?: boolean
+  revokedAt?: Date | string | null
+  revokedById?: number | null
+}
+
+export type DocProjectMemberUncheckedCreateWithoutDocProjectInput = {
+  id?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  userId: number
+  side: $Enums.DocProjectSide
+  assignedAt?: Date | string
+  assignedById: number
+  isActive?: boolean
+  revokedAt?: Date | string | null
+  revokedById?: number | null
+}
+
+export type DocProjectMemberCreateOrConnectWithoutDocProjectInput = {
+  where: Prisma.DocProjectMemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocProjectMemberCreateWithoutDocProjectInput, Prisma.DocProjectMemberUncheckedCreateWithoutDocProjectInput>
+}
+
+export type DocProjectMemberCreateManyDocProjectInputEnvelope = {
+  data: Prisma.DocProjectMemberCreateManyDocProjectInput | Prisma.DocProjectMemberCreateManyDocProjectInput[]
+  skipDuplicates?: boolean
+}
+
+export type DocProjectMemberUpsertWithWhereUniqueWithoutDocProjectInput = {
+  where: Prisma.DocProjectMemberWhereUniqueInput
+  update: Prisma.XOR<Prisma.DocProjectMemberUpdateWithoutDocProjectInput, Prisma.DocProjectMemberUncheckedUpdateWithoutDocProjectInput>
+  create: Prisma.XOR<Prisma.DocProjectMemberCreateWithoutDocProjectInput, Prisma.DocProjectMemberUncheckedCreateWithoutDocProjectInput>
+}
+
+export type DocProjectMemberUpdateWithWhereUniqueWithoutDocProjectInput = {
+  where: Prisma.DocProjectMemberWhereUniqueInput
+  data: Prisma.XOR<Prisma.DocProjectMemberUpdateWithoutDocProjectInput, Prisma.DocProjectMemberUncheckedUpdateWithoutDocProjectInput>
+}
+
+export type DocProjectMemberUpdateManyWithWhereWithoutDocProjectInput = {
+  where: Prisma.DocProjectMemberScalarWhereInput
+  data: Prisma.XOR<Prisma.DocProjectMemberUpdateManyMutationInput, Prisma.DocProjectMemberUncheckedUpdateManyWithoutDocProjectInput>
+}
+
+export type DocProjectMemberScalarWhereInput = {
+  AND?: Prisma.DocProjectMemberScalarWhereInput | Prisma.DocProjectMemberScalarWhereInput[]
+  OR?: Prisma.DocProjectMemberScalarWhereInput[]
+  NOT?: Prisma.DocProjectMemberScalarWhereInput | Prisma.DocProjectMemberScalarWhereInput[]
+  id?: Prisma.IntFilter<"DocProjectMember"> | number
+  createdAt?: Prisma.DateTimeFilter<"DocProjectMember"> | Date | string
+  updatedAt?: Prisma.DateTimeNullableFilter<"DocProjectMember"> | Date | string | null
+  updatedById?: Prisma.IntFilter<"DocProjectMember"> | number
+  isSys?: Prisma.BoolFilter<"DocProjectMember"> | boolean
+  docProjectId?: Prisma.IntFilter<"DocProjectMember"> | number
+  userId?: Prisma.IntFilter<"DocProjectMember"> | number
+  side?: Prisma.EnumDocProjectSideFilter<"DocProjectMember"> | $Enums.DocProjectSide
+  assignedAt?: Prisma.DateTimeFilter<"DocProjectMember"> | Date | string
+  assignedById?: Prisma.IntFilter<"DocProjectMember"> | number
+  isActive?: Prisma.BoolFilter<"DocProjectMember"> | boolean
+  revokedAt?: Prisma.DateTimeNullableFilter<"DocProjectMember"> | Date | string | null
+  revokedById?: Prisma.IntNullableFilter<"DocProjectMember"> | number | null
+}
+
+export type DocProjectMemberCreateManyDocProjectInput = {
+  id?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  userId: number
+  side: $Enums.DocProjectSide
+  assignedAt?: Date | string
+  assignedById: number
+  isActive?: boolean
+  revokedAt?: Date | string | null
+  revokedById?: number | null
+}
+
+export type DocProjectMemberUpdateWithoutDocProjectInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  userId?: Prisma.IntFieldUpdateOperationsInput | number
+  side?: Prisma.EnumDocProjectSideFieldUpdateOperationsInput | $Enums.DocProjectSide
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+}
+
+export type DocProjectMemberUncheckedUpdateWithoutDocProjectInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  userId?: Prisma.IntFieldUpdateOperationsInput | number
+  side?: Prisma.EnumDocProjectSideFieldUpdateOperationsInput | $Enums.DocProjectSide
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+}
+
+export type DocProjectMemberUncheckedUpdateManyWithoutDocProjectInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  userId?: Prisma.IntFieldUpdateOperationsInput | number
+  side?: Prisma.EnumDocProjectSideFieldUpdateOperationsInput | $Enums.DocProjectSide
+  assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 
@@ -570,7 +757,7 @@ export type DocProjectMemberSelect<ExtArgs extends runtime.Types.Extensions.Inte
   updatedAt?: boolean
   updatedById?: boolean
   isSys?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   userId?: boolean
   side?: boolean
   assignedAt?: boolean
@@ -578,6 +765,7 @@ export type DocProjectMemberSelect<ExtArgs extends runtime.Types.Extensions.Inte
   isActive?: boolean
   revokedAt?: boolean
   revokedById?: boolean
+  docProject?: boolean | Prisma.DocProjectDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["docProjectMember"]>
 
 export type DocProjectMemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -586,7 +774,7 @@ export type DocProjectMemberSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   updatedAt?: boolean
   updatedById?: boolean
   isSys?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   userId?: boolean
   side?: boolean
   assignedAt?: boolean
@@ -594,6 +782,7 @@ export type DocProjectMemberSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   isActive?: boolean
   revokedAt?: boolean
   revokedById?: boolean
+  docProject?: boolean | Prisma.DocProjectDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["docProjectMember"]>
 
 export type DocProjectMemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -602,7 +791,7 @@ export type DocProjectMemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   updatedAt?: boolean
   updatedById?: boolean
   isSys?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   userId?: boolean
   side?: boolean
   assignedAt?: boolean
@@ -610,6 +799,7 @@ export type DocProjectMemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   isActive?: boolean
   revokedAt?: boolean
   revokedById?: boolean
+  docProject?: boolean | Prisma.DocProjectDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["docProjectMember"]>
 
 export type DocProjectMemberSelectScalar = {
@@ -618,7 +808,7 @@ export type DocProjectMemberSelectScalar = {
   updatedAt?: boolean
   updatedById?: boolean
   isSys?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   userId?: boolean
   side?: boolean
   assignedAt?: boolean
@@ -628,18 +818,29 @@ export type DocProjectMemberSelectScalar = {
   revokedById?: boolean
 }
 
-export type DocProjectMemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "updatedById" | "isSys" | "projectId" | "userId" | "side" | "assignedAt" | "assignedById" | "isActive" | "revokedAt" | "revokedById", ExtArgs["result"]["docProjectMember"]>
+export type DocProjectMemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "updatedById" | "isSys" | "docProjectId" | "userId" | "side" | "assignedAt" | "assignedById" | "isActive" | "revokedAt" | "revokedById", ExtArgs["result"]["docProjectMember"]>
+export type DocProjectMemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.DocProjectDefaultArgs<ExtArgs>
+}
+export type DocProjectMemberIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.DocProjectDefaultArgs<ExtArgs>
+}
+export type DocProjectMemberIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.DocProjectDefaultArgs<ExtArgs>
+}
 
 export type $DocProjectMemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DocProjectMember"
-  objects: {}
+  objects: {
+    docProject: Prisma.$DocProjectPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     createdAt: Date
     updatedAt: Date | null
     updatedById: number
     isSys: boolean
-    projectId: number
+    docProjectId: number
     userId: number
     side: $Enums.DocProjectSide
     assignedAt: Date
@@ -1041,6 +1242,7 @@ readonly fields: DocProjectMemberFieldRefs;
  */
 export interface Prisma__DocProjectMemberClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  docProject<T extends Prisma.DocProjectDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocProjectDefaultArgs<ExtArgs>>): Prisma.Prisma__DocProjectClient<runtime.Types.Result.GetResult<Prisma.$DocProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1075,7 +1277,7 @@ export interface DocProjectMemberFieldRefs {
   readonly updatedAt: Prisma.FieldRef<"DocProjectMember", 'DateTime'>
   readonly updatedById: Prisma.FieldRef<"DocProjectMember", 'Int'>
   readonly isSys: Prisma.FieldRef<"DocProjectMember", 'Boolean'>
-  readonly projectId: Prisma.FieldRef<"DocProjectMember", 'Int'>
+  readonly docProjectId: Prisma.FieldRef<"DocProjectMember", 'Int'>
   readonly userId: Prisma.FieldRef<"DocProjectMember", 'Int'>
   readonly side: Prisma.FieldRef<"DocProjectMember", 'DocProjectSide'>
   readonly assignedAt: Prisma.FieldRef<"DocProjectMember", 'DateTime'>
@@ -1100,6 +1302,10 @@ export type DocProjectMemberFindUniqueArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.DocProjectMemberOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectMemberInclude<ExtArgs> | null
+  /**
    * Filter, which DocProjectMember to fetch.
    */
   where: Prisma.DocProjectMemberWhereUniqueInput
@@ -1118,6 +1324,10 @@ export type DocProjectMemberFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.DocProjectMemberOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectMemberInclude<ExtArgs> | null
+  /**
    * Filter, which DocProjectMember to fetch.
    */
   where: Prisma.DocProjectMemberWhereUniqueInput
@@ -1135,6 +1345,10 @@ export type DocProjectMemberFindFirstArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the DocProjectMember
    */
   omit?: Prisma.DocProjectMemberOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectMemberInclude<ExtArgs> | null
   /**
    * Filter, which DocProjectMember to fetch.
    */
@@ -1184,6 +1398,10 @@ export type DocProjectMemberFindFirstOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.DocProjectMemberOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectMemberInclude<ExtArgs> | null
+  /**
    * Filter, which DocProjectMember to fetch.
    */
   where?: Prisma.DocProjectMemberWhereInput
@@ -1231,6 +1449,10 @@ export type DocProjectMemberFindManyArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the DocProjectMember
    */
   omit?: Prisma.DocProjectMemberOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectMemberInclude<ExtArgs> | null
   /**
    * Filter, which DocProjectMembers to fetch.
    */
@@ -1280,6 +1502,10 @@ export type DocProjectMemberCreateArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.DocProjectMemberOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectMemberInclude<ExtArgs> | null
+  /**
    * The data needed to create a DocProjectMember.
    */
   data: Prisma.XOR<Prisma.DocProjectMemberCreateInput, Prisma.DocProjectMemberUncheckedCreateInput>
@@ -1313,6 +1539,10 @@ export type DocProjectMemberCreateManyAndReturnArgs<ExtArgs extends runtime.Type
    */
   data: Prisma.DocProjectMemberCreateManyInput | Prisma.DocProjectMemberCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectMemberIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1327,6 +1557,10 @@ export type DocProjectMemberUpdateArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the DocProjectMember
    */
   omit?: Prisma.DocProjectMemberOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectMemberInclude<ExtArgs> | null
   /**
    * The data needed to update a DocProjectMember.
    */
@@ -1379,6 +1613,10 @@ export type DocProjectMemberUpdateManyAndReturnArgs<ExtArgs extends runtime.Type
    * Limit how many DocProjectMembers to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectMemberIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1393,6 +1631,10 @@ export type DocProjectMemberUpsertArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the DocProjectMember
    */
   omit?: Prisma.DocProjectMemberOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectMemberInclude<ExtArgs> | null
   /**
    * The filter to search for the DocProjectMember to update in case it exists.
    */
@@ -1419,6 +1661,10 @@ export type DocProjectMemberDeleteArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the DocProjectMember
    */
   omit?: Prisma.DocProjectMemberOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectMemberInclude<ExtArgs> | null
   /**
    * Filter which DocProjectMember to delete.
    */
@@ -1451,4 +1697,8 @@ export type DocProjectMemberDefaultArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the DocProjectMember
    */
   omit?: Prisma.DocProjectMemberOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectMemberInclude<ExtArgs> | null
 }

@@ -111,6 +111,33 @@ FROM doc_qualifications
 WHERE "projectId" IS NOT NULL;
 
 -- -----------------------------------------------------------------------------
+-- 3b. El contexto de proyecto en las dos tablas de eventos (INFORMATIVO)
+-- -----------------------------------------------------------------------------
+--
+-- NO bloquea, y conviene saber por qué se mide igual. Las dos tablas llevan el
+-- proyecto como snapshot derivado y sin clave foránea, de modo que la migración
+-- las ANULA en lugar de detenerse: el valor nombra un proyecto del esquema
+-- anterior y después del renombre la columna significa otra cosa.
+--
+-- Lo que este control dice es CUÁNTO contexto se va a perder. En la base de
+-- desarrollo local son cientos de filas, todas de pruebas; en un despliegue
+-- deberían ser cero, y si no lo son conviene mirar de dónde salieron antes de
+-- correr la migración.
+SELECT
+  'eventos de workflow con proyecto (se anulan)'           AS control,
+  COUNT(*)                                                 AS cantidad,
+  false                                                    AS bloquea
+FROM doc_workflow_events
+WHERE "projectId" IS NOT NULL;
+
+SELECT
+  'trazas de auditoría con proyecto (se anulan)'           AS control,
+  COUNT(*)                                                 AS cantidad,
+  false                                                    AS bloquea
+FROM doc_audit_events
+WHERE "projectId" IS NOT NULL;
+
+-- -----------------------------------------------------------------------------
 -- 4. No hay configuración ni membresía de proyecto cargada (BLOQUEA)
 -- -----------------------------------------------------------------------------
 --

@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import test, { after, before } from "node:test"
 import jwt from "jsonwebtoken"
 import { prisma } from "../lib/prisma.js"
+import { asegurarContratos, borrarContratos } from "../utils/testContracts.js"
 import { ResolverContext } from "../types.js"
 import {
   DocCatalogKind,
@@ -63,21 +64,33 @@ const limpiar = async () => {
     where: { code: { startsWith: CODIGO } },
   })
   await prisma.docCatalogScope.deleteMany({
-    where: { projectId: { in: PROYECTOS } },
+    where: { docProjectId: { in: PROYECTOS } },
   })
   await prisma.docProjectMember.deleteMany({
-    where: { projectId: { in: PROYECTOS } },
+    where: { docProjectId: { in: PROYECTOS } },
   })
-  await prisma.docProject.deleteMany({
-    where: { projectId: { in: PROYECTOS } },
+  // Por alcance y no solo por código: varias entradas de la prueba llevan un
+  // código propio del dominio —"CIVIL"— y el prefijo solo está en el nombre.
+  // Con clave foránea RESTRICT, una que sobreviva impide borrar su contrato.
+  await prisma.documentType.deleteMany({
+    where: { docProjectId: { in: PROYECTOS } },
   })
+  await prisma.documentClass.deleteMany({
+    where: { docProjectId: { in: PROYECTOS } },
+  })
+  await borrarContratos(prisma, PROYECTOS)
   await prisma.docAuditEvent.deleteMany({
-    where: { projectId: { in: PROYECTOS } },
+    where: { docProjectId: { in: PROYECTOS } },
   })
 }
 
 const declarar = async (projectId: number, conMembresia = true) => {
-  await docProjectsResolvers.Mutation.declareDocProject(
+  // El contrato existe antes de declararlo, con id igual a la constante: la
+  // mutación hace upsert POR CÓDIGO y cae sobre esta misma fila, de modo que
+  // todo lo que la prueba cuelga de `docProjectId` sigue siendo válido.
+  await asegurarContratos(prisma, [projectId], DocumentRole.INTERNAL)
+
+  const contrato: any = await docProjectsResolvers.Mutation.declareDocProject(
     null,
     {
       input: {
@@ -93,7 +106,7 @@ const declarar = async (projectId: number, conMembresia = true) => {
   if (conMembresia) {
     await projectMemberResolvers.Mutation.assignDocProjectMember(
       null,
-      { input: { projectId, userId: USER_ID, side: DocProjectSide.HOST } },
+      { input: { docProjectId: contrato.id, userId: USER_ID, side: DocProjectSide.HOST } },
       context,
     )
   }
@@ -125,25 +138,25 @@ const crearTipo = (input: Record<string, unknown>) =>
     context,
   ) as Promise<any>
 
-const sembrar = (projectId: number, sourceProjectId?: number) =>
+const sembrar = (docProjectId: number, sourceProjectId?: number) =>
   classificationResolvers.Mutation.seedProjectClassification(
     null,
-    { projectId, sourceProjectId },
+    { docProjectId, sourceProjectId },
     context,
   ) as Promise<any>
 
-const declararAlcance = (projectId: number, mode: DocScopeMode) =>
+const declararAlcance = (docProjectId: number, mode: DocScopeMode) =>
   catalogScopeResolvers.Mutation.declareCatalogScope(
     null,
-    { input: { projectId, catalog: DocCatalogKind.CLASSIFICATION, mode } },
+    { input: { docProjectId, catalog: DocCatalogKind.CLASSIFICATION, mode } },
     context,
   ) as Promise<any>
 
 /** Los códigos que un ámbito ve, por el selector: es el alcance RESUELTO. */
-const clasesQueVe = async (projectId?: number) => {
+const clasesQueVe = async (docProjectId?: number) => {
   const items = (await documentClassResolvers.Query.documentClassesSelectList(
     null,
-    { module: ModuleType.PROJECTS, projectId },
+    { module: ModuleType.PROJECTS, docProjectId },
     context,
   )) as { value: string; label: string }[]
 
@@ -156,10 +169,10 @@ const clasesQueVe = async (projectId?: number) => {
 }
 
 /** Lo que la vista de administración lista: el ámbito pedido, sin resolver. */
-const clasesDelAmbito = async (projectId?: number) => {
+const clasesDelAmbito = async (docProjectId?: number) => {
   const res = (await documentClassResolvers.Query.documentClasses(
     null,
-    { projectId, filter: { query: CODIGO }, pagination: { skip: 0, take: 100 } },
+    { docProjectId, filter: { query: CODIGO }, pagination: { skip: 0, take: 100 } },
     context,
   )) as any
   return res.items.map((c: any) => c.code).sort()
@@ -194,6 +207,11 @@ before(async () => {
   )
   context = { orm: prisma, token: `Bearer ${token}` } as ResolverContext
 
+  // Los seis contratos existen desde el arranque: las entradas de catálogo con
+  // alcance les cuelgan con clave foránea (BLOQUE 02D, B7), y varias pruebas
+  // declaran su contrato recién a mitad del archivo.
+  await asegurarContratos(prisma, PROYECTOS)
+
   await declarar(HEREDA)
   await declarar(PROPIO)
   await declarar(AJENO, false)
@@ -204,7 +222,7 @@ before(async () => {
   propia = await crearClase({
     code: "CIVIL-P",
     name: `${CODIGO} Civil del proyecto`,
-    projectId: PROPIO,
+    docProjectId: PROPIO,
   })
 })
 
@@ -251,10 +269,10 @@ test("un proyecto que hereda y amplía ve las dos", async () => {
   const propiaDeHereda = await crearClase({
     code: "ELEC",
     name: `${CODIGO} Eléctrica`,
-    projectId: HEREDA,
+    docProjectId: HEREDA,
   })
 
-  assert.equal(propiaDeHereda.projectId, HEREDA)
+  assert.equal(propiaDeHereda.docProjectId, HEREDA)
   assert.deepEqual(await clasesQueVe(HEREDA), [
     `${CODIGO}-CIVIL`,
     `${CODIGO}-ELEC`,
@@ -267,10 +285,10 @@ test("un proyecto puede usar un código que el despliegue ya tiene", async () =>
   const homonima = await crearClase({
     code: "CIVIL",
     name: `${CODIGO} Civil del cliente`,
-    projectId: PROPIO,
+    docProjectId: PROPIO,
   })
 
-  assert.equal(homonima.projectId, PROPIO)
+  assert.equal(homonima.docProjectId, PROPIO)
   assert.notEqual(homonima.id, global1.id)
 })
 
@@ -283,7 +301,7 @@ test("el alcance no reemplaza al módulo: los dos ejes filtran", async () => {
     module: ModuleType.QUALITY,
   })
 
-  assert.equal(deCalidad.projectId, null)
+  assert.equal(deCalidad.docProjectId, null)
   // Un proyecto que hereda ve el despliegue, pero no lo de otro módulo.
   assert.equal((await clasesQueVe(HEREDA)).includes(`${CODIGO}-QA`), false)
 })
@@ -296,7 +314,7 @@ test("crear en el ámbito de un proyecto sin membresía se rechaza", async () =>
       crearClase({
         code: "AJENA",
         name: `${CODIGO} Ajena`,
-        projectId: AJENO,
+        docProjectId: AJENO,
       }),
     ),
     true,
@@ -315,7 +333,7 @@ test("editar una entrada de proyecto sin membresía se rechaza", async () => {
       name: `${CODIGO} ajena directa`,
       code: `${CODIGO}-AJENA-D`,
       module: ModuleType.PROJECTS,
-      projectId: AJENO,
+      docProjectId: AJENO,
       updatedById: USER_ID,
     },
   })
@@ -348,13 +366,13 @@ test("el tipo resuelve su alcance con la misma declaración que la clase", async
   await crearTipo({
     code: "PLANO-P",
     name: `${CODIGO} Plano del proyecto`,
-    projectId: PROPIO,
+    docProjectId: PROPIO,
   })
 
-  const vistos = async (projectId?: number) => {
+  const vistos = async (docProjectId?: number) => {
     const items = (await documentTypeResolvers.Query.documentTypesSelectList(
       null,
-      { module: ModuleType.PROJECTS, projectId },
+      { module: ModuleType.PROJECTS, docProjectId },
       context,
     )) as { value: string }[]
     const filas = await prisma.documentType.findMany({
@@ -397,7 +415,7 @@ test("sembrar desde el despliegue copia clase y tipo en un acto", async () => {
   assert.equal((await clasesQueVe(SEMBRADO)).includes(`${CODIGO}-CIVIL`), true)
 
   const tipos = await prisma.documentType.findMany({
-    where: { projectId: SEMBRADO, code: { startsWith: CODIGO } },
+    where: { docProjectId: SEMBRADO, code: { startsWith: CODIGO } },
     select: { code: true, classId: true },
   })
   assert.equal(tipos.length > 0, true)
@@ -407,15 +425,15 @@ test("el tipo copiado cuelga de la clase copiada, y no de la del origen", async 
   // Es lo que el plan resuelve con el CÓDIGO de la clase: en el destino la
   // clase es otra fila, con otro identificador.
   const tipo = await prisma.documentType.findFirstOrThrow({
-    where: { projectId: SEMBRADO, code: `${CODIGO}-PLANO-C` },
+    where: { docProjectId: SEMBRADO, code: `${CODIGO}-PLANO-C` },
     select: { classId: true },
   })
   const clase = await prisma.documentClass.findUniqueOrThrow({
     where: { id: tipo.classId as number },
-    select: { projectId: true, code: true },
+    select: { docProjectId: true, code: true },
   })
 
-  assert.equal(clase.projectId, SEMBRADO)
+  assert.equal(clase.docProjectId, SEMBRADO)
   assert.equal(clase.code, `${CODIGO}-CIVIL`)
 })
 
@@ -426,7 +444,7 @@ test("sembrar dos veces no duplica", async () => {
   assert.equal(res.alreadyPresent > 0, true)
 
   const clases = await prisma.documentClass.findMany({
-    where: { projectId: SEMBRADO, code: `${CODIGO}-CIVIL` },
+    where: { docProjectId: SEMBRADO, code: `${CODIGO}-CIVIL` },
   })
   assert.equal(clases.length, 1)
 })
@@ -436,7 +454,7 @@ test("la entrada copiada queda en el módulo de proyectos", async () => {
   // clase compartida del despliegue, al copiarse al alcance de un proyecto, ya
   // no está disponible para todos los módulos.
   const clase = await prisma.documentClass.findFirstOrThrow({
-    where: { projectId: SEMBRADO, code: `${CODIGO}-CIVIL` },
+    where: { docProjectId: SEMBRADO, code: `${CODIGO}-CIVIL` },
     select: { module: true },
   })
 
@@ -473,13 +491,13 @@ test("sembrar desde otro proyecto copia lo que ese proyecto ve", async () => {
 
 test("la siembra deja el acto en la traza, aunque no agregue nada", async () => {
   const antes = await prisma.docAuditEvent.count({
-    where: { action: AuditAction.SeedClassification, projectId: null },
+    where: { action: AuditAction.SeedClassification, docProjectId: null },
   })
 
   await sembrar(SEMBRADO)
 
   const despues = await prisma.docAuditEvent.count({
-    where: { action: AuditAction.SeedClassification, projectId: null },
+    where: { action: AuditAction.SeedClassification, docProjectId: null },
   })
 
   assert.equal(despues, antes + 1)
@@ -500,10 +518,10 @@ test("una clase dada de baja no viaja, y su tipo tampoco", async () => {
   await sembrar(TERCERO)
 
   const copiadas = await prisma.documentClass.findMany({
-    where: { projectId: TERCERO, code: `${CODIGO}-BAJA` },
+    where: { docProjectId: TERCERO, code: `${CODIGO}-BAJA` },
   })
   const copiados = await prisma.documentType.findMany({
-    where: { projectId: TERCERO, code: `${CODIGO}-BAJA-T` },
+    where: { docProjectId: TERCERO, code: `${CODIGO}-BAJA-T` },
   })
 
   assert.equal(copiadas.length, 0)
@@ -518,11 +536,11 @@ test("un tipo del proyecto puede colgar de una clase del despliegue", async () =
   const tipo = await crearTipo({
     code: "AMPLIA",
     name: `${CODIGO} Amplía`,
-    projectId: HEREDA,
+    docProjectId: HEREDA,
     classId: global1.id,
   })
 
-  assert.equal(tipo.projectId, HEREDA)
+  assert.equal(tipo.docProjectId, HEREDA)
   assert.equal(tipo.classId, global1.id)
 })
 
@@ -530,7 +548,7 @@ test("un tipo del despliegue no puede colgar de una clase de proyecto", async ()
   const delProyecto = await crearClase({
     code: "SOLO-P",
     name: `${CODIGO} Solo del proyecto`,
-    projectId: HEREDA,
+    docProjectId: HEREDA,
   })
 
   await assert.rejects(
@@ -546,7 +564,7 @@ test("un tipo del despliegue no puede colgar de una clase de proyecto", async ()
 
 test("un tipo de un proyecto no puede colgar de una clase de otro", async () => {
   const deOtro = await prisma.documentClass.findFirstOrThrow({
-    where: { projectId: PROPIO, code: `${CODIGO}-CIVIL-P` },
+    where: { docProjectId: PROPIO, code: `${CODIGO}-CIVIL-P` },
   })
 
   await assert.rejects(
@@ -554,7 +572,7 @@ test("un tipo de un proyecto no puede colgar de una clase de otro", async () => 
       crearTipo({
         code: "CRUZA-2",
         name: `${CODIGO} Cruza entre proyectos`,
-        projectId: HEREDA,
+        docProjectId: HEREDA,
         classId: deOtro.id,
       }),
     /no puede colgar de una clase de proyecto/,
@@ -568,7 +586,7 @@ test("mover un tipo del despliegue a una clase de proyecto se rechaza al editar"
     name: `${CODIGO} Se mueve`,
   })
   const delProyecto = await prisma.documentClass.findFirstOrThrow({
-    where: { projectId: HEREDA, code: `${CODIGO}-SOLO-P` },
+    where: { docProjectId: HEREDA, code: `${CODIGO}-SOLO-P` },
   })
 
   await assert.rejects(
@@ -595,7 +613,7 @@ test("declarar catálogo propio se rechaza con tipos colgando del despliegue", a
 
 test("un documento no se clasifica con una entrada fuera de su alcance", async () => {
   const tipoAjeno = await prisma.documentType.findFirstOrThrow({
-    where: { projectId: PROPIO, code: `${CODIGO}-PLANO-P` },
+    where: { docProjectId: PROPIO, code: `${CODIGO}-PLANO-P` },
   })
 
   await assert.rejects(
@@ -606,7 +624,7 @@ test("un documento no se clasifica con una entrada fuera de su alcance", async (
           input: {
             code: `${CODIGO}-DOC-1`,
             title: "Documento fuera de alcance",
-            projectId: HEREDA,
+            docProjectId: HEREDA,
             module: ModuleType.PROJECTS,
             documentTypeId: tipoAjeno.id,
           },
@@ -619,7 +637,7 @@ test("un documento no se clasifica con una entrada fuera de su alcance", async (
 
 test("una plantilla del despliegue no referencia entradas de proyecto", async () => {
   const claseDeProyecto = await prisma.documentClass.findFirstOrThrow({
-    where: { projectId: PROPIO, code: `${CODIGO}-CIVIL-P` },
+    where: { docProjectId: PROPIO, code: `${CODIGO}-CIVIL-P` },
   })
 
   await assert.rejects(
@@ -662,7 +680,7 @@ test("un documento no se clasifica con una clase dada de baja", async () => {
           input: {
             code: `${CODIGO}-DOC-BAJA`,
             title: "Con clase dada de baja",
-            projectId: HEREDA,
+            docProjectId: HEREDA,
             module: ModuleType.PROJECTS,
             documentTypeId: tipo.id,
             documentClassId: clase.id,
@@ -690,7 +708,7 @@ test("un documento no se clasifica con un tipo dado de baja", async () => {
           input: {
             code: `${CODIGO}-DOC-BAJA-T`,
             title: "Con tipo dado de baja",
-            projectId: HEREDA,
+            docProjectId: HEREDA,
             module: ModuleType.PROJECTS,
             documentTypeId: tipo.id,
           },
@@ -717,7 +735,7 @@ test("lo ya clasificado conserva su entrada aunque se dé de baja después", asy
       input: {
         code: `${CODIGO}-DOC-VIVE`,
         title: "Clasificado antes de la baja",
-        projectId: HEREDA,
+        docProjectId: HEREDA,
         module: ModuleType.PROJECTS,
         documentTypeId: tipo.id,
         documentClassId: clase.id,

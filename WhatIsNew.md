@@ -1232,3 +1232,29 @@ El módulo deja de referenciar el `Project` de `mi-project` y pasa a ser dueño 
 
 **Verificado:** `tsc` limpio, **525 pruebas y 0 fallos** —el mismo total que antes del cambio—, `prisma migrate diff` sin diferencias entre migraciones y modelo, y la ruta completa reconstruida sobre una base limpia con `pg_dump` **idéntico** al de la base migrada de forma incremental.
 
+---
+
+# What's new in María Ingeniería API Documents 2.12.0
+
+2026-08-20
+
+## La raíz de alcance propia del módulo (BLOQUE 02D)
+
+### Fase 3 — el alcance cuelga del contrato
+
+`projectId` pasa a `docProjectId` en los **once modelos** del subsistema documental, y gana **clave foránea real** contra `doc_projects` en nueve de ellos. Hasta hoy nada impedía que un documento apuntara a un proyecto inexistente: no había clave foránea porque no había tabla.
+
+**`ScannedFile` y `Area` quedan intactos**, con su `projectId` hacia `mi-project`: su destino es salir hacia `212-mi-digitalization`, y renombrarlos exigiría inventarles contratos a un subsistema que se va.
+
+**Las dos tablas de eventos llevan la columna sin clave foránea**, con el criterio de ADR-022 de digitalización y por una razón propia: un registro inmutable de auditoría no debe depender del ciclo de vida de lo que audita. Eso cambia qué hace la migración con un valor huérfano — en las nueve con FK **se detiene**, porque hay una decisión que no puede tomar; en las dos de eventos **anula el valor**, porque no hay ninguna decisión y el evento conserva su objeto, su acción, su actor y su fecha.
+
+**El contrato GraphQL se renombró en esta fase**, 48 líneas. Renombrar la columna sin renombrar el campo del SDL deja el contrato mintiendo: un campo que el modelo ya no tiene **se resuelve como `null` en lugar de romperse**, y el consumidor no se entera. Conservan `projectId` exactamente diez lugares: `ScannedFile`, `Area`, sus filtros y altas, el vínculo PMI del contrato, y las dos operaciones que reciben un proyecto de `mi-project`.
+
+**Control nuevo en `contract.test.ts`**, que declara esa frontera y **se verificó fallando con el defecto inyectado**. El test de contrato verificaba operaciones y enumeraciones, no campos, y por eso el `projectId` viejo pasó desapercibido.
+
+**Dos defectos propios, encontrados por las pruebas:** el alta por código no podía fijar el vínculo PMI —`projectId` había quedado fuera de la rama de actualización del `upsert`—, y cinco índices únicos con `NULLS NOT DISTINCT` quedaron con el nombre viejo, delatados por `prisma migrate diff`.
+
+**Al desplegar:** la migración `20260820140000_doc_project_scope` se detiene si encuentra filas con proyecto declarado en las nueve tablas con clave foránea. El control de precondición del bloque incorporó además dos filas nuevas —eventos y trazas con proyecto— que conviene volver a correr antes de desplegar.
+
+**Verificado:** `tsc` limpio, **526 pruebas y 0 fallos**, `prisma migrate diff` sin diferencias, y la ruta completa reconstruida sobre base limpia con `pg_dump` idéntico al de la base migrada de forma incremental.
+

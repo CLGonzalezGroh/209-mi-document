@@ -50,16 +50,16 @@ export const approvesStep = (effect: QualificationEffect): boolean =>
  * baja la última calificación propia devuelva el proyecto al catálogo del
  * despliegue y le cambie en silencio el juego de valores disponibles.
  */
-export const resolveScope = <T extends { projectId: number | null }>(
+export const resolveScope = <T extends { docProjectId: number | null }>(
   entradas: T[],
-  projectId: number | null,
+  docProjectId: number | null,
 ): T[] => {
-  const delDespliegue = entradas.filter((e) => e.projectId === null)
+  const delDespliegue = entradas.filter((e) => e.docProjectId === null)
 
-  if (projectId === null) return delDespliegue
+  if (docProjectId === null) return delDespliegue
 
-  return hasOwnCatalog(entradas, projectId)
-    ? entradas.filter((e) => e.projectId === projectId)
+  return hasOwnCatalog(entradas, docProjectId)
+    ? entradas.filter((e) => e.docProjectId === docProjectId)
     : delDespliegue
 }
 
@@ -69,7 +69,7 @@ export const resolveScope = <T extends { projectId: number | null }>(
  * Basta con que exista UNA entrada propia, dada de baja o no: declarar la
  * primera es lo que separa al proyecto del catálogo del despliegue.
  */
-export const hasOwnCatalog = <T extends { projectId: number | null }>(
+export const hasOwnCatalog = <T extends { docProjectId: number | null }>(
   entradas: T[],
-  projectId: number,
-): boolean => entradas.some((e) => e.projectId === projectId)
+  docProjectId: number,
+): boolean => entradas.some((e) => e.docProjectId === docProjectId)

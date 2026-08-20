@@ -19,9 +19,9 @@ import {
 const PROYECTO = 77
 const OTRO = 88
 
-const vigente = (projectId: number | null) => ({ projectId, terminatedAt: null })
-const dadaDeBaja = (projectId: number | null) => ({
-  projectId,
+const vigente = (docProjectId: number | null) => ({ docProjectId, terminatedAt: null })
+const dadaDeBaja = (docProjectId: number | null) => ({
+  docProjectId,
   terminatedAt: new Date(2026, 0, 1),
 })
 
@@ -30,10 +30,10 @@ const EXIGIDA = { enabled: true, required: true }
 const APAGADA = { enabled: false, required: false }
 
 const enProyecto = (mode: DocScopeMode = DocScopeMode.INHERIT) => ({
-  projectId: PROYECTO,
+  docProjectId: PROYECTO,
   mode,
 })
-const publicado = { projectId: null, mode: DocScopeMode.INHERIT }
+const publicado = { docProjectId: null, mode: DocScopeMode.INHERIT }
 
 const motivo = (check: ReturnType<typeof checkLocation>): LocationRejection | null =>
   check.ok ? null : check.reason

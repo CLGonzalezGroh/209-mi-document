@@ -29,7 +29,7 @@ export type AggregateTransmittal = {
 export type TransmittalAvgAggregateOutputType = {
   id: number | null
   updatedById: number | null
-  projectId: number | null
+  docProjectId: number | null
   respondsToTransmittalId: number | null
   issuedById: number | null
   acknowledgeRegisteredById: number | null
@@ -39,7 +39,7 @@ export type TransmittalAvgAggregateOutputType = {
 export type TransmittalSumAggregateOutputType = {
   id: number | null
   updatedById: number | null
-  projectId: number | null
+  docProjectId: number | null
   respondsToTransmittalId: number | null
   issuedById: number | null
   acknowledgeRegisteredById: number | null
@@ -52,7 +52,7 @@ export type TransmittalMinAggregateOutputType = {
   updatedAt: Date | null
   updatedById: number | null
   code: string | null
-  projectId: number | null
+  docProjectId: number | null
   nature: $Enums.TransmittalNature | null
   status: $Enums.TransmittalStatus | null
   counterpartyReference: string | null
@@ -74,7 +74,7 @@ export type TransmittalMaxAggregateOutputType = {
   updatedAt: Date | null
   updatedById: number | null
   code: string | null
-  projectId: number | null
+  docProjectId: number | null
   nature: $Enums.TransmittalNature | null
   status: $Enums.TransmittalStatus | null
   counterpartyReference: string | null
@@ -96,7 +96,7 @@ export type TransmittalCountAggregateOutputType = {
   updatedAt: number
   updatedById: number
   code: number
-  projectId: number
+  docProjectId: number
   nature: number
   status: number
   counterpartyReference: number
@@ -117,7 +117,7 @@ export type TransmittalCountAggregateOutputType = {
 export type TransmittalAvgAggregateInputType = {
   id?: true
   updatedById?: true
-  projectId?: true
+  docProjectId?: true
   respondsToTransmittalId?: true
   issuedById?: true
   acknowledgeRegisteredById?: true
@@ -127,7 +127,7 @@ export type TransmittalAvgAggregateInputType = {
 export type TransmittalSumAggregateInputType = {
   id?: true
   updatedById?: true
-  projectId?: true
+  docProjectId?: true
   respondsToTransmittalId?: true
   issuedById?: true
   acknowledgeRegisteredById?: true
@@ -140,7 +140,7 @@ export type TransmittalMinAggregateInputType = {
   updatedAt?: true
   updatedById?: true
   code?: true
-  projectId?: true
+  docProjectId?: true
   nature?: true
   status?: true
   counterpartyReference?: true
@@ -162,7 +162,7 @@ export type TransmittalMaxAggregateInputType = {
   updatedAt?: true
   updatedById?: true
   code?: true
-  projectId?: true
+  docProjectId?: true
   nature?: true
   status?: true
   counterpartyReference?: true
@@ -184,7 +184,7 @@ export type TransmittalCountAggregateInputType = {
   updatedAt?: true
   updatedById?: true
   code?: true
-  projectId?: true
+  docProjectId?: true
   nature?: true
   status?: true
   counterpartyReference?: true
@@ -293,7 +293,7 @@ export type TransmittalGroupByOutputType = {
   updatedAt: Date | null
   updatedById: number
   code: string
-  projectId: number
+  docProjectId: number
   nature: $Enums.TransmittalNature
   status: $Enums.TransmittalStatus
   counterpartyReference: string | null
@@ -338,7 +338,7 @@ export type TransmittalWhereInput = {
   updatedAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
   updatedById?: Prisma.IntFilter<"Transmittal"> | number
   code?: Prisma.StringFilter<"Transmittal"> | string
-  projectId?: Prisma.IntFilter<"Transmittal"> | number
+  docProjectId?: Prisma.IntFilter<"Transmittal"> | number
   nature?: Prisma.EnumTransmittalNatureFilter<"Transmittal"> | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFilter<"Transmittal"> | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.StringNullableFilter<"Transmittal"> | string | null
@@ -352,6 +352,7 @@ export type TransmittalWhereInput = {
   closedAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
   closedById?: Prisma.IntNullableFilter<"Transmittal"> | number | null
   closeReason?: Prisma.StringNullableFilter<"Transmittal"> | string | null
+  docProject?: Prisma.XOR<Prisma.DocProjectScalarRelationFilter, Prisma.DocProjectWhereInput>
   items?: Prisma.TransmittalItemListRelationFilter
   respondsTo?: Prisma.XOR<Prisma.TransmittalNullableScalarRelationFilter, Prisma.TransmittalWhereInput> | null
   responses?: Prisma.TransmittalListRelationFilter
@@ -364,7 +365,7 @@ export type TransmittalOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   code?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   nature?: Prisma.SortOrder
   status?: Prisma.SortOrder
   counterpartyReference?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -378,6 +379,7 @@ export type TransmittalOrderByWithRelationInput = {
   closedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   closedById?: Prisma.SortOrderInput | Prisma.SortOrder
   closeReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProject?: Prisma.DocProjectOrderByWithRelationInput
   items?: Prisma.TransmittalItemOrderByRelationAggregateInput
   respondsTo?: Prisma.TransmittalOrderByWithRelationInput
   responses?: Prisma.TransmittalOrderByRelationAggregateInput
@@ -386,7 +388,7 @@ export type TransmittalOrderByWithRelationInput = {
 
 export type TransmittalWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  projectId_code?: Prisma.TransmittalProjectIdCodeCompoundUniqueInput
+  docProjectId_code?: Prisma.TransmittalDocProjectIdCodeCompoundUniqueInput
   AND?: Prisma.TransmittalWhereInput | Prisma.TransmittalWhereInput[]
   OR?: Prisma.TransmittalWhereInput[]
   NOT?: Prisma.TransmittalWhereInput | Prisma.TransmittalWhereInput[]
@@ -394,7 +396,7 @@ export type TransmittalWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
   updatedById?: Prisma.IntFilter<"Transmittal"> | number
   code?: Prisma.StringFilter<"Transmittal"> | string
-  projectId?: Prisma.IntFilter<"Transmittal"> | number
+  docProjectId?: Prisma.IntFilter<"Transmittal"> | number
   nature?: Prisma.EnumTransmittalNatureFilter<"Transmittal"> | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFilter<"Transmittal"> | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.StringNullableFilter<"Transmittal"> | string | null
@@ -408,11 +410,12 @@ export type TransmittalWhereUniqueInput = Prisma.AtLeast<{
   closedAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
   closedById?: Prisma.IntNullableFilter<"Transmittal"> | number | null
   closeReason?: Prisma.StringNullableFilter<"Transmittal"> | string | null
+  docProject?: Prisma.XOR<Prisma.DocProjectScalarRelationFilter, Prisma.DocProjectWhereInput>
   items?: Prisma.TransmittalItemListRelationFilter
   respondsTo?: Prisma.XOR<Prisma.TransmittalNullableScalarRelationFilter, Prisma.TransmittalWhereInput> | null
   responses?: Prisma.TransmittalListRelationFilter
   carriedResponses?: Prisma.DocTransmittalResponseListRelationFilter
-}, "id" | "projectId_code">
+}, "id" | "docProjectId_code">
 
 export type TransmittalOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -420,7 +423,7 @@ export type TransmittalOrderByWithAggregationInput = {
   updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   code?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   nature?: Prisma.SortOrder
   status?: Prisma.SortOrder
   counterpartyReference?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -450,7 +453,7 @@ export type TransmittalScalarWhereWithAggregatesInput = {
   updatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Transmittal"> | Date | string | null
   updatedById?: Prisma.IntWithAggregatesFilter<"Transmittal"> | number
   code?: Prisma.StringWithAggregatesFilter<"Transmittal"> | string
-  projectId?: Prisma.IntWithAggregatesFilter<"Transmittal"> | number
+  docProjectId?: Prisma.IntWithAggregatesFilter<"Transmittal"> | number
   nature?: Prisma.EnumTransmittalNatureWithAggregatesFilter<"Transmittal"> | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusWithAggregatesFilter<"Transmittal"> | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.StringNullableWithAggregatesFilter<"Transmittal"> | string | null
@@ -471,7 +474,6 @@ export type TransmittalCreateInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   code: string
-  projectId: number
   nature: $Enums.TransmittalNature
   status?: $Enums.TransmittalStatus
   counterpartyReference?: string | null
@@ -484,6 +486,7 @@ export type TransmittalCreateInput = {
   closedAt?: Date | string | null
   closedById?: number | null
   closeReason?: string | null
+  docProject: Prisma.DocProjectCreateNestedOneWithoutTransmittalsInput
   items?: Prisma.TransmittalItemCreateNestedManyWithoutTransmittalInput
   respondsTo?: Prisma.TransmittalCreateNestedOneWithoutResponsesInput
   responses?: Prisma.TransmittalCreateNestedManyWithoutRespondsToInput
@@ -496,7 +499,7 @@ export type TransmittalUncheckedCreateInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   code: string
-  projectId: number
+  docProjectId: number
   nature: $Enums.TransmittalNature
   status?: $Enums.TransmittalStatus
   counterpartyReference?: string | null
@@ -520,7 +523,6 @@ export type TransmittalUpdateInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
   nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -533,6 +535,7 @@ export type TransmittalUpdateInput = {
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  docProject?: Prisma.DocProjectUpdateOneRequiredWithoutTransmittalsNestedInput
   items?: Prisma.TransmittalItemUpdateManyWithoutTransmittalNestedInput
   respondsTo?: Prisma.TransmittalUpdateOneWithoutResponsesNestedInput
   responses?: Prisma.TransmittalUpdateManyWithoutRespondsToNestedInput
@@ -545,7 +548,7 @@ export type TransmittalUncheckedUpdateInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  docProjectId?: Prisma.IntFieldUpdateOperationsInput | number
   nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -570,7 +573,7 @@ export type TransmittalCreateManyInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   code: string
-  projectId: number
+  docProjectId: number
   nature: $Enums.TransmittalNature
   status?: $Enums.TransmittalStatus
   counterpartyReference?: string | null
@@ -591,7 +594,6 @@ export type TransmittalUpdateManyMutationInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
   nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -612,7 +614,7 @@ export type TransmittalUncheckedUpdateManyInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  docProjectId?: Prisma.IntFieldUpdateOperationsInput | number
   nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -643,8 +645,8 @@ export type TransmittalOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type TransmittalProjectIdCodeCompoundUniqueInput = {
-  projectId: number
+export type TransmittalDocProjectIdCodeCompoundUniqueInput = {
+  docProjectId: number
   code: string
 }
 
@@ -654,7 +656,7 @@ export type TransmittalCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   code?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   nature?: Prisma.SortOrder
   status?: Prisma.SortOrder
   counterpartyReference?: Prisma.SortOrder
@@ -673,7 +675,7 @@ export type TransmittalCountOrderByAggregateInput = {
 export type TransmittalAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   respondsToTransmittalId?: Prisma.SortOrder
   issuedById?: Prisma.SortOrder
   acknowledgeRegisteredById?: Prisma.SortOrder
@@ -686,7 +688,7 @@ export type TransmittalMaxOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   code?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   nature?: Prisma.SortOrder
   status?: Prisma.SortOrder
   counterpartyReference?: Prisma.SortOrder
@@ -708,7 +710,7 @@ export type TransmittalMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   code?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   nature?: Prisma.SortOrder
   status?: Prisma.SortOrder
   counterpartyReference?: Prisma.SortOrder
@@ -727,7 +729,7 @@ export type TransmittalMinOrderByAggregateInput = {
 export type TransmittalSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   respondsToTransmittalId?: Prisma.SortOrder
   issuedById?: Prisma.SortOrder
   acknowledgeRegisteredById?: Prisma.SortOrder
@@ -819,6 +821,48 @@ export type TransmittalUpdateOneRequiredWithoutItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TransmittalUpdateToOneWithWhereWithoutItemsInput, Prisma.TransmittalUpdateWithoutItemsInput>, Prisma.TransmittalUncheckedUpdateWithoutItemsInput>
 }
 
+export type TransmittalCreateNestedManyWithoutDocProjectInput = {
+  create?: Prisma.XOR<Prisma.TransmittalCreateWithoutDocProjectInput, Prisma.TransmittalUncheckedCreateWithoutDocProjectInput> | Prisma.TransmittalCreateWithoutDocProjectInput[] | Prisma.TransmittalUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.TransmittalCreateOrConnectWithoutDocProjectInput | Prisma.TransmittalCreateOrConnectWithoutDocProjectInput[]
+  createMany?: Prisma.TransmittalCreateManyDocProjectInputEnvelope
+  connect?: Prisma.TransmittalWhereUniqueInput | Prisma.TransmittalWhereUniqueInput[]
+}
+
+export type TransmittalUncheckedCreateNestedManyWithoutDocProjectInput = {
+  create?: Prisma.XOR<Prisma.TransmittalCreateWithoutDocProjectInput, Prisma.TransmittalUncheckedCreateWithoutDocProjectInput> | Prisma.TransmittalCreateWithoutDocProjectInput[] | Prisma.TransmittalUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.TransmittalCreateOrConnectWithoutDocProjectInput | Prisma.TransmittalCreateOrConnectWithoutDocProjectInput[]
+  createMany?: Prisma.TransmittalCreateManyDocProjectInputEnvelope
+  connect?: Prisma.TransmittalWhereUniqueInput | Prisma.TransmittalWhereUniqueInput[]
+}
+
+export type TransmittalUpdateManyWithoutDocProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.TransmittalCreateWithoutDocProjectInput, Prisma.TransmittalUncheckedCreateWithoutDocProjectInput> | Prisma.TransmittalCreateWithoutDocProjectInput[] | Prisma.TransmittalUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.TransmittalCreateOrConnectWithoutDocProjectInput | Prisma.TransmittalCreateOrConnectWithoutDocProjectInput[]
+  upsert?: Prisma.TransmittalUpsertWithWhereUniqueWithoutDocProjectInput | Prisma.TransmittalUpsertWithWhereUniqueWithoutDocProjectInput[]
+  createMany?: Prisma.TransmittalCreateManyDocProjectInputEnvelope
+  set?: Prisma.TransmittalWhereUniqueInput | Prisma.TransmittalWhereUniqueInput[]
+  disconnect?: Prisma.TransmittalWhereUniqueInput | Prisma.TransmittalWhereUniqueInput[]
+  delete?: Prisma.TransmittalWhereUniqueInput | Prisma.TransmittalWhereUniqueInput[]
+  connect?: Prisma.TransmittalWhereUniqueInput | Prisma.TransmittalWhereUniqueInput[]
+  update?: Prisma.TransmittalUpdateWithWhereUniqueWithoutDocProjectInput | Prisma.TransmittalUpdateWithWhereUniqueWithoutDocProjectInput[]
+  updateMany?: Prisma.TransmittalUpdateManyWithWhereWithoutDocProjectInput | Prisma.TransmittalUpdateManyWithWhereWithoutDocProjectInput[]
+  deleteMany?: Prisma.TransmittalScalarWhereInput | Prisma.TransmittalScalarWhereInput[]
+}
+
+export type TransmittalUncheckedUpdateManyWithoutDocProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.TransmittalCreateWithoutDocProjectInput, Prisma.TransmittalUncheckedCreateWithoutDocProjectInput> | Prisma.TransmittalCreateWithoutDocProjectInput[] | Prisma.TransmittalUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.TransmittalCreateOrConnectWithoutDocProjectInput | Prisma.TransmittalCreateOrConnectWithoutDocProjectInput[]
+  upsert?: Prisma.TransmittalUpsertWithWhereUniqueWithoutDocProjectInput | Prisma.TransmittalUpsertWithWhereUniqueWithoutDocProjectInput[]
+  createMany?: Prisma.TransmittalCreateManyDocProjectInputEnvelope
+  set?: Prisma.TransmittalWhereUniqueInput | Prisma.TransmittalWhereUniqueInput[]
+  disconnect?: Prisma.TransmittalWhereUniqueInput | Prisma.TransmittalWhereUniqueInput[]
+  delete?: Prisma.TransmittalWhereUniqueInput | Prisma.TransmittalWhereUniqueInput[]
+  connect?: Prisma.TransmittalWhereUniqueInput | Prisma.TransmittalWhereUniqueInput[]
+  update?: Prisma.TransmittalUpdateWithWhereUniqueWithoutDocProjectInput | Prisma.TransmittalUpdateWithWhereUniqueWithoutDocProjectInput[]
+  updateMany?: Prisma.TransmittalUpdateManyWithWhereWithoutDocProjectInput | Prisma.TransmittalUpdateManyWithWhereWithoutDocProjectInput[]
+  deleteMany?: Prisma.TransmittalScalarWhereInput | Prisma.TransmittalScalarWhereInput[]
+}
+
 export type TransmittalCreateNestedOneWithoutCarriedResponsesInput = {
   create?: Prisma.XOR<Prisma.TransmittalCreateWithoutCarriedResponsesInput, Prisma.TransmittalUncheckedCreateWithoutCarriedResponsesInput>
   connectOrCreate?: Prisma.TransmittalCreateOrConnectWithoutCarriedResponsesInput
@@ -840,7 +884,6 @@ export type TransmittalCreateWithoutResponsesInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   code: string
-  projectId: number
   nature: $Enums.TransmittalNature
   status?: $Enums.TransmittalStatus
   counterpartyReference?: string | null
@@ -853,6 +896,7 @@ export type TransmittalCreateWithoutResponsesInput = {
   closedAt?: Date | string | null
   closedById?: number | null
   closeReason?: string | null
+  docProject: Prisma.DocProjectCreateNestedOneWithoutTransmittalsInput
   items?: Prisma.TransmittalItemCreateNestedManyWithoutTransmittalInput
   respondsTo?: Prisma.TransmittalCreateNestedOneWithoutResponsesInput
   carriedResponses?: Prisma.DocTransmittalResponseCreateNestedManyWithoutResponseTransmittalInput
@@ -864,7 +908,7 @@ export type TransmittalUncheckedCreateWithoutResponsesInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   code: string
-  projectId: number
+  docProjectId: number
   nature: $Enums.TransmittalNature
   status?: $Enums.TransmittalStatus
   counterpartyReference?: string | null
@@ -892,7 +936,6 @@ export type TransmittalCreateWithoutRespondsToInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   code: string
-  projectId: number
   nature: $Enums.TransmittalNature
   status?: $Enums.TransmittalStatus
   counterpartyReference?: string | null
@@ -905,6 +948,7 @@ export type TransmittalCreateWithoutRespondsToInput = {
   closedAt?: Date | string | null
   closedById?: number | null
   closeReason?: string | null
+  docProject: Prisma.DocProjectCreateNestedOneWithoutTransmittalsInput
   items?: Prisma.TransmittalItemCreateNestedManyWithoutTransmittalInput
   responses?: Prisma.TransmittalCreateNestedManyWithoutRespondsToInput
   carriedResponses?: Prisma.DocTransmittalResponseCreateNestedManyWithoutResponseTransmittalInput
@@ -916,7 +960,7 @@ export type TransmittalUncheckedCreateWithoutRespondsToInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   code: string
-  projectId: number
+  docProjectId: number
   nature: $Enums.TransmittalNature
   status?: $Enums.TransmittalStatus
   counterpartyReference?: string | null
@@ -960,7 +1004,6 @@ export type TransmittalUpdateWithoutResponsesInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
   nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -973,6 +1016,7 @@ export type TransmittalUpdateWithoutResponsesInput = {
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  docProject?: Prisma.DocProjectUpdateOneRequiredWithoutTransmittalsNestedInput
   items?: Prisma.TransmittalItemUpdateManyWithoutTransmittalNestedInput
   respondsTo?: Prisma.TransmittalUpdateOneWithoutResponsesNestedInput
   carriedResponses?: Prisma.DocTransmittalResponseUpdateManyWithoutResponseTransmittalNestedInput
@@ -984,7 +1028,7 @@ export type TransmittalUncheckedUpdateWithoutResponsesInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  docProjectId?: Prisma.IntFieldUpdateOperationsInput | number
   nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1027,7 +1071,7 @@ export type TransmittalScalarWhereInput = {
   updatedAt?: Prisma.DateTimeNullableFilter<"Transmittal"> | Date | string | null
   updatedById?: Prisma.IntFilter<"Transmittal"> | number
   code?: Prisma.StringFilter<"Transmittal"> | string
-  projectId?: Prisma.IntFilter<"Transmittal"> | number
+  docProjectId?: Prisma.IntFilter<"Transmittal"> | number
   nature?: Prisma.EnumTransmittalNatureFilter<"Transmittal"> | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFilter<"Transmittal"> | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.StringNullableFilter<"Transmittal"> | string | null
@@ -1048,7 +1092,6 @@ export type TransmittalCreateWithoutItemsInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   code: string
-  projectId: number
   nature: $Enums.TransmittalNature
   status?: $Enums.TransmittalStatus
   counterpartyReference?: string | null
@@ -1061,6 +1104,7 @@ export type TransmittalCreateWithoutItemsInput = {
   closedAt?: Date | string | null
   closedById?: number | null
   closeReason?: string | null
+  docProject: Prisma.DocProjectCreateNestedOneWithoutTransmittalsInput
   respondsTo?: Prisma.TransmittalCreateNestedOneWithoutResponsesInput
   responses?: Prisma.TransmittalCreateNestedManyWithoutRespondsToInput
   carriedResponses?: Prisma.DocTransmittalResponseCreateNestedManyWithoutResponseTransmittalInput
@@ -1072,7 +1116,7 @@ export type TransmittalUncheckedCreateWithoutItemsInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   code: string
-  projectId: number
+  docProjectId: number
   nature: $Enums.TransmittalNature
   status?: $Enums.TransmittalStatus
   counterpartyReference?: string | null
@@ -1111,7 +1155,6 @@ export type TransmittalUpdateWithoutItemsInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
   nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1124,6 +1167,7 @@ export type TransmittalUpdateWithoutItemsInput = {
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  docProject?: Prisma.DocProjectUpdateOneRequiredWithoutTransmittalsNestedInput
   respondsTo?: Prisma.TransmittalUpdateOneWithoutResponsesNestedInput
   responses?: Prisma.TransmittalUpdateManyWithoutRespondsToNestedInput
   carriedResponses?: Prisma.DocTransmittalResponseUpdateManyWithoutResponseTransmittalNestedInput
@@ -1135,7 +1179,7 @@ export type TransmittalUncheckedUpdateWithoutItemsInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  docProjectId?: Prisma.IntFieldUpdateOperationsInput | number
   nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1153,12 +1197,11 @@ export type TransmittalUncheckedUpdateWithoutItemsInput = {
   carriedResponses?: Prisma.DocTransmittalResponseUncheckedUpdateManyWithoutResponseTransmittalNestedInput
 }
 
-export type TransmittalCreateWithoutCarriedResponsesInput = {
+export type TransmittalCreateWithoutDocProjectInput = {
   createdAt?: Date | string
   updatedAt?: Date | string | null
   updatedById?: number
   code: string
-  projectId: number
   nature: $Enums.TransmittalNature
   status?: $Enums.TransmittalStatus
   counterpartyReference?: string | null
@@ -1174,6 +1217,80 @@ export type TransmittalCreateWithoutCarriedResponsesInput = {
   items?: Prisma.TransmittalItemCreateNestedManyWithoutTransmittalInput
   respondsTo?: Prisma.TransmittalCreateNestedOneWithoutResponsesInput
   responses?: Prisma.TransmittalCreateNestedManyWithoutRespondsToInput
+  carriedResponses?: Prisma.DocTransmittalResponseCreateNestedManyWithoutResponseTransmittalInput
+}
+
+export type TransmittalUncheckedCreateWithoutDocProjectInput = {
+  id?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string | null
+  updatedById?: number
+  code: string
+  nature: $Enums.TransmittalNature
+  status?: $Enums.TransmittalStatus
+  counterpartyReference?: string | null
+  respondsToTransmittalId?: number | null
+  issuedById: number
+  issuedAt?: Date | string | null
+  acknowledgedBy?: string | null
+  acknowledgedAt?: Date | string | null
+  acknowledgeRegisteredById?: number | null
+  acknowledgeRegisteredAt?: Date | string | null
+  closedAt?: Date | string | null
+  closedById?: number | null
+  closeReason?: string | null
+  items?: Prisma.TransmittalItemUncheckedCreateNestedManyWithoutTransmittalInput
+  responses?: Prisma.TransmittalUncheckedCreateNestedManyWithoutRespondsToInput
+  carriedResponses?: Prisma.DocTransmittalResponseUncheckedCreateNestedManyWithoutResponseTransmittalInput
+}
+
+export type TransmittalCreateOrConnectWithoutDocProjectInput = {
+  where: Prisma.TransmittalWhereUniqueInput
+  create: Prisma.XOR<Prisma.TransmittalCreateWithoutDocProjectInput, Prisma.TransmittalUncheckedCreateWithoutDocProjectInput>
+}
+
+export type TransmittalCreateManyDocProjectInputEnvelope = {
+  data: Prisma.TransmittalCreateManyDocProjectInput | Prisma.TransmittalCreateManyDocProjectInput[]
+  skipDuplicates?: boolean
+}
+
+export type TransmittalUpsertWithWhereUniqueWithoutDocProjectInput = {
+  where: Prisma.TransmittalWhereUniqueInput
+  update: Prisma.XOR<Prisma.TransmittalUpdateWithoutDocProjectInput, Prisma.TransmittalUncheckedUpdateWithoutDocProjectInput>
+  create: Prisma.XOR<Prisma.TransmittalCreateWithoutDocProjectInput, Prisma.TransmittalUncheckedCreateWithoutDocProjectInput>
+}
+
+export type TransmittalUpdateWithWhereUniqueWithoutDocProjectInput = {
+  where: Prisma.TransmittalWhereUniqueInput
+  data: Prisma.XOR<Prisma.TransmittalUpdateWithoutDocProjectInput, Prisma.TransmittalUncheckedUpdateWithoutDocProjectInput>
+}
+
+export type TransmittalUpdateManyWithWhereWithoutDocProjectInput = {
+  where: Prisma.TransmittalScalarWhereInput
+  data: Prisma.XOR<Prisma.TransmittalUpdateManyMutationInput, Prisma.TransmittalUncheckedUpdateManyWithoutDocProjectInput>
+}
+
+export type TransmittalCreateWithoutCarriedResponsesInput = {
+  createdAt?: Date | string
+  updatedAt?: Date | string | null
+  updatedById?: number
+  code: string
+  nature: $Enums.TransmittalNature
+  status?: $Enums.TransmittalStatus
+  counterpartyReference?: string | null
+  issuedById: number
+  issuedAt?: Date | string | null
+  acknowledgedBy?: string | null
+  acknowledgedAt?: Date | string | null
+  acknowledgeRegisteredById?: number | null
+  acknowledgeRegisteredAt?: Date | string | null
+  closedAt?: Date | string | null
+  closedById?: number | null
+  closeReason?: string | null
+  docProject: Prisma.DocProjectCreateNestedOneWithoutTransmittalsInput
+  items?: Prisma.TransmittalItemCreateNestedManyWithoutTransmittalInput
+  respondsTo?: Prisma.TransmittalCreateNestedOneWithoutResponsesInput
+  responses?: Prisma.TransmittalCreateNestedManyWithoutRespondsToInput
 }
 
 export type TransmittalUncheckedCreateWithoutCarriedResponsesInput = {
@@ -1182,7 +1299,7 @@ export type TransmittalUncheckedCreateWithoutCarriedResponsesInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   code: string
-  projectId: number
+  docProjectId: number
   nature: $Enums.TransmittalNature
   status?: $Enums.TransmittalStatus
   counterpartyReference?: string | null
@@ -1221,7 +1338,6 @@ export type TransmittalUpdateWithoutCarriedResponsesInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
   nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1234,6 +1350,7 @@ export type TransmittalUpdateWithoutCarriedResponsesInput = {
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  docProject?: Prisma.DocProjectUpdateOneRequiredWithoutTransmittalsNestedInput
   items?: Prisma.TransmittalItemUpdateManyWithoutTransmittalNestedInput
   respondsTo?: Prisma.TransmittalUpdateOneWithoutResponsesNestedInput
   responses?: Prisma.TransmittalUpdateManyWithoutRespondsToNestedInput
@@ -1245,7 +1362,7 @@ export type TransmittalUncheckedUpdateWithoutCarriedResponsesInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  docProjectId?: Prisma.IntFieldUpdateOperationsInput | number
   nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1269,7 +1386,7 @@ export type TransmittalCreateManyRespondsToInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   code: string
-  projectId: number
+  docProjectId: number
   nature: $Enums.TransmittalNature
   status?: $Enums.TransmittalStatus
   counterpartyReference?: string | null
@@ -1289,7 +1406,6 @@ export type TransmittalUpdateWithoutRespondsToInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
   nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1302,6 +1418,7 @@ export type TransmittalUpdateWithoutRespondsToInput = {
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  docProject?: Prisma.DocProjectUpdateOneRequiredWithoutTransmittalsNestedInput
   items?: Prisma.TransmittalItemUpdateManyWithoutTransmittalNestedInput
   responses?: Prisma.TransmittalUpdateManyWithoutRespondsToNestedInput
   carriedResponses?: Prisma.DocTransmittalResponseUpdateManyWithoutResponseTransmittalNestedInput
@@ -1313,7 +1430,7 @@ export type TransmittalUncheckedUpdateWithoutRespondsToInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  docProjectId?: Prisma.IntFieldUpdateOperationsInput | number
   nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1337,10 +1454,99 @@ export type TransmittalUncheckedUpdateManyWithoutRespondsToInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
-  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  docProjectId?: Prisma.IntFieldUpdateOperationsInput | number
   nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
   status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
   counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuedById?: Prisma.IntFieldUpdateOperationsInput | number
+  issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type TransmittalCreateManyDocProjectInput = {
+  id?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string | null
+  updatedById?: number
+  code: string
+  nature: $Enums.TransmittalNature
+  status?: $Enums.TransmittalStatus
+  counterpartyReference?: string | null
+  respondsToTransmittalId?: number | null
+  issuedById: number
+  issuedAt?: Date | string | null
+  acknowledgedBy?: string | null
+  acknowledgedAt?: Date | string | null
+  acknowledgeRegisteredById?: number | null
+  acknowledgeRegisteredAt?: Date | string | null
+  closedAt?: Date | string | null
+  closedById?: number | null
+  closeReason?: string | null
+}
+
+export type TransmittalUpdateWithoutDocProjectInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
+  status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
+  counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuedById?: Prisma.IntFieldUpdateOperationsInput | number
+  issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  items?: Prisma.TransmittalItemUpdateManyWithoutTransmittalNestedInput
+  respondsTo?: Prisma.TransmittalUpdateOneWithoutResponsesNestedInput
+  responses?: Prisma.TransmittalUpdateManyWithoutRespondsToNestedInput
+  carriedResponses?: Prisma.DocTransmittalResponseUpdateManyWithoutResponseTransmittalNestedInput
+}
+
+export type TransmittalUncheckedUpdateWithoutDocProjectInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
+  status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
+  counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respondsToTransmittalId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  issuedById?: Prisma.IntFieldUpdateOperationsInput | number
+  issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  acknowledgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  acknowledgeRegisteredById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  acknowledgeRegisteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  closeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  items?: Prisma.TransmittalItemUncheckedUpdateManyWithoutTransmittalNestedInput
+  responses?: Prisma.TransmittalUncheckedUpdateManyWithoutRespondsToNestedInput
+  carriedResponses?: Prisma.DocTransmittalResponseUncheckedUpdateManyWithoutResponseTransmittalNestedInput
+}
+
+export type TransmittalUncheckedUpdateManyWithoutDocProjectInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  nature?: Prisma.EnumTransmittalNatureFieldUpdateOperationsInput | $Enums.TransmittalNature
+  status?: Prisma.EnumTransmittalStatusFieldUpdateOperationsInput | $Enums.TransmittalStatus
+  counterpartyReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respondsToTransmittalId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   issuedById?: Prisma.IntFieldUpdateOperationsInput | number
   issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   acknowledgedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1407,7 +1613,7 @@ export type TransmittalSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   updatedAt?: boolean
   updatedById?: boolean
   code?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   nature?: boolean
   status?: boolean
   counterpartyReference?: boolean
@@ -1421,6 +1627,7 @@ export type TransmittalSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   closedAt?: boolean
   closedById?: boolean
   closeReason?: boolean
+  docProject?: boolean | Prisma.DocProjectDefaultArgs<ExtArgs>
   items?: boolean | Prisma.Transmittal$itemsArgs<ExtArgs>
   respondsTo?: boolean | Prisma.Transmittal$respondsToArgs<ExtArgs>
   responses?: boolean | Prisma.Transmittal$responsesArgs<ExtArgs>
@@ -1434,7 +1641,7 @@ export type TransmittalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   updatedAt?: boolean
   updatedById?: boolean
   code?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   nature?: boolean
   status?: boolean
   counterpartyReference?: boolean
@@ -1448,6 +1655,7 @@ export type TransmittalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   closedAt?: boolean
   closedById?: boolean
   closeReason?: boolean
+  docProject?: boolean | Prisma.DocProjectDefaultArgs<ExtArgs>
   respondsTo?: boolean | Prisma.Transmittal$respondsToArgs<ExtArgs>
 }, ExtArgs["result"]["transmittal"]>
 
@@ -1457,7 +1665,7 @@ export type TransmittalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   updatedAt?: boolean
   updatedById?: boolean
   code?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   nature?: boolean
   status?: boolean
   counterpartyReference?: boolean
@@ -1471,6 +1679,7 @@ export type TransmittalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   closedAt?: boolean
   closedById?: boolean
   closeReason?: boolean
+  docProject?: boolean | Prisma.DocProjectDefaultArgs<ExtArgs>
   respondsTo?: boolean | Prisma.Transmittal$respondsToArgs<ExtArgs>
 }, ExtArgs["result"]["transmittal"]>
 
@@ -1480,7 +1689,7 @@ export type TransmittalSelectScalar = {
   updatedAt?: boolean
   updatedById?: boolean
   code?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   nature?: boolean
   status?: boolean
   counterpartyReference?: boolean
@@ -1496,8 +1705,9 @@ export type TransmittalSelectScalar = {
   closeReason?: boolean
 }
 
-export type TransmittalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "updatedById" | "code" | "projectId" | "nature" | "status" | "counterpartyReference" | "respondsToTransmittalId" | "issuedById" | "issuedAt" | "acknowledgedBy" | "acknowledgedAt" | "acknowledgeRegisteredById" | "acknowledgeRegisteredAt" | "closedAt" | "closedById" | "closeReason", ExtArgs["result"]["transmittal"]>
+export type TransmittalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "updatedById" | "code" | "docProjectId" | "nature" | "status" | "counterpartyReference" | "respondsToTransmittalId" | "issuedById" | "issuedAt" | "acknowledgedBy" | "acknowledgedAt" | "acknowledgeRegisteredById" | "acknowledgeRegisteredAt" | "closedAt" | "closedById" | "closeReason", ExtArgs["result"]["transmittal"]>
 export type TransmittalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.DocProjectDefaultArgs<ExtArgs>
   items?: boolean | Prisma.Transmittal$itemsArgs<ExtArgs>
   respondsTo?: boolean | Prisma.Transmittal$respondsToArgs<ExtArgs>
   responses?: boolean | Prisma.Transmittal$responsesArgs<ExtArgs>
@@ -1505,15 +1715,18 @@ export type TransmittalInclude<ExtArgs extends runtime.Types.Extensions.Internal
   _count?: boolean | Prisma.TransmittalCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TransmittalIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.DocProjectDefaultArgs<ExtArgs>
   respondsTo?: boolean | Prisma.Transmittal$respondsToArgs<ExtArgs>
 }
 export type TransmittalIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.DocProjectDefaultArgs<ExtArgs>
   respondsTo?: boolean | Prisma.Transmittal$respondsToArgs<ExtArgs>
 }
 
 export type $TransmittalPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Transmittal"
   objects: {
+    docProject: Prisma.$DocProjectPayload<ExtArgs>
     items: Prisma.$TransmittalItemPayload<ExtArgs>[]
     respondsTo: Prisma.$TransmittalPayload<ExtArgs> | null
     responses: Prisma.$TransmittalPayload<ExtArgs>[]
@@ -1525,7 +1738,7 @@ export type $TransmittalPayload<ExtArgs extends runtime.Types.Extensions.Interna
     updatedAt: Date | null
     updatedById: number
     code: string
-    projectId: number
+    docProjectId: number
     nature: $Enums.TransmittalNature
     status: $Enums.TransmittalStatus
     counterpartyReference: string | null
@@ -1933,6 +2146,7 @@ readonly fields: TransmittalFieldRefs;
  */
 export interface Prisma__TransmittalClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  docProject<T extends Prisma.DocProjectDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocProjectDefaultArgs<ExtArgs>>): Prisma.Prisma__DocProjectClient<runtime.Types.Result.GetResult<Prisma.$DocProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   items<T extends Prisma.Transmittal$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Transmittal$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransmittalItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   respondsTo<T extends Prisma.Transmittal$respondsToArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Transmittal$respondsToArgs<ExtArgs>>): Prisma.Prisma__TransmittalClient<runtime.Types.Result.GetResult<Prisma.$TransmittalPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   responses<T extends Prisma.Transmittal$responsesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Transmittal$responsesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransmittalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1971,7 +2185,7 @@ export interface TransmittalFieldRefs {
   readonly updatedAt: Prisma.FieldRef<"Transmittal", 'DateTime'>
   readonly updatedById: Prisma.FieldRef<"Transmittal", 'Int'>
   readonly code: Prisma.FieldRef<"Transmittal", 'String'>
-  readonly projectId: Prisma.FieldRef<"Transmittal", 'Int'>
+  readonly docProjectId: Prisma.FieldRef<"Transmittal", 'Int'>
   readonly nature: Prisma.FieldRef<"Transmittal", 'TransmittalNature'>
   readonly status: Prisma.FieldRef<"Transmittal", 'TransmittalStatus'>
   readonly counterpartyReference: Prisma.FieldRef<"Transmittal", 'String'>

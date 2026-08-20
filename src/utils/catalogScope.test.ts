@@ -21,7 +21,7 @@ import {
 const PROYECTO = 77
 const OTRO = 88
 
-const entrada = (id: number, projectId: number | null) => ({ id, projectId })
+const entrada = (id: number, docProjectId: number | null) => ({ id, docProjectId })
 
 // --- El modo efectivo ---
 
@@ -51,7 +51,7 @@ test("heredar SUMA lo propio a lo del despliegue", () => {
   // reemplaza: acá ampliar es el caso normal de una planta.
   assert.deepEqual(
     visibleEntries(catalogo, {
-      projectId: PROYECTO,
+      docProjectId: PROYECTO,
       mode: DocScopeMode.INHERIT,
     }).map((e) => e.id),
     [1, 2, 3],
@@ -61,7 +61,7 @@ test("heredar SUMA lo propio a lo del despliegue", () => {
 test("catálogo propio no ve nada del despliegue", () => {
   assert.deepEqual(
     visibleEntries(catalogo, {
-      projectId: PROYECTO,
+      docProjectId: PROYECTO,
       mode: DocScopeMode.OWN,
     }).map((e) => e.id),
     [3],
@@ -70,8 +70,8 @@ test("catálogo propio no ve nada del despliegue", () => {
 
 test("ningún modo alcanza el catálogo de otro proyecto", () => {
   for (const mode of Object.values(DocScopeMode)) {
-    const ajenas = visibleEntries(catalogo, { projectId: PROYECTO, mode }).filter(
-      (e) => e.projectId === OTRO,
+    const ajenas = visibleEntries(catalogo, { docProjectId: PROYECTO, mode }).filter(
+      (e) => e.docProjectId === OTRO,
     )
     assert.deepEqual(ajenas, [], `el modo ${mode} filtra el catálogo ajeno`)
   }
@@ -83,7 +83,7 @@ test("un proyecto con catálogo propio y sin entradas ve la lista vacía", () =>
   // con la siembra por copia.
   assert.deepEqual(
     visibleEntries([entrada(1, null)], {
-      projectId: PROYECTO,
+      docProjectId: PROYECTO,
       mode: DocScopeMode.OWN,
     }),
     [],
@@ -95,12 +95,12 @@ test("el criterio de consulta coincide con el filtro en memoria", () => {
   // decir lo mismo. Acá se compara la forma; que la base la interprete igual lo
   // verifica la prueba de persistencia.
   assert.deepEqual(
-    scopeWhere({ projectId: PROYECTO, mode: DocScopeMode.OWN }),
-    { projectId: PROYECTO },
+    scopeWhere({ docProjectId: PROYECTO, mode: DocScopeMode.OWN }),
+    { docProjectId: PROYECTO },
   )
   assert.deepEqual(
-    scopeWhere({ projectId: PROYECTO, mode: DocScopeMode.INHERIT }),
-    { OR: [{ projectId: PROYECTO }, { projectId: null }] },
+    scopeWhere({ docProjectId: PROYECTO, mode: DocScopeMode.INHERIT }),
+    { OR: [{ docProjectId: PROYECTO }, { docProjectId: null }] },
   )
 })
 
@@ -141,9 +141,9 @@ test("dentro del mismo alcance siempre se admite", () => {
 
 const nodo = (
   id: number,
-  projectId: number | null,
+  docProjectId: number | null,
   parentId: number | null = null,
-) => ({ id, projectId, parentId })
+) => ({ id, docProjectId, parentId })
 
 test("declarar propio se impide si un nodo del proyecto cuelga del despliegue", () => {
   const arbol = [

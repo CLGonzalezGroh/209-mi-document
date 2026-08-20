@@ -16,7 +16,7 @@ import { DocScopeMode } from "../generated/prisma/enums.js"
  */
 
 /** Lo mínimo que una entrada de catálogo debe exponer para resolver alcance. */
-export type ScopedEntry = { projectId: number | null }
+export type ScopedEntry = { docProjectId: number | null }
 
 /** El modo declarado, o el que rige cuando nadie declaró nada. */
 export const effectiveMode = (
@@ -39,8 +39,8 @@ export const effectiveMode = (
  */
 export const visibleEntries = <T extends ScopedEntry>(
   entries: T[],
-  scope: { projectId: number; mode: DocScopeMode },
-): T[] => entries.filter((e) => entryVisible(e.projectId, scope))
+  scope: { docProjectId: number; mode: DocScopeMode },
+): T[] => entries.filter((e) => entryVisible(e.docProjectId, scope))
 
 /**
  * ¿Una entrada de alcance `entryScope` la ve el proyecto indicado?
@@ -51,11 +51,11 @@ export const visibleEntries = <T extends ScopedEntry>(
  */
 export const entryVisible = (
   entryScope: number | null,
-  { projectId, mode }: { projectId: number; mode: DocScopeMode },
+  { docProjectId, mode }: { docProjectId: number; mode: DocScopeMode },
 ): boolean =>
   mode === DocScopeMode.OWN
-    ? entryScope === projectId
-    : entryScope === projectId || entryScope === null
+    ? entryScope === docProjectId
+    : entryScope === docProjectId || entryScope === null
 
 /**
  * Criterio de consulta equivalente a `visibleEntries`, para no traer de la base
@@ -65,15 +65,15 @@ export const entryVisible = (
  * pura es la que se prueba. Es el mismo par que el módulo ya usa en otros lados.
  */
 export const scopeWhere = ({
-  projectId,
+  docProjectId,
   mode,
 }: {
-  projectId: number
+  docProjectId: number
   mode: DocScopeMode
-}): { projectId: number } | { OR: [{ projectId: number }, { projectId: null }] } =>
+}): { docProjectId: number } | { OR: [{ docProjectId: number }, { docProjectId: null }] } =>
   mode === DocScopeMode.OWN
-    ? { projectId }
-    : { OR: [{ projectId }, { projectId: null }] }
+    ? { docProjectId }
+    : { OR: [{ docProjectId }, { docProjectId: null }] }
 
 // ---------------------------------------------------------------------------
 // Invariantes de cruce — propias del catálogo jerárquico
@@ -121,13 +121,13 @@ export const crossScopeChildren = <
   T extends ScopedEntry & { id: number; parentId: number | null },
 >(
   nodes: T[],
-  projectId: number,
+  docProjectId: number,
 ): T[] => {
-  const scopeOf = new Map(nodes.map((n) => [n.id, n.projectId]))
+  const scopeOf = new Map(nodes.map((n) => [n.id, n.docProjectId]))
 
   return nodes.filter(
     (n) =>
-      n.projectId === projectId &&
+      n.docProjectId === docProjectId &&
       n.parentId !== null &&
       scopeOf.get(n.parentId) === null,
   )

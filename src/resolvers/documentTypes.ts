@@ -53,12 +53,12 @@ export const documentTypeResolvers = {
     documentTypes: async (
       _: any,
       {
-        projectId,
+        docProjectId,
         filter,
         pagination,
         orderBy,
       }: {
-        projectId?: number
+        docProjectId?: number
         filter?: DocumentTypeFilterInput
         pagination?: PaginationInput
         orderBy?: DocumentTypeOrderByInput
@@ -66,10 +66,10 @@ export const documentTypeResolvers = {
       context: ResolverContext,
     ) => {
       const userId =
-        projectId !== undefined
+        docProjectId !== undefined
           ? await projectAuthorization({
               requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_LIST],
-              projectId,
+              docProjectId,
               context,
             })
           : await userAuthorization({
@@ -79,7 +79,7 @@ export const documentTypeResolvers = {
       logger.info("documentTypes", { userId })
 
       try {
-        const where: any = { projectId: projectId ?? null }
+        const where: any = { docProjectId: docProjectId ?? null }
 
         if (filter?.terminatedFilter !== undefined) {
           if (filter.terminatedFilter === TerminatedFilter.ACTIVE) {
@@ -235,7 +235,7 @@ export const documentTypeResolvers = {
     /**
      * Los tipos con que se puede clasificar, con el **alcance resuelto**.
      *
-     * `projectId` es opcional porque hay documentos sin proyecto —calidad,
+     * `docProjectId` es opcional porque hay documentos sin proyecto —calidad,
      * comercial, activos—, y para ellos rige el catálogo del despliegue.
      */
     documentTypesSelectList: async (
@@ -243,8 +243,8 @@ export const documentTypeResolvers = {
       {
         module,
         classId,
-        projectId,
-      }: { module?: ModuleType; classId?: number; projectId?: number },
+        docProjectId,
+      }: { module?: ModuleType; classId?: number; docProjectId?: number },
       context: ResolverContext,
     ) => {
       const permisos = [
@@ -253,10 +253,10 @@ export const documentTypeResolvers = {
       ]
 
       const userId =
-        projectId !== undefined
+        docProjectId !== undefined
           ? await projectAuthorization({
               requiredPermissions: permisos,
-              projectId,
+              docProjectId,
               context,
             })
           : await userAuthorization({ requiredPermissions: permisos, context })
@@ -265,7 +265,7 @@ export const documentTypeResolvers = {
       try {
         const where: any = {
           terminatedAt: null,
-          ...(await visibleClassificationWhere(context.orm, projectId)),
+          ...(await visibleClassificationWhere(context.orm, docProjectId)),
         }
 
         // Cada eje se agrega como una condición AND propia. Componerlos sobre el
@@ -314,7 +314,7 @@ export const documentTypeResolvers = {
           name: string
           code: string
           module?: ModuleType
-          projectId?: number
+          docProjectId?: number
           classId?: number
           description?: string
           requiresFormalReview?: boolean
@@ -323,13 +323,13 @@ export const documentTypeResolvers = {
       context: ResolverContext,
     ) => {
       // El alcance de lo que se crea decide quién puede crearlo (BLOQUE 02, B7).
-      const scope = input.projectId ?? null
+      const scope = input.docProjectId ?? null
 
       const userId =
         scope !== null
           ? await projectAuthorization({
               requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_TYPE_CREATE],
-              projectId: scope,
+              docProjectId: scope,
               context,
             })
           : await userAuthorization({
@@ -353,7 +353,7 @@ export const documentTypeResolvers = {
               name: input.name,
               code: input.code,
               module: input.module,
-              projectId: scope,
+              docProjectId: scope,
               classId: input.classId,
               description: input.description,
               requiresFormalReview: input.requiresFormalReview ?? false,
@@ -429,10 +429,10 @@ export const documentTypeResolvers = {
           if (input.classId !== undefined) {
             const actual = await tx.documentType.findUniqueOrThrow({
               where: { id },
-              select: { projectId: true },
+              select: { docProjectId: true },
             })
             await assertClassScopeAdmitted(tx, {
-              typeScope: actual.projectId,
+              typeScope: actual.docProjectId,
               classId: input.classId ?? null,
             })
           }

@@ -30,14 +30,14 @@ export type DocCatalogScopeAvgAggregateOutputType = {
   id: number | null
   createdById: number | null
   updatedById: number | null
-  projectId: number | null
+  docProjectId: number | null
 }
 
 export type DocCatalogScopeSumAggregateOutputType = {
   id: number | null
   createdById: number | null
   updatedById: number | null
-  projectId: number | null
+  docProjectId: number | null
 }
 
 export type DocCatalogScopeMinAggregateOutputType = {
@@ -47,7 +47,7 @@ export type DocCatalogScopeMinAggregateOutputType = {
   updatedAt: Date | null
   updatedById: number | null
   module: $Enums.ModuleType | null
-  projectId: number | null
+  docProjectId: number | null
   catalog: $Enums.DocCatalogKind | null
   mode: $Enums.DocScopeMode | null
 }
@@ -59,7 +59,7 @@ export type DocCatalogScopeMaxAggregateOutputType = {
   updatedAt: Date | null
   updatedById: number | null
   module: $Enums.ModuleType | null
-  projectId: number | null
+  docProjectId: number | null
   catalog: $Enums.DocCatalogKind | null
   mode: $Enums.DocScopeMode | null
 }
@@ -71,7 +71,7 @@ export type DocCatalogScopeCountAggregateOutputType = {
   updatedAt: number
   updatedById: number
   module: number
-  projectId: number
+  docProjectId: number
   catalog: number
   mode: number
   _all: number
@@ -82,14 +82,14 @@ export type DocCatalogScopeAvgAggregateInputType = {
   id?: true
   createdById?: true
   updatedById?: true
-  projectId?: true
+  docProjectId?: true
 }
 
 export type DocCatalogScopeSumAggregateInputType = {
   id?: true
   createdById?: true
   updatedById?: true
-  projectId?: true
+  docProjectId?: true
 }
 
 export type DocCatalogScopeMinAggregateInputType = {
@@ -99,7 +99,7 @@ export type DocCatalogScopeMinAggregateInputType = {
   updatedAt?: true
   updatedById?: true
   module?: true
-  projectId?: true
+  docProjectId?: true
   catalog?: true
   mode?: true
 }
@@ -111,7 +111,7 @@ export type DocCatalogScopeMaxAggregateInputType = {
   updatedAt?: true
   updatedById?: true
   module?: true
-  projectId?: true
+  docProjectId?: true
   catalog?: true
   mode?: true
 }
@@ -123,7 +123,7 @@ export type DocCatalogScopeCountAggregateInputType = {
   updatedAt?: true
   updatedById?: true
   module?: true
-  projectId?: true
+  docProjectId?: true
   catalog?: true
   mode?: true
   _all?: true
@@ -222,7 +222,7 @@ export type DocCatalogScopeGroupByOutputType = {
   updatedAt: Date | null
   updatedById: number
   module: $Enums.ModuleType
-  projectId: number | null
+  docProjectId: number | null
   catalog: $Enums.DocCatalogKind
   mode: $Enums.DocScopeMode
   _count: DocCatalogScopeCountAggregateOutputType | null
@@ -257,9 +257,10 @@ export type DocCatalogScopeWhereInput = {
   updatedAt?: Prisma.DateTimeNullableFilter<"DocCatalogScope"> | Date | string | null
   updatedById?: Prisma.IntFilter<"DocCatalogScope"> | number
   module?: Prisma.EnumModuleTypeFilter<"DocCatalogScope"> | $Enums.ModuleType
-  projectId?: Prisma.IntNullableFilter<"DocCatalogScope"> | number | null
+  docProjectId?: Prisma.IntNullableFilter<"DocCatalogScope"> | number | null
   catalog?: Prisma.EnumDocCatalogKindFilter<"DocCatalogScope"> | $Enums.DocCatalogKind
   mode?: Prisma.EnumDocScopeModeFilter<"DocCatalogScope"> | $Enums.DocScopeMode
+  docProject?: Prisma.XOR<Prisma.DocProjectNullableScalarRelationFilter, Prisma.DocProjectWhereInput> | null
 }
 
 export type DocCatalogScopeOrderByWithRelationInput = {
@@ -269,14 +270,15 @@ export type DocCatalogScopeOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   module?: Prisma.SortOrder
-  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProjectId?: Prisma.SortOrderInput | Prisma.SortOrder
   catalog?: Prisma.SortOrder
   mode?: Prisma.SortOrder
+  docProject?: Prisma.DocProjectOrderByWithRelationInput
 }
 
 export type DocCatalogScopeWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  module_projectId_catalog?: Prisma.DocCatalogScopeModuleProjectIdCatalogCompoundUniqueInput
+  module_docProjectId_catalog?: Prisma.DocCatalogScopeModuleDocProjectIdCatalogCompoundUniqueInput
   AND?: Prisma.DocCatalogScopeWhereInput | Prisma.DocCatalogScopeWhereInput[]
   OR?: Prisma.DocCatalogScopeWhereInput[]
   NOT?: Prisma.DocCatalogScopeWhereInput | Prisma.DocCatalogScopeWhereInput[]
@@ -285,10 +287,11 @@ export type DocCatalogScopeWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeNullableFilter<"DocCatalogScope"> | Date | string | null
   updatedById?: Prisma.IntFilter<"DocCatalogScope"> | number
   module?: Prisma.EnumModuleTypeFilter<"DocCatalogScope"> | $Enums.ModuleType
-  projectId?: Prisma.IntNullableFilter<"DocCatalogScope"> | number | null
+  docProjectId?: Prisma.IntNullableFilter<"DocCatalogScope"> | number | null
   catalog?: Prisma.EnumDocCatalogKindFilter<"DocCatalogScope"> | $Enums.DocCatalogKind
   mode?: Prisma.EnumDocScopeModeFilter<"DocCatalogScope"> | $Enums.DocScopeMode
-}, "id" | "module_projectId_catalog">
+  docProject?: Prisma.XOR<Prisma.DocProjectNullableScalarRelationFilter, Prisma.DocProjectWhereInput> | null
+}, "id" | "module_docProjectId_catalog">
 
 export type DocCatalogScopeOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -297,7 +300,7 @@ export type DocCatalogScopeOrderByWithAggregationInput = {
   updatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   module?: Prisma.SortOrder
-  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProjectId?: Prisma.SortOrderInput | Prisma.SortOrder
   catalog?: Prisma.SortOrder
   mode?: Prisma.SortOrder
   _count?: Prisma.DocCatalogScopeCountOrderByAggregateInput
@@ -317,7 +320,7 @@ export type DocCatalogScopeScalarWhereWithAggregatesInput = {
   updatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DocCatalogScope"> | Date | string | null
   updatedById?: Prisma.IntWithAggregatesFilter<"DocCatalogScope"> | number
   module?: Prisma.EnumModuleTypeWithAggregatesFilter<"DocCatalogScope"> | $Enums.ModuleType
-  projectId?: Prisma.IntNullableWithAggregatesFilter<"DocCatalogScope"> | number | null
+  docProjectId?: Prisma.IntNullableWithAggregatesFilter<"DocCatalogScope"> | number | null
   catalog?: Prisma.EnumDocCatalogKindWithAggregatesFilter<"DocCatalogScope"> | $Enums.DocCatalogKind
   mode?: Prisma.EnumDocScopeModeWithAggregatesFilter<"DocCatalogScope"> | $Enums.DocScopeMode
 }
@@ -328,9 +331,9 @@ export type DocCatalogScopeCreateInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   module: $Enums.ModuleType
-  projectId?: number | null
   catalog: $Enums.DocCatalogKind
   mode: $Enums.DocScopeMode
+  docProject?: Prisma.DocProjectCreateNestedOneWithoutCatalogScopesInput
 }
 
 export type DocCatalogScopeUncheckedCreateInput = {
@@ -340,7 +343,7 @@ export type DocCatalogScopeUncheckedCreateInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   module: $Enums.ModuleType
-  projectId?: number | null
+  docProjectId?: number | null
   catalog: $Enums.DocCatalogKind
   mode: $Enums.DocScopeMode
 }
@@ -351,9 +354,9 @@ export type DocCatalogScopeUpdateInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   catalog?: Prisma.EnumDocCatalogKindFieldUpdateOperationsInput | $Enums.DocCatalogKind
   mode?: Prisma.EnumDocScopeModeFieldUpdateOperationsInput | $Enums.DocScopeMode
+  docProject?: Prisma.DocProjectUpdateOneWithoutCatalogScopesNestedInput
 }
 
 export type DocCatalogScopeUncheckedUpdateInput = {
@@ -363,7 +366,7 @@ export type DocCatalogScopeUncheckedUpdateInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   catalog?: Prisma.EnumDocCatalogKindFieldUpdateOperationsInput | $Enums.DocCatalogKind
   mode?: Prisma.EnumDocScopeModeFieldUpdateOperationsInput | $Enums.DocScopeMode
 }
@@ -375,7 +378,7 @@ export type DocCatalogScopeCreateManyInput = {
   updatedAt?: Date | string | null
   updatedById?: number
   module: $Enums.ModuleType
-  projectId?: number | null
+  docProjectId?: number | null
   catalog: $Enums.DocCatalogKind
   mode: $Enums.DocScopeMode
 }
@@ -386,7 +389,6 @@ export type DocCatalogScopeUpdateManyMutationInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   catalog?: Prisma.EnumDocCatalogKindFieldUpdateOperationsInput | $Enums.DocCatalogKind
   mode?: Prisma.EnumDocScopeModeFieldUpdateOperationsInput | $Enums.DocScopeMode
 }
@@ -398,14 +400,24 @@ export type DocCatalogScopeUncheckedUpdateManyInput = {
   updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   catalog?: Prisma.EnumDocCatalogKindFieldUpdateOperationsInput | $Enums.DocCatalogKind
   mode?: Prisma.EnumDocScopeModeFieldUpdateOperationsInput | $Enums.DocScopeMode
 }
 
-export type DocCatalogScopeModuleProjectIdCatalogCompoundUniqueInput = {
+export type DocCatalogScopeListRelationFilter = {
+  every?: Prisma.DocCatalogScopeWhereInput
+  some?: Prisma.DocCatalogScopeWhereInput
+  none?: Prisma.DocCatalogScopeWhereInput
+}
+
+export type DocCatalogScopeOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type DocCatalogScopeModuleDocProjectIdCatalogCompoundUniqueInput = {
   module: $Enums.ModuleType
-  projectId: number
+  docProjectId: number
   catalog: $Enums.DocCatalogKind
 }
 
@@ -416,7 +428,7 @@ export type DocCatalogScopeCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   module?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   catalog?: Prisma.SortOrder
   mode?: Prisma.SortOrder
 }
@@ -425,7 +437,7 @@ export type DocCatalogScopeAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
 }
 
 export type DocCatalogScopeMaxOrderByAggregateInput = {
@@ -435,7 +447,7 @@ export type DocCatalogScopeMaxOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   module?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   catalog?: Prisma.SortOrder
   mode?: Prisma.SortOrder
 }
@@ -447,7 +459,7 @@ export type DocCatalogScopeMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
   module?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   catalog?: Prisma.SortOrder
   mode?: Prisma.SortOrder
 }
@@ -456,7 +468,49 @@ export type DocCatalogScopeSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
+}
+
+export type DocCatalogScopeCreateNestedManyWithoutDocProjectInput = {
+  create?: Prisma.XOR<Prisma.DocCatalogScopeCreateWithoutDocProjectInput, Prisma.DocCatalogScopeUncheckedCreateWithoutDocProjectInput> | Prisma.DocCatalogScopeCreateWithoutDocProjectInput[] | Prisma.DocCatalogScopeUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocCatalogScopeCreateOrConnectWithoutDocProjectInput | Prisma.DocCatalogScopeCreateOrConnectWithoutDocProjectInput[]
+  createMany?: Prisma.DocCatalogScopeCreateManyDocProjectInputEnvelope
+  connect?: Prisma.DocCatalogScopeWhereUniqueInput | Prisma.DocCatalogScopeWhereUniqueInput[]
+}
+
+export type DocCatalogScopeUncheckedCreateNestedManyWithoutDocProjectInput = {
+  create?: Prisma.XOR<Prisma.DocCatalogScopeCreateWithoutDocProjectInput, Prisma.DocCatalogScopeUncheckedCreateWithoutDocProjectInput> | Prisma.DocCatalogScopeCreateWithoutDocProjectInput[] | Prisma.DocCatalogScopeUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocCatalogScopeCreateOrConnectWithoutDocProjectInput | Prisma.DocCatalogScopeCreateOrConnectWithoutDocProjectInput[]
+  createMany?: Prisma.DocCatalogScopeCreateManyDocProjectInputEnvelope
+  connect?: Prisma.DocCatalogScopeWhereUniqueInput | Prisma.DocCatalogScopeWhereUniqueInput[]
+}
+
+export type DocCatalogScopeUpdateManyWithoutDocProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.DocCatalogScopeCreateWithoutDocProjectInput, Prisma.DocCatalogScopeUncheckedCreateWithoutDocProjectInput> | Prisma.DocCatalogScopeCreateWithoutDocProjectInput[] | Prisma.DocCatalogScopeUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocCatalogScopeCreateOrConnectWithoutDocProjectInput | Prisma.DocCatalogScopeCreateOrConnectWithoutDocProjectInput[]
+  upsert?: Prisma.DocCatalogScopeUpsertWithWhereUniqueWithoutDocProjectInput | Prisma.DocCatalogScopeUpsertWithWhereUniqueWithoutDocProjectInput[]
+  createMany?: Prisma.DocCatalogScopeCreateManyDocProjectInputEnvelope
+  set?: Prisma.DocCatalogScopeWhereUniqueInput | Prisma.DocCatalogScopeWhereUniqueInput[]
+  disconnect?: Prisma.DocCatalogScopeWhereUniqueInput | Prisma.DocCatalogScopeWhereUniqueInput[]
+  delete?: Prisma.DocCatalogScopeWhereUniqueInput | Prisma.DocCatalogScopeWhereUniqueInput[]
+  connect?: Prisma.DocCatalogScopeWhereUniqueInput | Prisma.DocCatalogScopeWhereUniqueInput[]
+  update?: Prisma.DocCatalogScopeUpdateWithWhereUniqueWithoutDocProjectInput | Prisma.DocCatalogScopeUpdateWithWhereUniqueWithoutDocProjectInput[]
+  updateMany?: Prisma.DocCatalogScopeUpdateManyWithWhereWithoutDocProjectInput | Prisma.DocCatalogScopeUpdateManyWithWhereWithoutDocProjectInput[]
+  deleteMany?: Prisma.DocCatalogScopeScalarWhereInput | Prisma.DocCatalogScopeScalarWhereInput[]
+}
+
+export type DocCatalogScopeUncheckedUpdateManyWithoutDocProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.DocCatalogScopeCreateWithoutDocProjectInput, Prisma.DocCatalogScopeUncheckedCreateWithoutDocProjectInput> | Prisma.DocCatalogScopeCreateWithoutDocProjectInput[] | Prisma.DocCatalogScopeUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocCatalogScopeCreateOrConnectWithoutDocProjectInput | Prisma.DocCatalogScopeCreateOrConnectWithoutDocProjectInput[]
+  upsert?: Prisma.DocCatalogScopeUpsertWithWhereUniqueWithoutDocProjectInput | Prisma.DocCatalogScopeUpsertWithWhereUniqueWithoutDocProjectInput[]
+  createMany?: Prisma.DocCatalogScopeCreateManyDocProjectInputEnvelope
+  set?: Prisma.DocCatalogScopeWhereUniqueInput | Prisma.DocCatalogScopeWhereUniqueInput[]
+  disconnect?: Prisma.DocCatalogScopeWhereUniqueInput | Prisma.DocCatalogScopeWhereUniqueInput[]
+  delete?: Prisma.DocCatalogScopeWhereUniqueInput | Prisma.DocCatalogScopeWhereUniqueInput[]
+  connect?: Prisma.DocCatalogScopeWhereUniqueInput | Prisma.DocCatalogScopeWhereUniqueInput[]
+  update?: Prisma.DocCatalogScopeUpdateWithWhereUniqueWithoutDocProjectInput | Prisma.DocCatalogScopeUpdateWithWhereUniqueWithoutDocProjectInput[]
+  updateMany?: Prisma.DocCatalogScopeUpdateManyWithWhereWithoutDocProjectInput | Prisma.DocCatalogScopeUpdateManyWithWhereWithoutDocProjectInput[]
+  deleteMany?: Prisma.DocCatalogScopeScalarWhereInput | Prisma.DocCatalogScopeScalarWhereInput[]
 }
 
 export type EnumDocCatalogKindFieldUpdateOperationsInput = {
@@ -465,6 +519,111 @@ export type EnumDocCatalogKindFieldUpdateOperationsInput = {
 
 export type EnumDocScopeModeFieldUpdateOperationsInput = {
   set?: $Enums.DocScopeMode
+}
+
+export type DocCatalogScopeCreateWithoutDocProjectInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  module: $Enums.ModuleType
+  catalog: $Enums.DocCatalogKind
+  mode: $Enums.DocScopeMode
+}
+
+export type DocCatalogScopeUncheckedCreateWithoutDocProjectInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  module: $Enums.ModuleType
+  catalog: $Enums.DocCatalogKind
+  mode: $Enums.DocScopeMode
+}
+
+export type DocCatalogScopeCreateOrConnectWithoutDocProjectInput = {
+  where: Prisma.DocCatalogScopeWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocCatalogScopeCreateWithoutDocProjectInput, Prisma.DocCatalogScopeUncheckedCreateWithoutDocProjectInput>
+}
+
+export type DocCatalogScopeCreateManyDocProjectInputEnvelope = {
+  data: Prisma.DocCatalogScopeCreateManyDocProjectInput | Prisma.DocCatalogScopeCreateManyDocProjectInput[]
+  skipDuplicates?: boolean
+}
+
+export type DocCatalogScopeUpsertWithWhereUniqueWithoutDocProjectInput = {
+  where: Prisma.DocCatalogScopeWhereUniqueInput
+  update: Prisma.XOR<Prisma.DocCatalogScopeUpdateWithoutDocProjectInput, Prisma.DocCatalogScopeUncheckedUpdateWithoutDocProjectInput>
+  create: Prisma.XOR<Prisma.DocCatalogScopeCreateWithoutDocProjectInput, Prisma.DocCatalogScopeUncheckedCreateWithoutDocProjectInput>
+}
+
+export type DocCatalogScopeUpdateWithWhereUniqueWithoutDocProjectInput = {
+  where: Prisma.DocCatalogScopeWhereUniqueInput
+  data: Prisma.XOR<Prisma.DocCatalogScopeUpdateWithoutDocProjectInput, Prisma.DocCatalogScopeUncheckedUpdateWithoutDocProjectInput>
+}
+
+export type DocCatalogScopeUpdateManyWithWhereWithoutDocProjectInput = {
+  where: Prisma.DocCatalogScopeScalarWhereInput
+  data: Prisma.XOR<Prisma.DocCatalogScopeUpdateManyMutationInput, Prisma.DocCatalogScopeUncheckedUpdateManyWithoutDocProjectInput>
+}
+
+export type DocCatalogScopeScalarWhereInput = {
+  AND?: Prisma.DocCatalogScopeScalarWhereInput | Prisma.DocCatalogScopeScalarWhereInput[]
+  OR?: Prisma.DocCatalogScopeScalarWhereInput[]
+  NOT?: Prisma.DocCatalogScopeScalarWhereInput | Prisma.DocCatalogScopeScalarWhereInput[]
+  id?: Prisma.IntFilter<"DocCatalogScope"> | number
+  createdAt?: Prisma.DateTimeFilter<"DocCatalogScope"> | Date | string
+  createdById?: Prisma.IntFilter<"DocCatalogScope"> | number
+  updatedAt?: Prisma.DateTimeNullableFilter<"DocCatalogScope"> | Date | string | null
+  updatedById?: Prisma.IntFilter<"DocCatalogScope"> | number
+  module?: Prisma.EnumModuleTypeFilter<"DocCatalogScope"> | $Enums.ModuleType
+  docProjectId?: Prisma.IntNullableFilter<"DocCatalogScope"> | number | null
+  catalog?: Prisma.EnumDocCatalogKindFilter<"DocCatalogScope"> | $Enums.DocCatalogKind
+  mode?: Prisma.EnumDocScopeModeFilter<"DocCatalogScope"> | $Enums.DocScopeMode
+}
+
+export type DocCatalogScopeCreateManyDocProjectInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  module: $Enums.ModuleType
+  catalog: $Enums.DocCatalogKind
+  mode: $Enums.DocScopeMode
+}
+
+export type DocCatalogScopeUpdateWithoutDocProjectInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
+  catalog?: Prisma.EnumDocCatalogKindFieldUpdateOperationsInput | $Enums.DocCatalogKind
+  mode?: Prisma.EnumDocScopeModeFieldUpdateOperationsInput | $Enums.DocScopeMode
+}
+
+export type DocCatalogScopeUncheckedUpdateWithoutDocProjectInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
+  catalog?: Prisma.EnumDocCatalogKindFieldUpdateOperationsInput | $Enums.DocCatalogKind
+  mode?: Prisma.EnumDocScopeModeFieldUpdateOperationsInput | $Enums.DocScopeMode
+}
+
+export type DocCatalogScopeUncheckedUpdateManyWithoutDocProjectInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  module?: Prisma.EnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType
+  catalog?: Prisma.EnumDocCatalogKindFieldUpdateOperationsInput | $Enums.DocCatalogKind
+  mode?: Prisma.EnumDocScopeModeFieldUpdateOperationsInput | $Enums.DocScopeMode
 }
 
 
@@ -476,9 +635,10 @@ export type DocCatalogScopeSelect<ExtArgs extends runtime.Types.Extensions.Inter
   updatedAt?: boolean
   updatedById?: boolean
   module?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   catalog?: boolean
   mode?: boolean
+  docProject?: boolean | Prisma.DocCatalogScope$docProjectArgs<ExtArgs>
 }, ExtArgs["result"]["docCatalogScope"]>
 
 export type DocCatalogScopeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -488,9 +648,10 @@ export type DocCatalogScopeSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   updatedAt?: boolean
   updatedById?: boolean
   module?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   catalog?: boolean
   mode?: boolean
+  docProject?: boolean | Prisma.DocCatalogScope$docProjectArgs<ExtArgs>
 }, ExtArgs["result"]["docCatalogScope"]>
 
 export type DocCatalogScopeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -500,9 +661,10 @@ export type DocCatalogScopeSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   updatedAt?: boolean
   updatedById?: boolean
   module?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   catalog?: boolean
   mode?: boolean
+  docProject?: boolean | Prisma.DocCatalogScope$docProjectArgs<ExtArgs>
 }, ExtArgs["result"]["docCatalogScope"]>
 
 export type DocCatalogScopeSelectScalar = {
@@ -512,16 +674,27 @@ export type DocCatalogScopeSelectScalar = {
   updatedAt?: boolean
   updatedById?: boolean
   module?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   catalog?: boolean
   mode?: boolean
 }
 
-export type DocCatalogScopeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "module" | "projectId" | "catalog" | "mode", ExtArgs["result"]["docCatalogScope"]>
+export type DocCatalogScopeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "module" | "docProjectId" | "catalog" | "mode", ExtArgs["result"]["docCatalogScope"]>
+export type DocCatalogScopeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.DocCatalogScope$docProjectArgs<ExtArgs>
+}
+export type DocCatalogScopeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.DocCatalogScope$docProjectArgs<ExtArgs>
+}
+export type DocCatalogScopeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.DocCatalogScope$docProjectArgs<ExtArgs>
+}
 
 export type $DocCatalogScopePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DocCatalogScope"
-  objects: {}
+  objects: {
+    docProject: Prisma.$DocProjectPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     createdAt: Date
@@ -529,7 +702,7 @@ export type $DocCatalogScopePayload<ExtArgs extends runtime.Types.Extensions.Int
     updatedAt: Date | null
     updatedById: number
     module: $Enums.ModuleType
-    projectId: number | null
+    docProjectId: number | null
     catalog: $Enums.DocCatalogKind
     mode: $Enums.DocScopeMode
   }, ExtArgs["result"]["docCatalogScope"]>
@@ -926,6 +1099,7 @@ readonly fields: DocCatalogScopeFieldRefs;
  */
 export interface Prisma__DocCatalogScopeClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  docProject<T extends Prisma.DocCatalogScope$docProjectArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocCatalogScope$docProjectArgs<ExtArgs>>): Prisma.Prisma__DocProjectClient<runtime.Types.Result.GetResult<Prisma.$DocProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -961,7 +1135,7 @@ export interface DocCatalogScopeFieldRefs {
   readonly updatedAt: Prisma.FieldRef<"DocCatalogScope", 'DateTime'>
   readonly updatedById: Prisma.FieldRef<"DocCatalogScope", 'Int'>
   readonly module: Prisma.FieldRef<"DocCatalogScope", 'ModuleType'>
-  readonly projectId: Prisma.FieldRef<"DocCatalogScope", 'Int'>
+  readonly docProjectId: Prisma.FieldRef<"DocCatalogScope", 'Int'>
   readonly catalog: Prisma.FieldRef<"DocCatalogScope", 'DocCatalogKind'>
   readonly mode: Prisma.FieldRef<"DocCatalogScope", 'DocScopeMode'>
 }
@@ -981,6 +1155,10 @@ export type DocCatalogScopeFindUniqueArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.DocCatalogScopeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocCatalogScopeInclude<ExtArgs> | null
+  /**
    * Filter, which DocCatalogScope to fetch.
    */
   where: Prisma.DocCatalogScopeWhereUniqueInput
@@ -999,6 +1177,10 @@ export type DocCatalogScopeFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.DocCatalogScopeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocCatalogScopeInclude<ExtArgs> | null
+  /**
    * Filter, which DocCatalogScope to fetch.
    */
   where: Prisma.DocCatalogScopeWhereUniqueInput
@@ -1016,6 +1198,10 @@ export type DocCatalogScopeFindFirstArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the DocCatalogScope
    */
   omit?: Prisma.DocCatalogScopeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocCatalogScopeInclude<ExtArgs> | null
   /**
    * Filter, which DocCatalogScope to fetch.
    */
@@ -1065,6 +1251,10 @@ export type DocCatalogScopeFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.DocCatalogScopeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocCatalogScopeInclude<ExtArgs> | null
+  /**
    * Filter, which DocCatalogScope to fetch.
    */
   where?: Prisma.DocCatalogScopeWhereInput
@@ -1112,6 +1302,10 @@ export type DocCatalogScopeFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the DocCatalogScope
    */
   omit?: Prisma.DocCatalogScopeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocCatalogScopeInclude<ExtArgs> | null
   /**
    * Filter, which DocCatalogScopes to fetch.
    */
@@ -1161,6 +1355,10 @@ export type DocCatalogScopeCreateArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.DocCatalogScopeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocCatalogScopeInclude<ExtArgs> | null
+  /**
    * The data needed to create a DocCatalogScope.
    */
   data: Prisma.XOR<Prisma.DocCatalogScopeCreateInput, Prisma.DocCatalogScopeUncheckedCreateInput>
@@ -1194,6 +1392,10 @@ export type DocCatalogScopeCreateManyAndReturnArgs<ExtArgs extends runtime.Types
    */
   data: Prisma.DocCatalogScopeCreateManyInput | Prisma.DocCatalogScopeCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocCatalogScopeIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1208,6 +1410,10 @@ export type DocCatalogScopeUpdateArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the DocCatalogScope
    */
   omit?: Prisma.DocCatalogScopeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocCatalogScopeInclude<ExtArgs> | null
   /**
    * The data needed to update a DocCatalogScope.
    */
@@ -1260,6 +1466,10 @@ export type DocCatalogScopeUpdateManyAndReturnArgs<ExtArgs extends runtime.Types
    * Limit how many DocCatalogScopes to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocCatalogScopeIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1274,6 +1484,10 @@ export type DocCatalogScopeUpsertArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the DocCatalogScope
    */
   omit?: Prisma.DocCatalogScopeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocCatalogScopeInclude<ExtArgs> | null
   /**
    * The filter to search for the DocCatalogScope to update in case it exists.
    */
@@ -1301,6 +1515,10 @@ export type DocCatalogScopeDeleteArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.DocCatalogScopeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocCatalogScopeInclude<ExtArgs> | null
+  /**
    * Filter which DocCatalogScope to delete.
    */
   where: Prisma.DocCatalogScopeWhereUniqueInput
@@ -1321,6 +1539,25 @@ export type DocCatalogScopeDeleteManyArgs<ExtArgs extends runtime.Types.Extensio
 }
 
 /**
+ * DocCatalogScope.docProject
+ */
+export type DocCatalogScope$docProjectArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocProject
+   */
+  select?: Prisma.DocProjectSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocProject
+   */
+  omit?: Prisma.DocProjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectInclude<ExtArgs> | null
+  where?: Prisma.DocProjectWhereInput
+}
+
+/**
  * DocCatalogScope without action
  */
 export type DocCatalogScopeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1332,4 +1569,8 @@ export type DocCatalogScopeDefaultArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the DocCatalogScope
    */
   omit?: Prisma.DocCatalogScopeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocCatalogScopeInclude<ExtArgs> | null
 }

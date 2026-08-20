@@ -47,8 +47,11 @@ export const dependencyResolvers = {
         if (entityType === "PROJECT") {
           const [transmittalCount, scannedFileCount, areaCount, documentCount] =
             await Promise.all([
+              // Transmittals y documentos cuelgan del CONTRATO, y el que se
+              // borra es un proyecto de mi-project: el conteo cruza por el
+              // vínculo PMI, que es N:1 (BLOQUE 02D, B3).
               context.orm.transmittal.count({
-                where: { projectId: entityId },
+                where: { docProject: { projectId: entityId } },
               }),
               context.orm.scannedFile.count({
                 where: { projectId: entityId },
@@ -56,10 +59,8 @@ export const dependencyResolvers = {
               context.orm.area.count({
                 where: { projectId: entityId },
               }),
-              // Con projectId explícito, el conteo expresa directamente lo que
-              // siempre quiso decir (BLOQUE 02, B3)
               context.orm.document.count({
-                where: { projectId: entityId },
+                where: { docProject: { projectId: entityId } },
               }),
             ])
 

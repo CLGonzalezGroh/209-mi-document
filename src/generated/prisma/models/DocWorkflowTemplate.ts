@@ -30,7 +30,7 @@ export type DocWorkflowTemplateAvgAggregateOutputType = {
   id: number | null
   createdById: number | null
   updatedById: number | null
-  projectId: number | null
+  docProjectId: number | null
   documentClassId: number | null
   documentTypeId: number | null
 }
@@ -39,7 +39,7 @@ export type DocWorkflowTemplateSumAggregateOutputType = {
   id: number | null
   createdById: number | null
   updatedById: number | null
-  projectId: number | null
+  docProjectId: number | null
   documentClassId: number | null
   documentTypeId: number | null
 }
@@ -54,7 +54,7 @@ export type DocWorkflowTemplateMinAggregateOutputType = {
   isSys: boolean | null
   name: string | null
   description: string | null
-  projectId: number | null
+  docProjectId: number | null
   documentClassId: number | null
   documentTypeId: number | null
 }
@@ -69,7 +69,7 @@ export type DocWorkflowTemplateMaxAggregateOutputType = {
   isSys: boolean | null
   name: string | null
   description: string | null
-  projectId: number | null
+  docProjectId: number | null
   documentClassId: number | null
   documentTypeId: number | null
 }
@@ -84,7 +84,7 @@ export type DocWorkflowTemplateCountAggregateOutputType = {
   isSys: number
   name: number
   description: number
-  projectId: number
+  docProjectId: number
   documentClassId: number
   documentTypeId: number
   _all: number
@@ -95,7 +95,7 @@ export type DocWorkflowTemplateAvgAggregateInputType = {
   id?: true
   createdById?: true
   updatedById?: true
-  projectId?: true
+  docProjectId?: true
   documentClassId?: true
   documentTypeId?: true
 }
@@ -104,7 +104,7 @@ export type DocWorkflowTemplateSumAggregateInputType = {
   id?: true
   createdById?: true
   updatedById?: true
-  projectId?: true
+  docProjectId?: true
   documentClassId?: true
   documentTypeId?: true
 }
@@ -119,7 +119,7 @@ export type DocWorkflowTemplateMinAggregateInputType = {
   isSys?: true
   name?: true
   description?: true
-  projectId?: true
+  docProjectId?: true
   documentClassId?: true
   documentTypeId?: true
 }
@@ -134,7 +134,7 @@ export type DocWorkflowTemplateMaxAggregateInputType = {
   isSys?: true
   name?: true
   description?: true
-  projectId?: true
+  docProjectId?: true
   documentClassId?: true
   documentTypeId?: true
 }
@@ -149,7 +149,7 @@ export type DocWorkflowTemplateCountAggregateInputType = {
   isSys?: true
   name?: true
   description?: true
-  projectId?: true
+  docProjectId?: true
   documentClassId?: true
   documentTypeId?: true
   _all?: true
@@ -251,7 +251,7 @@ export type DocWorkflowTemplateGroupByOutputType = {
   isSys: boolean
   name: string
   description: string | null
-  projectId: number | null
+  docProjectId: number | null
   documentClassId: number | null
   documentTypeId: number | null
   _count: DocWorkflowTemplateCountAggregateOutputType | null
@@ -289,9 +289,10 @@ export type DocWorkflowTemplateWhereInput = {
   isSys?: Prisma.BoolFilter<"DocWorkflowTemplate"> | boolean
   name?: Prisma.StringFilter<"DocWorkflowTemplate"> | string
   description?: Prisma.StringNullableFilter<"DocWorkflowTemplate"> | string | null
-  projectId?: Prisma.IntNullableFilter<"DocWorkflowTemplate"> | number | null
+  docProjectId?: Prisma.IntNullableFilter<"DocWorkflowTemplate"> | number | null
   documentClassId?: Prisma.IntNullableFilter<"DocWorkflowTemplate"> | number | null
   documentTypeId?: Prisma.IntNullableFilter<"DocWorkflowTemplate"> | number | null
+  docProject?: Prisma.XOR<Prisma.DocProjectNullableScalarRelationFilter, Prisma.DocProjectWhereInput> | null
   documentClass?: Prisma.XOR<Prisma.DocumentClassNullableScalarRelationFilter, Prisma.DocumentClassWhereInput> | null
   documentType?: Prisma.XOR<Prisma.DocumentTypeNullableScalarRelationFilter, Prisma.DocumentTypeWhereInput> | null
   steps?: Prisma.DocWorkflowTemplateStepListRelationFilter
@@ -308,9 +309,10 @@ export type DocWorkflowTemplateOrderByWithRelationInput = {
   isSys?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProjectId?: Prisma.SortOrderInput | Prisma.SortOrder
   documentClassId?: Prisma.SortOrderInput | Prisma.SortOrder
   documentTypeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProject?: Prisma.DocProjectOrderByWithRelationInput
   documentClass?: Prisma.DocumentClassOrderByWithRelationInput
   documentType?: Prisma.DocumentTypeOrderByWithRelationInput
   steps?: Prisma.DocWorkflowTemplateStepOrderByRelationAggregateInput
@@ -319,7 +321,7 @@ export type DocWorkflowTemplateOrderByWithRelationInput = {
 
 export type DocWorkflowTemplateWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  projectId_documentClassId_documentTypeId?: Prisma.DocWorkflowTemplateProjectIdDocumentClassIdDocumentTypeIdCompoundUniqueInput
+  docProjectId_documentClassId_documentTypeId?: Prisma.DocWorkflowTemplateDocProjectIdDocumentClassIdDocumentTypeIdCompoundUniqueInput
   AND?: Prisma.DocWorkflowTemplateWhereInput | Prisma.DocWorkflowTemplateWhereInput[]
   OR?: Prisma.DocWorkflowTemplateWhereInput[]
   NOT?: Prisma.DocWorkflowTemplateWhereInput | Prisma.DocWorkflowTemplateWhereInput[]
@@ -331,14 +333,15 @@ export type DocWorkflowTemplateWhereUniqueInput = Prisma.AtLeast<{
   isSys?: Prisma.BoolFilter<"DocWorkflowTemplate"> | boolean
   name?: Prisma.StringFilter<"DocWorkflowTemplate"> | string
   description?: Prisma.StringNullableFilter<"DocWorkflowTemplate"> | string | null
-  projectId?: Prisma.IntNullableFilter<"DocWorkflowTemplate"> | number | null
+  docProjectId?: Prisma.IntNullableFilter<"DocWorkflowTemplate"> | number | null
   documentClassId?: Prisma.IntNullableFilter<"DocWorkflowTemplate"> | number | null
   documentTypeId?: Prisma.IntNullableFilter<"DocWorkflowTemplate"> | number | null
+  docProject?: Prisma.XOR<Prisma.DocProjectNullableScalarRelationFilter, Prisma.DocProjectWhereInput> | null
   documentClass?: Prisma.XOR<Prisma.DocumentClassNullableScalarRelationFilter, Prisma.DocumentClassWhereInput> | null
   documentType?: Prisma.XOR<Prisma.DocumentTypeNullableScalarRelationFilter, Prisma.DocumentTypeWhereInput> | null
   steps?: Prisma.DocWorkflowTemplateStepListRelationFilter
   workflows?: Prisma.ReviewWorkflowListRelationFilter
-}, "id" | "projectId_documentClassId_documentTypeId">
+}, "id" | "docProjectId_documentClassId_documentTypeId">
 
 export type DocWorkflowTemplateOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -350,7 +353,7 @@ export type DocWorkflowTemplateOrderByWithAggregationInput = {
   isSys?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProjectId?: Prisma.SortOrderInput | Prisma.SortOrder
   documentClassId?: Prisma.SortOrderInput | Prisma.SortOrder
   documentTypeId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DocWorkflowTemplateCountOrderByAggregateInput
@@ -373,7 +376,7 @@ export type DocWorkflowTemplateScalarWhereWithAggregatesInput = {
   isSys?: Prisma.BoolWithAggregatesFilter<"DocWorkflowTemplate"> | boolean
   name?: Prisma.StringWithAggregatesFilter<"DocWorkflowTemplate"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"DocWorkflowTemplate"> | string | null
-  projectId?: Prisma.IntNullableWithAggregatesFilter<"DocWorkflowTemplate"> | number | null
+  docProjectId?: Prisma.IntNullableWithAggregatesFilter<"DocWorkflowTemplate"> | number | null
   documentClassId?: Prisma.IntNullableWithAggregatesFilter<"DocWorkflowTemplate"> | number | null
   documentTypeId?: Prisma.IntNullableWithAggregatesFilter<"DocWorkflowTemplate"> | number | null
 }
@@ -387,7 +390,7 @@ export type DocWorkflowTemplateCreateInput = {
   isSys?: boolean
   name: string
   description?: string | null
-  projectId?: number | null
+  docProject?: Prisma.DocProjectCreateNestedOneWithoutWorkflowTemplatesInput
   documentClass?: Prisma.DocumentClassCreateNestedOneWithoutWorkflowTemplatesInput
   documentType?: Prisma.DocumentTypeCreateNestedOneWithoutWorkflowTemplatesInput
   steps?: Prisma.DocWorkflowTemplateStepCreateNestedManyWithoutTemplateInput
@@ -404,7 +407,7 @@ export type DocWorkflowTemplateUncheckedCreateInput = {
   isSys?: boolean
   name: string
   description?: string | null
-  projectId?: number | null
+  docProjectId?: number | null
   documentClassId?: number | null
   documentTypeId?: number | null
   steps?: Prisma.DocWorkflowTemplateStepUncheckedCreateNestedManyWithoutTemplateInput
@@ -420,7 +423,7 @@ export type DocWorkflowTemplateUpdateInput = {
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProject?: Prisma.DocProjectUpdateOneWithoutWorkflowTemplatesNestedInput
   documentClass?: Prisma.DocumentClassUpdateOneWithoutWorkflowTemplatesNestedInput
   documentType?: Prisma.DocumentTypeUpdateOneWithoutWorkflowTemplatesNestedInput
   steps?: Prisma.DocWorkflowTemplateStepUpdateManyWithoutTemplateNestedInput
@@ -437,7 +440,7 @@ export type DocWorkflowTemplateUncheckedUpdateInput = {
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   steps?: Prisma.DocWorkflowTemplateStepUncheckedUpdateManyWithoutTemplateNestedInput
@@ -454,7 +457,7 @@ export type DocWorkflowTemplateCreateManyInput = {
   isSys?: boolean
   name: string
   description?: string | null
-  projectId?: number | null
+  docProjectId?: number | null
   documentClassId?: number | null
   documentTypeId?: number | null
 }
@@ -468,7 +471,6 @@ export type DocWorkflowTemplateUpdateManyMutationInput = {
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type DocWorkflowTemplateUncheckedUpdateManyInput = {
@@ -481,7 +483,7 @@ export type DocWorkflowTemplateUncheckedUpdateManyInput = {
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
@@ -501,8 +503,8 @@ export type DocWorkflowTemplateNullableScalarRelationFilter = {
   isNot?: Prisma.DocWorkflowTemplateWhereInput | null
 }
 
-export type DocWorkflowTemplateProjectIdDocumentClassIdDocumentTypeIdCompoundUniqueInput = {
-  projectId: number
+export type DocWorkflowTemplateDocProjectIdDocumentClassIdDocumentTypeIdCompoundUniqueInput = {
+  docProjectId: number
   documentClassId: number
   documentTypeId: number
 }
@@ -517,7 +519,7 @@ export type DocWorkflowTemplateCountOrderByAggregateInput = {
   isSys?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   documentClassId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
 }
@@ -526,7 +528,7 @@ export type DocWorkflowTemplateAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   documentClassId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
 }
@@ -541,7 +543,7 @@ export type DocWorkflowTemplateMaxOrderByAggregateInput = {
   isSys?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   documentClassId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
 }
@@ -556,7 +558,7 @@ export type DocWorkflowTemplateMinOrderByAggregateInput = {
   isSys?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   documentClassId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
 }
@@ -565,7 +567,7 @@ export type DocWorkflowTemplateSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   documentClassId?: Prisma.SortOrder
   documentTypeId?: Prisma.SortOrder
 }
@@ -675,6 +677,48 @@ export type DocWorkflowTemplateUpdateOneWithoutWorkflowsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.DocWorkflowTemplateUpdateToOneWithWhereWithoutWorkflowsInput, Prisma.DocWorkflowTemplateUpdateWithoutWorkflowsInput>, Prisma.DocWorkflowTemplateUncheckedUpdateWithoutWorkflowsInput>
 }
 
+export type DocWorkflowTemplateCreateNestedManyWithoutDocProjectInput = {
+  create?: Prisma.XOR<Prisma.DocWorkflowTemplateCreateWithoutDocProjectInput, Prisma.DocWorkflowTemplateUncheckedCreateWithoutDocProjectInput> | Prisma.DocWorkflowTemplateCreateWithoutDocProjectInput[] | Prisma.DocWorkflowTemplateUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocWorkflowTemplateCreateOrConnectWithoutDocProjectInput | Prisma.DocWorkflowTemplateCreateOrConnectWithoutDocProjectInput[]
+  createMany?: Prisma.DocWorkflowTemplateCreateManyDocProjectInputEnvelope
+  connect?: Prisma.DocWorkflowTemplateWhereUniqueInput | Prisma.DocWorkflowTemplateWhereUniqueInput[]
+}
+
+export type DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocProjectInput = {
+  create?: Prisma.XOR<Prisma.DocWorkflowTemplateCreateWithoutDocProjectInput, Prisma.DocWorkflowTemplateUncheckedCreateWithoutDocProjectInput> | Prisma.DocWorkflowTemplateCreateWithoutDocProjectInput[] | Prisma.DocWorkflowTemplateUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocWorkflowTemplateCreateOrConnectWithoutDocProjectInput | Prisma.DocWorkflowTemplateCreateOrConnectWithoutDocProjectInput[]
+  createMany?: Prisma.DocWorkflowTemplateCreateManyDocProjectInputEnvelope
+  connect?: Prisma.DocWorkflowTemplateWhereUniqueInput | Prisma.DocWorkflowTemplateWhereUniqueInput[]
+}
+
+export type DocWorkflowTemplateUpdateManyWithoutDocProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.DocWorkflowTemplateCreateWithoutDocProjectInput, Prisma.DocWorkflowTemplateUncheckedCreateWithoutDocProjectInput> | Prisma.DocWorkflowTemplateCreateWithoutDocProjectInput[] | Prisma.DocWorkflowTemplateUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocWorkflowTemplateCreateOrConnectWithoutDocProjectInput | Prisma.DocWorkflowTemplateCreateOrConnectWithoutDocProjectInput[]
+  upsert?: Prisma.DocWorkflowTemplateUpsertWithWhereUniqueWithoutDocProjectInput | Prisma.DocWorkflowTemplateUpsertWithWhereUniqueWithoutDocProjectInput[]
+  createMany?: Prisma.DocWorkflowTemplateCreateManyDocProjectInputEnvelope
+  set?: Prisma.DocWorkflowTemplateWhereUniqueInput | Prisma.DocWorkflowTemplateWhereUniqueInput[]
+  disconnect?: Prisma.DocWorkflowTemplateWhereUniqueInput | Prisma.DocWorkflowTemplateWhereUniqueInput[]
+  delete?: Prisma.DocWorkflowTemplateWhereUniqueInput | Prisma.DocWorkflowTemplateWhereUniqueInput[]
+  connect?: Prisma.DocWorkflowTemplateWhereUniqueInput | Prisma.DocWorkflowTemplateWhereUniqueInput[]
+  update?: Prisma.DocWorkflowTemplateUpdateWithWhereUniqueWithoutDocProjectInput | Prisma.DocWorkflowTemplateUpdateWithWhereUniqueWithoutDocProjectInput[]
+  updateMany?: Prisma.DocWorkflowTemplateUpdateManyWithWhereWithoutDocProjectInput | Prisma.DocWorkflowTemplateUpdateManyWithWhereWithoutDocProjectInput[]
+  deleteMany?: Prisma.DocWorkflowTemplateScalarWhereInput | Prisma.DocWorkflowTemplateScalarWhereInput[]
+}
+
+export type DocWorkflowTemplateUncheckedUpdateManyWithoutDocProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.DocWorkflowTemplateCreateWithoutDocProjectInput, Prisma.DocWorkflowTemplateUncheckedCreateWithoutDocProjectInput> | Prisma.DocWorkflowTemplateCreateWithoutDocProjectInput[] | Prisma.DocWorkflowTemplateUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocWorkflowTemplateCreateOrConnectWithoutDocProjectInput | Prisma.DocWorkflowTemplateCreateOrConnectWithoutDocProjectInput[]
+  upsert?: Prisma.DocWorkflowTemplateUpsertWithWhereUniqueWithoutDocProjectInput | Prisma.DocWorkflowTemplateUpsertWithWhereUniqueWithoutDocProjectInput[]
+  createMany?: Prisma.DocWorkflowTemplateCreateManyDocProjectInputEnvelope
+  set?: Prisma.DocWorkflowTemplateWhereUniqueInput | Prisma.DocWorkflowTemplateWhereUniqueInput[]
+  disconnect?: Prisma.DocWorkflowTemplateWhereUniqueInput | Prisma.DocWorkflowTemplateWhereUniqueInput[]
+  delete?: Prisma.DocWorkflowTemplateWhereUniqueInput | Prisma.DocWorkflowTemplateWhereUniqueInput[]
+  connect?: Prisma.DocWorkflowTemplateWhereUniqueInput | Prisma.DocWorkflowTemplateWhereUniqueInput[]
+  update?: Prisma.DocWorkflowTemplateUpdateWithWhereUniqueWithoutDocProjectInput | Prisma.DocWorkflowTemplateUpdateWithWhereUniqueWithoutDocProjectInput[]
+  updateMany?: Prisma.DocWorkflowTemplateUpdateManyWithWhereWithoutDocProjectInput | Prisma.DocWorkflowTemplateUpdateManyWithWhereWithoutDocProjectInput[]
+  deleteMany?: Prisma.DocWorkflowTemplateScalarWhereInput | Prisma.DocWorkflowTemplateScalarWhereInput[]
+}
+
 export type DocWorkflowTemplateCreateNestedOneWithoutStepsInput = {
   create?: Prisma.XOR<Prisma.DocWorkflowTemplateCreateWithoutStepsInput, Prisma.DocWorkflowTemplateUncheckedCreateWithoutStepsInput>
   connectOrCreate?: Prisma.DocWorkflowTemplateCreateOrConnectWithoutStepsInput
@@ -698,7 +742,7 @@ export type DocWorkflowTemplateCreateWithoutDocumentClassInput = {
   isSys?: boolean
   name: string
   description?: string | null
-  projectId?: number | null
+  docProject?: Prisma.DocProjectCreateNestedOneWithoutWorkflowTemplatesInput
   documentType?: Prisma.DocumentTypeCreateNestedOneWithoutWorkflowTemplatesInput
   steps?: Prisma.DocWorkflowTemplateStepCreateNestedManyWithoutTemplateInput
   workflows?: Prisma.ReviewWorkflowCreateNestedManyWithoutTemplateInput
@@ -714,7 +758,7 @@ export type DocWorkflowTemplateUncheckedCreateWithoutDocumentClassInput = {
   isSys?: boolean
   name: string
   description?: string | null
-  projectId?: number | null
+  docProjectId?: number | null
   documentTypeId?: number | null
   steps?: Prisma.DocWorkflowTemplateStepUncheckedCreateNestedManyWithoutTemplateInput
   workflows?: Prisma.ReviewWorkflowUncheckedCreateNestedManyWithoutTemplateInput
@@ -759,7 +803,7 @@ export type DocWorkflowTemplateScalarWhereInput = {
   isSys?: Prisma.BoolFilter<"DocWorkflowTemplate"> | boolean
   name?: Prisma.StringFilter<"DocWorkflowTemplate"> | string
   description?: Prisma.StringNullableFilter<"DocWorkflowTemplate"> | string | null
-  projectId?: Prisma.IntNullableFilter<"DocWorkflowTemplate"> | number | null
+  docProjectId?: Prisma.IntNullableFilter<"DocWorkflowTemplate"> | number | null
   documentClassId?: Prisma.IntNullableFilter<"DocWorkflowTemplate"> | number | null
   documentTypeId?: Prisma.IntNullableFilter<"DocWorkflowTemplate"> | number | null
 }
@@ -773,7 +817,7 @@ export type DocWorkflowTemplateCreateWithoutDocumentTypeInput = {
   isSys?: boolean
   name: string
   description?: string | null
-  projectId?: number | null
+  docProject?: Prisma.DocProjectCreateNestedOneWithoutWorkflowTemplatesInput
   documentClass?: Prisma.DocumentClassCreateNestedOneWithoutWorkflowTemplatesInput
   steps?: Prisma.DocWorkflowTemplateStepCreateNestedManyWithoutTemplateInput
   workflows?: Prisma.ReviewWorkflowCreateNestedManyWithoutTemplateInput
@@ -789,7 +833,7 @@ export type DocWorkflowTemplateUncheckedCreateWithoutDocumentTypeInput = {
   isSys?: boolean
   name: string
   description?: string | null
-  projectId?: number | null
+  docProjectId?: number | null
   documentClassId?: number | null
   steps?: Prisma.DocWorkflowTemplateStepUncheckedCreateNestedManyWithoutTemplateInput
   workflows?: Prisma.ReviewWorkflowUncheckedCreateNestedManyWithoutTemplateInput
@@ -830,7 +874,7 @@ export type DocWorkflowTemplateCreateWithoutWorkflowsInput = {
   isSys?: boolean
   name: string
   description?: string | null
-  projectId?: number | null
+  docProject?: Prisma.DocProjectCreateNestedOneWithoutWorkflowTemplatesInput
   documentClass?: Prisma.DocumentClassCreateNestedOneWithoutWorkflowTemplatesInput
   documentType?: Prisma.DocumentTypeCreateNestedOneWithoutWorkflowTemplatesInput
   steps?: Prisma.DocWorkflowTemplateStepCreateNestedManyWithoutTemplateInput
@@ -846,7 +890,7 @@ export type DocWorkflowTemplateUncheckedCreateWithoutWorkflowsInput = {
   isSys?: boolean
   name: string
   description?: string | null
-  projectId?: number | null
+  docProjectId?: number | null
   documentClassId?: number | null
   documentTypeId?: number | null
   steps?: Prisma.DocWorkflowTemplateStepUncheckedCreateNestedManyWithoutTemplateInput
@@ -877,7 +921,7 @@ export type DocWorkflowTemplateUpdateWithoutWorkflowsInput = {
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProject?: Prisma.DocProjectUpdateOneWithoutWorkflowTemplatesNestedInput
   documentClass?: Prisma.DocumentClassUpdateOneWithoutWorkflowTemplatesNestedInput
   documentType?: Prisma.DocumentTypeUpdateOneWithoutWorkflowTemplatesNestedInput
   steps?: Prisma.DocWorkflowTemplateStepUpdateManyWithoutTemplateNestedInput
@@ -893,10 +937,67 @@ export type DocWorkflowTemplateUncheckedUpdateWithoutWorkflowsInput = {
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   steps?: Prisma.DocWorkflowTemplateStepUncheckedUpdateManyWithoutTemplateNestedInput
+}
+
+export type DocWorkflowTemplateCreateWithoutDocProjectInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  name: string
+  description?: string | null
+  documentClass?: Prisma.DocumentClassCreateNestedOneWithoutWorkflowTemplatesInput
+  documentType?: Prisma.DocumentTypeCreateNestedOneWithoutWorkflowTemplatesInput
+  steps?: Prisma.DocWorkflowTemplateStepCreateNestedManyWithoutTemplateInput
+  workflows?: Prisma.ReviewWorkflowCreateNestedManyWithoutTemplateInput
+}
+
+export type DocWorkflowTemplateUncheckedCreateWithoutDocProjectInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  name: string
+  description?: string | null
+  documentClassId?: number | null
+  documentTypeId?: number | null
+  steps?: Prisma.DocWorkflowTemplateStepUncheckedCreateNestedManyWithoutTemplateInput
+  workflows?: Prisma.ReviewWorkflowUncheckedCreateNestedManyWithoutTemplateInput
+}
+
+export type DocWorkflowTemplateCreateOrConnectWithoutDocProjectInput = {
+  where: Prisma.DocWorkflowTemplateWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocWorkflowTemplateCreateWithoutDocProjectInput, Prisma.DocWorkflowTemplateUncheckedCreateWithoutDocProjectInput>
+}
+
+export type DocWorkflowTemplateCreateManyDocProjectInputEnvelope = {
+  data: Prisma.DocWorkflowTemplateCreateManyDocProjectInput | Prisma.DocWorkflowTemplateCreateManyDocProjectInput[]
+  skipDuplicates?: boolean
+}
+
+export type DocWorkflowTemplateUpsertWithWhereUniqueWithoutDocProjectInput = {
+  where: Prisma.DocWorkflowTemplateWhereUniqueInput
+  update: Prisma.XOR<Prisma.DocWorkflowTemplateUpdateWithoutDocProjectInput, Prisma.DocWorkflowTemplateUncheckedUpdateWithoutDocProjectInput>
+  create: Prisma.XOR<Prisma.DocWorkflowTemplateCreateWithoutDocProjectInput, Prisma.DocWorkflowTemplateUncheckedCreateWithoutDocProjectInput>
+}
+
+export type DocWorkflowTemplateUpdateWithWhereUniqueWithoutDocProjectInput = {
+  where: Prisma.DocWorkflowTemplateWhereUniqueInput
+  data: Prisma.XOR<Prisma.DocWorkflowTemplateUpdateWithoutDocProjectInput, Prisma.DocWorkflowTemplateUncheckedUpdateWithoutDocProjectInput>
+}
+
+export type DocWorkflowTemplateUpdateManyWithWhereWithoutDocProjectInput = {
+  where: Prisma.DocWorkflowTemplateScalarWhereInput
+  data: Prisma.XOR<Prisma.DocWorkflowTemplateUpdateManyMutationInput, Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocProjectInput>
 }
 
 export type DocWorkflowTemplateCreateWithoutStepsInput = {
@@ -908,7 +1009,7 @@ export type DocWorkflowTemplateCreateWithoutStepsInput = {
   isSys?: boolean
   name: string
   description?: string | null
-  projectId?: number | null
+  docProject?: Prisma.DocProjectCreateNestedOneWithoutWorkflowTemplatesInput
   documentClass?: Prisma.DocumentClassCreateNestedOneWithoutWorkflowTemplatesInput
   documentType?: Prisma.DocumentTypeCreateNestedOneWithoutWorkflowTemplatesInput
   workflows?: Prisma.ReviewWorkflowCreateNestedManyWithoutTemplateInput
@@ -924,7 +1025,7 @@ export type DocWorkflowTemplateUncheckedCreateWithoutStepsInput = {
   isSys?: boolean
   name: string
   description?: string | null
-  projectId?: number | null
+  docProjectId?: number | null
   documentClassId?: number | null
   documentTypeId?: number | null
   workflows?: Prisma.ReviewWorkflowUncheckedCreateNestedManyWithoutTemplateInput
@@ -955,7 +1056,7 @@ export type DocWorkflowTemplateUpdateWithoutStepsInput = {
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProject?: Prisma.DocProjectUpdateOneWithoutWorkflowTemplatesNestedInput
   documentClass?: Prisma.DocumentClassUpdateOneWithoutWorkflowTemplatesNestedInput
   documentType?: Prisma.DocumentTypeUpdateOneWithoutWorkflowTemplatesNestedInput
   workflows?: Prisma.ReviewWorkflowUpdateManyWithoutTemplateNestedInput
@@ -971,7 +1072,7 @@ export type DocWorkflowTemplateUncheckedUpdateWithoutStepsInput = {
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workflows?: Prisma.ReviewWorkflowUncheckedUpdateManyWithoutTemplateNestedInput
@@ -987,7 +1088,7 @@ export type DocWorkflowTemplateCreateManyDocumentClassInput = {
   isSys?: boolean
   name: string
   description?: string | null
-  projectId?: number | null
+  docProjectId?: number | null
   documentTypeId?: number | null
 }
 
@@ -1000,7 +1101,7 @@ export type DocWorkflowTemplateUpdateWithoutDocumentClassInput = {
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProject?: Prisma.DocProjectUpdateOneWithoutWorkflowTemplatesNestedInput
   documentType?: Prisma.DocumentTypeUpdateOneWithoutWorkflowTemplatesNestedInput
   steps?: Prisma.DocWorkflowTemplateStepUpdateManyWithoutTemplateNestedInput
   workflows?: Prisma.ReviewWorkflowUpdateManyWithoutTemplateNestedInput
@@ -1016,7 +1117,7 @@ export type DocWorkflowTemplateUncheckedUpdateWithoutDocumentClassInput = {
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   steps?: Prisma.DocWorkflowTemplateStepUncheckedUpdateManyWithoutTemplateNestedInput
   workflows?: Prisma.ReviewWorkflowUncheckedUpdateManyWithoutTemplateNestedInput
@@ -1032,7 +1133,7 @@ export type DocWorkflowTemplateUncheckedUpdateManyWithoutDocumentClassInput = {
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
@@ -1046,7 +1147,7 @@ export type DocWorkflowTemplateCreateManyDocumentTypeInput = {
   isSys?: boolean
   name: string
   description?: string | null
-  projectId?: number | null
+  docProjectId?: number | null
   documentClassId?: number | null
 }
 
@@ -1059,7 +1160,7 @@ export type DocWorkflowTemplateUpdateWithoutDocumentTypeInput = {
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProject?: Prisma.DocProjectUpdateOneWithoutWorkflowTemplatesNestedInput
   documentClass?: Prisma.DocumentClassUpdateOneWithoutWorkflowTemplatesNestedInput
   steps?: Prisma.DocWorkflowTemplateStepUpdateManyWithoutTemplateNestedInput
   workflows?: Prisma.ReviewWorkflowUpdateManyWithoutTemplateNestedInput
@@ -1075,7 +1176,7 @@ export type DocWorkflowTemplateUncheckedUpdateWithoutDocumentTypeInput = {
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   steps?: Prisma.DocWorkflowTemplateStepUncheckedUpdateManyWithoutTemplateNestedInput
   workflows?: Prisma.ReviewWorkflowUncheckedUpdateManyWithoutTemplateNestedInput
@@ -1091,8 +1192,67 @@ export type DocWorkflowTemplateUncheckedUpdateManyWithoutDocumentTypeInput = {
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+}
+
+export type DocWorkflowTemplateCreateManyDocProjectInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  name: string
+  description?: string | null
+  documentClassId?: number | null
+  documentTypeId?: number | null
+}
+
+export type DocWorkflowTemplateUpdateWithoutDocProjectInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentClass?: Prisma.DocumentClassUpdateOneWithoutWorkflowTemplatesNestedInput
+  documentType?: Prisma.DocumentTypeUpdateOneWithoutWorkflowTemplatesNestedInput
+  steps?: Prisma.DocWorkflowTemplateStepUpdateManyWithoutTemplateNestedInput
+  workflows?: Prisma.ReviewWorkflowUpdateManyWithoutTemplateNestedInput
+}
+
+export type DocWorkflowTemplateUncheckedUpdateWithoutDocProjectInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  steps?: Prisma.DocWorkflowTemplateStepUncheckedUpdateManyWithoutTemplateNestedInput
+  workflows?: Prisma.ReviewWorkflowUncheckedUpdateManyWithoutTemplateNestedInput
+}
+
+export type DocWorkflowTemplateUncheckedUpdateManyWithoutDocProjectInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentClassId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentTypeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 
@@ -1145,9 +1305,10 @@ export type DocWorkflowTemplateSelect<ExtArgs extends runtime.Types.Extensions.I
   isSys?: boolean
   name?: boolean
   description?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   documentClassId?: boolean
   documentTypeId?: boolean
+  docProject?: boolean | Prisma.DocWorkflowTemplate$docProjectArgs<ExtArgs>
   documentClass?: boolean | Prisma.DocWorkflowTemplate$documentClassArgs<ExtArgs>
   documentType?: boolean | Prisma.DocWorkflowTemplate$documentTypeArgs<ExtArgs>
   steps?: boolean | Prisma.DocWorkflowTemplate$stepsArgs<ExtArgs>
@@ -1165,9 +1326,10 @@ export type DocWorkflowTemplateSelectCreateManyAndReturn<ExtArgs extends runtime
   isSys?: boolean
   name?: boolean
   description?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   documentClassId?: boolean
   documentTypeId?: boolean
+  docProject?: boolean | Prisma.DocWorkflowTemplate$docProjectArgs<ExtArgs>
   documentClass?: boolean | Prisma.DocWorkflowTemplate$documentClassArgs<ExtArgs>
   documentType?: boolean | Prisma.DocWorkflowTemplate$documentTypeArgs<ExtArgs>
 }, ExtArgs["result"]["docWorkflowTemplate"]>
@@ -1182,9 +1344,10 @@ export type DocWorkflowTemplateSelectUpdateManyAndReturn<ExtArgs extends runtime
   isSys?: boolean
   name?: boolean
   description?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   documentClassId?: boolean
   documentTypeId?: boolean
+  docProject?: boolean | Prisma.DocWorkflowTemplate$docProjectArgs<ExtArgs>
   documentClass?: boolean | Prisma.DocWorkflowTemplate$documentClassArgs<ExtArgs>
   documentType?: boolean | Prisma.DocWorkflowTemplate$documentTypeArgs<ExtArgs>
 }, ExtArgs["result"]["docWorkflowTemplate"]>
@@ -1199,13 +1362,14 @@ export type DocWorkflowTemplateSelectScalar = {
   isSys?: boolean
   name?: boolean
   description?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   documentClassId?: boolean
   documentTypeId?: boolean
 }
 
-export type DocWorkflowTemplateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "name" | "description" | "projectId" | "documentClassId" | "documentTypeId", ExtArgs["result"]["docWorkflowTemplate"]>
+export type DocWorkflowTemplateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "name" | "description" | "docProjectId" | "documentClassId" | "documentTypeId", ExtArgs["result"]["docWorkflowTemplate"]>
 export type DocWorkflowTemplateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.DocWorkflowTemplate$docProjectArgs<ExtArgs>
   documentClass?: boolean | Prisma.DocWorkflowTemplate$documentClassArgs<ExtArgs>
   documentType?: boolean | Prisma.DocWorkflowTemplate$documentTypeArgs<ExtArgs>
   steps?: boolean | Prisma.DocWorkflowTemplate$stepsArgs<ExtArgs>
@@ -1213,10 +1377,12 @@ export type DocWorkflowTemplateInclude<ExtArgs extends runtime.Types.Extensions.
   _count?: boolean | Prisma.DocWorkflowTemplateCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DocWorkflowTemplateIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.DocWorkflowTemplate$docProjectArgs<ExtArgs>
   documentClass?: boolean | Prisma.DocWorkflowTemplate$documentClassArgs<ExtArgs>
   documentType?: boolean | Prisma.DocWorkflowTemplate$documentTypeArgs<ExtArgs>
 }
 export type DocWorkflowTemplateIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.DocWorkflowTemplate$docProjectArgs<ExtArgs>
   documentClass?: boolean | Prisma.DocWorkflowTemplate$documentClassArgs<ExtArgs>
   documentType?: boolean | Prisma.DocWorkflowTemplate$documentTypeArgs<ExtArgs>
 }
@@ -1224,6 +1390,7 @@ export type DocWorkflowTemplateIncludeUpdateManyAndReturn<ExtArgs extends runtim
 export type $DocWorkflowTemplatePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DocWorkflowTemplate"
   objects: {
+    docProject: Prisma.$DocProjectPayload<ExtArgs> | null
     documentClass: Prisma.$DocumentClassPayload<ExtArgs> | null
     documentType: Prisma.$DocumentTypePayload<ExtArgs> | null
     steps: Prisma.$DocWorkflowTemplateStepPayload<ExtArgs>[]
@@ -1239,7 +1406,7 @@ export type $DocWorkflowTemplatePayload<ExtArgs extends runtime.Types.Extensions
     isSys: boolean
     name: string
     description: string | null
-    projectId: number | null
+    docProjectId: number | null
     documentClassId: number | null
     documentTypeId: number | null
   }, ExtArgs["result"]["docWorkflowTemplate"]>
@@ -1636,6 +1803,7 @@ readonly fields: DocWorkflowTemplateFieldRefs;
  */
 export interface Prisma__DocWorkflowTemplateClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  docProject<T extends Prisma.DocWorkflowTemplate$docProjectArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocWorkflowTemplate$docProjectArgs<ExtArgs>>): Prisma.Prisma__DocProjectClient<runtime.Types.Result.GetResult<Prisma.$DocProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   documentClass<T extends Prisma.DocWorkflowTemplate$documentClassArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocWorkflowTemplate$documentClassArgs<ExtArgs>>): Prisma.Prisma__DocumentClassClient<runtime.Types.Result.GetResult<Prisma.$DocumentClassPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   documentType<T extends Prisma.DocWorkflowTemplate$documentTypeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocWorkflowTemplate$documentTypeArgs<ExtArgs>>): Prisma.Prisma__DocumentTypeClient<runtime.Types.Result.GetResult<Prisma.$DocumentTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   steps<T extends Prisma.DocWorkflowTemplate$stepsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocWorkflowTemplate$stepsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocWorkflowTemplateStepPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1678,7 +1846,7 @@ export interface DocWorkflowTemplateFieldRefs {
   readonly isSys: Prisma.FieldRef<"DocWorkflowTemplate", 'Boolean'>
   readonly name: Prisma.FieldRef<"DocWorkflowTemplate", 'String'>
   readonly description: Prisma.FieldRef<"DocWorkflowTemplate", 'String'>
-  readonly projectId: Prisma.FieldRef<"DocWorkflowTemplate", 'Int'>
+  readonly docProjectId: Prisma.FieldRef<"DocWorkflowTemplate", 'Int'>
   readonly documentClassId: Prisma.FieldRef<"DocWorkflowTemplate", 'Int'>
   readonly documentTypeId: Prisma.FieldRef<"DocWorkflowTemplate", 'Int'>
 }
@@ -2079,6 +2247,25 @@ export type DocWorkflowTemplateDeleteManyArgs<ExtArgs extends runtime.Types.Exte
    * Limit how many DocWorkflowTemplates to delete.
    */
   limit?: number
+}
+
+/**
+ * DocWorkflowTemplate.docProject
+ */
+export type DocWorkflowTemplate$docProjectArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocProject
+   */
+  select?: Prisma.DocProjectSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocProject
+   */
+  omit?: Prisma.DocProjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectInclude<ExtArgs> | null
+  where?: Prisma.DocProjectWhereInput
 }
 
 /**

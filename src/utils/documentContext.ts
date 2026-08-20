@@ -4,7 +4,7 @@ import { ModuleType } from "../generated/prisma/enums.js"
 /**
  * Invariante del contexto de un documento (BLOQUE 02, B1).
  *
- * `Document.projectId` admite nulo en el modelo, pero no en cualquier caso:
+ * `Document.docProjectId` admite nulo en el modelo, pero no en cualquier caso:
  *
  *  - `module = PROJECTS` → el proyecto es OBLIGATORIO. Un documento de proyecto
  *    sin proyecto no es representable;
@@ -22,9 +22,9 @@ export const requiresProject = (module: ModuleType): boolean => module === Modul
 /** Devuelve el motivo del incumplimiento, o `null` si el contexto es válido. */
 export const documentContextViolation = (
   module: ModuleType,
-  projectId: number | null | undefined,
+  docProjectId: number | null | undefined,
 ): string | null => {
-  const tieneProyecto = projectId !== null && projectId !== undefined
+  const tieneProyecto = docProjectId !== null && docProjectId !== undefined
 
   if (requiresProject(module) && !tieneProyecto) {
     return "Un documento del módulo de proyectos debe pertenecer a un proyecto"
@@ -40,9 +40,9 @@ export const documentContextViolation = (
 /** Variante que corta la operación, para usar en los resolvers. */
 export const assertDocumentContext = (
   module: ModuleType,
-  projectId: number | null | undefined,
+  docProjectId: number | null | undefined,
 ): void => {
-  const violacion = documentContextViolation(module, projectId)
+  const violacion = documentContextViolation(module, docProjectId)
 
   if (violacion) {
     throw new GraphQLError(violacion, { extensions: { code: "BAD_USER_INPUT" } })

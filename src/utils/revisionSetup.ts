@@ -57,12 +57,12 @@ const SIN_PROYECTO: ProjectDefaults = {
  */
 export const projectDefaults = async (
   client: Prisma.TransactionClient,
-  projectId: number | null,
+  docProjectId: number | null,
 ): Promise<ProjectDefaults> => {
-  if (projectId === null) return SIN_PROYECTO
+  if (docProjectId === null) return SIN_PROYECTO
 
   const settings = await client.docProject.findUnique({
-    where: { projectId },
+    where: { id: docProjectId },
     select: {
       revisionScheme: true,
       defaultOrganizerId: true,
@@ -85,11 +85,11 @@ export const proposeTemplate = async (
 ): Promise<number | null> => {
   const candidates = await client.docWorkflowTemplate.findMany({
     where: {
-      OR: [{ projectId: null }, { projectId: scope.projectId ?? undefined }],
+      OR: [{ docProjectId: null }, { docProjectId: scope.docProjectId ?? undefined }],
     },
     select: {
       id: true,
-      projectId: true,
+      docProjectId: true,
       documentClassId: true,
       documentTypeId: true,
       terminatedAt: true,
@@ -141,7 +141,7 @@ export const planRevision = async (
     informedOrganizerId: number | null
   },
 ): Promise<RevisionPlanResult> => {
-  const defaults = await projectDefaults(client, scope.projectId)
+  const defaults = await projectDefaults(client, scope.docProjectId)
 
   const organizerId = informedOrganizerId ?? defaults.defaultOrganizerId
   if (organizerId === null) {

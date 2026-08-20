@@ -691,7 +691,7 @@ type DocumentClass @key(fields: "id") {
   "Módulo al que pertenece (null = disponible para todos)"
   module: ModuleType
   "Alcance de la entrada. Null = catálogo del despliegue, del que los proyectos heredan"
-  projectId: Int
+  docProjectId: Int
   "Descripción de la clase de documento"
   description: String
   "Orden de visualización"
@@ -721,7 +721,7 @@ type DocumentType @key(fields: "id") {
   "Módulo al que pertenece (null = disponible para todos)"
   module: ModuleType
   "Alcance de la entrada. Null = catálogo del despliegue, del que los proyectos heredan"
-  projectId: Int
+  docProjectId: Int
   "Clase de documento a la que pertenece (null = disponible para todas)"
   class: DocumentClass
   "Descripción del tipo de documento"
@@ -763,7 +763,7 @@ type Document @key(fields: "id") {
   "Módulo al que pertenece"
   module: ModuleType!
   "Proyecto al que pertenece. Nulo en el régimen de publicación, documentación que no circula"
-  projectId: Int
+  docProjectId: Int
   "Tipo de la revisión EN CURSO. Copia, como `currentTitle`"
   currentDocumentType: DocumentType!
   "Clase de la revisión EN CURSO. Copia, como `currentTitle`"
@@ -1214,7 +1214,7 @@ type Transmittal @key(fields: "id") {
   "Código del transmittal (ej: TR-001)"
   code: String!
   "ID del proyecto asociado"
-  projectId: Int!
+  docProjectId: Int!
   "Estado actual del transmittal"
   status: TransmittalStatus!
   "Naturaleza: entrega de documentación o calificación de una emisión"
@@ -1715,7 +1715,7 @@ type DocQualification {
   suyas: la lista de calificaciones es la del contrato, y una lista mezclada no
   es la de nadie.
   """
-  projectId: Int
+  docProjectId: Int
   "Código de la contraparte, tal como ella lo usa"
   code: String!
   "Rótulo que el usuario ve"
@@ -1752,7 +1752,7 @@ type DocCatalogScope {
   "Usuario que la modificó"
   updatedBy: UserName!
   "Proyecto que declara"
-  projectId: Int!
+  docProjectId: Int!
   "Catálogo alcanzado"
   catalog: DocCatalogKind!
   "Modo declarado"
@@ -1771,7 +1771,7 @@ módulo no lo duplica.
 """
 type DocSeedSource {
   "Proyecto fuente"
-  projectId: Int!
+  docProjectId: Int!
   "Cuántas entradas aportaría"
   nodeCount: Int!
 }
@@ -1798,7 +1798,7 @@ type DocSeedResult {
 "Input para declarar cómo un proyecto resuelve un catálogo"
 input DeclareCatalogScopeInput {
   "Proyecto que declara"
-  projectId: Int!
+  docProjectId: Int!
   "Catálogo alcanzado"
   catalog: DocCatalogKindInput!
   "Modo a declarar"
@@ -1837,7 +1837,7 @@ type DocLocation {
   Con valor, el nodo lo agregó ese proyecto. Un nodo de proyecto puede colgar de
   uno del despliegue —eso es ampliar—, nunca al revés.
   """
-  projectId: Int
+  docProjectId: Int
   "Nodo padre. Nulo si es raíz"
   parent: DocLocation
   "Descendencia directa, ordenada por su orden de presentación"
@@ -1891,7 +1891,7 @@ type DocWorkflowTemplate {
   "Descripción"
   description: String
   "Proyecto del alcance. Nulo alcanza a los documentos sin proyecto"
-  projectId: Int
+  docProjectId: Int
   "Clase del alcance. Nula = todas las clases"
   documentClass: DocumentClass
   "Tipo del alcance. Nulo = todos los tipos"
@@ -1930,7 +1930,7 @@ type DocProjectMember {
   "Fecha de creación"
   createdAt: DateTime!
   "Proyecto al que da acceso"
-  projectId: Int!
+  docProjectId: Int!
   "Usuario habilitado"
   user: UserName
   "Lado del proyecto al que pertenece"
@@ -1950,7 +1950,7 @@ type DocProjectMember {
 "Alta de un miembro en un proyecto documental"
 input AssignDocProjectMemberInput {
   "Proyecto al que se incorpora"
-  projectId: Int!
+  docProjectId: Int!
   "Usuario a incorporar"
   userId: Int!
   "Lado del proyecto al que pertenece"
@@ -1983,7 +1983,7 @@ type DocWorkflowEvent {
   "Estado resultante"
   toState: String
   "Proyecto del objeto afectado. Derivado, nunca informado por quien emite"
-  projectId: Int
+  docProjectId: Int
   "Módulo del objeto afectado. Derivado, nunca informado por quien emite"
   module: ModuleType
 }
@@ -2008,7 +2008,7 @@ type DocAuditEvent {
   "Datos contextuales de la acción"
   meta: JSON
   "Proyecto del objeto afectado. Derivado, nunca informado por quien emite"
-  projectId: Int
+  docProjectId: Int
   "Módulo del objeto afectado. Derivado, nunca informado por quien emite"
   module: ModuleType
 }
@@ -2262,7 +2262,7 @@ input TransmittalFilterInput {
   "Búsqueda en el código propio o en la referencia de la contraparte"
   query: String
   "Filtrar por proyecto"
-  projectId: Int
+  docProjectId: Int
   "Filtrar por estado"
   status: TransmittalStatusInput
   "Filtrar por naturaleza"
@@ -2320,7 +2320,7 @@ input CreateDocumentInput {
   "Módulo al que pertenece"
   module: ModuleTypeInput!
   "Proyecto al que pertenece. Obligatorio cuando el módulo es PROJECTS, prohibido en el resto"
-  projectId: Int
+  docProjectId: Int
   "ID del tipo de documento"
   documentTypeId: Int!
   "ID de la clase de documento"
@@ -2519,7 +2519,7 @@ input CreateDocWorkflowTemplateInput {
   "Descripción"
   description: String
   "Proyecto del alcance. Nulo alcanza a los documentos sin proyecto"
-  projectId: Int
+  docProjectId: Int
   "Clase del alcance. Nulo = todas las clases"
   documentClassId: Int
   "Tipo del alcance. Nulo = todos los tipos"
@@ -2564,7 +2564,7 @@ input DocLocationFilterInput {
 "Input para crear un nodo de ubicación física"
 input CreateLocationInput {
   "Alcance. Omitido = árbol del despliegue"
-  projectId: Int
+  docProjectId: Int
   "Nodo padre. Omitido = nodo raíz"
   parentId: Int
   "Código, único dentro de su nivel"
@@ -2601,7 +2601,7 @@ input UpdateLocationInput {
 "Input para filtrar el catálogo de calificaciones"
 input QualificationFilterInput {
   "Alcance. Omitido = catálogo del despliegue"
-  projectId: Int
+  docProjectId: Int
   "Estado de los registros a devolver"
   terminatedFilter: TerminatedFilterInput
 }
@@ -2609,7 +2609,7 @@ input QualificationFilterInput {
 "Input para crear una calificación"
 input CreateQualificationInput {
   "Alcance. Omitido = catálogo del despliegue"
-  projectId: Int
+  docProjectId: Int
   "Código de la contraparte"
   code: String!
   "Rótulo que el usuario ve"
@@ -2657,7 +2657,7 @@ input CreateDocumentTypeInput {
   Declararlo exige que el módulo sea PROJECTS, y crear en el alcance de un
   proyecto exige membresía vigente además del permiso.
   """
-  projectId: Int
+  docProjectId: Int
   "Clase de documento a la que pertenece"
   classId: Int
   "Descripción del tipo"
@@ -2696,7 +2696,7 @@ input CreateDocumentClassInput {
   Declararlo exige que el módulo sea PROJECTS, y crear en el alcance de un
   proyecto exige membresía vigente además del permiso.
   """
-  projectId: Int
+  docProjectId: Int
   "Descripción de la clase"
   description: String
   "Orden de visualización"
@@ -2720,7 +2720,7 @@ input UpdateDocumentClassInput {
 "Input para crear un transmittal"
 input CreateTransmittalInput {
   "ID del proyecto asociado"
-  projectId: Int!
+  docProjectId: Int!
   """
   Naturaleza del transmittal.
 
@@ -3019,7 +3019,7 @@ type Query {
   "Listar tipos de documento"
   documentTypes(
     "Ámbito a listar. Omitido = catálogo del despliegue"
-    projectId: Int
+    docProjectId: Int
     filter: DocumentTypeFilterInput
     pagination: PaginationInput
     orderBy: DocumentTypeOrderByInput
@@ -3031,21 +3031,21 @@ type Query {
   """
   Tipos de documento vigentes como lista de selección, con el alcance resuelto.
 
-  projectId es opcional porque hay documentos sin proyecto —calidad, comercial,
+  docProjectId es opcional porque hay documentos sin proyecto —calidad, comercial,
   activos—, y para ellos rige el catálogo del despliegue. Omitirlo nombra ese
   ámbito y no desactiva el filtro.
   """
   documentTypesSelectList(
     module: ModuleTypeInput
     classId: Int
-    projectId: Int
+    docProjectId: Int
   ): [SelectList!]!
 
   # ─── Clases de documento ───
   "Listar clases de documento"
   documentClasses(
     "Ámbito a listar. Omitido = catálogo del despliegue"
-    projectId: Int
+    docProjectId: Int
     filter: DocumentClassFilterInput
     pagination: PaginationInput
     orderBy: DocumentClassOrderByInput
@@ -3057,13 +3057,13 @@ type Query {
   """
   Clases de documento vigentes como lista de selección, con el alcance resuelto.
 
-  projectId es opcional porque hay documentos sin proyecto —calidad, comercial,
+  docProjectId es opcional porque hay documentos sin proyecto —calidad, comercial,
   activos—, y para ellos rige el catálogo del despliegue. Omitirlo nombra ese
   ámbito y no desactiva el filtro.
   """
   documentClassesSelectList(
     module: ModuleTypeInput
-    projectId: Int
+    docProjectId: Int
   ): [SelectList!]!
 
   # ─── Áreas ───
@@ -3097,7 +3097,7 @@ type Query {
 
   "Transmittals de un proyecto específico"
   transmittalsByProject(
-    projectId: Int!
+    docProjectId: Int!
     pagination: PaginationInput
   ): TransmittalConnection!
 
@@ -3117,7 +3117,7 @@ type Query {
   workflowsByStatus(status: WorkflowStatusInput!): [ReviewWorkflow!]!
 
   "Plantillas de circuito. Con proyecto, devuelve las suyas y las de alcance general"
-  docWorkflowTemplates(projectId: Int): [DocWorkflowTemplate!]!
+  docWorkflowTemplates(docProjectId: Int): [DocWorkflowTemplate!]!
 
   """
   Plantilla que regiría para un documento con ese alcance, con la más específica
@@ -3125,7 +3125,7 @@ type Query {
   el circuito propuesto ANTES de crear el documento.
   """
   proposedWorkflowTemplate(
-    projectId: Int
+    docProjectId: Int
     documentClassId: Int
     documentTypeId: Int
   ): DocWorkflowTemplate
@@ -3193,7 +3193,7 @@ type Query {
     "Acota la traza a un módulo. El contexto se persiste derivado del objeto"
     module: ModuleTypeInput
     "Acota la traza a un proyecto. El contexto se persiste derivado del objeto"
-    projectId: Int
+    docProjectId: Int
   ): [DocWorkflowEvent!]!
 
   "Acciones ejecutadas sobre un objeto, en orden cronológico"
@@ -3203,7 +3203,7 @@ type Query {
     "Acota la traza a un módulo. El contexto se persiste derivado del objeto"
     module: ModuleTypeInput
     "Acota la traza a un proyecto. El contexto se persiste derivado del objeto"
-    projectId: Int
+    docProjectId: Int
   ): [DocAuditEvent!]!
 
   # ─── Contexto de proyecto ───
@@ -3229,7 +3229,7 @@ type Query {
   Mira la revisión EN CURSO y no cualquiera: después de que la contraparte
   rechaza, el documento debe la siguiente y vuelve a figurar.
   """
-  pendingDocuments(projectId: Int!): [Document!]!
+  pendingDocuments(docProjectId: Int!): [Document!]!
 
   "Configuración documental del despliegue. Registro único"
   docSettings: DocSettings!
@@ -3246,14 +3246,14 @@ type Query {
   Resuelve el alcance —las propias si el proyecto declaró alguna, las del
   despliegue si no— y excluye las dadas de baja.
   """
-  projectQualifications(projectId: Int!): [DocQualification!]!
+  projectQualifications(docProjectId: Int!): [DocQualification!]!
 
   "Calificaciones vigentes del proyecto, como lista de selección"
-  qualificationsSelectList(projectId: Int!): [SelectList!]!
+  qualificationsSelectList(docProjectId: Int!): [SelectList!]!
 
   "Miembros de un proyecto documental"
   docProjectMembers(
-    projectId: Int!
+    docProjectId: Int!
     "Incluye las membresías dadas de baja. Por defecto solo las vigentes"
     includeRevoked: Boolean
   ): [DocProjectMember!]!
@@ -3266,7 +3266,7 @@ type Query {
   """
   locations(
     "Alcance a listar. Omitido = árbol del despliegue"
-    projectId: Int
+    docProjectId: Int
     filter: DocLocationFilterInput
   ): [DocLocation!]!
 
@@ -3276,7 +3276,7 @@ type Query {
   Hereda del despliegue y suma las propias, o devuelve solo las propias, según lo
   que el proyecto haya declarado. Excluye las dadas de baja.
   """
-  projectLocations(projectId: Int!, filter: DocLocationFilterInput): [DocLocation!]!
+  projectLocations(docProjectId: Int!, filter: DocLocationFilterInput): [DocLocation!]!
 
   """
   El modo con que un proyecto resuelve este catálogo, resuelto.
@@ -3284,7 +3284,7 @@ type Query {
   Existe además de catalogScopes porque esa consulta devuelve lo declarado, que
   puede ser nada, y quien arma una pantalla necesita el modo que rige.
   """
-  locationScope(projectId: Int!): DocScopeMode!
+  locationScope(docProjectId: Int!): DocScopeMode!
 
   """
   De qué proyectos puede este usuario copiar el catálogo hacia el indicado.
@@ -3292,7 +3292,7 @@ type Query {
   Los que alcanza por membresía vigente y que tienen catálogo propio, sin el
   destino. Evita ofrecer proyectos cuya siembra no agregaría nada.
   """
-  locationSeedSources(projectId: Int!): [DocSeedSource!]!
+  locationSeedSources(docProjectId: Int!): [DocSeedSource!]!
 
   """
   Los proyectos que pueden sembrar la clasificación de este, y cuánto aportaría
@@ -3301,7 +3301,7 @@ type Query {
   Son los que el usuario alcanza por membresía vigente y tienen catálogo propio.
   El global del despliegue no figura: siempre está disponible.
   """
-  classificationSeedSources(projectId: Int!): [DocSeedSource!]!
+  classificationSeedSources(docProjectId: Int!): [DocSeedSource!]!
 
   "Un nodo de ubicación por su identificador"
   locationById(id: Int!): DocLocation!
@@ -3312,10 +3312,10 @@ type Query {
   El rótulo es la ruta completa y no el nombre: "Unidad 110" no identifica nada
   por sí solo, y el mismo nombre puede repetirse en dos plantas.
 
-  projectId es opcional porque hay documentos sin proyecto —calidad, comercial,
+  docProjectId es opcional porque hay documentos sin proyecto —calidad, comercial,
   activos—, y para ellos el catálogo que rige es el del despliegue.
   """
-  locationsSelectList(projectId: Int, filter: DocLocationFilterInput): [SelectList!]!
+  locationsSelectList(docProjectId: Int, filter: DocLocationFilterInput): [SelectList!]!
 
   """
   El alcance de los catálogos que el proyecto declaró, que puede ser ninguno.
@@ -3323,7 +3323,7 @@ type Query {
   No completa con INHERIT los catálogos sin declarar: la ausencia es el default, y
   fabricar filas inexistentes haría indistinguible lo declarado de lo supuesto.
   """
-  catalogScopes(projectId: Int!): [DocCatalogScope!]!
+  catalogScopes(docProjectId: Int!): [DocCatalogScope!]!
 }
 
 # ═══════════════════════════════════════════════════════
@@ -3694,7 +3694,7 @@ type Mutation {
   """
   seedProjectLocations(
     "Proyecto que recibe la copia"
-    projectId: Int!
+    docProjectId: Int!
     "Proyecto del que se copia. Omitido = el árbol del despliegue"
     sourceProjectId: Int
   ): DocSeedResult!
@@ -3708,7 +3708,7 @@ type Mutation {
   """
   seedProjectClassification(
     "Proyecto que recibe la copia"
-    projectId: Int!
+    docProjectId: Int!
     "Proyecto del que se copia. Omitido = el catálogo del despliegue"
     sourceProjectId: Int
   ): DocSeedResult!

@@ -30,7 +30,7 @@ export type DocQualificationAvgAggregateOutputType = {
   id: number | null
   createdById: number | null
   updatedById: number | null
-  projectId: number | null
+  docProjectId: number | null
   sortOrder: number | null
 }
 
@@ -38,7 +38,7 @@ export type DocQualificationSumAggregateOutputType = {
   id: number | null
   createdById: number | null
   updatedById: number | null
-  projectId: number | null
+  docProjectId: number | null
   sortOrder: number | null
 }
 
@@ -50,7 +50,7 @@ export type DocQualificationMinAggregateOutputType = {
   updatedById: number | null
   terminatedAt: Date | null
   isSys: boolean | null
-  projectId: number | null
+  docProjectId: number | null
   code: string | null
   label: string | null
   effect: $Enums.QualificationEffect | null
@@ -65,7 +65,7 @@ export type DocQualificationMaxAggregateOutputType = {
   updatedById: number | null
   terminatedAt: Date | null
   isSys: boolean | null
-  projectId: number | null
+  docProjectId: number | null
   code: string | null
   label: string | null
   effect: $Enums.QualificationEffect | null
@@ -80,7 +80,7 @@ export type DocQualificationCountAggregateOutputType = {
   updatedById: number
   terminatedAt: number
   isSys: number
-  projectId: number
+  docProjectId: number
   code: number
   label: number
   effect: number
@@ -93,7 +93,7 @@ export type DocQualificationAvgAggregateInputType = {
   id?: true
   createdById?: true
   updatedById?: true
-  projectId?: true
+  docProjectId?: true
   sortOrder?: true
 }
 
@@ -101,7 +101,7 @@ export type DocQualificationSumAggregateInputType = {
   id?: true
   createdById?: true
   updatedById?: true
-  projectId?: true
+  docProjectId?: true
   sortOrder?: true
 }
 
@@ -113,7 +113,7 @@ export type DocQualificationMinAggregateInputType = {
   updatedById?: true
   terminatedAt?: true
   isSys?: true
-  projectId?: true
+  docProjectId?: true
   code?: true
   label?: true
   effect?: true
@@ -128,7 +128,7 @@ export type DocQualificationMaxAggregateInputType = {
   updatedById?: true
   terminatedAt?: true
   isSys?: true
-  projectId?: true
+  docProjectId?: true
   code?: true
   label?: true
   effect?: true
@@ -143,7 +143,7 @@ export type DocQualificationCountAggregateInputType = {
   updatedById?: true
   terminatedAt?: true
   isSys?: true
-  projectId?: true
+  docProjectId?: true
   code?: true
   label?: true
   effect?: true
@@ -245,7 +245,7 @@ export type DocQualificationGroupByOutputType = {
   updatedById: number
   terminatedAt: Date | null
   isSys: boolean
-  projectId: number | null
+  docProjectId: number | null
   code: string
   label: string
   effect: $Enums.QualificationEffect
@@ -283,11 +283,12 @@ export type DocQualificationWhereInput = {
   updatedById?: Prisma.IntFilter<"DocQualification"> | number
   terminatedAt?: Prisma.DateTimeNullableFilter<"DocQualification"> | Date | string | null
   isSys?: Prisma.BoolFilter<"DocQualification"> | boolean
-  projectId?: Prisma.IntNullableFilter<"DocQualification"> | number | null
+  docProjectId?: Prisma.IntNullableFilter<"DocQualification"> | number | null
   code?: Prisma.StringFilter<"DocQualification"> | string
   label?: Prisma.StringFilter<"DocQualification"> | string
   effect?: Prisma.EnumQualificationEffectFilter<"DocQualification"> | $Enums.QualificationEffect
   sortOrder?: Prisma.IntFilter<"DocQualification"> | number
+  docProject?: Prisma.XOR<Prisma.DocProjectNullableScalarRelationFilter, Prisma.DocProjectWhereInput> | null
   responses?: Prisma.DocTransmittalResponseListRelationFilter
 }
 
@@ -299,17 +300,18 @@ export type DocQualificationOrderByWithRelationInput = {
   updatedById?: Prisma.SortOrder
   terminatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   isSys?: Prisma.SortOrder
-  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProjectId?: Prisma.SortOrderInput | Prisma.SortOrder
   code?: Prisma.SortOrder
   label?: Prisma.SortOrder
   effect?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
+  docProject?: Prisma.DocProjectOrderByWithRelationInput
   responses?: Prisma.DocTransmittalResponseOrderByRelationAggregateInput
 }
 
 export type DocQualificationWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  code_projectId?: Prisma.DocQualificationCodeProjectIdCompoundUniqueInput
+  code_docProjectId?: Prisma.DocQualificationCodeDocProjectIdCompoundUniqueInput
   AND?: Prisma.DocQualificationWhereInput | Prisma.DocQualificationWhereInput[]
   OR?: Prisma.DocQualificationWhereInput[]
   NOT?: Prisma.DocQualificationWhereInput | Prisma.DocQualificationWhereInput[]
@@ -319,13 +321,14 @@ export type DocQualificationWhereUniqueInput = Prisma.AtLeast<{
   updatedById?: Prisma.IntFilter<"DocQualification"> | number
   terminatedAt?: Prisma.DateTimeNullableFilter<"DocQualification"> | Date | string | null
   isSys?: Prisma.BoolFilter<"DocQualification"> | boolean
-  projectId?: Prisma.IntNullableFilter<"DocQualification"> | number | null
+  docProjectId?: Prisma.IntNullableFilter<"DocQualification"> | number | null
   code?: Prisma.StringFilter<"DocQualification"> | string
   label?: Prisma.StringFilter<"DocQualification"> | string
   effect?: Prisma.EnumQualificationEffectFilter<"DocQualification"> | $Enums.QualificationEffect
   sortOrder?: Prisma.IntFilter<"DocQualification"> | number
+  docProject?: Prisma.XOR<Prisma.DocProjectNullableScalarRelationFilter, Prisma.DocProjectWhereInput> | null
   responses?: Prisma.DocTransmittalResponseListRelationFilter
-}, "id" | "code_projectId">
+}, "id" | "code_docProjectId">
 
 export type DocQualificationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -335,7 +338,7 @@ export type DocQualificationOrderByWithAggregationInput = {
   updatedById?: Prisma.SortOrder
   terminatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   isSys?: Prisma.SortOrder
-  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProjectId?: Prisma.SortOrderInput | Prisma.SortOrder
   code?: Prisma.SortOrder
   label?: Prisma.SortOrder
   effect?: Prisma.SortOrder
@@ -358,7 +361,7 @@ export type DocQualificationScalarWhereWithAggregatesInput = {
   updatedById?: Prisma.IntWithAggregatesFilter<"DocQualification"> | number
   terminatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DocQualification"> | Date | string | null
   isSys?: Prisma.BoolWithAggregatesFilter<"DocQualification"> | boolean
-  projectId?: Prisma.IntNullableWithAggregatesFilter<"DocQualification"> | number | null
+  docProjectId?: Prisma.IntNullableWithAggregatesFilter<"DocQualification"> | number | null
   code?: Prisma.StringWithAggregatesFilter<"DocQualification"> | string
   label?: Prisma.StringWithAggregatesFilter<"DocQualification"> | string
   effect?: Prisma.EnumQualificationEffectWithAggregatesFilter<"DocQualification"> | $Enums.QualificationEffect
@@ -372,11 +375,11 @@ export type DocQualificationCreateInput = {
   updatedById?: number
   terminatedAt?: Date | string | null
   isSys?: boolean
-  projectId?: number | null
   code: string
   label: string
   effect: $Enums.QualificationEffect
   sortOrder?: number
+  docProject?: Prisma.DocProjectCreateNestedOneWithoutQualificationsInput
   responses?: Prisma.DocTransmittalResponseCreateNestedManyWithoutQualificationInput
 }
 
@@ -388,7 +391,7 @@ export type DocQualificationUncheckedCreateInput = {
   updatedById?: number
   terminatedAt?: Date | string | null
   isSys?: boolean
-  projectId?: number | null
+  docProjectId?: number | null
   code: string
   label: string
   effect: $Enums.QualificationEffect
@@ -403,11 +406,11 @@ export type DocQualificationUpdateInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   effect?: Prisma.EnumQualificationEffectFieldUpdateOperationsInput | $Enums.QualificationEffect
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  docProject?: Prisma.DocProjectUpdateOneWithoutQualificationsNestedInput
   responses?: Prisma.DocTransmittalResponseUpdateManyWithoutQualificationNestedInput
 }
 
@@ -419,7 +422,7 @@ export type DocQualificationUncheckedUpdateInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   effect?: Prisma.EnumQualificationEffectFieldUpdateOperationsInput | $Enums.QualificationEffect
@@ -435,7 +438,7 @@ export type DocQualificationCreateManyInput = {
   updatedById?: number
   terminatedAt?: Date | string | null
   isSys?: boolean
-  projectId?: number | null
+  docProjectId?: number | null
   code: string
   label: string
   effect: $Enums.QualificationEffect
@@ -449,7 +452,6 @@ export type DocQualificationUpdateManyMutationInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   effect?: Prisma.EnumQualificationEffectFieldUpdateOperationsInput | $Enums.QualificationEffect
@@ -464,16 +466,26 @@ export type DocQualificationUncheckedUpdateManyInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   effect?: Prisma.EnumQualificationEffectFieldUpdateOperationsInput | $Enums.QualificationEffect
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
-export type DocQualificationCodeProjectIdCompoundUniqueInput = {
+export type DocQualificationListRelationFilter = {
+  every?: Prisma.DocQualificationWhereInput
+  some?: Prisma.DocQualificationWhereInput
+  none?: Prisma.DocQualificationWhereInput
+}
+
+export type DocQualificationOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type DocQualificationCodeDocProjectIdCompoundUniqueInput = {
   code: string
-  projectId: number
+  docProjectId: number
 }
 
 export type DocQualificationCountOrderByAggregateInput = {
@@ -484,7 +496,7 @@ export type DocQualificationCountOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   terminatedAt?: Prisma.SortOrder
   isSys?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   label?: Prisma.SortOrder
   effect?: Prisma.SortOrder
@@ -495,7 +507,7 @@ export type DocQualificationAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
 
@@ -507,7 +519,7 @@ export type DocQualificationMaxOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   terminatedAt?: Prisma.SortOrder
   isSys?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   label?: Prisma.SortOrder
   effect?: Prisma.SortOrder
@@ -522,7 +534,7 @@ export type DocQualificationMinOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   terminatedAt?: Prisma.SortOrder
   isSys?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   label?: Prisma.SortOrder
   effect?: Prisma.SortOrder
@@ -533,13 +545,55 @@ export type DocQualificationSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   updatedById?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
 
 export type DocQualificationScalarRelationFilter = {
   is?: Prisma.DocQualificationWhereInput
   isNot?: Prisma.DocQualificationWhereInput
+}
+
+export type DocQualificationCreateNestedManyWithoutDocProjectInput = {
+  create?: Prisma.XOR<Prisma.DocQualificationCreateWithoutDocProjectInput, Prisma.DocQualificationUncheckedCreateWithoutDocProjectInput> | Prisma.DocQualificationCreateWithoutDocProjectInput[] | Prisma.DocQualificationUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocQualificationCreateOrConnectWithoutDocProjectInput | Prisma.DocQualificationCreateOrConnectWithoutDocProjectInput[]
+  createMany?: Prisma.DocQualificationCreateManyDocProjectInputEnvelope
+  connect?: Prisma.DocQualificationWhereUniqueInput | Prisma.DocQualificationWhereUniqueInput[]
+}
+
+export type DocQualificationUncheckedCreateNestedManyWithoutDocProjectInput = {
+  create?: Prisma.XOR<Prisma.DocQualificationCreateWithoutDocProjectInput, Prisma.DocQualificationUncheckedCreateWithoutDocProjectInput> | Prisma.DocQualificationCreateWithoutDocProjectInput[] | Prisma.DocQualificationUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocQualificationCreateOrConnectWithoutDocProjectInput | Prisma.DocQualificationCreateOrConnectWithoutDocProjectInput[]
+  createMany?: Prisma.DocQualificationCreateManyDocProjectInputEnvelope
+  connect?: Prisma.DocQualificationWhereUniqueInput | Prisma.DocQualificationWhereUniqueInput[]
+}
+
+export type DocQualificationUpdateManyWithoutDocProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.DocQualificationCreateWithoutDocProjectInput, Prisma.DocQualificationUncheckedCreateWithoutDocProjectInput> | Prisma.DocQualificationCreateWithoutDocProjectInput[] | Prisma.DocQualificationUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocQualificationCreateOrConnectWithoutDocProjectInput | Prisma.DocQualificationCreateOrConnectWithoutDocProjectInput[]
+  upsert?: Prisma.DocQualificationUpsertWithWhereUniqueWithoutDocProjectInput | Prisma.DocQualificationUpsertWithWhereUniqueWithoutDocProjectInput[]
+  createMany?: Prisma.DocQualificationCreateManyDocProjectInputEnvelope
+  set?: Prisma.DocQualificationWhereUniqueInput | Prisma.DocQualificationWhereUniqueInput[]
+  disconnect?: Prisma.DocQualificationWhereUniqueInput | Prisma.DocQualificationWhereUniqueInput[]
+  delete?: Prisma.DocQualificationWhereUniqueInput | Prisma.DocQualificationWhereUniqueInput[]
+  connect?: Prisma.DocQualificationWhereUniqueInput | Prisma.DocQualificationWhereUniqueInput[]
+  update?: Prisma.DocQualificationUpdateWithWhereUniqueWithoutDocProjectInput | Prisma.DocQualificationUpdateWithWhereUniqueWithoutDocProjectInput[]
+  updateMany?: Prisma.DocQualificationUpdateManyWithWhereWithoutDocProjectInput | Prisma.DocQualificationUpdateManyWithWhereWithoutDocProjectInput[]
+  deleteMany?: Prisma.DocQualificationScalarWhereInput | Prisma.DocQualificationScalarWhereInput[]
+}
+
+export type DocQualificationUncheckedUpdateManyWithoutDocProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.DocQualificationCreateWithoutDocProjectInput, Prisma.DocQualificationUncheckedCreateWithoutDocProjectInput> | Prisma.DocQualificationCreateWithoutDocProjectInput[] | Prisma.DocQualificationUncheckedCreateWithoutDocProjectInput[]
+  connectOrCreate?: Prisma.DocQualificationCreateOrConnectWithoutDocProjectInput | Prisma.DocQualificationCreateOrConnectWithoutDocProjectInput[]
+  upsert?: Prisma.DocQualificationUpsertWithWhereUniqueWithoutDocProjectInput | Prisma.DocQualificationUpsertWithWhereUniqueWithoutDocProjectInput[]
+  createMany?: Prisma.DocQualificationCreateManyDocProjectInputEnvelope
+  set?: Prisma.DocQualificationWhereUniqueInput | Prisma.DocQualificationWhereUniqueInput[]
+  disconnect?: Prisma.DocQualificationWhereUniqueInput | Prisma.DocQualificationWhereUniqueInput[]
+  delete?: Prisma.DocQualificationWhereUniqueInput | Prisma.DocQualificationWhereUniqueInput[]
+  connect?: Prisma.DocQualificationWhereUniqueInput | Prisma.DocQualificationWhereUniqueInput[]
+  update?: Prisma.DocQualificationUpdateWithWhereUniqueWithoutDocProjectInput | Prisma.DocQualificationUpdateWithWhereUniqueWithoutDocProjectInput[]
+  updateMany?: Prisma.DocQualificationUpdateManyWithWhereWithoutDocProjectInput | Prisma.DocQualificationUpdateManyWithWhereWithoutDocProjectInput[]
+  deleteMany?: Prisma.DocQualificationScalarWhereInput | Prisma.DocQualificationScalarWhereInput[]
 }
 
 export type EnumQualificationEffectFieldUpdateOperationsInput = {
@@ -560,6 +614,79 @@ export type DocQualificationUpdateOneRequiredWithoutResponsesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.DocQualificationUpdateToOneWithWhereWithoutResponsesInput, Prisma.DocQualificationUpdateWithoutResponsesInput>, Prisma.DocQualificationUncheckedUpdateWithoutResponsesInput>
 }
 
+export type DocQualificationCreateWithoutDocProjectInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  code: string
+  label: string
+  effect: $Enums.QualificationEffect
+  sortOrder?: number
+  responses?: Prisma.DocTransmittalResponseCreateNestedManyWithoutQualificationInput
+}
+
+export type DocQualificationUncheckedCreateWithoutDocProjectInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  code: string
+  label: string
+  effect: $Enums.QualificationEffect
+  sortOrder?: number
+  responses?: Prisma.DocTransmittalResponseUncheckedCreateNestedManyWithoutQualificationInput
+}
+
+export type DocQualificationCreateOrConnectWithoutDocProjectInput = {
+  where: Prisma.DocQualificationWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocQualificationCreateWithoutDocProjectInput, Prisma.DocQualificationUncheckedCreateWithoutDocProjectInput>
+}
+
+export type DocQualificationCreateManyDocProjectInputEnvelope = {
+  data: Prisma.DocQualificationCreateManyDocProjectInput | Prisma.DocQualificationCreateManyDocProjectInput[]
+  skipDuplicates?: boolean
+}
+
+export type DocQualificationUpsertWithWhereUniqueWithoutDocProjectInput = {
+  where: Prisma.DocQualificationWhereUniqueInput
+  update: Prisma.XOR<Prisma.DocQualificationUpdateWithoutDocProjectInput, Prisma.DocQualificationUncheckedUpdateWithoutDocProjectInput>
+  create: Prisma.XOR<Prisma.DocQualificationCreateWithoutDocProjectInput, Prisma.DocQualificationUncheckedCreateWithoutDocProjectInput>
+}
+
+export type DocQualificationUpdateWithWhereUniqueWithoutDocProjectInput = {
+  where: Prisma.DocQualificationWhereUniqueInput
+  data: Prisma.XOR<Prisma.DocQualificationUpdateWithoutDocProjectInput, Prisma.DocQualificationUncheckedUpdateWithoutDocProjectInput>
+}
+
+export type DocQualificationUpdateManyWithWhereWithoutDocProjectInput = {
+  where: Prisma.DocQualificationScalarWhereInput
+  data: Prisma.XOR<Prisma.DocQualificationUpdateManyMutationInput, Prisma.DocQualificationUncheckedUpdateManyWithoutDocProjectInput>
+}
+
+export type DocQualificationScalarWhereInput = {
+  AND?: Prisma.DocQualificationScalarWhereInput | Prisma.DocQualificationScalarWhereInput[]
+  OR?: Prisma.DocQualificationScalarWhereInput[]
+  NOT?: Prisma.DocQualificationScalarWhereInput | Prisma.DocQualificationScalarWhereInput[]
+  id?: Prisma.IntFilter<"DocQualification"> | number
+  createdAt?: Prisma.DateTimeFilter<"DocQualification"> | Date | string
+  createdById?: Prisma.IntFilter<"DocQualification"> | number
+  updatedAt?: Prisma.DateTimeNullableFilter<"DocQualification"> | Date | string | null
+  updatedById?: Prisma.IntFilter<"DocQualification"> | number
+  terminatedAt?: Prisma.DateTimeNullableFilter<"DocQualification"> | Date | string | null
+  isSys?: Prisma.BoolFilter<"DocQualification"> | boolean
+  docProjectId?: Prisma.IntNullableFilter<"DocQualification"> | number | null
+  code?: Prisma.StringFilter<"DocQualification"> | string
+  label?: Prisma.StringFilter<"DocQualification"> | string
+  effect?: Prisma.EnumQualificationEffectFilter<"DocQualification"> | $Enums.QualificationEffect
+  sortOrder?: Prisma.IntFilter<"DocQualification"> | number
+}
+
 export type DocQualificationCreateWithoutResponsesInput = {
   createdAt?: Date | string
   createdById: number
@@ -567,11 +694,11 @@ export type DocQualificationCreateWithoutResponsesInput = {
   updatedById?: number
   terminatedAt?: Date | string | null
   isSys?: boolean
-  projectId?: number | null
   code: string
   label: string
   effect: $Enums.QualificationEffect
   sortOrder?: number
+  docProject?: Prisma.DocProjectCreateNestedOneWithoutQualificationsInput
 }
 
 export type DocQualificationUncheckedCreateWithoutResponsesInput = {
@@ -582,7 +709,7 @@ export type DocQualificationUncheckedCreateWithoutResponsesInput = {
   updatedById?: number
   terminatedAt?: Date | string | null
   isSys?: boolean
-  projectId?: number | null
+  docProjectId?: number | null
   code: string
   label: string
   effect: $Enums.QualificationEffect
@@ -612,11 +739,11 @@ export type DocQualificationUpdateWithoutResponsesInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   effect?: Prisma.EnumQualificationEffectFieldUpdateOperationsInput | $Enums.QualificationEffect
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  docProject?: Prisma.DocProjectUpdateOneWithoutQualificationsNestedInput
 }
 
 export type DocQualificationUncheckedUpdateWithoutResponsesInput = {
@@ -627,7 +754,64 @@ export type DocQualificationUncheckedUpdateWithoutResponsesInput = {
   updatedById?: Prisma.IntFieldUpdateOperationsInput | number
   terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  effect?: Prisma.EnumQualificationEffectFieldUpdateOperationsInput | $Enums.QualificationEffect
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+}
+
+export type DocQualificationCreateManyDocProjectInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  terminatedAt?: Date | string | null
+  isSys?: boolean
+  code: string
+  label: string
+  effect: $Enums.QualificationEffect
+  sortOrder?: number
+}
+
+export type DocQualificationUpdateWithoutDocProjectInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  effect?: Prisma.EnumQualificationEffectFieldUpdateOperationsInput | $Enums.QualificationEffect
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  responses?: Prisma.DocTransmittalResponseUpdateManyWithoutQualificationNestedInput
+}
+
+export type DocQualificationUncheckedUpdateWithoutDocProjectInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  effect?: Prisma.EnumQualificationEffectFieldUpdateOperationsInput | $Enums.QualificationEffect
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  responses?: Prisma.DocTransmittalResponseUncheckedUpdateManyWithoutQualificationNestedInput
+}
+
+export type DocQualificationUncheckedUpdateManyWithoutDocProjectInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  terminatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   effect?: Prisma.EnumQualificationEffectFieldUpdateOperationsInput | $Enums.QualificationEffect
@@ -673,11 +857,12 @@ export type DocQualificationSelect<ExtArgs extends runtime.Types.Extensions.Inte
   updatedById?: boolean
   terminatedAt?: boolean
   isSys?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   code?: boolean
   label?: boolean
   effect?: boolean
   sortOrder?: boolean
+  docProject?: boolean | Prisma.DocQualification$docProjectArgs<ExtArgs>
   responses?: boolean | Prisma.DocQualification$responsesArgs<ExtArgs>
   _count?: boolean | Prisma.DocQualificationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["docQualification"]>
@@ -690,11 +875,12 @@ export type DocQualificationSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   updatedById?: boolean
   terminatedAt?: boolean
   isSys?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   code?: boolean
   label?: boolean
   effect?: boolean
   sortOrder?: boolean
+  docProject?: boolean | Prisma.DocQualification$docProjectArgs<ExtArgs>
 }, ExtArgs["result"]["docQualification"]>
 
 export type DocQualificationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -705,11 +891,12 @@ export type DocQualificationSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   updatedById?: boolean
   terminatedAt?: boolean
   isSys?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   code?: boolean
   label?: boolean
   effect?: boolean
   sortOrder?: boolean
+  docProject?: boolean | Prisma.DocQualification$docProjectArgs<ExtArgs>
 }, ExtArgs["result"]["docQualification"]>
 
 export type DocQualificationSelectScalar = {
@@ -720,24 +907,30 @@ export type DocQualificationSelectScalar = {
   updatedById?: boolean
   terminatedAt?: boolean
   isSys?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   code?: boolean
   label?: boolean
   effect?: boolean
   sortOrder?: boolean
 }
 
-export type DocQualificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "projectId" | "code" | "label" | "effect" | "sortOrder", ExtArgs["result"]["docQualification"]>
+export type DocQualificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "terminatedAt" | "isSys" | "docProjectId" | "code" | "label" | "effect" | "sortOrder", ExtArgs["result"]["docQualification"]>
 export type DocQualificationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.DocQualification$docProjectArgs<ExtArgs>
   responses?: boolean | Prisma.DocQualification$responsesArgs<ExtArgs>
   _count?: boolean | Prisma.DocQualificationCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type DocQualificationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type DocQualificationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type DocQualificationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.DocQualification$docProjectArgs<ExtArgs>
+}
+export type DocQualificationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  docProject?: boolean | Prisma.DocQualification$docProjectArgs<ExtArgs>
+}
 
 export type $DocQualificationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DocQualification"
   objects: {
+    docProject: Prisma.$DocProjectPayload<ExtArgs> | null
     responses: Prisma.$DocTransmittalResponsePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -748,7 +941,7 @@ export type $DocQualificationPayload<ExtArgs extends runtime.Types.Extensions.In
     updatedById: number
     terminatedAt: Date | null
     isSys: boolean
-    projectId: number | null
+    docProjectId: number | null
     code: string
     label: string
     effect: $Enums.QualificationEffect
@@ -1147,6 +1340,7 @@ readonly fields: DocQualificationFieldRefs;
  */
 export interface Prisma__DocQualificationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  docProject<T extends Prisma.DocQualification$docProjectArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocQualification$docProjectArgs<ExtArgs>>): Prisma.Prisma__DocProjectClient<runtime.Types.Result.GetResult<Prisma.$DocProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   responses<T extends Prisma.DocQualification$responsesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocQualification$responsesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocTransmittalResponsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1184,7 +1378,7 @@ export interface DocQualificationFieldRefs {
   readonly updatedById: Prisma.FieldRef<"DocQualification", 'Int'>
   readonly terminatedAt: Prisma.FieldRef<"DocQualification", 'DateTime'>
   readonly isSys: Prisma.FieldRef<"DocQualification", 'Boolean'>
-  readonly projectId: Prisma.FieldRef<"DocQualification", 'Int'>
+  readonly docProjectId: Prisma.FieldRef<"DocQualification", 'Int'>
   readonly code: Prisma.FieldRef<"DocQualification", 'String'>
   readonly label: Prisma.FieldRef<"DocQualification", 'String'>
   readonly effect: Prisma.FieldRef<"DocQualification", 'QualificationEffect'>
@@ -1443,6 +1637,10 @@ export type DocQualificationCreateManyAndReturnArgs<ExtArgs extends runtime.Type
    */
   data: Prisma.DocQualificationCreateManyInput | Prisma.DocQualificationCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocQualificationIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1513,6 +1711,10 @@ export type DocQualificationUpdateManyAndReturnArgs<ExtArgs extends runtime.Type
    * Limit how many DocQualifications to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocQualificationIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1579,6 +1781,25 @@ export type DocQualificationDeleteManyArgs<ExtArgs extends runtime.Types.Extensi
    * Limit how many DocQualifications to delete.
    */
   limit?: number
+}
+
+/**
+ * DocQualification.docProject
+ */
+export type DocQualification$docProjectArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocProject
+   */
+  select?: Prisma.DocProjectSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocProject
+   */
+  omit?: Prisma.DocProjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectInclude<ExtArgs> | null
+  where?: Prisma.DocProjectWhereInput
 }
 
 /**

@@ -30,14 +30,14 @@ export type DocAuditEventAvgAggregateOutputType = {
   id: number | null
   createdById: number | null
   objectId: number | null
-  projectId: number | null
+  docProjectId: number | null
 }
 
 export type DocAuditEventSumAggregateOutputType = {
   id: number | null
   createdById: number | null
   objectId: number | null
-  projectId: number | null
+  docProjectId: number | null
 }
 
 export type DocAuditEventMinAggregateOutputType = {
@@ -47,7 +47,7 @@ export type DocAuditEventMinAggregateOutputType = {
   objectType: $Enums.DocObjectType | null
   objectId: number | null
   action: string | null
-  projectId: number | null
+  docProjectId: number | null
   module: $Enums.ModuleType | null
 }
 
@@ -58,7 +58,7 @@ export type DocAuditEventMaxAggregateOutputType = {
   objectType: $Enums.DocObjectType | null
   objectId: number | null
   action: string | null
-  projectId: number | null
+  docProjectId: number | null
   module: $Enums.ModuleType | null
 }
 
@@ -70,7 +70,7 @@ export type DocAuditEventCountAggregateOutputType = {
   objectId: number
   action: number
   meta: number
-  projectId: number
+  docProjectId: number
   module: number
   _all: number
 }
@@ -80,14 +80,14 @@ export type DocAuditEventAvgAggregateInputType = {
   id?: true
   createdById?: true
   objectId?: true
-  projectId?: true
+  docProjectId?: true
 }
 
 export type DocAuditEventSumAggregateInputType = {
   id?: true
   createdById?: true
   objectId?: true
-  projectId?: true
+  docProjectId?: true
 }
 
 export type DocAuditEventMinAggregateInputType = {
@@ -97,7 +97,7 @@ export type DocAuditEventMinAggregateInputType = {
   objectType?: true
   objectId?: true
   action?: true
-  projectId?: true
+  docProjectId?: true
   module?: true
 }
 
@@ -108,7 +108,7 @@ export type DocAuditEventMaxAggregateInputType = {
   objectType?: true
   objectId?: true
   action?: true
-  projectId?: true
+  docProjectId?: true
   module?: true
 }
 
@@ -120,7 +120,7 @@ export type DocAuditEventCountAggregateInputType = {
   objectId?: true
   action?: true
   meta?: true
-  projectId?: true
+  docProjectId?: true
   module?: true
   _all?: true
 }
@@ -219,7 +219,7 @@ export type DocAuditEventGroupByOutputType = {
   objectId: number | null
   action: string
   meta: runtime.JsonValue | null
-  projectId: number | null
+  docProjectId: number | null
   module: $Enums.ModuleType | null
   _count: DocAuditEventCountAggregateOutputType | null
   _avg: DocAuditEventAvgAggregateOutputType | null
@@ -254,7 +254,7 @@ export type DocAuditEventWhereInput = {
   objectId?: Prisma.IntNullableFilter<"DocAuditEvent"> | number | null
   action?: Prisma.StringFilter<"DocAuditEvent"> | string
   meta?: Prisma.JsonNullableFilter<"DocAuditEvent">
-  projectId?: Prisma.IntNullableFilter<"DocAuditEvent"> | number | null
+  docProjectId?: Prisma.IntNullableFilter<"DocAuditEvent"> | number | null
   module?: Prisma.EnumModuleTypeNullableFilter<"DocAuditEvent"> | $Enums.ModuleType | null
 }
 
@@ -266,7 +266,7 @@ export type DocAuditEventOrderByWithRelationInput = {
   objectId?: Prisma.SortOrderInput | Prisma.SortOrder
   action?: Prisma.SortOrder
   meta?: Prisma.SortOrderInput | Prisma.SortOrder
-  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProjectId?: Prisma.SortOrderInput | Prisma.SortOrder
   module?: Prisma.SortOrderInput | Prisma.SortOrder
 }
 
@@ -281,7 +281,7 @@ export type DocAuditEventWhereUniqueInput = Prisma.AtLeast<{
   objectId?: Prisma.IntNullableFilter<"DocAuditEvent"> | number | null
   action?: Prisma.StringFilter<"DocAuditEvent"> | string
   meta?: Prisma.JsonNullableFilter<"DocAuditEvent">
-  projectId?: Prisma.IntNullableFilter<"DocAuditEvent"> | number | null
+  docProjectId?: Prisma.IntNullableFilter<"DocAuditEvent"> | number | null
   module?: Prisma.EnumModuleTypeNullableFilter<"DocAuditEvent"> | $Enums.ModuleType | null
 }, "id">
 
@@ -293,7 +293,7 @@ export type DocAuditEventOrderByWithAggregationInput = {
   objectId?: Prisma.SortOrderInput | Prisma.SortOrder
   action?: Prisma.SortOrder
   meta?: Prisma.SortOrderInput | Prisma.SortOrder
-  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  docProjectId?: Prisma.SortOrderInput | Prisma.SortOrder
   module?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DocAuditEventCountOrderByAggregateInput
   _avg?: Prisma.DocAuditEventAvgOrderByAggregateInput
@@ -313,7 +313,7 @@ export type DocAuditEventScalarWhereWithAggregatesInput = {
   objectId?: Prisma.IntNullableWithAggregatesFilter<"DocAuditEvent"> | number | null
   action?: Prisma.StringWithAggregatesFilter<"DocAuditEvent"> | string
   meta?: Prisma.JsonNullableWithAggregatesFilter<"DocAuditEvent">
-  projectId?: Prisma.IntNullableWithAggregatesFilter<"DocAuditEvent"> | number | null
+  docProjectId?: Prisma.IntNullableWithAggregatesFilter<"DocAuditEvent"> | number | null
   module?: Prisma.EnumModuleTypeNullableWithAggregatesFilter<"DocAuditEvent"> | $Enums.ModuleType | null
 }
 
@@ -324,7 +324,7 @@ export type DocAuditEventCreateInput = {
   objectId?: number | null
   action: string
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  projectId?: number | null
+  docProjectId?: number | null
   module?: $Enums.ModuleType | null
 }
 
@@ -336,7 +336,7 @@ export type DocAuditEventUncheckedCreateInput = {
   objectId?: number | null
   action: string
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  projectId?: number | null
+  docProjectId?: number | null
   module?: $Enums.ModuleType | null
 }
 
@@ -347,7 +347,7 @@ export type DocAuditEventUpdateInput = {
   objectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
 }
 
@@ -359,7 +359,7 @@ export type DocAuditEventUncheckedUpdateInput = {
   objectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
 }
 
@@ -371,7 +371,7 @@ export type DocAuditEventCreateManyInput = {
   objectId?: number | null
   action: string
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  projectId?: number | null
+  docProjectId?: number | null
   module?: $Enums.ModuleType | null
 }
 
@@ -382,7 +382,7 @@ export type DocAuditEventUpdateManyMutationInput = {
   objectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
 }
 
@@ -394,7 +394,7 @@ export type DocAuditEventUncheckedUpdateManyInput = {
   objectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   action?: Prisma.StringFieldUpdateOperationsInput | string
   meta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  docProjectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   module?: Prisma.NullableEnumModuleTypeFieldUpdateOperationsInput | $Enums.ModuleType | null
 }
 
@@ -406,7 +406,7 @@ export type DocAuditEventCountOrderByAggregateInput = {
   objectId?: Prisma.SortOrder
   action?: Prisma.SortOrder
   meta?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   module?: Prisma.SortOrder
 }
 
@@ -414,7 +414,7 @@ export type DocAuditEventAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   objectId?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
 }
 
 export type DocAuditEventMaxOrderByAggregateInput = {
@@ -424,7 +424,7 @@ export type DocAuditEventMaxOrderByAggregateInput = {
   objectType?: Prisma.SortOrder
   objectId?: Prisma.SortOrder
   action?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   module?: Prisma.SortOrder
 }
 
@@ -435,7 +435,7 @@ export type DocAuditEventMinOrderByAggregateInput = {
   objectType?: Prisma.SortOrder
   objectId?: Prisma.SortOrder
   action?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
   module?: Prisma.SortOrder
 }
 
@@ -443,7 +443,7 @@ export type DocAuditEventSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   objectId?: Prisma.SortOrder
-  projectId?: Prisma.SortOrder
+  docProjectId?: Prisma.SortOrder
 }
 
 
@@ -456,7 +456,7 @@ export type DocAuditEventSelect<ExtArgs extends runtime.Types.Extensions.Interna
   objectId?: boolean
   action?: boolean
   meta?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   module?: boolean
 }, ExtArgs["result"]["docAuditEvent"]>
 
@@ -468,7 +468,7 @@ export type DocAuditEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   objectId?: boolean
   action?: boolean
   meta?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   module?: boolean
 }, ExtArgs["result"]["docAuditEvent"]>
 
@@ -480,7 +480,7 @@ export type DocAuditEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   objectId?: boolean
   action?: boolean
   meta?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   module?: boolean
 }, ExtArgs["result"]["docAuditEvent"]>
 
@@ -492,11 +492,11 @@ export type DocAuditEventSelectScalar = {
   objectId?: boolean
   action?: boolean
   meta?: boolean
-  projectId?: boolean
+  docProjectId?: boolean
   module?: boolean
 }
 
-export type DocAuditEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "objectType" | "objectId" | "action" | "meta" | "projectId" | "module", ExtArgs["result"]["docAuditEvent"]>
+export type DocAuditEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "objectType" | "objectId" | "action" | "meta" | "docProjectId" | "module", ExtArgs["result"]["docAuditEvent"]>
 
 export type $DocAuditEventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DocAuditEvent"
@@ -509,7 +509,7 @@ export type $DocAuditEventPayload<ExtArgs extends runtime.Types.Extensions.Inter
     objectId: number | null
     action: string
     meta: runtime.JsonValue | null
-    projectId: number | null
+    docProjectId: number | null
     module: $Enums.ModuleType | null
   }, ExtArgs["result"]["docAuditEvent"]>
   composites: {}
@@ -941,7 +941,7 @@ export interface DocAuditEventFieldRefs {
   readonly objectId: Prisma.FieldRef<"DocAuditEvent", 'Int'>
   readonly action: Prisma.FieldRef<"DocAuditEvent", 'String'>
   readonly meta: Prisma.FieldRef<"DocAuditEvent", 'Json'>
-  readonly projectId: Prisma.FieldRef<"DocAuditEvent", 'Int'>
+  readonly docProjectId: Prisma.FieldRef<"DocAuditEvent", 'Int'>
   readonly module: Prisma.FieldRef<"DocAuditEvent", 'ModuleType'>
 }
     

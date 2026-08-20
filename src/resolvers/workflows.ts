@@ -320,13 +320,13 @@ const roleOfRevision = async (
 ): Promise<DocumentRole> => {
   const revision = await context.orm.documentRevision.findUniqueOrThrow({
     where: { id: revisionId },
-    select: { document: { select: { projectId: true } } },
+    select: { document: { select: { docProjectId: true } } },
   })
 
-  if (revision.document.projectId === null) return DocumentRole.INTERNAL
+  if (revision.document.docProjectId === null) return DocumentRole.INTERNAL
 
   const settings = await context.orm.docProject.findUnique({
-    where: { projectId: revision.document.projectId },
+    where: { id: revision.document.docProjectId },
     select: { documentRole: true },
   })
 
@@ -355,7 +355,7 @@ const prepareQualification = async (
     where: { documentRevisionId: revisionId },
     select: {
       id: true,
-      transmittal: { select: { projectId: true, status: true } },
+      transmittal: { select: { docProjectId: true, status: true } },
     },
   })
 
@@ -370,12 +370,12 @@ const prepareQualification = async (
 
   const catalogo = await context.orm.docQualification.findMany({
     where: {
-      OR: [{ projectId: item.transmittal.projectId }, { projectId: null }],
+      OR: [{ docProjectId: item.transmittal.docProjectId }, { docProjectId: null }],
     },
-    select: { id: true, projectId: true, terminatedAt: true, effect: true },
+    select: { id: true, docProjectId: true, terminatedAt: true, effect: true },
   })
 
-  const elegida = resolveScope(catalogo, item.transmittal.projectId)
+  const elegida = resolveScope(catalogo, item.transmittal.docProjectId)
     .filter((q) => q.terminatedAt === null)
     .find((q) => q.id === qualificationId)
 
@@ -611,7 +611,7 @@ export const workflowResolvers = {
           // no lo hay, porque el documento llega ya elaborado desde afuera (B16).
           const { documentRole } = await projectDefaults(
             tx,
-            workflow.revision.document.projectId,
+            workflow.revision.document.docProjectId,
           )
 
           const materialized = materializeSteps(

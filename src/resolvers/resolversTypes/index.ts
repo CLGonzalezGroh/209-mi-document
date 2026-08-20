@@ -674,7 +674,7 @@ export const resolverTypes = {
      */
     direction: async (parent: Transmittal) => {
       const settings = await prisma.docProject.findUnique({
-        where: { projectId: parent.projectId },
+        where: { id: parent.docProjectId },
         select: { documentRole: true },
       })
 

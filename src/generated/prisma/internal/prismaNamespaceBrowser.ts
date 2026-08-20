@@ -114,7 +114,7 @@ export const DocumentClassScalarFieldEnum = {
   module: 'module',
   description: 'description',
   sortOrder: 'sortOrder',
-  projectId: 'projectId'
+  docProjectId: 'docProjectId'
 } as const
 
 export type DocumentClassScalarFieldEnum = (typeof DocumentClassScalarFieldEnum)[keyof typeof DocumentClassScalarFieldEnum]
@@ -133,7 +133,7 @@ export const DocumentTypeScalarFieldEnum = {
   classId: 'classId',
   description: 'description',
   requiresFormalReview: 'requiresFormalReview',
-  projectId: 'projectId'
+  docProjectId: 'docProjectId'
 } as const
 
 export type DocumentTypeScalarFieldEnum = (typeof DocumentTypeScalarFieldEnum)[keyof typeof DocumentTypeScalarFieldEnum]
@@ -150,7 +150,7 @@ export const DocumentScalarFieldEnum = {
   code: 'code',
   description: 'description',
   module: 'module',
-  projectId: 'projectId',
+  docProjectId: 'docProjectId',
   currentTitle: 'currentTitle',
   currentDocumentTypeId: 'currentDocumentTypeId',
   currentDocumentClassId: 'currentDocumentClassId',
@@ -332,7 +332,7 @@ export const TransmittalScalarFieldEnum = {
   updatedAt: 'updatedAt',
   updatedById: 'updatedById',
   code: 'code',
-  projectId: 'projectId',
+  docProjectId: 'docProjectId',
   nature: 'nature',
   status: 'status',
   counterpartyReference: 'counterpartyReference',
@@ -425,7 +425,7 @@ export const DocWorkflowTemplateScalarFieldEnum = {
   isSys: 'isSys',
   name: 'name',
   description: 'description',
-  projectId: 'projectId',
+  docProjectId: 'docProjectId',
   documentClassId: 'documentClassId',
   documentTypeId: 'documentTypeId'
 } as const
@@ -451,7 +451,7 @@ export const DocProjectMemberScalarFieldEnum = {
   updatedAt: 'updatedAt',
   updatedById: 'updatedById',
   isSys: 'isSys',
-  projectId: 'projectId',
+  docProjectId: 'docProjectId',
   userId: 'userId',
   side: 'side',
   assignedAt: 'assignedAt',
@@ -472,7 +472,7 @@ export const DocQualificationScalarFieldEnum = {
   updatedById: 'updatedById',
   terminatedAt: 'terminatedAt',
   isSys: 'isSys',
-  projectId: 'projectId',
+  docProjectId: 'docProjectId',
   code: 'code',
   label: 'label',
   effect: 'effect',
@@ -520,7 +520,7 @@ export const DocCatalogScopeScalarFieldEnum = {
   updatedAt: 'updatedAt',
   updatedById: 'updatedById',
   module: 'module',
-  projectId: 'projectId',
+  docProjectId: 'docProjectId',
   catalog: 'catalog',
   mode: 'mode'
 } as const
@@ -536,7 +536,7 @@ export const DocLocationScalarFieldEnum = {
   updatedById: 'updatedById',
   terminatedAt: 'terminatedAt',
   isSys: 'isSys',
-  projectId: 'projectId',
+  docProjectId: 'docProjectId',
   parentId: 'parentId',
   code: 'code',
   name: 'name',
@@ -558,7 +558,7 @@ export const DocWorkflowEventScalarFieldEnum = {
   name: 'name',
   fromState: 'fromState',
   toState: 'toState',
-  projectId: 'projectId',
+  docProjectId: 'docProjectId',
   module: 'module'
 } as const
 
@@ -573,7 +573,7 @@ export const DocAuditEventScalarFieldEnum = {
   objectId: 'objectId',
   action: 'action',
   meta: 'meta',
-  projectId: 'projectId',
+  docProjectId: 'docProjectId',
   module: 'module'
 } as const
 

@@ -9,19 +9,19 @@ import { applyProjectScope, buildProjectScope } from "./projectAuthorization.js"
 
 test("acota a los proyectos con membresía vigente", () => {
   assert.deepEqual(buildProjectScope([7, 3], { includeWithoutProject: false }), {
-    projectId: { in: [3, 7] },
+    docProjectId: { in: [3, 7] },
   })
 })
 
 test("sin membresías no alcanza ningún documento en circulación", () => {
   assert.deepEqual(buildProjectScope([], { includeWithoutProject: false }), {
-    projectId: { in: [] },
+    docProjectId: { in: [] },
   })
 })
 
 test("incorpora los documentos sin proyecto cuando se lo pide", () => {
   assert.deepEqual(buildProjectScope([5], { includeWithoutProject: true }), {
-    OR: [{ projectId: { in: [5] } }, { projectId: null }],
+    OR: [{ docProjectId: { in: [5] } }, { docProjectId: null }],
   })
 })
 
@@ -29,7 +29,7 @@ test("sin membresías alcanza igual el régimen de publicación", () => {
   // Un usuario sin ningún proyecto sigue viendo los documentos publicados, que
   // no circulan y se gobiernan solo por el permiso global (B1).
   assert.deepEqual(buildProjectScope([], { includeWithoutProject: true }), {
-    OR: [{ projectId: { in: [] } }, { projectId: null }],
+    OR: [{ docProjectId: { in: [] } }, { docProjectId: null }],
   })
 })
 
@@ -42,7 +42,7 @@ test("los transmittals y workflows nunca incorporan el caso sin proyecto", () =>
 
 test("deduplica y ordena los proyectos, para que el filtro sea estable", () => {
   assert.deepEqual(buildProjectScope([9, 2, 9, 2, 4], { includeWithoutProject: false }), {
-    projectId: { in: [2, 4, 9] },
+    docProjectId: { in: [2, 4, 9] },
   })
 })
 

@@ -166,6 +166,15 @@ Lo que `BLOCK_02`, B1 estableció sobre el primero se conserva intacto: *un `pro
 
 **Resolución. El renombre a `docProjectId`, con clave foránea real a `DocProject`, alcanza a los once modelos del subsistema documental** —`Document`, `Transmittal`, `DocumentClass`, `DocumentType`, `DocWorkflowTemplate`, `DocQualification`, `DocCatalogScope`, `DocLocation`, `DocWorkflowEvent`, `DocAuditEvent` y `DocProjectMember`— **y excluye a `ScannedFile` y `Area`**, que conservan su `projectId` apuntando a `mi-project` exactamente como está hoy.
 
+**Nueve llevan clave foránea, y dos no.** `DocWorkflowEvent` y `DocAuditEvent` reciben la columna **sin FK**, con el criterio de ADR-022 de digitalización —clave foránea en las raíces, columna de alcance en lo que solo denormaliza el contexto— y por una razón propia: en esas dos tablas el valor es un **snapshot derivado del objeto afectado**, nunca informado por quien emite (`BLOCK_02`, B9), y **un registro inmutable de auditoría no debe depender del ciclo de vida de lo que audita**.
+
+Eso cambia además qué hace la migración con un valor huérfano, y la diferencia es de fondo:
+
+| | Las nueve con FK | Las dos de eventos |
+| --- | --- | --- |
+| Qué se hace | **Se detiene la migración** | **Se anula el valor** |
+| Por qué | Hay una decisión que tomar —qué contrato representa a ese proyecto— y no la puede tomar una migración | No hay ninguna decisión: el valor no puede seguir significando lo que significaba, y el evento conserva su objeto, su acción, su actor y su fecha |
+
 **Por qué se excluyen.** Renombrarlos exigiría crearles un `DocProject` a cada proyecto que hoy referencian, es decir **inventar contratos para un subsistema que se va del módulo**. Es el mismo criterio con que `BLOCK_02C`, B3 los dejó fuera del alcance por proyecto, y aquella exclusión no quedó como argumento: quedó **medida**, y sobre el 96% del subsistema apoyado en los catálogos que ese bloque alteró.
 
 **Lo que vuelve barato el renombre, y está medido.** En los once modelos que sí participan, las únicas filas productivas son las de los catálogos: 7 clases y 57 tipos en `optimal`, **todas con `projectId` nulo**, porque declaran módulo y no proyecto. `BLOCK_02C` verificó además que no existe ninguna declaración de alcance en producción. El resto del subsistema está vacío en los cinco despliegues. **La migración renombra columnas sin filas que convertir**, salvo por lo que la fase 1 mida y contradiga.
@@ -328,6 +337,27 @@ Tres consecuencias, y ninguna bloquea:
 #### Lo demás que la medición confirma
 
 **`proion` productivo da cero absoluto**, catálogos incluidos: nunca usó ni el subsistema documental ni el legado. **`rbb` da cero en todo** en testing, coherente con que ese despliegue corra únicamente `quality`. De los cinco, **`optimal` productivo es el único con algo real en juego**, y es el que gobierna el cuidado del bloque.
+
+### Fase 3 — completada
+
+**El alcance cuelga del contrato.** `projectId` pasó a `docProjectId` en los once modelos, con clave foránea real en nueve y columna de alcance sin FK en las dos de eventos. `ScannedFile` y `Area` no registran una sola línea de cambio.
+
+**El contrato GraphQL entró en esta fase y no en la octava.** Renombrar la columna sin renombrar el campo del SDL deja el contrato mintiendo: `tsc` no lee el SDL, y un campo que el modelo ya no tiene **se resuelve como `null` en lugar de romperse**, de modo que un consumidor pediría `projectId` y recibiría nulo sin enterarse. Son 48 líneas del contrato, y las diez que conservan el nombre viejo son exactamente las que deben: el legado y el vínculo PMI.
+
+**Un control nuevo, y probado contra su propio defecto.** El test de contrato verificaba operaciones y enumeraciones, y **no campos**: por eso el `projectId` viejo pasó desapercibido hasta que se lo buscó a mano. Se agregó un control que declara la frontera de `B7` —quién puede seguir nombrando `projectId`— y se verificó que **falla cuando el defecto se inyecta**, con el criterio que `BLOCK_02C` ya había establecido: un control que nunca se vio fallar no prueba nada.
+
+**Dos defectos propios que encontraron las pruebas:**
+
+- **el alta no podía fijar el vínculo PMI.** La fase 2 dejó `projectId` fuera de la rama de actualización del `upsert`, herencia de cuando la clave de búsqueda **era** ese campo. Con el alta por código, declarar un contrato existente no podía asociarle su gestión PMI — que es justo lo que `B3` promete;
+- **cinco índices únicos quedaron con el nombre viejo.** Son los de `NULLS NOT DISTINCT` creados en SQL crudo por `BLOCK_02C` y `BLOCK_03`: no los nombra Prisma y no seguían la convención automática. Los delató `prisma migrate diff`, que es el control que existe para esto.
+
+**Las pruebas se hicieron fieles al modelo, no se adaptaron.** Con clave foránea, toda fila con alcance exige que su contrato exista. Se agregó `testContracts.ts`, que crea contratos **con id explícito**: la convención de identificadores negativos se conserva y ahora nombran al contrato en lugar del proyecto, de modo que ninguna prueba tuvo que reescribir sus constantes. Su código sigue la forma `T-<id>` a propósito, para que `declareDocProject` —que hace upsert por código— caiga sobre esa misma fila en lugar de crear un segundo contrato.
+
+Una prueba de limpieza tuvo que corregirse por una razón que conviene retener: borraba entradas de catálogo **por prefijo de código**, y varias llevan un código propio del dominio —`CIVIL`— con el prefijo solo en el nombre. Sin FK eso solo dejaba basura; con `RESTRICT` impide borrar el contrato, y el defecto se vuelve visible.
+
+**Verificado:** `tsc` limpio, **526 pruebas y 0 fallos** —una más que antes, la del contrato—, `prisma migrate diff` sin diferencias, y la ruta completa reconstruida sobre base limpia con `pg_dump` **idéntico** al de la base migrada de forma incremental.
+
+**Pendiente de medición antes de desplegar:** el control de precondición incorporó dos filas nuevas —eventos de workflow y trazas de auditoría con proyecto—, que **no estaban cuando se corrieron los cinco**. En la base de desarrollo local son 420 y 104 filas, todas de pruebas; en los despliegues deberían ser cero, y la migración las anula sin detenerse. Conviene volver a correr el control antes de la fase de despliegue.
 
 ## Referencias
 

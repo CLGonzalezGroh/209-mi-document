@@ -67,7 +67,7 @@ test("solo el rol Emisor emite hacia afuera", () => {
 
 // --- El vínculo con la emisión que se contesta ---
 
-const emision = (projectId: number) => ({ projectId, nature: EMISSION })
+const emision = (docProjectId: number) => ({ docProjectId, nature: EMISSION })
 
 test("la respuesta exige declarar la emisión que contesta", () => {
   assert.match(
@@ -94,7 +94,7 @@ test("no se contesta una emisión de otro proyecto", () => {
 
 test("no se contesta una respuesta", () => {
   assert.match(
-    responseLinkViolation(RESPONSE, { projectId: 7, nature: RESPONSE }, 7) ?? "",
+    responseLinkViolation(RESPONSE, { docProjectId: 7, nature: RESPONSE }, 7) ?? "",
     /Solo se contesta una emisión/,
   )
 })

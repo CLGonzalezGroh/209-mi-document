@@ -76,17 +76,16 @@ export const assertRoleIsSettled = async (
 ): Promise<void> => {
   const actual = await context.orm.docProject.findUnique({
     where: { code },
-    select: { documentRole: true, projectId: true },
+    select: { id: true, documentRole: true },
   })
 
   if (!actual || actual.documentRole === nuevoRol) return
-  if (actual.projectId === null) return
 
-  const projectId = actual.projectId
+  const docProjectId = actual.id
 
   const [documentos, transmittals] = await Promise.all([
-    context.orm.document.count({ where: { projectId } }),
-    context.orm.transmittal.count({ where: { projectId } }),
+    context.orm.document.count({ where: { docProjectId } }),
+    context.orm.transmittal.count({ where: { docProjectId } }),
   ])
 
   if (documentos > 0 || transmittals > 0) {

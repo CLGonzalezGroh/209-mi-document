@@ -115,6 +115,9 @@ export const docProjectsResolvers = {
               code: input.code,
               name: input.name,
               description: input.description ?? null,
+              // El vínculo PMI se puede agregar y quitar después del alta (B3):
+              // no es identidad, a diferencia del código.
+              projectId: input.projectId ?? null,
               documentRole: input.documentRole,
               counterpartyName: input.counterpartyName ?? null,
               revisionScheme: input.revisionScheme ?? null,

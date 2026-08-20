@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import test, { after, before } from "node:test"
 import jwt from "jsonwebtoken"
 import { prisma } from "../lib/prisma.js"
+import { asegurarContratos, borrarContratos } from "../utils/testContracts.js"
 import { ResolverContext } from "../types.js"
 import {
   DocProjectSide,
@@ -39,6 +40,9 @@ const PROYECTO_CON_MEMBRESIA = -424401
 const PROYECTO_SIN_MEMBRESIA = -424402
 const CODIGO = "TEST-BLOCK02"
 
+/** Los dos contratos de la prueba. El id negativo es la convención de fixtures. */
+const CONTRATOS = [PROYECTO_CON_MEMBRESIA, PROYECTO_SIN_MEMBRESIA]
+
 let context: ResolverContext
 let docConMembresia: number
 let docSinMembresia: number
@@ -47,7 +51,7 @@ let transmittalSinMembresia: number
 
 const limpiar = async () => {
   await prisma.transmittal.deleteMany({
-    where: { projectId: { in: [PROYECTO_CON_MEMBRESIA, PROYECTO_SIN_MEMBRESIA] } },
+    where: { docProjectId: { in: [PROYECTO_CON_MEMBRESIA, PROYECTO_SIN_MEMBRESIA] } },
   })
   await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
   await prisma.docProjectMember.deleteMany({ where: { userId: USER_ID } })
@@ -55,18 +59,18 @@ const limpiar = async () => {
     where: { projectId: { in: [PROYECTO_CON_MEMBRESIA, PROYECTO_SIN_MEMBRESIA] } },
   })
   await prisma.docAuditEvent.deleteMany({
-    where: { projectId: { in: [PROYECTO_CON_MEMBRESIA, PROYECTO_SIN_MEMBRESIA] } },
+    where: { docProjectId: { in: [PROYECTO_CON_MEMBRESIA, PROYECTO_SIN_MEMBRESIA] } },
   })
 }
 
-const crearDocumento = async (sufijo: string, module: ModuleType, projectId: number | null) => {
+const crearDocumento = async (sufijo: string, module: ModuleType, docProjectId: number | null) => {
   const tipo = await prisma.documentType.findFirst({ select: { id: true } })
   const doc = await prisma.document.create({
     data: {
       code: `${CODIGO}-${sufijo}`,
       currentTitle: `Documento de prueba ${sufijo}`,
       module,
-      projectId,
+      docProjectId,
       currentDocumentTypeId: tipo!.id,
       createdById: USER_ID,
       updatedById: USER_ID,
@@ -77,6 +81,16 @@ const crearDocumento = async (sufijo: string, module: ModuleType, projectId: num
 
 before(async () => {
   await limpiar()
+
+  // Los dos contratos, con id explícito: el documento les cuelga con clave
+  // foránea desde BLOQUE 02D, B7.
+  //
+  // Cada uno nace con el rol que después declara su prueba. El rol es inmutable
+  // desde el primer documento (B5), y estos contratos tienen documentos creados
+  // acá abajo: nacer con otro rol volvería la declaración un CAMBIO de rol, que
+  // el invariante rechaza con razón.
+  await asegurarContratos(prisma, [PROYECTO_CON_MEMBRESIA], DocumentRole.ISSUER)
+  await asegurarContratos(prisma, [PROYECTO_SIN_MEMBRESIA], DocumentRole.INTERNAL)
 
   const token = jwt.sign({ id: USER_ID, roles: ROLE_IDS }, process.env.AUTH_JWT_SECRET as string, {
     expiresIn: "1h",
@@ -90,7 +104,7 @@ before(async () => {
   const transmittal = await prisma.transmittal.create({
     data: {
       code: `${CODIGO}-TR`,
-      projectId: PROYECTO_SIN_MEMBRESIA,
+      docProjectId: PROYECTO_SIN_MEMBRESIA,
       nature: TransmittalNature.EMISSION,
       issuedById: USER_ID,
     },
@@ -100,7 +114,7 @@ before(async () => {
   // El usuario es miembro de UN SOLO proyecto
   await prisma.docProjectMember.create({
     data: {
-      projectId: PROYECTO_CON_MEMBRESIA,
+      docProjectId: PROYECTO_CON_MEMBRESIA,
       userId: USER_ID,
       side: DocProjectSide.HOST,
       assignedById: USER_ID,
@@ -110,6 +124,7 @@ before(async () => {
 
 after(async () => {
   await limpiar()
+  await borrarContratos(prisma, CONTRATOS)
   await prisma.$disconnect()
 })
 
@@ -195,7 +210,7 @@ test("el proyecto como argumento explícito exige membresía", async () => {
     await codigoDeError(() =>
       transmittalResolvers.Query.transmittalsByProject(
         null,
-        { projectId: PROYECTO_SIN_MEMBRESIA },
+        { docProjectId: PROYECTO_SIN_MEMBRESIA },
         context,
       ),
     ),
@@ -238,7 +253,7 @@ test("crear en un proyecto ajeno se rechaza con FORBIDDEN", async () => {
             code: `${CODIGO}-AJENO`,
             title: "Ajeno",
             module: ModuleType.PROJECTS,
-            projectId: PROYECTO_SIN_MEMBRESIA,
+            docProjectId: PROYECTO_SIN_MEMBRESIA,
             documentTypeId: 1,
             // El archivo dejó de ser obligatorio (BLOQUE 03, H-20): el alta ya
             // no lo lleva, y el armador lo aporta DocProject.
@@ -285,7 +300,7 @@ test("la configuración se declara y se lee, y emite su traza", async () => {
     where: { objectId: settings.id, action: AuditAction.DeclareDocProject },
   })
   assert.equal(eventos.length, 1)
-  assert.equal(eventos[0].projectId, PROYECTO_CON_MEMBRESIA)
+  assert.equal(eventos[0].docProjectId, PROYECTO_CON_MEMBRESIA)
 })
 
 test("un proyecto interno no admite contraparte", async () => {
@@ -338,7 +353,7 @@ test("administrar la membresía no exige membresía previa", async () => {
     null,
     {
       input: {
-        projectId: PROYECTO_SIN_MEMBRESIA,
+        docProjectId: PROYECTO_SIN_MEMBRESIA,
         userId: USER_ID,
         side: DocProjectSide.COUNTERPARTY,
       },
@@ -372,7 +387,7 @@ test("el alta repetida reincorpora en lugar de duplicar", async () => {
     null,
     {
       input: {
-        projectId: PROYECTO_SIN_MEMBRESIA,
+        docProjectId: PROYECTO_SIN_MEMBRESIA,
         userId: USER_ID,
         side: DocProjectSide.COUNTERPARTY,
       },
@@ -381,7 +396,7 @@ test("el alta repetida reincorpora en lugar de duplicar", async () => {
   )
 
   const total = await prisma.docProjectMember.count({
-    where: { projectId: PROYECTO_SIN_MEMBRESIA, userId: USER_ID },
+    where: { docProjectId: PROYECTO_SIN_MEMBRESIA, userId: USER_ID },
   })
 
   assert.equal(total, 1, "la unicidad del par usuario–proyecto debe sostenerse")
@@ -394,12 +409,12 @@ test("el alta repetida reincorpora en lugar de duplicar", async () => {
 test("el listado de miembros excluye las bajas salvo que se pidan", async () => {
   const vigentes: any = await projectMemberResolvers.Query.docProjectMembers(
     null,
-    { projectId: PROYECTO_SIN_MEMBRESIA },
+    { docProjectId: PROYECTO_SIN_MEMBRESIA },
     context,
   )
   const todas: any = await projectMemberResolvers.Query.docProjectMembers(
     null,
-    { projectId: PROYECTO_SIN_MEMBRESIA, includeRevoked: true },
+    { docProjectId: PROYECTO_SIN_MEMBRESIA, includeRevoked: true },
     context,
   )
 
@@ -409,7 +424,7 @@ test("el listado de miembros excluye las bajas salvo que se pidan", async () => 
 
 test("dar de baja la membresía retira el acceso al objeto", async () => {
   const membresia = await prisma.docProjectMember.findFirstOrThrow({
-    where: { projectId: PROYECTO_CON_MEMBRESIA, userId: USER_ID },
+    where: { docProjectId: PROYECTO_CON_MEMBRESIA, userId: USER_ID },
   })
 
   await prisma.docProjectMember.update({

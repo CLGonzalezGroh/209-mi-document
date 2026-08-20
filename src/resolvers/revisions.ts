@@ -159,7 +159,7 @@ export const revisionResolvers = {
             select: {
               id: true,
               code: true,
-              projectId: true,
+              docProjectId: true,
               obsoletedAt: true,
               currentTitle: true,
               currentDocumentClassId: true,
@@ -202,7 +202,7 @@ export const revisionResolvers = {
           const planned = await planRevision(tx, {
             documentId,
             scope: {
-              projectId: document.projectId,
+              docProjectId: document.docProjectId,
               documentClassId: document.currentDocumentClassId,
               documentTypeId: document.currentDocumentTypeId,
             },
@@ -403,11 +403,11 @@ export const revisionResolvers = {
           // entran a una revisión.
           const documento = await tx.document.findUniqueOrThrow({
             where: { id: revision.documentId },
-            select: { projectId: true },
+            select: { docProjectId: true },
           })
 
           await assertClassificationInScope(tx, {
-            projectId: documento.projectId,
+            docProjectId: documento.docProjectId,
             documentClassId: input.documentClassId,
             documentTypeId: input.documentTypeId,
           })

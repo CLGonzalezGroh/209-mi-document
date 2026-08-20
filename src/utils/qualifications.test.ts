@@ -17,7 +17,7 @@ import {
  * en lugar de heredarlo.
  */
 
-const entrada = (id: number, projectId: number | null) => ({ id, projectId })
+const entrada = (id: number, docProjectId: number | null) => ({ id, docProjectId })
 
 // --- El efecto y sus dos lecturas ---
 

@@ -60,7 +60,7 @@ export interface TransmittalOrderByInput extends OrderByInput {
 
 interface TransmittalFilterInput {
   query?: string
-  projectId?: number
+  docProjectId?: number
   status?: TransmittalStatus
   nature?: TransmittalNature
 }
@@ -159,15 +159,15 @@ const assertDraft = (status: TransmittalStatus, accion: string): void => {
  */
 const assertQualificationInScope = async (
   context: ResolverContext,
-  projectId: number,
+  docProjectId: number,
   qualificationId: number,
 ): Promise<void> => {
   const catalogo = await context.orm.docQualification.findMany({
-    where: { OR: [{ projectId }, { projectId: null }] },
-    select: { id: true, projectId: true, terminatedAt: true },
+    where: { OR: [{ docProjectId }, { docProjectId: null }] },
+    select: { id: true, docProjectId: true, terminatedAt: true },
   })
 
-  const vigentes = resolveScope(catalogo, projectId).filter(
+  const vigentes = resolveScope(catalogo, docProjectId).filter(
     (q) => q.terminatedAt === null,
   )
 
@@ -330,7 +330,7 @@ export const transmittalResolvers = {
       logger.info("transmittalById", { userId })
 
       // Fuera del try: un rechazo de autorización no es un error del servicio.
-      // El transmittal lleva su propio projectId, y nunca es nulo.
+      // El transmittal lleva su propio docProjectId, y nunca es nulo.
       await assertObjectAccess({
         userId,
         objectType: DocObjectType.TRANSMITTAL,
@@ -382,7 +382,7 @@ export const transmittalResolvers = {
       context: ResolverContext,
     ) => {
       // Listado sin proyecto en los argumentos: la segunda capa filtra (B7).
-      // Sin el régimen de publicación: Transmittal.projectId es obligatorio.
+      // Sin el régimen de publicación: Transmittal.docProjectId es obligatorio.
       const { userId, scope } = await projectScopeAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_LIST],
         context,
@@ -408,8 +408,8 @@ export const transmittalResolvers = {
           ]
         }
 
-        if (filter?.projectId) {
-          where.projectId = filter.projectId
+        if (filter?.docProjectId) {
+          where.docProjectId = filter.docProjectId
         }
 
         if (filter?.status) {
@@ -468,10 +468,10 @@ export const transmittalResolvers = {
     transmittalsByProject: async (
       _: any,
       {
-        projectId,
+        docProjectId,
         pagination,
       }: {
-        projectId: number
+        docProjectId: number
         pagination?: PaginationInput
       },
       context: ResolverContext,
@@ -479,7 +479,7 @@ export const transmittalResolvers = {
       // El proyecto es argumento explícito: doble capa estricta
       const userId = await projectAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_LIST],
-        projectId,
+        docProjectId,
         context,
       })
       logger.info("transmittalsByProject", { userId })
@@ -488,7 +488,7 @@ export const transmittalResolvers = {
         const skip = pagination?.skip || 0
         const take = pagination?.take || 10
 
-        const where = { projectId }
+        const where = { docProjectId }
 
         const totalItems = await context.orm.transmittal.count({ where })
 
@@ -535,7 +535,7 @@ export const transmittalResolvers = {
         input,
       }: {
         input: {
-          projectId: number
+          docProjectId: number
           nature: TransmittalNature
           counterpartyReference?: string
           respondsToTransmittalId?: number
@@ -550,7 +550,7 @@ export const transmittalResolvers = {
       // El proyecto viene en el input: doble capa estricta, sin nulo posible
       const userId = await projectAuthorization({
         requiredPermissions: [PERMISSIONS.DOCUMENTS_TRANSMITTAL_CREATE],
-        projectId: input.projectId,
+        docProjectId: input.docProjectId,
         context,
       })
       logger.info("createTransmittal", { userId })
@@ -560,7 +560,7 @@ export const transmittalResolvers = {
         // circulación posible: es el rol el que dice si el transmittal sale, si
         // entra, o si no existe.
         const settings = await context.orm.docProject.findUnique({
-          where: { projectId: input.projectId },
+          where: { id: input.docProjectId },
           select: { documentRole: true },
         })
 
@@ -578,7 +578,7 @@ export const transmittalResolvers = {
         const respondsTo = input.respondsToTransmittalId
           ? await context.orm.transmittal.findUnique({
               where: { id: input.respondsToTransmittalId },
-              select: { projectId: true, nature: true },
+              select: { docProjectId: true, nature: true },
             })
           : null
 
@@ -591,7 +591,7 @@ export const transmittalResolvers = {
         const vinculo = responseLinkViolation(
           input.nature,
           respondsTo,
-          input.projectId,
+          input.docProjectId,
         )
 
         if (vinculo) {
@@ -618,17 +618,17 @@ export const transmittalResolvers = {
         }
 
         // El código se calcula DENTRO de la transacción y el índice único
-        // `[projectId, code]` es el árbitro (B2). El reintento repite la
+        // `[docProjectId, code]` es el árbitro (B2). El reintento repite la
         // transacción entera, porque una violación de unicidad la aborta en
         // PostgreSQL y continuar adentro no es posible.
         const transmittal = await withCodeRetry(() =>
           context.orm.$transaction(async (tx) => {
-            const code = await generateTransmittalCode(tx, input.projectId)
+            const code = await generateTransmittalCode(tx, input.docProjectId)
 
             const created = await tx.transmittal.create({
               data: {
                 code,
-                projectId: input.projectId,
+                docProjectId: input.docProjectId,
                 nature: input.nature,
                 counterpartyReference: input.counterpartyReference,
                 respondsToTransmittalId: input.respondsToTransmittalId,
@@ -650,7 +650,7 @@ export const transmittalResolvers = {
               actorId: userId,
               meta: {
                 code: created.code,
-                projectId: input.projectId,
+                docProjectId: input.docProjectId,
                 nature: created.nature,
                 itemsCount: input.items.length,
               },
@@ -726,14 +726,14 @@ export const transmittalResolvers = {
       try {
         const transmittal = await context.orm.transmittal.findUniqueOrThrow({
           where: { id: transmittalId },
-          select: { id: true, projectId: true, nature: true, status: true },
+          select: { id: true, docProjectId: true, nature: true, status: true },
         })
 
         assertCarriesItems(transmittal.nature)
         assertDraft(transmittal.status, "agregar documentos")
 
         const settings = await context.orm.docProject.findUnique({
-          where: { projectId: transmittal.projectId },
+          where: { id: transmittal.docProjectId },
           select: { documentRole: true },
         })
 
@@ -891,7 +891,7 @@ export const transmittalResolvers = {
       logger.info("issueTransmittal", { userId })
 
       // Fuera del try: un rechazo de autorización no es un error del servicio.
-      // El transmittal lleva su propio projectId, y nunca es nulo.
+      // El transmittal lleva su propio docProjectId, y nunca es nulo.
       await assertObjectAccess({
         userId,
         objectType: DocObjectType.TRANSMITTAL,
@@ -919,7 +919,7 @@ export const transmittalResolvers = {
         }
 
         const settings = await context.orm.docProject.findUnique({
-          where: { projectId: transmittal.projectId },
+          where: { id: transmittal.docProjectId },
           select: { documentRole: true },
         })
 
@@ -1085,7 +1085,7 @@ export const transmittalResolvers = {
         where: { id: itemId },
         select: {
           id: true,
-          transmittal: { select: { id: true, projectId: true, status: true } },
+          transmittal: { select: { id: true, docProjectId: true, status: true } },
         },
       })
 
@@ -1109,7 +1109,7 @@ export const transmittalResolvers = {
 
         await assertQualificationInScope(
           context,
-          item.transmittal.projectId,
+          item.transmittal.docProjectId,
           input.qualificationId,
         )
 
@@ -1249,7 +1249,7 @@ export const transmittalResolvers = {
             respondedBy: true,
             respondedAt: true,
             transmittalItem: {
-              select: { transmittal: { select: { projectId: true } } },
+              select: { transmittal: { select: { docProjectId: true } } },
             },
           },
         })
@@ -1257,7 +1257,7 @@ export const transmittalResolvers = {
         if (input.qualificationId) {
           await assertQualificationInScope(
             context,
-            previa.transmittalItem.transmittal.projectId,
+            previa.transmittalItem.transmittal.docProjectId,
             input.qualificationId,
           )
         }
@@ -1347,14 +1347,14 @@ export const transmittalResolvers = {
           select: {
             id: true,
             code: true,
-            projectId: true,
+            docProjectId: true,
             nature: true,
             status: true,
           },
         })
 
         const settings = await context.orm.docProject.findUnique({
-          where: { projectId: transmittal.projectId },
+          where: { id: transmittal.docProjectId },
           select: { documentRole: true },
         })
 
@@ -1433,7 +1433,7 @@ export const transmittalResolvers = {
       logger.info("closeTransmittal", { userId })
 
       // Fuera del try: un rechazo de autorización no es un error del servicio.
-      // El transmittal lleva su propio projectId, y nunca es nulo.
+      // El transmittal lleva su propio docProjectId, y nunca es nulo.
       await assertObjectAccess({
         userId,
         objectType: DocObjectType.TRANSMITTAL,

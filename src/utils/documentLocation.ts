@@ -49,19 +49,19 @@ export type LocationSettings = {
  * declara ubicación.
  */
 export type ChosenLocation = {
-  projectId: number | null
+  docProjectId: number | null
   terminatedAt: Date | null
 } | null
 
 /**
  * Ámbito del documento: su proyecto y el modo con que resuelve el catálogo.
  *
- * `projectId` nulo es el régimen de publicación —calidad, comercial, activos—,
+ * `docProjectId` nulo es el régimen de publicación —calidad, comercial, activos—,
  * que no tiene proyecto y por lo tanto usa el árbol del despliegue. No es una
  * ausencia sino un ámbito, con el criterio de B1 de BLOQUE 02.
  */
 export type DocumentScope = {
-  projectId: number | null
+  docProjectId: number | null
   mode: DocScopeMode
 }
 
@@ -87,10 +87,10 @@ export const checkLocation = ({
   // Sin proyecto rige el árbol del despliegue, y solo él: el régimen de
   // publicación no hereda de ningún proyecto porque no pertenece a ninguno.
   const visible =
-    scope.projectId === null
-      ? chosen.projectId === null
-      : entryVisible(chosen.projectId, {
-          projectId: scope.projectId,
+    scope.docProjectId === null
+      ? chosen.docProjectId === null
+      : entryVisible(chosen.docProjectId, {
+          docProjectId: scope.docProjectId,
           mode: scope.mode,
         })
 
@@ -111,17 +111,17 @@ export const resolveDocumentLocation = async (
   client: Prisma.TransactionClient,
   {
     locationId,
-    projectId,
-  }: { locationId: number | null; projectId: number | null },
+    docProjectId,
+  }: { locationId: number | null; docProjectId: number | null },
 ): Promise<string | null> => {
   // Sin proyecto rige el valor por defecto: habilitado y no obligatorio. El
   // escalón de módulo que el plan tiene diferido es lo que permitiría a calidad,
   // comercial o activos exigirla; hoy no tienen dónde declararlo.
   const settings =
-    projectId === null
+    docProjectId === null
       ? null
       : await client.docProject.findUnique({
-          where: { projectId },
+          where: { id: docProjectId },
           select: { locationEnabled: true, locationRequired: true },
         })
 
@@ -130,7 +130,7 @@ export const resolveDocumentLocation = async (
       ? null
       : await client.docLocation.findUnique({
           where: { id: locationId },
-          select: { projectId: true, terminatedAt: true, path: true },
+          select: { docProjectId: true, terminatedAt: true, path: true },
         })
 
   if (locationId !== null && !chosen) {
@@ -140,13 +140,13 @@ export const resolveDocumentLocation = async (
   }
 
   const declarado =
-    projectId === null
+    docProjectId === null
       ? null
       : await client.docCatalogScope.findUnique({
           where: {
-            module_projectId_catalog: {
+            module_docProjectId_catalog: {
               module: ModuleType.PROJECTS,
-              projectId,
+              docProjectId,
               catalog: DocCatalogKind.LOCATION,
             },
           },
@@ -159,7 +159,7 @@ export const resolveDocumentLocation = async (
       enabled: settings?.locationEnabled ?? true,
       required: settings?.locationRequired ?? false,
     },
-    scope: { projectId, mode: effectiveMode(declarado?.mode) },
+    scope: { docProjectId, mode: effectiveMode(declarado?.mode) },
   })
 
   if (!check.ok) {

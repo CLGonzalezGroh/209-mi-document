@@ -356,6 +356,15 @@ export type DocProjectWhereInput = {
   locationEnabled?: Prisma.BoolFilter<"DocProject"> | boolean
   locationRequired?: Prisma.BoolFilter<"DocProject"> | boolean
   locationLabel?: Prisma.StringNullableFilter<"DocProject"> | string | null
+  documents?: Prisma.DocumentListRelationFilter
+  transmittals?: Prisma.TransmittalListRelationFilter
+  members?: Prisma.DocProjectMemberListRelationFilter
+  documentClasses?: Prisma.DocumentClassListRelationFilter
+  documentTypes?: Prisma.DocumentTypeListRelationFilter
+  locations?: Prisma.DocLocationListRelationFilter
+  qualifications?: Prisma.DocQualificationListRelationFilter
+  catalogScopes?: Prisma.DocCatalogScopeListRelationFilter
+  workflowTemplates?: Prisma.DocWorkflowTemplateListRelationFilter
 }
 
 export type DocProjectOrderByWithRelationInput = {
@@ -379,6 +388,15 @@ export type DocProjectOrderByWithRelationInput = {
   locationEnabled?: Prisma.SortOrder
   locationRequired?: Prisma.SortOrder
   locationLabel?: Prisma.SortOrderInput | Prisma.SortOrder
+  documents?: Prisma.DocumentOrderByRelationAggregateInput
+  transmittals?: Prisma.TransmittalOrderByRelationAggregateInput
+  members?: Prisma.DocProjectMemberOrderByRelationAggregateInput
+  documentClasses?: Prisma.DocumentClassOrderByRelationAggregateInput
+  documentTypes?: Prisma.DocumentTypeOrderByRelationAggregateInput
+  locations?: Prisma.DocLocationOrderByRelationAggregateInput
+  qualifications?: Prisma.DocQualificationOrderByRelationAggregateInput
+  catalogScopes?: Prisma.DocCatalogScopeOrderByRelationAggregateInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateOrderByRelationAggregateInput
 }
 
 export type DocProjectWhereUniqueInput = Prisma.AtLeast<{
@@ -405,6 +423,15 @@ export type DocProjectWhereUniqueInput = Prisma.AtLeast<{
   locationEnabled?: Prisma.BoolFilter<"DocProject"> | boolean
   locationRequired?: Prisma.BoolFilter<"DocProject"> | boolean
   locationLabel?: Prisma.StringNullableFilter<"DocProject"> | string | null
+  documents?: Prisma.DocumentListRelationFilter
+  transmittals?: Prisma.TransmittalListRelationFilter
+  members?: Prisma.DocProjectMemberListRelationFilter
+  documentClasses?: Prisma.DocumentClassListRelationFilter
+  documentTypes?: Prisma.DocumentTypeListRelationFilter
+  locations?: Prisma.DocLocationListRelationFilter
+  qualifications?: Prisma.DocQualificationListRelationFilter
+  catalogScopes?: Prisma.DocCatalogScopeListRelationFilter
+  workflowTemplates?: Prisma.DocWorkflowTemplateListRelationFilter
 }, "id" | "code" | "projectId">
 
 export type DocProjectOrderByWithAggregationInput = {
@@ -481,6 +508,15 @@ export type DocProjectCreateInput = {
   locationEnabled?: boolean
   locationRequired?: boolean
   locationLabel?: string | null
+  documents?: Prisma.DocumentCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateCreateNestedManyWithoutDocProjectInput
 }
 
 export type DocProjectUncheckedCreateInput = {
@@ -504,6 +540,15 @@ export type DocProjectUncheckedCreateInput = {
   locationEnabled?: boolean
   locationRequired?: boolean
   locationLabel?: string | null
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalUncheckedCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberUncheckedCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassUncheckedCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationUncheckedCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationUncheckedCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocProjectInput
 }
 
 export type DocProjectUpdateInput = {
@@ -526,6 +571,15 @@ export type DocProjectUpdateInput = {
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUpdateManyWithoutDocProjectNestedInput
 }
 
 export type DocProjectUncheckedUpdateInput = {
@@ -549,6 +603,15 @@ export type DocProjectUncheckedUpdateInput = {
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUncheckedUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUncheckedUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUncheckedUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocProjectNestedInput
 }
 
 export type DocProjectCreateManyInput = {
@@ -617,6 +680,16 @@ export type DocProjectUncheckedUpdateManyInput = {
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
   locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type DocProjectNullableScalarRelationFilter = {
+  is?: Prisma.DocProjectWhereInput | null
+  isNot?: Prisma.DocProjectWhereInput | null
+}
+
+export type DocProjectScalarRelationFilter = {
+  is?: Prisma.DocProjectWhereInput
+  isNot?: Prisma.DocProjectWhereInput
 }
 
 export type DocProjectCountOrderByAggregateInput = {
@@ -706,6 +779,68 @@ export type DocProjectSumOrderByAggregateInput = {
   defaultOrganizerId?: Prisma.SortOrder
 }
 
+export type DocProjectCreateNestedOneWithoutDocumentClassesInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutDocumentClassesInput, Prisma.DocProjectUncheckedCreateWithoutDocumentClassesInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutDocumentClassesInput
+  connect?: Prisma.DocProjectWhereUniqueInput
+}
+
+export type DocProjectUpdateOneWithoutDocumentClassesNestedInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutDocumentClassesInput, Prisma.DocProjectUncheckedCreateWithoutDocumentClassesInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutDocumentClassesInput
+  upsert?: Prisma.DocProjectUpsertWithoutDocumentClassesInput
+  disconnect?: Prisma.DocProjectWhereInput | boolean
+  delete?: Prisma.DocProjectWhereInput | boolean
+  connect?: Prisma.DocProjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocProjectUpdateToOneWithWhereWithoutDocumentClassesInput, Prisma.DocProjectUpdateWithoutDocumentClassesInput>, Prisma.DocProjectUncheckedUpdateWithoutDocumentClassesInput>
+}
+
+export type DocProjectCreateNestedOneWithoutDocumentTypesInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutDocumentTypesInput, Prisma.DocProjectUncheckedCreateWithoutDocumentTypesInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutDocumentTypesInput
+  connect?: Prisma.DocProjectWhereUniqueInput
+}
+
+export type DocProjectUpdateOneWithoutDocumentTypesNestedInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutDocumentTypesInput, Prisma.DocProjectUncheckedCreateWithoutDocumentTypesInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutDocumentTypesInput
+  upsert?: Prisma.DocProjectUpsertWithoutDocumentTypesInput
+  disconnect?: Prisma.DocProjectWhereInput | boolean
+  delete?: Prisma.DocProjectWhereInput | boolean
+  connect?: Prisma.DocProjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocProjectUpdateToOneWithWhereWithoutDocumentTypesInput, Prisma.DocProjectUpdateWithoutDocumentTypesInput>, Prisma.DocProjectUncheckedUpdateWithoutDocumentTypesInput>
+}
+
+export type DocProjectCreateNestedOneWithoutDocumentsInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutDocumentsInput, Prisma.DocProjectUncheckedCreateWithoutDocumentsInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutDocumentsInput
+  connect?: Prisma.DocProjectWhereUniqueInput
+}
+
+export type DocProjectUpdateOneWithoutDocumentsNestedInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutDocumentsInput, Prisma.DocProjectUncheckedCreateWithoutDocumentsInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutDocumentsInput
+  upsert?: Prisma.DocProjectUpsertWithoutDocumentsInput
+  disconnect?: Prisma.DocProjectWhereInput | boolean
+  delete?: Prisma.DocProjectWhereInput | boolean
+  connect?: Prisma.DocProjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocProjectUpdateToOneWithWhereWithoutDocumentsInput, Prisma.DocProjectUpdateWithoutDocumentsInput>, Prisma.DocProjectUncheckedUpdateWithoutDocumentsInput>
+}
+
+export type DocProjectCreateNestedOneWithoutTransmittalsInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutTransmittalsInput, Prisma.DocProjectUncheckedCreateWithoutTransmittalsInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutTransmittalsInput
+  connect?: Prisma.DocProjectWhereUniqueInput
+}
+
+export type DocProjectUpdateOneRequiredWithoutTransmittalsNestedInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutTransmittalsInput, Prisma.DocProjectUncheckedCreateWithoutTransmittalsInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutTransmittalsInput
+  upsert?: Prisma.DocProjectUpsertWithoutTransmittalsInput
+  connect?: Prisma.DocProjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocProjectUpdateToOneWithWhereWithoutTransmittalsInput, Prisma.DocProjectUpdateWithoutTransmittalsInput>, Prisma.DocProjectUncheckedUpdateWithoutTransmittalsInput>
+}
+
 export type EnumDocProjectStatusFieldUpdateOperationsInput = {
   set?: $Enums.DocProjectStatus
 }
@@ -718,6 +853,1427 @@ export type NullableEnumRevisionSchemeFieldUpdateOperationsInput = {
   set?: $Enums.RevisionScheme | null
 }
 
+export type DocProjectCreateNestedOneWithoutWorkflowTemplatesInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutWorkflowTemplatesInput, Prisma.DocProjectUncheckedCreateWithoutWorkflowTemplatesInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutWorkflowTemplatesInput
+  connect?: Prisma.DocProjectWhereUniqueInput
+}
+
+export type DocProjectUpdateOneWithoutWorkflowTemplatesNestedInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutWorkflowTemplatesInput, Prisma.DocProjectUncheckedCreateWithoutWorkflowTemplatesInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutWorkflowTemplatesInput
+  upsert?: Prisma.DocProjectUpsertWithoutWorkflowTemplatesInput
+  disconnect?: Prisma.DocProjectWhereInput | boolean
+  delete?: Prisma.DocProjectWhereInput | boolean
+  connect?: Prisma.DocProjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocProjectUpdateToOneWithWhereWithoutWorkflowTemplatesInput, Prisma.DocProjectUpdateWithoutWorkflowTemplatesInput>, Prisma.DocProjectUncheckedUpdateWithoutWorkflowTemplatesInput>
+}
+
+export type DocProjectCreateNestedOneWithoutMembersInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutMembersInput, Prisma.DocProjectUncheckedCreateWithoutMembersInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutMembersInput
+  connect?: Prisma.DocProjectWhereUniqueInput
+}
+
+export type DocProjectUpdateOneRequiredWithoutMembersNestedInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutMembersInput, Prisma.DocProjectUncheckedCreateWithoutMembersInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutMembersInput
+  upsert?: Prisma.DocProjectUpsertWithoutMembersInput
+  connect?: Prisma.DocProjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocProjectUpdateToOneWithWhereWithoutMembersInput, Prisma.DocProjectUpdateWithoutMembersInput>, Prisma.DocProjectUncheckedUpdateWithoutMembersInput>
+}
+
+export type DocProjectCreateNestedOneWithoutQualificationsInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutQualificationsInput, Prisma.DocProjectUncheckedCreateWithoutQualificationsInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutQualificationsInput
+  connect?: Prisma.DocProjectWhereUniqueInput
+}
+
+export type DocProjectUpdateOneWithoutQualificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutQualificationsInput, Prisma.DocProjectUncheckedCreateWithoutQualificationsInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutQualificationsInput
+  upsert?: Prisma.DocProjectUpsertWithoutQualificationsInput
+  disconnect?: Prisma.DocProjectWhereInput | boolean
+  delete?: Prisma.DocProjectWhereInput | boolean
+  connect?: Prisma.DocProjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocProjectUpdateToOneWithWhereWithoutQualificationsInput, Prisma.DocProjectUpdateWithoutQualificationsInput>, Prisma.DocProjectUncheckedUpdateWithoutQualificationsInput>
+}
+
+export type DocProjectCreateNestedOneWithoutCatalogScopesInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutCatalogScopesInput, Prisma.DocProjectUncheckedCreateWithoutCatalogScopesInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutCatalogScopesInput
+  connect?: Prisma.DocProjectWhereUniqueInput
+}
+
+export type DocProjectUpdateOneWithoutCatalogScopesNestedInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutCatalogScopesInput, Prisma.DocProjectUncheckedCreateWithoutCatalogScopesInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutCatalogScopesInput
+  upsert?: Prisma.DocProjectUpsertWithoutCatalogScopesInput
+  disconnect?: Prisma.DocProjectWhereInput | boolean
+  delete?: Prisma.DocProjectWhereInput | boolean
+  connect?: Prisma.DocProjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocProjectUpdateToOneWithWhereWithoutCatalogScopesInput, Prisma.DocProjectUpdateWithoutCatalogScopesInput>, Prisma.DocProjectUncheckedUpdateWithoutCatalogScopesInput>
+}
+
+export type DocProjectCreateNestedOneWithoutLocationsInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutLocationsInput, Prisma.DocProjectUncheckedCreateWithoutLocationsInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutLocationsInput
+  connect?: Prisma.DocProjectWhereUniqueInput
+}
+
+export type DocProjectUpdateOneWithoutLocationsNestedInput = {
+  create?: Prisma.XOR<Prisma.DocProjectCreateWithoutLocationsInput, Prisma.DocProjectUncheckedCreateWithoutLocationsInput>
+  connectOrCreate?: Prisma.DocProjectCreateOrConnectWithoutLocationsInput
+  upsert?: Prisma.DocProjectUpsertWithoutLocationsInput
+  disconnect?: Prisma.DocProjectWhereInput | boolean
+  delete?: Prisma.DocProjectWhereInput | boolean
+  connect?: Prisma.DocProjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocProjectUpdateToOneWithWhereWithoutLocationsInput, Prisma.DocProjectUpdateWithoutLocationsInput>, Prisma.DocProjectUncheckedUpdateWithoutLocationsInput>
+}
+
+export type DocProjectCreateWithoutDocumentClassesInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectUncheckedCreateWithoutDocumentClassesInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalUncheckedCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberUncheckedCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationUncheckedCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationUncheckedCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectCreateOrConnectWithoutDocumentClassesInput = {
+  where: Prisma.DocProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutDocumentClassesInput, Prisma.DocProjectUncheckedCreateWithoutDocumentClassesInput>
+}
+
+export type DocProjectUpsertWithoutDocumentClassesInput = {
+  update: Prisma.XOR<Prisma.DocProjectUpdateWithoutDocumentClassesInput, Prisma.DocProjectUncheckedUpdateWithoutDocumentClassesInput>
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutDocumentClassesInput, Prisma.DocProjectUncheckedCreateWithoutDocumentClassesInput>
+  where?: Prisma.DocProjectWhereInput
+}
+
+export type DocProjectUpdateToOneWithWhereWithoutDocumentClassesInput = {
+  where?: Prisma.DocProjectWhereInput
+  data: Prisma.XOR<Prisma.DocProjectUpdateWithoutDocumentClassesInput, Prisma.DocProjectUncheckedUpdateWithoutDocumentClassesInput>
+}
+
+export type DocProjectUpdateWithoutDocumentClassesInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectUncheckedUpdateWithoutDocumentClassesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUncheckedUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUncheckedUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUncheckedUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectCreateWithoutDocumentTypesInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectUncheckedCreateWithoutDocumentTypesInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalUncheckedCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberUncheckedCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassUncheckedCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationUncheckedCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationUncheckedCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectCreateOrConnectWithoutDocumentTypesInput = {
+  where: Prisma.DocProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutDocumentTypesInput, Prisma.DocProjectUncheckedCreateWithoutDocumentTypesInput>
+}
+
+export type DocProjectUpsertWithoutDocumentTypesInput = {
+  update: Prisma.XOR<Prisma.DocProjectUpdateWithoutDocumentTypesInput, Prisma.DocProjectUncheckedUpdateWithoutDocumentTypesInput>
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutDocumentTypesInput, Prisma.DocProjectUncheckedCreateWithoutDocumentTypesInput>
+  where?: Prisma.DocProjectWhereInput
+}
+
+export type DocProjectUpdateToOneWithWhereWithoutDocumentTypesInput = {
+  where?: Prisma.DocProjectWhereInput
+  data: Prisma.XOR<Prisma.DocProjectUpdateWithoutDocumentTypesInput, Prisma.DocProjectUncheckedUpdateWithoutDocumentTypesInput>
+}
+
+export type DocProjectUpdateWithoutDocumentTypesInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectUncheckedUpdateWithoutDocumentTypesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUncheckedUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUncheckedUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUncheckedUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUncheckedUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectCreateWithoutDocumentsInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  transmittals?: Prisma.TransmittalCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectUncheckedCreateWithoutDocumentsInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  transmittals?: Prisma.TransmittalUncheckedCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberUncheckedCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassUncheckedCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationUncheckedCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationUncheckedCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectCreateOrConnectWithoutDocumentsInput = {
+  where: Prisma.DocProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutDocumentsInput, Prisma.DocProjectUncheckedCreateWithoutDocumentsInput>
+}
+
+export type DocProjectUpsertWithoutDocumentsInput = {
+  update: Prisma.XOR<Prisma.DocProjectUpdateWithoutDocumentsInput, Prisma.DocProjectUncheckedUpdateWithoutDocumentsInput>
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutDocumentsInput, Prisma.DocProjectUncheckedCreateWithoutDocumentsInput>
+  where?: Prisma.DocProjectWhereInput
+}
+
+export type DocProjectUpdateToOneWithWhereWithoutDocumentsInput = {
+  where?: Prisma.DocProjectWhereInput
+  data: Prisma.XOR<Prisma.DocProjectUpdateWithoutDocumentsInput, Prisma.DocProjectUncheckedUpdateWithoutDocumentsInput>
+}
+
+export type DocProjectUpdateWithoutDocumentsInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transmittals?: Prisma.TransmittalUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectUncheckedUpdateWithoutDocumentsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transmittals?: Prisma.TransmittalUncheckedUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUncheckedUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUncheckedUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectCreateWithoutTransmittalsInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectUncheckedCreateWithoutTransmittalsInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberUncheckedCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassUncheckedCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationUncheckedCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationUncheckedCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectCreateOrConnectWithoutTransmittalsInput = {
+  where: Prisma.DocProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutTransmittalsInput, Prisma.DocProjectUncheckedCreateWithoutTransmittalsInput>
+}
+
+export type DocProjectUpsertWithoutTransmittalsInput = {
+  update: Prisma.XOR<Prisma.DocProjectUpdateWithoutTransmittalsInput, Prisma.DocProjectUncheckedUpdateWithoutTransmittalsInput>
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutTransmittalsInput, Prisma.DocProjectUncheckedCreateWithoutTransmittalsInput>
+  where?: Prisma.DocProjectWhereInput
+}
+
+export type DocProjectUpdateToOneWithWhereWithoutTransmittalsInput = {
+  where?: Prisma.DocProjectWhereInput
+  data: Prisma.XOR<Prisma.DocProjectUpdateWithoutTransmittalsInput, Prisma.DocProjectUncheckedUpdateWithoutTransmittalsInput>
+}
+
+export type DocProjectUpdateWithoutTransmittalsInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectUncheckedUpdateWithoutTransmittalsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUncheckedUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUncheckedUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectCreateWithoutWorkflowTemplatesInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectUncheckedCreateWithoutWorkflowTemplatesInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalUncheckedCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberUncheckedCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassUncheckedCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationUncheckedCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationUncheckedCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectCreateOrConnectWithoutWorkflowTemplatesInput = {
+  where: Prisma.DocProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutWorkflowTemplatesInput, Prisma.DocProjectUncheckedCreateWithoutWorkflowTemplatesInput>
+}
+
+export type DocProjectUpsertWithoutWorkflowTemplatesInput = {
+  update: Prisma.XOR<Prisma.DocProjectUpdateWithoutWorkflowTemplatesInput, Prisma.DocProjectUncheckedUpdateWithoutWorkflowTemplatesInput>
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutWorkflowTemplatesInput, Prisma.DocProjectUncheckedCreateWithoutWorkflowTemplatesInput>
+  where?: Prisma.DocProjectWhereInput
+}
+
+export type DocProjectUpdateToOneWithWhereWithoutWorkflowTemplatesInput = {
+  where?: Prisma.DocProjectWhereInput
+  data: Prisma.XOR<Prisma.DocProjectUpdateWithoutWorkflowTemplatesInput, Prisma.DocProjectUncheckedUpdateWithoutWorkflowTemplatesInput>
+}
+
+export type DocProjectUpdateWithoutWorkflowTemplatesInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectUncheckedUpdateWithoutWorkflowTemplatesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUncheckedUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUncheckedUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUncheckedUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectCreateWithoutMembersInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectUncheckedCreateWithoutMembersInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalUncheckedCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassUncheckedCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationUncheckedCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationUncheckedCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectCreateOrConnectWithoutMembersInput = {
+  where: Prisma.DocProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutMembersInput, Prisma.DocProjectUncheckedCreateWithoutMembersInput>
+}
+
+export type DocProjectUpsertWithoutMembersInput = {
+  update: Prisma.XOR<Prisma.DocProjectUpdateWithoutMembersInput, Prisma.DocProjectUncheckedUpdateWithoutMembersInput>
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutMembersInput, Prisma.DocProjectUncheckedCreateWithoutMembersInput>
+  where?: Prisma.DocProjectWhereInput
+}
+
+export type DocProjectUpdateToOneWithWhereWithoutMembersInput = {
+  where?: Prisma.DocProjectWhereInput
+  data: Prisma.XOR<Prisma.DocProjectUpdateWithoutMembersInput, Prisma.DocProjectUncheckedUpdateWithoutMembersInput>
+}
+
+export type DocProjectUpdateWithoutMembersInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectUncheckedUpdateWithoutMembersInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUncheckedUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUncheckedUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectCreateWithoutQualificationsInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectUncheckedCreateWithoutQualificationsInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalUncheckedCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberUncheckedCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassUncheckedCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationUncheckedCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectCreateOrConnectWithoutQualificationsInput = {
+  where: Prisma.DocProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutQualificationsInput, Prisma.DocProjectUncheckedCreateWithoutQualificationsInput>
+}
+
+export type DocProjectUpsertWithoutQualificationsInput = {
+  update: Prisma.XOR<Prisma.DocProjectUpdateWithoutQualificationsInput, Prisma.DocProjectUncheckedUpdateWithoutQualificationsInput>
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutQualificationsInput, Prisma.DocProjectUncheckedCreateWithoutQualificationsInput>
+  where?: Prisma.DocProjectWhereInput
+}
+
+export type DocProjectUpdateToOneWithWhereWithoutQualificationsInput = {
+  where?: Prisma.DocProjectWhereInput
+  data: Prisma.XOR<Prisma.DocProjectUpdateWithoutQualificationsInput, Prisma.DocProjectUncheckedUpdateWithoutQualificationsInput>
+}
+
+export type DocProjectUpdateWithoutQualificationsInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectUncheckedUpdateWithoutQualificationsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUncheckedUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUncheckedUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectCreateWithoutCatalogScopesInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectUncheckedCreateWithoutCatalogScopesInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalUncheckedCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberUncheckedCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassUncheckedCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutDocProjectInput
+  locations?: Prisma.DocLocationUncheckedCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationUncheckedCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectCreateOrConnectWithoutCatalogScopesInput = {
+  where: Prisma.DocProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutCatalogScopesInput, Prisma.DocProjectUncheckedCreateWithoutCatalogScopesInput>
+}
+
+export type DocProjectUpsertWithoutCatalogScopesInput = {
+  update: Prisma.XOR<Prisma.DocProjectUpdateWithoutCatalogScopesInput, Prisma.DocProjectUncheckedUpdateWithoutCatalogScopesInput>
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutCatalogScopesInput, Prisma.DocProjectUncheckedCreateWithoutCatalogScopesInput>
+  where?: Prisma.DocProjectWhereInput
+}
+
+export type DocProjectUpdateToOneWithWhereWithoutCatalogScopesInput = {
+  where?: Prisma.DocProjectWhereInput
+  data: Prisma.XOR<Prisma.DocProjectUpdateWithoutCatalogScopesInput, Prisma.DocProjectUncheckedUpdateWithoutCatalogScopesInput>
+}
+
+export type DocProjectUpdateWithoutCatalogScopesInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectUncheckedUpdateWithoutCatalogScopesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUncheckedUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutDocProjectNestedInput
+  locations?: Prisma.DocLocationUncheckedUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUncheckedUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectCreateWithoutLocationsInput = {
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectUncheckedCreateWithoutLocationsInput = {
+  id?: number
+  createdAt?: Date | string
+  createdById: number
+  updatedAt?: Date | string | null
+  updatedById?: number
+  isSys?: boolean
+  code: string
+  name: string
+  description?: string | null
+  status?: $Enums.DocProjectStatus
+  closedAt?: Date | string | null
+  closedById?: number | null
+  projectId?: number | null
+  documentRole: $Enums.DocumentRole
+  counterpartyName?: string | null
+  revisionScheme?: $Enums.RevisionScheme | null
+  defaultOrganizerId?: number | null
+  locationEnabled?: boolean
+  locationRequired?: boolean
+  locationLabel?: string | null
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutDocProjectInput
+  transmittals?: Prisma.TransmittalUncheckedCreateNestedManyWithoutDocProjectInput
+  members?: Prisma.DocProjectMemberUncheckedCreateNestedManyWithoutDocProjectInput
+  documentClasses?: Prisma.DocumentClassUncheckedCreateNestedManyWithoutDocProjectInput
+  documentTypes?: Prisma.DocumentTypeUncheckedCreateNestedManyWithoutDocProjectInput
+  qualifications?: Prisma.DocQualificationUncheckedCreateNestedManyWithoutDocProjectInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedCreateNestedManyWithoutDocProjectInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedCreateNestedManyWithoutDocProjectInput
+}
+
+export type DocProjectCreateOrConnectWithoutLocationsInput = {
+  where: Prisma.DocProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutLocationsInput, Prisma.DocProjectUncheckedCreateWithoutLocationsInput>
+}
+
+export type DocProjectUpsertWithoutLocationsInput = {
+  update: Prisma.XOR<Prisma.DocProjectUpdateWithoutLocationsInput, Prisma.DocProjectUncheckedUpdateWithoutLocationsInput>
+  create: Prisma.XOR<Prisma.DocProjectCreateWithoutLocationsInput, Prisma.DocProjectUncheckedCreateWithoutLocationsInput>
+  where?: Prisma.DocProjectWhereInput
+}
+
+export type DocProjectUpdateToOneWithWhereWithoutLocationsInput = {
+  where?: Prisma.DocProjectWhereInput
+  data: Prisma.XOR<Prisma.DocProjectUpdateWithoutLocationsInput, Prisma.DocProjectUncheckedUpdateWithoutLocationsInput>
+}
+
+export type DocProjectUpdateWithoutLocationsInput = {
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUpdateManyWithoutDocProjectNestedInput
+}
+
+export type DocProjectUncheckedUpdateWithoutLocationsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdById?: Prisma.IntFieldUpdateOperationsInput | number
+  updatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updatedById?: Prisma.IntFieldUpdateOperationsInput | number
+  isSys?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumDocProjectStatusFieldUpdateOperationsInput | $Enums.DocProjectStatus
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
+  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
+  defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  locationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutDocProjectNestedInput
+  transmittals?: Prisma.TransmittalUncheckedUpdateManyWithoutDocProjectNestedInput
+  members?: Prisma.DocProjectMemberUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentClasses?: Prisma.DocumentClassUncheckedUpdateManyWithoutDocProjectNestedInput
+  documentTypes?: Prisma.DocumentTypeUncheckedUpdateManyWithoutDocProjectNestedInput
+  qualifications?: Prisma.DocQualificationUncheckedUpdateManyWithoutDocProjectNestedInput
+  catalogScopes?: Prisma.DocCatalogScopeUncheckedUpdateManyWithoutDocProjectNestedInput
+  workflowTemplates?: Prisma.DocWorkflowTemplateUncheckedUpdateManyWithoutDocProjectNestedInput
+}
+
+
+/**
+ * Count Type DocProjectCountOutputType
+ */
+
+export type DocProjectCountOutputType = {
+  documents: number
+  transmittals: number
+  members: number
+  documentClasses: number
+  documentTypes: number
+  locations: number
+  qualifications: number
+  catalogScopes: number
+  workflowTemplates: number
+}
+
+export type DocProjectCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  documents?: boolean | DocProjectCountOutputTypeCountDocumentsArgs
+  transmittals?: boolean | DocProjectCountOutputTypeCountTransmittalsArgs
+  members?: boolean | DocProjectCountOutputTypeCountMembersArgs
+  documentClasses?: boolean | DocProjectCountOutputTypeCountDocumentClassesArgs
+  documentTypes?: boolean | DocProjectCountOutputTypeCountDocumentTypesArgs
+  locations?: boolean | DocProjectCountOutputTypeCountLocationsArgs
+  qualifications?: boolean | DocProjectCountOutputTypeCountQualificationsArgs
+  catalogScopes?: boolean | DocProjectCountOutputTypeCountCatalogScopesArgs
+  workflowTemplates?: boolean | DocProjectCountOutputTypeCountWorkflowTemplatesArgs
+}
+
+/**
+ * DocProjectCountOutputType without action
+ */
+export type DocProjectCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocProjectCountOutputType
+   */
+  select?: Prisma.DocProjectCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * DocProjectCountOutputType without action
+ */
+export type DocProjectCountOutputTypeCountDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentWhereInput
+}
+
+/**
+ * DocProjectCountOutputType without action
+ */
+export type DocProjectCountOutputTypeCountTransmittalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TransmittalWhereInput
+}
+
+/**
+ * DocProjectCountOutputType without action
+ */
+export type DocProjectCountOutputTypeCountMembersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocProjectMemberWhereInput
+}
+
+/**
+ * DocProjectCountOutputType without action
+ */
+export type DocProjectCountOutputTypeCountDocumentClassesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentClassWhereInput
+}
+
+/**
+ * DocProjectCountOutputType without action
+ */
+export type DocProjectCountOutputTypeCountDocumentTypesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentTypeWhereInput
+}
+
+/**
+ * DocProjectCountOutputType without action
+ */
+export type DocProjectCountOutputTypeCountLocationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocLocationWhereInput
+}
+
+/**
+ * DocProjectCountOutputType without action
+ */
+export type DocProjectCountOutputTypeCountQualificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocQualificationWhereInput
+}
+
+/**
+ * DocProjectCountOutputType without action
+ */
+export type DocProjectCountOutputTypeCountCatalogScopesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocCatalogScopeWhereInput
+}
+
+/**
+ * DocProjectCountOutputType without action
+ */
+export type DocProjectCountOutputTypeCountWorkflowTemplatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocWorkflowTemplateWhereInput
+}
 
 
 export type DocProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -741,6 +2297,16 @@ export type DocProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   locationEnabled?: boolean
   locationRequired?: boolean
   locationLabel?: boolean
+  documents?: boolean | Prisma.DocProject$documentsArgs<ExtArgs>
+  transmittals?: boolean | Prisma.DocProject$transmittalsArgs<ExtArgs>
+  members?: boolean | Prisma.DocProject$membersArgs<ExtArgs>
+  documentClasses?: boolean | Prisma.DocProject$documentClassesArgs<ExtArgs>
+  documentTypes?: boolean | Prisma.DocProject$documentTypesArgs<ExtArgs>
+  locations?: boolean | Prisma.DocProject$locationsArgs<ExtArgs>
+  qualifications?: boolean | Prisma.DocProject$qualificationsArgs<ExtArgs>
+  catalogScopes?: boolean | Prisma.DocProject$catalogScopesArgs<ExtArgs>
+  workflowTemplates?: boolean | Prisma.DocProject$workflowTemplatesArgs<ExtArgs>
+  _count?: boolean | Prisma.DocProjectCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["docProject"]>
 
 export type DocProjectSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -813,10 +2379,34 @@ export type DocProjectSelectScalar = {
 }
 
 export type DocProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "isSys" | "code" | "name" | "description" | "status" | "closedAt" | "closedById" | "projectId" | "documentRole" | "counterpartyName" | "revisionScheme" | "defaultOrganizerId" | "locationEnabled" | "locationRequired" | "locationLabel", ExtArgs["result"]["docProject"]>
+export type DocProjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  documents?: boolean | Prisma.DocProject$documentsArgs<ExtArgs>
+  transmittals?: boolean | Prisma.DocProject$transmittalsArgs<ExtArgs>
+  members?: boolean | Prisma.DocProject$membersArgs<ExtArgs>
+  documentClasses?: boolean | Prisma.DocProject$documentClassesArgs<ExtArgs>
+  documentTypes?: boolean | Prisma.DocProject$documentTypesArgs<ExtArgs>
+  locations?: boolean | Prisma.DocProject$locationsArgs<ExtArgs>
+  qualifications?: boolean | Prisma.DocProject$qualificationsArgs<ExtArgs>
+  catalogScopes?: boolean | Prisma.DocProject$catalogScopesArgs<ExtArgs>
+  workflowTemplates?: boolean | Prisma.DocProject$workflowTemplatesArgs<ExtArgs>
+  _count?: boolean | Prisma.DocProjectCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type DocProjectIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type DocProjectIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $DocProjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DocProject"
-  objects: {}
+  objects: {
+    documents: Prisma.$DocumentPayload<ExtArgs>[]
+    transmittals: Prisma.$TransmittalPayload<ExtArgs>[]
+    members: Prisma.$DocProjectMemberPayload<ExtArgs>[]
+    documentClasses: Prisma.$DocumentClassPayload<ExtArgs>[]
+    documentTypes: Prisma.$DocumentTypePayload<ExtArgs>[]
+    locations: Prisma.$DocLocationPayload<ExtArgs>[]
+    qualifications: Prisma.$DocQualificationPayload<ExtArgs>[]
+    catalogScopes: Prisma.$DocCatalogScopePayload<ExtArgs>[]
+    workflowTemplates: Prisma.$DocWorkflowTemplatePayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     createdAt: Date
@@ -1232,6 +2822,15 @@ readonly fields: DocProjectFieldRefs;
  */
 export interface Prisma__DocProjectClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  documents<T extends Prisma.DocProject$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocProject$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  transmittals<T extends Prisma.DocProject$transmittalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocProject$transmittalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransmittalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  members<T extends Prisma.DocProject$membersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocProject$membersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocProjectMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentClasses<T extends Prisma.DocProject$documentClassesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocProject$documentClassesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentClassPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentTypes<T extends Prisma.DocProject$documentTypesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocProject$documentTypesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentTypePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  locations<T extends Prisma.DocProject$locationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocProject$locationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocLocationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  qualifications<T extends Prisma.DocProject$qualificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocProject$qualificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocQualificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  catalogScopes<T extends Prisma.DocProject$catalogScopesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocProject$catalogScopesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocCatalogScopePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  workflowTemplates<T extends Prisma.DocProject$workflowTemplatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DocProject$workflowTemplatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocWorkflowTemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1298,6 +2897,10 @@ export type DocProjectFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.DocProjectOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectInclude<ExtArgs> | null
+  /**
    * Filter, which DocProject to fetch.
    */
   where: Prisma.DocProjectWhereUniqueInput
@@ -1316,6 +2919,10 @@ export type DocProjectFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.DocProjectOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectInclude<ExtArgs> | null
+  /**
    * Filter, which DocProject to fetch.
    */
   where: Prisma.DocProjectWhereUniqueInput
@@ -1333,6 +2940,10 @@ export type DocProjectFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the DocProject
    */
   omit?: Prisma.DocProjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectInclude<ExtArgs> | null
   /**
    * Filter, which DocProject to fetch.
    */
@@ -1382,6 +2993,10 @@ export type DocProjectFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.DocProjectOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectInclude<ExtArgs> | null
+  /**
    * Filter, which DocProject to fetch.
    */
   where?: Prisma.DocProjectWhereInput
@@ -1429,6 +3044,10 @@ export type DocProjectFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the DocProject
    */
   omit?: Prisma.DocProjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectInclude<ExtArgs> | null
   /**
    * Filter, which DocProjects to fetch.
    */
@@ -1478,6 +3097,10 @@ export type DocProjectCreateArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   omit?: Prisma.DocProjectOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectInclude<ExtArgs> | null
+  /**
    * The data needed to create a DocProject.
    */
   data: Prisma.XOR<Prisma.DocProjectCreateInput, Prisma.DocProjectUncheckedCreateInput>
@@ -1525,6 +3148,10 @@ export type DocProjectUpdateArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the DocProject
    */
   omit?: Prisma.DocProjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectInclude<ExtArgs> | null
   /**
    * The data needed to update a DocProject.
    */
@@ -1592,6 +3219,10 @@ export type DocProjectUpsertArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   omit?: Prisma.DocProjectOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectInclude<ExtArgs> | null
+  /**
    * The filter to search for the DocProject to update in case it exists.
    */
   where: Prisma.DocProjectWhereUniqueInput
@@ -1618,6 +3249,10 @@ export type DocProjectDeleteArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   omit?: Prisma.DocProjectOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectInclude<ExtArgs> | null
+  /**
    * Filter which DocProject to delete.
    */
   where: Prisma.DocProjectWhereUniqueInput
@@ -1638,6 +3273,222 @@ export type DocProjectDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
 }
 
 /**
+ * DocProject.documents
+ */
+export type DocProject$documentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Document
+   */
+  select?: Prisma.DocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Document
+   */
+  omit?: Prisma.DocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentInclude<ExtArgs> | null
+  where?: Prisma.DocumentWhereInput
+  orderBy?: Prisma.DocumentOrderByWithRelationInput | Prisma.DocumentOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
+}
+
+/**
+ * DocProject.transmittals
+ */
+export type DocProject$transmittalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Transmittal
+   */
+  select?: Prisma.TransmittalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Transmittal
+   */
+  omit?: Prisma.TransmittalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TransmittalInclude<ExtArgs> | null
+  where?: Prisma.TransmittalWhereInput
+  orderBy?: Prisma.TransmittalOrderByWithRelationInput | Prisma.TransmittalOrderByWithRelationInput[]
+  cursor?: Prisma.TransmittalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TransmittalScalarFieldEnum | Prisma.TransmittalScalarFieldEnum[]
+}
+
+/**
+ * DocProject.members
+ */
+export type DocProject$membersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocProjectMember
+   */
+  select?: Prisma.DocProjectMemberSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocProjectMember
+   */
+  omit?: Prisma.DocProjectMemberOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectMemberInclude<ExtArgs> | null
+  where?: Prisma.DocProjectMemberWhereInput
+  orderBy?: Prisma.DocProjectMemberOrderByWithRelationInput | Prisma.DocProjectMemberOrderByWithRelationInput[]
+  cursor?: Prisma.DocProjectMemberWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocProjectMemberScalarFieldEnum | Prisma.DocProjectMemberScalarFieldEnum[]
+}
+
+/**
+ * DocProject.documentClasses
+ */
+export type DocProject$documentClassesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentClass
+   */
+  select?: Prisma.DocumentClassSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentClass
+   */
+  omit?: Prisma.DocumentClassOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentClassInclude<ExtArgs> | null
+  where?: Prisma.DocumentClassWhereInput
+  orderBy?: Prisma.DocumentClassOrderByWithRelationInput | Prisma.DocumentClassOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentClassWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentClassScalarFieldEnum | Prisma.DocumentClassScalarFieldEnum[]
+}
+
+/**
+ * DocProject.documentTypes
+ */
+export type DocProject$documentTypesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentType
+   */
+  select?: Prisma.DocumentTypeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentType
+   */
+  omit?: Prisma.DocumentTypeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentTypeInclude<ExtArgs> | null
+  where?: Prisma.DocumentTypeWhereInput
+  orderBy?: Prisma.DocumentTypeOrderByWithRelationInput | Prisma.DocumentTypeOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentTypeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentTypeScalarFieldEnum | Prisma.DocumentTypeScalarFieldEnum[]
+}
+
+/**
+ * DocProject.locations
+ */
+export type DocProject$locationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocLocation
+   */
+  select?: Prisma.DocLocationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocLocation
+   */
+  omit?: Prisma.DocLocationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocLocationInclude<ExtArgs> | null
+  where?: Prisma.DocLocationWhereInput
+  orderBy?: Prisma.DocLocationOrderByWithRelationInput | Prisma.DocLocationOrderByWithRelationInput[]
+  cursor?: Prisma.DocLocationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocLocationScalarFieldEnum | Prisma.DocLocationScalarFieldEnum[]
+}
+
+/**
+ * DocProject.qualifications
+ */
+export type DocProject$qualificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocQualification
+   */
+  select?: Prisma.DocQualificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocQualification
+   */
+  omit?: Prisma.DocQualificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocQualificationInclude<ExtArgs> | null
+  where?: Prisma.DocQualificationWhereInput
+  orderBy?: Prisma.DocQualificationOrderByWithRelationInput | Prisma.DocQualificationOrderByWithRelationInput[]
+  cursor?: Prisma.DocQualificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocQualificationScalarFieldEnum | Prisma.DocQualificationScalarFieldEnum[]
+}
+
+/**
+ * DocProject.catalogScopes
+ */
+export type DocProject$catalogScopesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocCatalogScope
+   */
+  select?: Prisma.DocCatalogScopeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocCatalogScope
+   */
+  omit?: Prisma.DocCatalogScopeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocCatalogScopeInclude<ExtArgs> | null
+  where?: Prisma.DocCatalogScopeWhereInput
+  orderBy?: Prisma.DocCatalogScopeOrderByWithRelationInput | Prisma.DocCatalogScopeOrderByWithRelationInput[]
+  cursor?: Prisma.DocCatalogScopeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocCatalogScopeScalarFieldEnum | Prisma.DocCatalogScopeScalarFieldEnum[]
+}
+
+/**
+ * DocProject.workflowTemplates
+ */
+export type DocProject$workflowTemplatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocWorkflowTemplate
+   */
+  select?: Prisma.DocWorkflowTemplateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocWorkflowTemplate
+   */
+  omit?: Prisma.DocWorkflowTemplateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocWorkflowTemplateInclude<ExtArgs> | null
+  where?: Prisma.DocWorkflowTemplateWhereInput
+  orderBy?: Prisma.DocWorkflowTemplateOrderByWithRelationInput | Prisma.DocWorkflowTemplateOrderByWithRelationInput[]
+  cursor?: Prisma.DocWorkflowTemplateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocWorkflowTemplateScalarFieldEnum | Prisma.DocWorkflowTemplateScalarFieldEnum[]
+}
+
+/**
  * DocProject without action
  */
 export type DocProjectDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1649,4 +3500,8 @@ export type DocProjectDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the DocProject
    */
   omit?: Prisma.DocProjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocProjectInclude<ExtArgs> | null
 }

@@ -60,12 +60,12 @@ export const documentClassResolvers = {
     documentClasses: async (
       _: any,
       {
-        projectId,
+        docProjectId,
         filter,
         pagination,
         orderBy,
       }: {
-        projectId?: number
+        docProjectId?: number
         filter?: DocumentClassFilterInput
         pagination?: PaginationInput
         orderBy?: DocumentClassOrderByInput
@@ -73,10 +73,10 @@ export const documentClassResolvers = {
       context: ResolverContext,
     ) => {
       const userId =
-        projectId !== undefined
+        docProjectId !== undefined
           ? await projectAuthorization({
               requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_LIST],
-              projectId,
+              docProjectId,
               context,
             })
           : await userAuthorization({
@@ -86,7 +86,7 @@ export const documentClassResolvers = {
       logger.info("documentClasses", { userId })
 
       try {
-        const where: any = { projectId: projectId ?? null }
+        const where: any = { docProjectId: docProjectId ?? null }
 
         if (filter?.terminatedFilter !== undefined) {
           if (filter.terminatedFilter === TerminatedFilter.ACTIVE) {
@@ -245,12 +245,12 @@ export const documentClassResolvers = {
      * Las clases con que se puede clasificar, con el **alcance resuelto**:
      * heredando del despliegue y sumando las propias, o solo las propias.
      *
-     * `projectId` es opcional porque hay documentos sin proyecto —calidad,
+     * `docProjectId` es opcional porque hay documentos sin proyecto —calidad,
      * comercial, activos—, y para ellos rige el catálogo del despliegue.
      */
     documentClassesSelectList: async (
       _: any,
-      { module, projectId }: { module?: ModuleType; projectId?: number },
+      { module, docProjectId }: { module?: ModuleType; docProjectId?: number },
       context: ResolverContext,
     ) => {
       const permisos = [
@@ -259,10 +259,10 @@ export const documentClassResolvers = {
       ]
 
       const userId =
-        projectId !== undefined
+        docProjectId !== undefined
           ? await projectAuthorization({
               requiredPermissions: permisos,
-              projectId,
+              docProjectId,
               context,
             })
           : await userAuthorization({ requiredPermissions: permisos, context })
@@ -271,7 +271,7 @@ export const documentClassResolvers = {
       try {
         const where: any = {
           terminatedAt: null,
-          ...(await visibleClassificationWhere(context.orm, projectId)),
+          ...(await visibleClassificationWhere(context.orm, docProjectId)),
         }
 
         if (module) {
@@ -315,7 +315,7 @@ export const documentClassResolvers = {
           name: string
           code: string
           module?: ModuleType
-          projectId?: number
+          docProjectId?: number
           description?: string
           sortOrder?: number
         }
@@ -324,13 +324,13 @@ export const documentClassResolvers = {
     ) => {
       // El alcance de lo que se crea decide quién puede crearlo: la entrada de
       // un proyecto exige membresía, la del despliegue el permiso global.
-      const scope = input.projectId ?? null
+      const scope = input.docProjectId ?? null
 
       const userId =
         scope !== null
           ? await projectAuthorization({
               requiredPermissions: [PERMISSIONS.DOCUMENTS_DOCUMENT_CLASS_CREATE],
-              projectId: scope,
+              docProjectId: scope,
               context,
             })
           : await userAuthorization({
@@ -348,7 +348,7 @@ export const documentClassResolvers = {
               // El CHECK de la base exige PROJECTS cuando hay proyecto, y no se
               // completa de oficio: declarar el módulo es del usuario.
               module: input.module,
-              projectId: scope,
+              docProjectId: scope,
               description: input.description,
               sortOrder: input.sortOrder ?? 0,
               updatedById: userId,

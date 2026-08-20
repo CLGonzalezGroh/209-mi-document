@@ -69,7 +69,7 @@ export const workflowTemplateResolvers = {
   Query: {
     docWorkflowTemplates: async (
       _: any,
-      { projectId }: { projectId?: number },
+      { docProjectId }: { docProjectId?: number },
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
@@ -81,11 +81,11 @@ export const workflowTemplateResolvers = {
       try {
         return await context.orm.docWorkflowTemplate.findMany({
           where:
-            projectId === undefined
+            docProjectId === undefined
               ? {}
-              : { OR: [{ projectId }, { projectId: null }] },
+              : { OR: [{ docProjectId }, { docProjectId: null }] },
           include: templateIncludes,
-          orderBy: [{ projectId: "asc" }, { name: "asc" }],
+          orderBy: [{ docProjectId: "asc" }, { name: "asc" }],
         })
       } catch (error) {
         return handleError({
@@ -106,11 +106,11 @@ export const workflowTemplateResolvers = {
     proposedWorkflowTemplate: async (
       _: any,
       {
-        projectId,
+        docProjectId,
         documentClassId,
         documentTypeId,
       }: {
-        projectId?: number
+        docProjectId?: number
         documentClassId?: number
         documentTypeId?: number
       },
@@ -124,12 +124,12 @@ export const workflowTemplateResolvers = {
 
       try {
         const candidates = await context.orm.docWorkflowTemplate.findMany({
-          where: { OR: [{ projectId: null }, { projectId: projectId ?? undefined }] },
+          where: { OR: [{ docProjectId: null }, { docProjectId: docProjectId ?? undefined }] },
           include: templateIncludes,
         })
 
         return resolveTemplate(candidates, {
-          projectId: projectId ?? null,
+          docProjectId: docProjectId ?? null,
           documentClassId: documentClassId ?? null,
           documentTypeId: documentTypeId ?? null,
         })
@@ -154,7 +154,7 @@ export const workflowTemplateResolvers = {
         input: {
           name: string
           description?: string
-          projectId?: number
+          docProjectId?: number
           documentClassId?: number
           documentTypeId?: number
           steps: TemplateStepInput[]
@@ -177,7 +177,7 @@ export const workflowTemplateResolvers = {
           // proyecto dejaría al catálogo global dependiendo de un proyecto, y
           // una de proyecto no ve las entradas de otro.
           await assertClassificationInScope(tx, {
-            projectId: input.projectId ?? null,
+            docProjectId: input.docProjectId ?? null,
             documentClassId: input.documentClassId ?? null,
             documentTypeId: input.documentTypeId ?? null,
           })
@@ -186,7 +186,7 @@ export const workflowTemplateResolvers = {
             data: {
               name: input.name,
               description: input.description,
-              projectId: input.projectId,
+              docProjectId: input.docProjectId,
               documentClassId: input.documentClassId,
               documentTypeId: input.documentTypeId,
               createdById: userId,
@@ -208,7 +208,7 @@ export const workflowTemplateResolvers = {
             actorId: userId,
             meta: {
               name: created.name,
-              projectId: created.projectId,
+              docProjectId: created.docProjectId,
               documentClassId: created.documentClassId,
               documentTypeId: created.documentTypeId,
               stepsCount: input.steps.length,

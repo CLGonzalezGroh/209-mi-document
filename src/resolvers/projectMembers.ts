@@ -29,7 +29,7 @@ export const projectMemberResolvers = {
   Query: {
     docProjectMembers: async (
       _: any,
-      { projectId, includeRevoked }: { projectId: number; includeRevoked?: boolean },
+      { docProjectId, includeRevoked }: { docProjectId: number; includeRevoked?: boolean },
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
@@ -41,7 +41,7 @@ export const projectMemberResolvers = {
       try {
         return await context.orm.docProjectMember.findMany({
           where: {
-            projectId,
+            docProjectId,
             ...(includeRevoked ? {} : { isActive: true, revokedAt: null }),
           },
           orderBy: [{ side: "asc" }, { assignedAt: "asc" }],
@@ -66,7 +66,7 @@ export const projectMemberResolvers = {
       {
         input,
       }: {
-        input: { projectId: number; userId: number; side: DocProjectSide }
+        input: { docProjectId: number; userId: number; side: DocProjectSide }
       },
       context: ResolverContext,
     ) => {
@@ -83,7 +83,7 @@ export const projectMemberResolvers = {
           // reincorporación, no un duplicado.
           const member = await tx.docProjectMember.upsert({
             where: {
-              projectId_userId: { projectId: input.projectId, userId: input.userId },
+              docProjectId_userId: { docProjectId: input.docProjectId, userId: input.userId },
             },
             update: {
               side: input.side,
@@ -95,7 +95,7 @@ export const projectMemberResolvers = {
               updatedById: userId,
             },
             create: {
-              projectId: input.projectId,
+              docProjectId: input.docProjectId,
               userId: input.userId,
               side: input.side,
               assignedById: userId,
@@ -108,7 +108,7 @@ export const projectMemberResolvers = {
             objectId: member.id,
             actorId: userId,
             meta: {
-              projectId: input.projectId,
+              docProjectId: input.docProjectId,
               memberUserId: input.userId,
               side: input.side,
             },
@@ -165,7 +165,7 @@ export const projectMemberResolvers = {
             action: AuditAction.RevokeProjectMember,
             objectId: revoked.id,
             actorId: userId,
-            meta: { projectId: revoked.projectId, memberUserId: revoked.userId },
+            meta: { docProjectId: revoked.docProjectId, memberUserId: revoked.userId },
           })
 
           return revoked

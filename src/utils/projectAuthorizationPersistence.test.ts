@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma.js"
 import { DocProjectSide } from "../generated/prisma/enums.js"
 import { ResolverContext } from "../types.js"
 import { buildProjectScope, listMemberProjectIds } from "./projectAuthorization.js"
+import { asegurarContratos, borrarContratos } from "./testContracts.js"
 
 /**
  * Verificación de la segunda capa de autorización contra la base.
@@ -28,23 +29,29 @@ const PROYECTO_B = -424302
 // El contexto real trae además el token, que esta capa no usa.
 const context = { orm: prisma } as ResolverContext
 
+const CONTRATOS = [PROYECTO_A, PROYECTO_B]
+
 const limpiar = async () => {
   await prisma.docProjectMember.deleteMany({
     where: { userId: { in: [USER_ID, OTRO_USER_ID] } },
   })
+  await asegurarContratos(prisma, CONTRATOS)
 }
 
 const afiliar = async (
   userId: number,
-  projectId: number,
+  docProjectId: number,
   side: DocProjectSide = DocProjectSide.HOST,
 ) =>
   prisma.docProjectMember.create({
-    data: { userId, projectId, side, assignedById: USER_ID },
+    data: { userId, docProjectId, side, assignedById: USER_ID },
   })
 
 after(async () => {
-  await limpiar()
+  await prisma.docProjectMember.deleteMany({
+    where: { userId: { in: [USER_ID, OTRO_USER_ID] } },
+  })
+  await borrarContratos(prisma, CONTRATOS)
   await prisma.$disconnect()
 })
 

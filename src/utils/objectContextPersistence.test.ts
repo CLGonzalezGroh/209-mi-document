@@ -18,11 +18,12 @@ import {
   WorkflowStatus,
 } from "../generated/prisma/enums.js"
 import { resolveObjectContext } from "./objectContext.js"
+import { asegurarContratos, borrarContratos } from "./testContracts.js"
 
 /**
  * Derivación del contexto de cada tipo de objeto, contra la base.
  *
- * `projectId` y `module` se DERIVAN del objeto afectado y no los informa quien
+ * `docProjectId` y `module` se DERIVAN del objeto afectado y no los informa quien
  * emite (BLOQUE 02, B9). El derivador tiene además un segundo consumidor que
  * debe coincidir: la resolución del proyecto para la segunda capa de
  * autorización (B7). Una derivación equivocada no rompe la compilación —el
@@ -67,19 +68,24 @@ const limpiar = async () => {
   await prisma.docLocation.deleteMany({
     where: { code: { startsWith: `${CODIGO}-L` } },
   })
-  await prisma.docCatalogScope.deleteMany({ where: { projectId: PROYECTO } })
-  await prisma.transmittal.deleteMany({ where: { projectId: PROYECTO } })
+  await prisma.docCatalogScope.deleteMany({ where: { docProjectId: PROYECTO } })
+  await prisma.transmittal.deleteMany({ where: { docProjectId: PROYECTO } })
   await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
-  await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: PROYECTO } })
-  await prisma.docQualification.deleteMany({ where: { projectId: PROYECTO } })
-  await prisma.docProjectMember.deleteMany({ where: { projectId: PROYECTO } })
-  await prisma.docProject.deleteMany({ where: { projectId: PROYECTO } })
+  await prisma.docWorkflowTemplate.deleteMany({ where: { docProjectId: PROYECTO } })
+  await prisma.docQualification.deleteMany({ where: { docProjectId: PROYECTO } })
+  await prisma.docProjectMember.deleteMany({ where: { docProjectId: PROYECTO } })
+  await borrarContratos(prisma, [PROYECTO])
   await prisma.documentType.deleteMany({ where: { code: `${CODIGO}-T` } })
   await prisma.documentClass.deleteMany({ where: { code: `${CODIGO}-C` } })
 }
 
 before(async () => {
   await limpiar()
+
+  // El id del contrato ES la constante: así el resto de la prueba puede seguir
+  // usándola como alcance sin hilvanar el id devuelto por cada llamada. Va
+  // primero porque todo lo que sigue le cuelga con clave foránea.
+  await asegurarContratos(prisma, [PROYECTO])
 
   const clase = await prisma.documentClass.create({
     data: { name: `${CODIGO} clase`, code: `${CODIGO}-C`, module: ModuleType.QUALITY },
@@ -98,7 +104,7 @@ before(async () => {
       code: `${CODIGO}-1`,
       currentTitle: "Documento de contexto",
       module: ModuleType.PROJECTS,
-      projectId: PROYECTO,
+      docProjectId: PROYECTO,
       currentDocumentTypeId: tipo.id,
       createdById: 1,
       revisions: {
@@ -175,7 +181,7 @@ before(async () => {
   const plantilla = await prisma.docWorkflowTemplate.create({
     data: {
       name: `${CODIGO} plantilla`,
-      projectId: PROYECTO,
+      docProjectId: PROYECTO,
       createdById: 1,
       steps: {
         create: { stepOrder: 1, stepType: StepType.APPROVE },
@@ -189,19 +195,11 @@ before(async () => {
     create: { id: 1, revisionScheme: RevisionScheme.ALPHA },
   })
 
-  const docProject = await prisma.docProject.create({
-    data: {
-      code: `T-${PROYECTO}`,
-      name: "Contrato de prueba",
-      projectId: PROYECTO,
-      documentRole: DocumentRole.INTERNAL,
-      createdById: 1,
-    },
-  })
+  const docProject = { id: PROYECTO }
 
   const miembro = await prisma.docProjectMember.create({
     data: {
-      projectId: PROYECTO,
+      docProjectId: PROYECTO,
       userId: 1,
       side: DocProjectSide.HOST,
       assignedById: 1,
@@ -211,7 +209,7 @@ before(async () => {
   const transmittal = await prisma.transmittal.create({
     data: {
       code: `${CODIGO}-TR`,
-      projectId: PROYECTO,
+      docProjectId: PROYECTO,
       nature: TransmittalNature.EMISSION,
       issuedById: 1,
     },
@@ -219,7 +217,7 @@ before(async () => {
 
   const calificacion = await prisma.docQualification.create({
     data: {
-      projectId: PROYECTO,
+      docProjectId: PROYECTO,
       code: `${CODIGO}-Q`,
       label: "Aprobado (cliente)",
       effect: QualificationEffect.ACCEPTED,
@@ -252,14 +250,14 @@ before(async () => {
       name: "Unidad del proyecto",
       path: "Planta de contexto / Unidad del proyecto",
       parentId: ubicacion.id,
-      projectId: PROYECTO,
+      docProjectId: PROYECTO,
       createdById: 1,
     },
   })
   const alcance = await prisma.docCatalogScope.create({
     data: {
       module: ModuleType.PROJECTS,
-      projectId: PROYECTO,
+      docProjectId: PROYECTO,
       catalog: DocCatalogKind.LOCATION,
       mode: DocScopeMode.INHERIT,
       createdById: 1,
@@ -309,7 +307,7 @@ const contextoDe = (objectType: DocObjectType, objectId: number) =>
 
 test("el documento aporta su proyecto y su módulo", async () => {
   assert.deepEqual(await contextoDe(DocObjectType.DOCUMENT, creados.documentId), {
-    projectId: PROYECTO,
+    docProjectId: PROYECTO,
     module: ModuleType.PROJECTS,
   })
 })
@@ -319,12 +317,12 @@ test("el documento publicado no tiene proyecto, y por eso el módulo importa", a
   // traza quedaría en una masa indistinguible.
   assert.deepEqual(
     await contextoDe(DocObjectType.DOCUMENT, creados.publicadoId),
-    { projectId: null, module: ModuleType.QUALITY },
+    { docProjectId: null, module: ModuleType.QUALITY },
   )
 })
 
 test("revisión, versión, circuito y paso derivan del documento", async () => {
-  const esperado = { projectId: PROYECTO, module: ModuleType.PROJECTS }
+  const esperado = { docProjectId: PROYECTO, module: ModuleType.PROJECTS }
 
   assert.deepEqual(
     await contextoDe(DocObjectType.DOCUMENT_REVISION, creados.revisionId),
@@ -349,7 +347,7 @@ test("la firma deriva del paso, un nivel más en la misma cadena", async () => {
   // circuito. Es el tipo de objeto nuevo con la cadena más larga.
   assert.deepEqual(
     await contextoDe(DocObjectType.DOC_STEP_SIGNATURE, creados.signatureId),
-    { projectId: PROYECTO, module: ModuleType.PROJECTS },
+    { docProjectId: PROYECTO, module: ModuleType.PROJECTS },
   )
 })
 
@@ -360,18 +358,18 @@ test("el transmittal lleva su proyecto y su módulo es siempre PROJECTS", async 
   // modelo afirma, declarado en un solo lugar.
   assert.deepEqual(
     await contextoDe(DocObjectType.TRANSMITTAL, creados.transmittalId),
-    { projectId: PROYECTO, module: ModuleType.PROJECTS },
+    { docProjectId: PROYECTO, module: ModuleType.PROJECTS },
   )
 })
 
 test("los catálogos no pertenecen a ningún proyecto", async () => {
   assert.deepEqual(
     await contextoDe(DocObjectType.DOCUMENT_CLASS, creados.classId),
-    { projectId: null, module: ModuleType.QUALITY },
+    { docProjectId: null, module: ModuleType.QUALITY },
   )
   assert.deepEqual(
     await contextoDe(DocObjectType.DOCUMENT_TYPE, creados.typeId),
-    { projectId: null, module: ModuleType.QUALITY },
+    { docProjectId: null, module: ModuleType.QUALITY },
   )
 })
 
@@ -382,18 +380,18 @@ test("la configuración y la membresía del proyecto no tienen módulo", async (
       DocObjectType.DOC_PROJECT,
       (creados as any).docProjectId,
     ),
-    { projectId: PROYECTO, module: null },
+    { docProjectId: PROYECTO, module: null },
   )
   assert.deepEqual(
     await contextoDe(DocObjectType.DOC_PROJECT_MEMBER, creados.memberId),
-    { projectId: PROYECTO, module: null },
+    { docProjectId: PROYECTO, module: null },
   )
 })
 
 test("la plantilla lleva su proyecto en el alcance y no declara módulo", async () => {
   assert.deepEqual(
     await contextoDe(DocObjectType.DOC_WORKFLOW_TEMPLATE, creados.templateId),
-    { projectId: PROYECTO, module: null },
+    { docProjectId: PROYECTO, module: null },
   )
 })
 
@@ -401,7 +399,7 @@ test("la configuración del despliegue no tiene ni proyecto ni módulo", async (
   // Es exactamente lo que la vuelve el último escalón de la precedencia.
   assert.deepEqual(
     await contextoDe(DocObjectType.DOC_SETTINGS, creados.settingsId),
-    { projectId: null, module: null },
+    { docProjectId: null, module: null },
   )
 })
 
@@ -411,17 +409,17 @@ test("la calificación lleva su alcance, y la del despliegue no tiene proyecto",
   // del contrato (BLOQUE 04, B11).
   assert.deepEqual(
     await contextoDe(DocObjectType.DOC_QUALIFICATION, creados.qualificationId),
-    { projectId: PROYECTO, module: null },
+    { docProjectId: PROYECTO, module: null },
   )
 
   const delDespliegue = await prisma.docQualification.findFirst({
-    where: { projectId: null },
+    where: { docProjectId: null },
     select: { id: true },
   })
   assert.ok(delDespliegue, "la siembra del despliegue debe existir")
   assert.deepEqual(
     await contextoDe(DocObjectType.DOC_QUALIFICATION, delDespliegue.id),
-    { projectId: null, module: null },
+    { docProjectId: null, module: null },
   )
 })
 
@@ -455,7 +453,7 @@ test("el acto de reemplazo toma el contexto de los documentos que agrupa", async
   })
 
   assert.deepEqual(await contextoDe(DocObjectType.DOC_REPLACEMENT, acto.id), {
-    projectId: PROYECTO,
+    docProjectId: PROYECTO,
     module: ModuleType.PROJECTS,
   })
 
@@ -467,7 +465,7 @@ test("la respuesta toma el contexto del transmittal por el que el documento sali
   // transmittal, y por eso su módulo es también PROJECTS (BLOQUE 04, B5).
   assert.deepEqual(
     await contextoDe(DocObjectType.DOC_TRANSMITTAL_RESPONSE, creados.responseId),
-    { projectId: PROYECTO, module: ModuleType.PROJECTS },
+    { docProjectId: PROYECTO, module: ModuleType.PROJECTS },
   )
 })
 
@@ -477,11 +475,11 @@ test("el nodo de ubicación aporta su alcance, y el del despliegue no tiene proy
   // membresía (BLOQUE 02B, B1).
   assert.deepEqual(
     await contextoDe(DocObjectType.DOC_LOCATION, creados.locationId),
-    { projectId: null, module: null },
+    { docProjectId: null, module: null },
   )
   assert.deepEqual(
     await contextoDe(DocObjectType.DOC_LOCATION, creados.ampliacionId),
-    { projectId: PROYECTO, module: null },
+    { docProjectId: PROYECTO, module: null },
   )
 })
 
@@ -490,7 +488,7 @@ test("la declaración de alcance pertenece a un proyecto por definición", async
   // hereda. El módulo es nulo porque no es documentación.
   assert.deepEqual(
     await contextoDe(DocObjectType.DOC_CATALOG_SCOPE, creados.scopeId),
-    { projectId: PROYECTO, module: null },
+    { docProjectId: PROYECTO, module: null },
   )
 })
 
