@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import test, { after, before } from "node:test"
 import jwt from "jsonwebtoken"
 import { prisma } from "../lib/prisma.js"
+import { resolverTypes } from "./resolversTypes/index.js"
 import { asegurarContratos, borrarContratos } from "../utils/testContracts.js"
 import { ResolverContext } from "../types.js"
 import {
@@ -780,5 +781,25 @@ test("el listado filtra por estado, por obra y por ausencia de obra", async () =
     context,
   )
   assert.ok(selector.every((o: any) => o.label.includes(" — ")))
+})
+
+test("la contraparte se expone como referencia federada a Company", async () => {
+  // BLOQUE 02D, B4. El contrato guarda un id; el contrato GraphQL expone la
+  // EMPRESA, resuelta por federación contra mi-admin con el mismo patrón que
+  // UserName. Nula en los contratos internos, que no tienen contraparte.
+  const conContraparte: any = resolverTypes.DocProject.counterparty({
+    counterpartyId: EMPRESA_A,
+  })
+  assert.deepEqual(conContraparte, { __typename: "Company", id: EMPRESA_A })
+
+  const interno = resolverTypes.DocProject.counterparty({ counterpartyId: null })
+  assert.equal(interno, null)
+
+  // Y el armador por defecto sigue resolviendo contra UserName, que es el
+  // precedente que este bloque siguió.
+  const armador: any = resolverTypes.DocProject.defaultOrganizer({
+    defaultOrganizerId: USER_ID,
+  })
+  assert.deepEqual(armador, { __typename: "UserName", id: USER_ID })
 })
 

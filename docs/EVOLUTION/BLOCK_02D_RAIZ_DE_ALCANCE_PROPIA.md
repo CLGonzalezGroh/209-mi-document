@@ -471,6 +471,41 @@ Es la contracara exacta del hallazgo de la fase 3 sobre el contrato: allá un ca
 
 **Verificado:** `tsc` limpio en los tres repos, **538 pruebas y 0 fallos** contra el paquete **publicado** —no contra la copia local—, supergrafo compuesto, y el seed corrido en la base local con los seis permisos repartidos a los dos roles.
 
+### Fase 9 — completada
+
+**Los dos controles de despliegue aprendieron el bloque, y a los dos se los vio fallar.**
+
+`check-document-contract.sh` verifica ahora las cinco mutaciones, las cuatro consultas, los seis tipos y **los valores de `DocObjectType` en sus dos variantes**. Pero su marcador más confiable no son las operaciones nuevas sino **las retiradas**: `declareDocProject` y `DeclareDocProjectInput` desaparecieron, y una imagen a medio desplegar podría tener alguna de las nuevas — lo que solo ocurre con el bloque entero puesto es que las viejas ya no estén.
+
+Se lo vio fallar **sin buscarlo**: el puerto local estaba ocupado por un servicio anterior, el control leyó ese, y dictaminó *"la imagen desplegada es ANTERIOR a BLOQUE 02D"*. Es exactamente el caso para el que existe.
+
+`check-document-permissions.sh` incorpora `documentsDocProject` con sus seis, y **su veredicto lo verifica primero**, antes que el de ubicación, por un motivo propio: sin permisos de contrato no se puede crear un contrato, y sin contrato **no se puede crear ningún documento de proyecto** — lo impide la clave foránea. Es el único recurso cuya ausencia bloquea el módulo entero. Se verificó que dispara borrando el reparto de `doc-full` dentro de una transacción revertida.
+
+**`documentsProjectSettings` queda inerte y no se borra.** El objeto que gobernaba se disolvió dentro del contrato y ninguna operación lo exige. Es el mismo criterio con que los permisos de comercial quedaron sin uso: borrarlos obligaría a recrearlos.
+
+**La federación quedó cubierta por prueba.** `DocProject.counterparty` devuelve la referencia a `Company`, y nula en los contratos internos — es lo único del bloque que no se ejercita desde la base ni desde el contrato, sino desde el resolver de tipo.
+
+**Verificado:** **539 pruebas y 0 fallos**, los dos controles en verde contra el servicio y la base locales, y los dos vistos fallar contra su propio defecto.
+
+## Despliegue
+
+El bloque toca **tres repositorios** y el orden no es negociable: cada paso deja lo que el siguiente exige.
+
+| # | Dónde | Qué | Por qué en ese lugar |
+| - | ----- | --- | -------------------- |
+| 0 | Servidor | `./check-document-precondition-02d.sh <cliente> <ambiente>` en los **cinco** | Es condición de arranque. Trae dos controles más que la corrida del 2026-08-20 |
+| 1 | Servidor | Línea base del legado, **inmediatamente antes** de migrar | El subsistema carga por lotes: una medición de días atrás se lee después como daño de la migración |
+| 2 | — | `@CLGonzalezGroh/mi-common@3.1.0` | Las constantes que los otros dos importan |
+| 3 | `205-mi-admin` 2.6.0 | Imagen nueva | Trae el catálogo con los seis permisos |
+| 4 | Servidor | `seed --permissions-only` **y** `seed --sync-roles` | **Son dos.** Con el primero solo, los permisos existen y ningún rol los tiene: compila, siembra y falla en la primera llamada real |
+| 5 | `209-mi-document` 2.17.0 | Imagen nueva; migra sola al arrancar | Las cinco migraciones del bloque, en orden |
+| 6 | Desarrollo | `update-supergraph.sh` y reiniciar el router | El supergrafo se compone en la máquina de desarrollo y el router no tiene hot reload |
+| 7 | Servidor | Los dos controles, y la línea base contrastada contra el paso 1 | Verde en contrato y permisos, y el legado idéntico |
+
+**Las cinco migraciones se detienen solas** si encuentran lo que no esperan: configuraciones de proyecto cargadas, filas con proyecto declarado en las nueve tablas con clave foránea, contrapartes por nombre, o documentos donde el módulo y el alcance no coinciden. Ninguna intenta adivinar.
+
+**El paso 4 es el que más veces se olvidó en este módulo**, y es el que ningún control de contrato detecta: el servicio expone las operaciones aunque nadie pueda ejecutarlas.
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-06, D-07, D-09, D-15, D-19, D-21, D-24, D-28, D-29

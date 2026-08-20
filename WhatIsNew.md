@@ -1378,3 +1378,25 @@ Dos estados y **un solo efecto**: `ACTIVE` admite todo, `CLOSED` solo lectura.
 
 **Verificado:** `tsc` limpio, **538 pruebas y 0 fallos** contra el paquete publicado, y supergrafo compuesto con `rover`.
 
+---
+
+# What's new in María Ingeniería API Documents 2.17.1
+
+2026-08-20
+
+## La raíz de alcance propia del módulo (BLOQUE 02D)
+
+### Fase 9 — los controles de despliegue, y el orden del despliegue
+
+**Los dos controles aprendieron el bloque, y a los dos se los vio fallar.**
+
+`check-document-contract.sh` verifica las cinco mutaciones, las cuatro consultas, los seis tipos y los valores de `DocObjectType` en sus dos variantes. Su marcador más confiable son **las operaciones retiradas**: `declareDocProject` y `DeclareDocProjectInput` solo desaparecen con el bloque entero puesto. Se lo vio fallar sin buscarlo, contra un servicio anterior que ocupaba el puerto.
+
+`check-document-permissions.sh` incorpora `documentsDocProject`, y **su veredicto lo verifica primero**: sin permisos de contrato no hay contrato, y sin contrato no hay documento de proyecto posible — lo impide la clave foránea. Es el único recurso cuya ausencia bloquea el módulo entero.
+
+**Una prueba más** sobre la federación de la contraparte, que es lo único del bloque que no se ejercita ni desde la base ni desde el contrato.
+
+**El orden del despliegue quedó escrito en el bloque**, en siete pasos. Dos que conviene no perder: la línea base del legado se toma **inmediatamente antes** de migrar —el subsistema carga por lotes—, y el seed de `mi-admin` son **dos** comandos, no uno.
+
+**Verificado:** **539 pruebas y 0 fallos**, los dos controles en verde y los dos vistos fallar contra su propio defecto.
+
