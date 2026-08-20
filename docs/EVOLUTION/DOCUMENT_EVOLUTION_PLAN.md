@@ -1,7 +1,7 @@
 # Plan de evolución funcional — OperMask Documents
 
 **Estado:** Decisiones aprobadas — en ejecución por bloques
-**Versión:** 1.3
+**Versión:** 1.4
 **Alcance:** subsistema de Gestión Documental (`Document`, `DocumentRevision`, `DocumentVersion`, `ReviewWorkflow`, `ReviewStep`, `Transmittal`, `TransmittalItem`, catálogos, adjuntos y vínculo con tareas de proyecto).
 
 ## Objetivo
@@ -968,11 +968,39 @@ La expansión transversal confirmada más abajo tiene una consecuencia sobre la 
 
 **`BLOCK_05` nace en la ubicación definitiva.** Hoy la ruta implementada es `projects/documents/[projectId]/` —módulo primero, identificador después— y la de esta decisión la invierte. Construir la interfaz documental en la ruta vieja para mudarla después es levantar dos veces las mismas pantallas y sus enlaces.
 
-**Dependencia externa declarada:** la reorganización del módulo de proyectos por workspace, que tiene su propio plan en curso y no pertenece a este módulo. El precedente construido es OperMask Digitalization, donde el workspace es `digitalization/[projectId]/` por fase y los catálogos del despliegue viven en `digitalization/settings/`.
+**Dependencia externa declarada:** la reorganización del módulo de proyectos por workspace, que tiene su propio plan en curso y no pertenece a este módulo. **Cae con D-29**, que le da al módulo su propia raíz de alcance: el ámbito de contrato pasa a ser `documents/[docProjectId]/` y la tabla de arriba se corrige al promoverse `BLOCK_02D`. El precedente construido es OperMask Digitalization, donde el workspace es `digitalization/[projectId]/` por fase y los catálogos del despliegue viven en `digitalization/settings/`.
 
 Alternativa descartada: construir `BLOCK_05` sobre la ruta actual y mudarla al reorganizarse el módulo de proyectos. Se descarta porque la interfaz documental es el bloque más grande que queda, y sería el que más superficie tendría que mudar.
 
 Alternativa descartada: administrar el catálogo de cada proyecto desde la pantalla global, con un selector de proyecto. Se descarta porque vuelve al ámbito un filtro dentro de una pantalla en lugar de un lugar donde se está parado, y obliga a que la misma pantalla resuelva permisos de despliegue y membresías de proyecto a la vez.
+
+### D-29 — El módulo es dueño de su raíz de alcance
+
+**Estado:** Aprobada. Revisa D-06, D-15 y D-28.
+
+El proyecto documental deja de ser una referencia externa al `Project` de `mi-project` y pasa a ser una entidad de este módulo, `DocProject`. Es lo que D-15 ya había nombrado sin darle objeto: **cada proyecto documental es un contrato**.
+
+El precedente es `DigitalizationProject` (DOM-019) de OperMask Digitalization, raíz de alcance de todo su dominio, con código, nombre, estado y membresía propios y sin federar el proyecto de `mi-project`.
+
+Motivo. La regla de oro de `PROJECTS_DOCUMENTS_INTEGRATION_SPEC` establece que un cliente puede comprar solo Projects, solo Documents o ambos, pero formaliza una sola dirección —que Projects no dependa de Documents—. La otra mitad no se cumple: **un cliente que compre únicamente gestión documental no tiene dónde dar de alta un proyecto**, porque el alta vive en un módulo que no compró, y el listado por el que se entra a la gestión documental es el listado de `mi-project`. Es el mismo argumento con que `Company` se movió a `mi-admin`, un nivel más arriba.
+
+Forma adoptada, definida al abrir `BLOCK_02D`:
+
+- **`DocProjectSettings` se disuelve dentro de `DocProject`**: era la entidad de contrato sin identidad propia. `documentRole` no es una preferencia de configuración, es lo que el contrato es (D-09);
+- **el vínculo con `mi-project` es opcional y N:1** —`DocProject.projectId` anulable—, y el nulo significa que **el contrato no tiene asociada una gestión PMI**. La dirección de la dependencia no cambia: sigue siendo estrictamente `Documents → Projects`, sin campo inverso;
+- **varios contratos por proyecto**, que es el desbloqueo funcional: una planta que contrata la ingeniería civil, la mecánica y la construcción a tres proveedores tiene una obra y tres contratos, y hoy debe abrir tres proyectos hermanos sin nada que los una. **No roza la binariedad de D-15**: cada contrato conserva una sola contraparte, y la lógica de visibilidad entre anfitrión y contraparte queda igual de barata;
+- **la contraparte pasa a ser una referencia a `Company`** de `mi-admin`, habilitada por la reubicación del 2026-08-19: se contrata con la empresa, no con la razón social, y la referencia no arrastra ni `mi-comercial` ni `mi-management`;
+- **el vínculo con la gestión PMI se puede agregar y quitar después del alta**: no es identidad, a diferencia del código del contrato, que no cambia por el mismo criterio de D-24;
+- **el contrato tiene dos estados y un solo efecto**: en curso admite todas las operaciones; cerrado, solo lectura. El cierre es una puerta sobre la escritura y **no se propaga hacia abajo** —una revisión en circuito queda donde está—, admite reapertura con acto trazado, y **no promueve nada**: la nota prospectiva de este plan ya establece que la promoción es selectiva y no puede ser efecto automático del cierre;
+- **la unicidad del código se discrimina por módulo y no por el nulo**: `[docProjectId, code]` donde `module = PROJECTS`, `[module, code]` en el resto. Dos contratos de la misma obra **pueden** repetir código, que es la contracara del N:1: cada contratista numera con su propia convención.
+
+**Lo que le devuelve a D-06.** Aquella decisión descartó el proyecto reservado del sistema porque *"el módulo no es dueño de `Project`"* y el invariante quedaría sostenido por convención entre servicios. La premisa deja de valer y el invariante pasa a ser clave foránea. El nulo de `Document.docProjectId` sigue nombrando el régimen de publicación, sin cambio de significado.
+
+**Lo que le devuelve a D-28.** Cae la dependencia externa que aquella decisión declaraba —la reorganización de `mi-project` por workspace—, porque con raíz propia el workspace es del módulo documental: el ámbito de contrato es `documents/[docProjectId]/`, con el precedente de `digitalization/[projectId]/`. `BLOCK_05` deja de esperar el calendario de otro módulo.
+
+Alternativa descartada: sembrar un proyecto reservado en `mi-project`. Se descarta por lo que D-06 ya había dicho, y porque contamina un módulo ajeno.
+
+Alternativa descartada: federar `Project` como entidad con `@key`. Se descarta porque el alta sigue estando del otro lado y vuelve obligatoria la presencia de un subgrafo que el cliente puede no haber comprado.
 
 ## Cuestión de fondo pendiente
 
@@ -1163,9 +1191,14 @@ Orden propuesto. Cada bloque se abre con su propio documento, con línea base co
 | `BLOCK_04B` | Paquete de información de entrada y promoción a documento controlado (D-16, D-20) | `BLOCK_02` |
 | `BLOCK_02B` ✔ | Ubicación física jerárquica del documento, y **el mecanismo de alcance por proyecto** que los tres catálogos comparten (D-14; construye D-21; descarta H-36). **Promovido a la SFS y desplegado en testing** | `BLOCK_02` |
 | `BLOCK_02C` ✔ | Alcance por proyecto de clase y tipo, aplicando el mecanismo que construye `BLOCK_02B`: clase y tipo declaran juntos, siembra conjunta, cruce en un solo sentido, y el eje de módulo preparado en la declaración de alcance (D-21). **Promovido a la SFS y desplegado en testing y producción** | `BLOCK_02`, `BLOCK_03` por la unicidad, `BLOCK_02B` por el mecanismo |
-| `BLOCK_05` | Interfaz de usuario del subsistema, en la organización por ámbito de D-28 (H-25) | `BLOCK_03`, `BLOCK_04`, `BLOCK_02B`, `BLOCK_02C` |
+| `BLOCK_02D` | Raíz de alcance propia: `DocProject` como entidad del módulo, `DocProjectSettings` disuelto dentro suyo, vínculo opcional y N:1 con `mi-project`, contraparte como referencia a `Company`, estados del contrato con puerta de escritura, y unicidad del código discriminada por módulo (D-29; revisa D-06, D-15 y D-28) | `BLOCK_02`, `BLOCK_02C` |
+| `BLOCK_05` | Interfaz de usuario del subsistema, en la organización por ámbito de D-28 corregida por D-29 (H-25) | `BLOCK_03`, `BLOCK_04`, `BLOCK_02B`, `BLOCK_02C`, `BLOCK_02D` |
 
 El rol documental (D-09) gobierna el ciclo completo, por lo que el contexto de proyecto pasa a ser el primer bloque funcional: ya no puede quedar detrás del ciclo de revisión.
+
+`BLOCK_02D` se abrió al quedar `Company` en `mi-admin`, y **se interpone antes de `BLOCK_05`** por el mismo criterio con que `BLOCK_03B` se interpuso antes de `BLOCK_04`: no se construye encima de un objeto que está por cambiar de naturaleza. Acá el objeto es la raíz de alcance, de la que cuelga cada ruta, cada listado y cada resolución de catálogo de la interfaz. **Es además el bloque que desbloquea a `BLOCK_05`**, cuya ubicación definitiva dependía del calendario de otro módulo.
+
+Su ventana es la más estrecha del plan y no se repite: el subsistema documental está vacío en los cinco despliegues, de modo que renombrar la raíz de alcance en once modelos y doce índices únicos **no tiene una sola fila que convertir**. Con documentos productivos sería otro trabajo.
 
 `BLOCK_03B` se abrió al cerrarse `BLOCK_03`, y **se interpone antes de `BLOCK_04`**. Revisa decisiones de bloques ya promovidos, que no se reabren: lo relevado e implementado no se confunde con lo que se decide después. Y no puede ir detrás de la emisión, porque `BLOCK_04` da por sentados qué acredita una firma y qué compone un entregable — si esas dos cosas se mueven durante la emisión, la puerta se especifica sobre un piso inestable. Conserva el sufijo por el mismo criterio que `BLOCK_02B` y `BLOCK_02C`: no renumerar bloques ya referenciados.
 
