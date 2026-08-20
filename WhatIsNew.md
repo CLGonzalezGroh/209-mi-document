@@ -1418,3 +1418,23 @@ Dos estados y **un solo efecto**: `ACTIVE` admite todo, `CLOSED` solo lectura.
 
 **Búsqueda del nombre viejo**: cero apariciones de `docProjectSettings`, `declareDocProject`, `counterpartyName` y `DOC_PROJECT_SETTINGS` fuera de lo generado. Los `projectId` que quedan son todos de `Area` y `ScannedFile` — los dos tipos que el bloque excluyó a propósito.
 
+---
+
+# What's new in María Ingeniería API Documents 2.17.3
+
+2026-08-20
+
+## La raíz de alcance propia del módulo (BLOQUE 02D)
+
+### Fase 9 — la precondición corrida sobre los cinco, con los quince controles
+
+**Ninguno bloquea en ningún despliegue.** El bloque queda habilitado para desplegarse.
+
+**Y los dos controles que la fase 3 agregó dan cero en los cinco.** Ningún despliegue tiene eventos de workflow ni trazas de auditoría con proyecto declarado, de modo que **la rama de la migración que anula el contexto huérfano no se va a ejecutar en ninguna parte**. Lo que en la base de desarrollo local eran 420 y 104 filas resultó ser residuo de las pruebas.
+
+Importa por lo que evita: esa rama era la única del bloque que pierde información sin detenerse, y ahora se sabe que no tiene sobre qué actuar.
+
+**Esta corrida no es la línea base del despliegue.** El legado de `optimal` sumó 136 archivos entre el 18 y el 20 de agosto: la del criterio 5 se toma inmediatamente antes de migrar.
+
+Con esto la fase 9 queda cerrada y solo resta la promoción a la SFS.
+

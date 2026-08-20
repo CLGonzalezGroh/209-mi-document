@@ -487,6 +487,24 @@ Se lo vio fallar **sin buscarlo**: el puerto local estaba ocupado por un servici
 
 **Verificado:** **539 pruebas y 0 fallos**, los dos controles en verde contra el servicio y la base locales, y los dos vistos fallar contra su propio defecto.
 
+#### La precondición, corrida de nuevo sobre los cinco
+
+Con los **quince controles** —trece que bloquean y los dos de contexto de auditoría que la fase 3 agregó—. **Ninguno bloquea en ningún despliegue.**
+
+| Línea base | `rbb` t | `optimal` t | `proion` t | `optimal` p | `proion` p |
+| ---------- | ------- | ----------- | ---------- | ----------- | ---------- |
+| Clases / tipos | 0 / 0 | 3 / 4 | 0 / 0 | **8 / 57** | 0 / 0 |
+| Alcances / ubicaciones | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| Escaneados, con clase, con tipo | 0 | 9, 4, 4 | 1, 0, 0 | **3.425, 3.318, 3.300** | 0 |
+| Áreas / logs | 0 / 0 | 3 / 32 | 0 / 1 | **52 / 5.277** | 0 / 0 |
+| Proyectos referenciados por el legado | 0 | 2 | 1 | 2 | 0 |
+
+**El resultado que faltaba: los dos controles nuevos dan cero en los cinco.** Ningún despliegue tiene eventos de workflow ni trazas de auditoría con proyecto declarado, de modo que **la rama de la migración que anula el contexto huérfano no se va a ejecutar en ninguna parte**. Lo que en la base de desarrollo local eran 420 y 104 filas es, en los despliegues, nada: aquellas eran residuo de las pruebas.
+
+Vale la pena decirlo por lo que evita: esa rama era la única del bloque que **pierde información sin detenerse**, y ahora se sabe que no tiene sobre qué actuar. Si alguna hubiera dado distinto de cero, habría que haber mirado de dónde salió antes de migrar.
+
+**Lo que esta corrida NO es.** No es la línea base del despliegue. El legado de `optimal` sumó 136 archivos entre el 18 y el 20 de agosto, así que la del criterio 5 se toma **inmediatamente antes de migrar** y no se reutiliza esta.
+
 #### El contrato federado, y la webapp
 
 Tres verificaciones que ninguna de las anteriores cubre, y que el despliegue local necesita porque **usa Apollo Studio** y no un supergrafo de archivo.
