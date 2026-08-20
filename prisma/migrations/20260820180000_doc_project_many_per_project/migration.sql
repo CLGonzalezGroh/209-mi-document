@@ -1,0 +1,22 @@
+-- BLOQUE 02D, fase 4 — Varios contratos por obra (B3).
+--
+-- Cae la unicidad de `doc_projects.projectId`. Es el desbloqueo funcional del
+-- bloque: una planta que contrata la ingeniería civil, la mecánica y la
+-- construcción a tres proveedores tiene **una obra y tres contratos**, y hasta
+-- acá tenía que abrir tres proyectos hermanos sin nada que los una.
+--
+-- **No roza la binariedad de D-15.** Cada contrato conserva una sola
+-- contraparte, de modo que la lógica de visibilidad entre anfitrión y
+-- contraparte queda igual de barata: sigue siendo binaria, y no aparece ninguna
+-- regla multi-parte. Las tres contrapartes no conviven dentro de un contrato:
+-- son tres contratos.
+--
+-- **Se pudo recién ahora, y no antes.** Hasta la fase 3, catorce lugares leían
+-- la configuración con `findUnique` por `projectId`, que exige que esa columna
+-- sea única. El renombre les dio el contrato por su id, y con eso **ya nadie
+-- busca por ahí**: quitar la unicidad no deja a nadie sin clave.
+--
+-- El índice NO único se conserva: la consulta por obra —qué contratos tiene—
+-- sigue existiendo, y ahora devuelve varios en lugar de uno.
+
+DROP INDEX "doc_projects_projectId_key";

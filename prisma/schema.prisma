@@ -945,9 +945,15 @@ model DocProject {
   // módulo, o porque esa obra no se sigue por cronograma— y NO que el contrato
   // esté incompleto (B3, B6).
   //
-  // Sigue siendo único mientras dura la fase 3: la unicidad cae con el N:1, que
-  // es lo que habilita varios contratos por obra, uno por contratista.
-  projectId Int? @unique
+  // N:1 y no uno a uno (B3): una obra puede tener VARIOS contratos, uno por
+  // contratista. Una planta que contrata la ingeniería civil, la mecánica y la
+  // construcción a tres proveedores tiene una obra y tres contratos, y hasta
+  // acá tenía que abrir tres proyectos hermanos sin nada que los una.
+  //
+  // No roza la binariedad de D-15: cada contrato conserva UNA sola contraparte,
+  // de modo que la visibilidad entre anfitrión y contraparte sigue siendo
+  // binaria y no aparece ninguna regla multi-parte.
+  projectId Int?
 
   // ── Lo que venía de DocProjectSettings ─────────────────────────────────────
   documentRole DocumentRole

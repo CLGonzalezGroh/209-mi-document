@@ -27,9 +27,10 @@ const logger = createLogger("docProjects")
  */
 export const docProjectsResolvers = {
   Query: {
+    /** El contrato por su identidad. */
     docProject: async (
       _: any,
-      { projectId }: { projectId: number },
+      { id }: { id: number },
       context: ResolverContext,
     ) => {
       const userId = await userAuthorization({
@@ -39,10 +40,7 @@ export const docProjectsResolvers = {
       logger.info("docProject", { userId })
 
       try {
-        // Nulo cuando la obra todavía no tiene contrato documental
-        return await context.orm.docProject.findUnique({
-          where: { projectId },
-        })
+        return await context.orm.docProject.findUnique({ where: { id } })
       } catch (error) {
         return handleError({
           error,
@@ -50,7 +48,43 @@ export const docProjectsResolvers = {
           context,
           logName: "GET_DOC_PROJECT",
           messages: {
-            default: "Error al obtener el contrato documental de la obra.",
+            default: "Error al obtener el contrato documental.",
+          },
+        })
+      }
+    },
+
+    /**
+     * Los contratos de una obra de `mi-project` (B3).
+     *
+     * Devuelve una LISTA y no un contrato: el vínculo es N:1 desde la fase 4, y
+     * una obra con tres contratistas tiene tres contratos. Vacía cuando la obra
+     * todavía no tiene ninguno, que no es un error.
+     */
+    docProjectsByProject: async (
+      _: any,
+      { projectId }: { projectId: number },
+      context: ResolverContext,
+    ) => {
+      const userId = await userAuthorization({
+        requiredPermissions: [PERMISSIONS.DOCUMENTS_PROJECT_SETTINGS_READ],
+        context,
+      })
+      logger.info("docProjectsByProject", { userId })
+
+      try {
+        return await context.orm.docProject.findMany({
+          where: { projectId },
+          orderBy: { code: "asc" },
+        })
+      } catch (error) {
+        return handleError({
+          error,
+          userId,
+          context,
+          logName: "LIST_DOC_PROJECTS_BY_PROJECT",
+          messages: {
+            default: "Error al obtener los contratos documentales de la obra.",
           },
         })
       }

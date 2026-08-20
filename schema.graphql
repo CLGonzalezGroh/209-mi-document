@@ -3208,8 +3208,16 @@ type Query {
 
   # ─── Contexto de proyecto ───
 
-  "Configuración documental de un proyecto. Nula si todavía no declaró su rol"
-  docProject(projectId: Int!): DocProject
+  "El contrato documental por su identidad. Nulo si no existe"
+  docProject(id: Int!): DocProject
+
+  """
+  Los contratos documentales de una obra de mi-project.
+
+  Devuelve una LISTA y no un contrato: una obra puede tener varios, uno por
+  contratista. Vacía cuando todavía no tiene ninguno, que no es un error.
+  """
+  docProjectsByProject(projectId: Int!): [DocProject!]!
 
   """
   Documentos pendientes de salir en un proyecto.

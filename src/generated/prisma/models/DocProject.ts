@@ -402,7 +402,6 @@ export type DocProjectOrderByWithRelationInput = {
 export type DocProjectWhereUniqueInput = Prisma.AtLeast<{
   id?: number
   code?: string
-  projectId?: number
   AND?: Prisma.DocProjectWhereInput | Prisma.DocProjectWhereInput[]
   OR?: Prisma.DocProjectWhereInput[]
   NOT?: Prisma.DocProjectWhereInput | Prisma.DocProjectWhereInput[]
@@ -416,6 +415,7 @@ export type DocProjectWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumDocProjectStatusFilter<"DocProject"> | $Enums.DocProjectStatus
   closedAt?: Prisma.DateTimeNullableFilter<"DocProject"> | Date | string | null
   closedById?: Prisma.IntNullableFilter<"DocProject"> | number | null
+  projectId?: Prisma.IntNullableFilter<"DocProject"> | number | null
   documentRole?: Prisma.EnumDocumentRoleFilter<"DocProject"> | $Enums.DocumentRole
   counterpartyName?: Prisma.StringNullableFilter<"DocProject"> | string | null
   revisionScheme?: Prisma.EnumRevisionSchemeNullableFilter<"DocProject"> | $Enums.RevisionScheme | null
@@ -432,7 +432,7 @@ export type DocProjectWhereUniqueInput = Prisma.AtLeast<{
   qualifications?: Prisma.DocQualificationListRelationFilter
   catalogScopes?: Prisma.DocCatalogScopeListRelationFilter
   workflowTemplates?: Prisma.DocWorkflowTemplateListRelationFilter
-}, "id" | "code" | "projectId">
+}, "id" | "code">
 
 export type DocProjectOrderByWithAggregationInput = {
   id?: Prisma.SortOrder

@@ -1258,3 +1258,23 @@ El módulo deja de referenciar el `Project` de `mi-project` y pasa a ser dueño 
 
 **Verificado:** `tsc` limpio, **526 pruebas y 0 fallos**, `prisma migrate diff` sin diferencias, y la ruta completa reconstruida sobre base limpia con `pg_dump` idéntico al de la base migrada de forma incremental.
 
+---
+
+# What's new in María Ingeniería API Documents 2.13.0
+
+2026-08-20
+
+## La raíz de alcance propia del módulo (BLOQUE 02D)
+
+### Fase 4 — varios contratos por obra
+
+Cae la unicidad de `doc_projects.projectId`. Es el desbloqueo funcional del bloque: una planta que contrata la ingeniería civil, la mecánica y la construcción a tres proveedores tiene **una obra y tres contratos**, y hasta acá tenía que abrir tres proyectos hermanos sin nada que los una.
+
+**No roza la binariedad de D-15**: cada contrato conserva una sola contraparte, de modo que la visibilidad entre anfitrión y contraparte sigue siendo binaria y no aparece ninguna regla multi-parte.
+
+**Cambia el contrato GraphQL.** `docProject(projectId:)` no puede seguir existiendo —sin unicidad no hay un contrato por obra que devolver— y quedan dos operaciones donde había una: `docProject(id:)`, por identidad, y `docProjectsByProject(projectId:)`, que devuelve **la lista** de contratos de una obra y vacía si no tiene ninguno.
+
+Al agregar la segunda, el control de contrato de la fase 3 **falló de inmediato**: su lista de operaciones autorizadas a recibir un `projectId` de `mi-project` tenía dos. Es lo que ese control existe para hacer.
+
+**Verificado:** `tsc` limpio, **527 pruebas y 0 fallos** —una más, la de tres contratos sobre la misma obra—, `prisma migrate diff` sin diferencias, y ruta completa sobre base limpia con `pg_dump` idéntico al de la base incremental.
+

@@ -222,10 +222,12 @@ test("solo el legado y el vínculo PMI siguen nombrando `projectId`", () => {
     assert.ok(permitido, `${nombre} todavía declara projectId`)
   }
 
-  // Las dos operaciones que reciben un proyecto de mi-project, y ninguna más.
+  // Las operaciones que reciben un proyecto de mi-project, y ninguna más:
+  // el selector de áreas del legado, y la lista de contratos de una obra, que
+  // devuelve varios desde que el vínculo es N:1 (B3).
   const operaciones = contrato.match(/^  \w+\([^)]*projectId[^)]*\)/gm) ?? []
   const nombres = operaciones.map((o) => o.trim().split("(")[0]).sort()
-  assert.deepEqual(nombres, ["areasSelectList", "docProject"])
+  assert.deepEqual(nombres, ["areasSelectList", "docProjectsByProject"])
 })
 
 test("las enumeraciones del contrato coinciden con las del modelo", () => {

@@ -290,7 +290,7 @@ test("la configuración se declara y se lee, y emite su traza", async () => {
 
   const leida: any = await docProjectsResolvers.Query.docProject(
     null,
-    { projectId: PROYECTO_CON_MEMBRESIA },
+    { id: settings.id },
     context,
   )
   assert.equal(leida.counterpartyName, "Planta de prueba")
@@ -322,6 +322,57 @@ test("un proyecto interno no admite contraparte", async () => {
     ),
     "BAD_USER_INPUT",
   )
+})
+
+test("una obra admite varios contratos, uno por contratista", async () => {
+  // El desbloqueo funcional de BLOQUE 02D, B3. Hasta la fase 4 el vínculo era
+  // uno a uno, y una planta con tres contratistas tenía que abrir tres
+  // proyectos hermanos sin nada que los una.
+  const OBRA = -424490
+  const codigos = ["OBRA-CIVIL", "OBRA-MEC", "OBRA-CONSTR"]
+
+  for (const [i, code] of codigos.entries()) {
+    await docProjectsResolvers.Mutation.declareDocProject(
+      null,
+      {
+        input: {
+          code,
+          name: `Contrato ${i + 1}`,
+          projectId: OBRA,
+          documentRole: DocumentRole.RECEIVER,
+          counterpartyName: `Contratista ${i + 1}`,
+        },
+      },
+      context,
+    )
+  }
+
+  const contratos: any[] = await docProjectsResolvers.Query.docProjectsByProject(
+    null,
+    { projectId: OBRA },
+    context,
+  )
+
+  assert.equal(contratos.length, 3)
+  assert.deepEqual(contratos.map((c) => c.code), [...codigos].sort())
+
+  // Cada uno conserva UNA sola contraparte: la binariedad de D-15 no se toca.
+  assert.deepEqual(
+    contratos.map((c) => c.counterpartyName).sort(),
+    ["Contratista 1", "Contratista 2", "Contratista 3"],
+  )
+
+  // Y una obra sin contratos devuelve vacío, que no es un error.
+  assert.deepEqual(
+    await docProjectsResolvers.Query.docProjectsByProject(
+      null,
+      { projectId: -424491 },
+      context,
+    ),
+    [],
+  )
+
+  await prisma.docProject.deleteMany({ where: { code: { in: codigos } } })
 })
 
 test("el rol no puede cambiarse si el proyecto ya tiene documentos", async () => {

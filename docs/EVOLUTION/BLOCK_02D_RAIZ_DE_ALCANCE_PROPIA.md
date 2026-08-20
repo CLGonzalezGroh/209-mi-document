@@ -359,6 +359,25 @@ Una prueba de limpieza tuvo que corregirse por una razón que conviene retener: 
 
 **Pendiente de medición antes de desplegar:** el control de precondición incorporó dos filas nuevas —eventos de workflow y trazas de auditoría con proyecto—, que **no estaban cuando se corrieron los cinco**. En la base de desarrollo local son 420 y 104 filas, todas de pruebas; en los despliegues deberían ser cero, y la migración las anula sin detenerse. Conviene volver a correr el control antes de la fase de despliegue.
 
+### Fase 4 — completada
+
+**Cae la unicidad de `doc_projects.projectId`, y con eso una obra admite varios contratos.** Es el desbloqueo funcional del bloque: la planta que contrata la ingeniería civil, la mecánica y la construcción a tres proveedores tiene **una obra y tres contratos**, en lugar de tres proyectos hermanos sin nada que los una.
+
+**La consulta del contrato cambió de clave, y era inevitable.** `docProject(projectId:)` no puede seguir existiendo: sin unicidad no hay un contrato por obra que devolver. Quedaron dos operaciones donde había una, y la distinción es la que el N:1 introduce:
+
+| Operación | Devuelve |
+| --------- | -------- |
+| `docProject(id:)` | El contrato por su identidad |
+| `docProjectsByProject(projectId:)` | **La lista** de contratos de una obra. Vacía si no tiene ninguno, que no es un error |
+
+**El control de contrato de la fase 3 hizo su trabajo enseguida.** Al agregar `docProjectsByProject` falló, porque su lista de operaciones autorizadas a recibir un `projectId` de `mi-project` tenía dos y ahora son tres. Es exactamente lo que ese control existe para hacer: obligar a que cada operación nueva que cruce la frontera se declare a propósito en lugar de colarse.
+
+**Se pudo recién ahora y no antes**, que es lo que el reordenamiento de fases anticipó: hasta la fase 3, catorce lugares leían la configuración con `findUnique` por `projectId`. El renombre les dio el contrato por su id, y con eso **ya nadie busca por ahí**.
+
+**La prueba nueva verifica lo que la fase habilita**, y no solo que la migración corrió: tres contratos sobre la misma obra, cada uno con **una sola contraparte** —la binariedad de D-15 intacta—, más la obra sin contratos que devuelve vacío.
+
+**Verificado:** `tsc` limpio, **527 pruebas y 0 fallos**, `prisma migrate diff` sin diferencias, y ruta completa sobre base limpia con `pg_dump` idéntico al de la base incremental.
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-06, D-07, D-09, D-15, D-19, D-21, D-24, D-28, D-29
