@@ -120,7 +120,7 @@ export const resolveDocumentLocation = async (
   const settings =
     projectId === null
       ? null
-      : await client.docProjectSettings.findUnique({
+      : await client.docProject.findUnique({
           where: { projectId },
           select: { locationEnabled: true, locationRequired: true },
         })

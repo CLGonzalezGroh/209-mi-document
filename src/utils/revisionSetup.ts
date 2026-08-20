@@ -61,7 +61,7 @@ export const projectDefaults = async (
 ): Promise<ProjectDefaults> => {
   if (projectId === null) return SIN_PROYECTO
 
-  const settings = await client.docProjectSettings.findUnique({
+  const settings = await client.docProject.findUnique({
     where: { projectId },
     select: {
       revisionScheme: true,

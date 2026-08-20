@@ -18,7 +18,7 @@ import { areaResolvers } from "./areas.js"
 import { dependencyResolvers } from "./dependencies.js"
 import { taskDocumentReferenceResolvers } from "./taskDocumentReferences.js"
 import { eventResolvers } from "./events.js"
-import { projectSettingsResolvers } from "./projectSettings.js"
+import { docProjectsResolvers } from "./docProjects.js"
 import { projectMemberResolvers } from "./projectMembers.js"
 import { docSettingsResolvers } from "./docSettings.js"
 import { workflowTemplateResolvers } from "./workflowTemplates.js"
@@ -42,7 +42,7 @@ export const resolvers: GraphQLResolverMap<ResolverContext> = {
     ...scannedFileResolvers.Query,
     ...dependencyResolvers.Query,
     ...eventResolvers.Query,
-    ...projectSettingsResolvers.Query,
+    ...docProjectsResolvers.Query,
     ...projectMemberResolvers.Query,
     ...docSettingsResolvers.Query,
     ...workflowTemplateResolvers.Query,
@@ -52,7 +52,7 @@ export const resolvers: GraphQLResolverMap<ResolverContext> = {
     ...classificationResolvers.Query,
   },
   Mutation: {
-    ...projectSettingsResolvers.Mutation,
+    ...docProjectsResolvers.Mutation,
     ...projectMemberResolvers.Mutation,
     ...documentResolvers.Mutation,
     ...documentTypeResolvers.Mutation,

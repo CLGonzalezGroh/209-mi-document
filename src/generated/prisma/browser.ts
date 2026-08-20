@@ -103,10 +103,10 @@ export type TransmittalItem = Prisma.TransmittalItemModel
  */
 export type Attachment = Prisma.AttachmentModel
 /**
- * Model DocProjectSettings
+ * Model DocProject
  * 
  */
-export type DocProjectSettings = Prisma.DocProjectSettingsModel
+export type DocProject = Prisma.DocProjectModel
 /**
  * Model DocSettings
  * 

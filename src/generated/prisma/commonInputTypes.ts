@@ -406,6 +406,13 @@ export type EnumPurposeCodeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumPurposeCodeFilter<$PrismaModel>
 }
 
+export type EnumDocProjectStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocProjectStatus | Prisma.EnumDocProjectStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocProjectStatus[] | Prisma.ListEnumDocProjectStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocProjectStatus[] | Prisma.ListEnumDocProjectStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocProjectStatusFilter<$PrismaModel> | $Enums.DocProjectStatus
+}
+
 export type EnumDocumentRoleFilter<$PrismaModel = never> = {
   equals?: $Enums.DocumentRole | Prisma.EnumDocumentRoleFieldRefInput<$PrismaModel>
   in?: $Enums.DocumentRole[] | Prisma.ListEnumDocumentRoleFieldRefInput<$PrismaModel>
@@ -418,6 +425,16 @@ export type EnumRevisionSchemeNullableFilter<$PrismaModel = never> = {
   in?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel> | null
   notIn?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel> | null
   not?: Prisma.NestedEnumRevisionSchemeNullableFilter<$PrismaModel> | $Enums.RevisionScheme | null
+}
+
+export type EnumDocProjectStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocProjectStatus | Prisma.EnumDocProjectStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocProjectStatus[] | Prisma.ListEnumDocProjectStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocProjectStatus[] | Prisma.ListEnumDocProjectStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocProjectStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocProjectStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocProjectStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocProjectStatusFilter<$PrismaModel>
 }
 
 export type EnumDocumentRoleWithAggregatesFilter<$PrismaModel = never> = {
@@ -1083,6 +1100,13 @@ export type NestedEnumPurposeCodeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumPurposeCodeFilter<$PrismaModel>
 }
 
+export type NestedEnumDocProjectStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocProjectStatus | Prisma.EnumDocProjectStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocProjectStatus[] | Prisma.ListEnumDocProjectStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocProjectStatus[] | Prisma.ListEnumDocProjectStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocProjectStatusFilter<$PrismaModel> | $Enums.DocProjectStatus
+}
+
 export type NestedEnumDocumentRoleFilter<$PrismaModel = never> = {
   equals?: $Enums.DocumentRole | Prisma.EnumDocumentRoleFieldRefInput<$PrismaModel>
   in?: $Enums.DocumentRole[] | Prisma.ListEnumDocumentRoleFieldRefInput<$PrismaModel>
@@ -1095,6 +1119,16 @@ export type NestedEnumRevisionSchemeNullableFilter<$PrismaModel = never> = {
   in?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel> | null
   notIn?: $Enums.RevisionScheme[] | Prisma.ListEnumRevisionSchemeFieldRefInput<$PrismaModel> | null
   not?: Prisma.NestedEnumRevisionSchemeNullableFilter<$PrismaModel> | $Enums.RevisionScheme | null
+}
+
+export type NestedEnumDocProjectStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocProjectStatus | Prisma.EnumDocProjectStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.DocProjectStatus[] | Prisma.ListEnumDocProjectStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.DocProjectStatus[] | Prisma.ListEnumDocProjectStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumDocProjectStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocProjectStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocProjectStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocProjectStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumDocumentRoleWithAggregatesFilter<$PrismaModel = never> = {

@@ -21,7 +21,7 @@ import { versionResolvers } from "./versions.js"
 import { workflowResolvers } from "./workflows.js"
 import { replacementResolvers } from "./replacements.js"
 import { workingCopyResolvers } from "./workingCopies.js"
-import { projectSettingsResolvers } from "./projectSettings.js"
+import { docProjectsResolvers } from "./docProjects.js"
 import { projectMemberResolvers } from "./projectMembers.js"
 import { resolverTypes } from "./resolversTypes/index.js"
 import { AuditAction, WorkflowEvent } from "../events/catalog.js"
@@ -55,7 +55,7 @@ const limpiar = async () => {
   await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
   await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: PROYECTO } })
   await prisma.docProjectMember.deleteMany({ where: { projectId: PROYECTO } })
-  await prisma.docProjectSettings.deleteMany({ where: { projectId: PROYECTO } })
+  await prisma.docProject.deleteMany({ where: { projectId: PROYECTO } })
   await prisma.docAuditEvent.deleteMany({ where: { projectId: PROYECTO } })
   await prisma.docWorkflowEvent.deleteMany({ where: { projectId: PROYECTO } })
 }
@@ -83,10 +83,12 @@ before(async () => {
   const tipo = await prisma.documentType.findFirstOrThrow({ select: { id: true } })
   documentTypeId = tipo.id
 
-  await projectSettingsResolvers.Mutation.declareDocProjectSettings(
+  await docProjectsResolvers.Mutation.declareDocProject(
     null,
     {
       input: {
+        code: `T-${PROYECTO}`,
+        name: "Contrato de prueba",
         projectId: PROYECTO,
         documentRole: DocumentRole.ISSUER,
         counterpartyName: "Cliente de prueba",

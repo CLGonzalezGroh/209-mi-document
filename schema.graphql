@@ -575,7 +575,7 @@ enum DocObjectType {
   "Tipo de documento"
   DOCUMENT_TYPE
   "Configuración documental de un proyecto"
-  DOC_PROJECT_SETTINGS
+  DOC_PROJECT
   "Membresía documental de un proyecto"
   DOC_PROJECT_MEMBER
   "Firma de un paso del circuito"
@@ -619,7 +619,7 @@ enum DocObjectTypeInput {
   "Tipo de documento"
   DOCUMENT_TYPE
   "Configuración documental de un proyecto"
-  DOC_PROJECT_SETTINGS
+  DOC_PROJECT
   "Membresía documental de un proyecto"
   DOC_PROJECT_MEMBER
   "Firma de un paso del circuito"
@@ -1576,16 +1576,20 @@ enum DocProjectSideInput {
 }
 
 """
-Configuración documental de un proyecto. Un registro por proyecto.
-Declara el rol documental y, cuando corresponde, la contraparte.
+El contrato: raíz de alcance del módulo documental.
+
+Cada proyecto documental ES UN CONTRATO con una contraparte, y el módulo es
+dueño de su identidad: no referencia el proyecto de `mi-project` ni lo federa.
+Absorbe la configuración documental, porque el rol no es una preferencia sino
+lo que el contrato es.
 """
-type DocProjectSettings {
-  "¿El proyecto usa el atributo de ubicación física?"
+type DocProject {
+  "¿El contrato usa el atributo de ubicación física?"
   locationEnabled: Boolean!
   "¿Lo exige al dar de alta un documento? Solo tiene efecto si está habilitado"
   locationRequired: Boolean!
   """
-  Etiqueta con que el proyecto la nombra: "área", "unidad", "sector".
+  Etiqueta con que el contrato la nombra: "área", "unidad", "sector".
 
   Configurable, a diferencia del esquema de revisión: cada organización usa un
   nombre distinto, mientras que "revisión" es terminología establecida.
@@ -1597,14 +1601,29 @@ type DocProjectSettings {
   createdAt: DateTime!
   "Fecha de última modificación"
   updatedAt: DateTime
-  "Proyecto al que corresponde"
-  projectId: Int!
+  "Código con que se identifica el contrato. No cambia"
+  code: String!
+  "Nombre del contrato"
+  name: String!
+  "Descripción"
+  description: String
+  "Estado del contrato. Cerrado admite solo lectura"
+  status: DocProjectStatus!
+  "Fecha de cierre. Nula mientras está en curso"
+  closedAt: DateTime
+  """
+  Gestión PMI asociada, en `mi-project`.
+
+  NULO significa que la obra de este contrato no se administra con el módulo de
+  proyectos, y no que el contrato esté incompleto.
+  """
+  projectId: Int
   "Rol documental declarado"
   documentRole: DocumentRole!
-  "Nombre de la contraparte. Nulo en proyectos internos, que no la tienen"
+  "Nombre de la contraparte. Nulo en contratos internos, que no la tienen"
   counterpartyName: String
   """
-  Esquema con que el proyecto propone el código de la PRIMERA revisión de sus
+  Esquema con que el contrato propone el código de la PRIMERA revisión de sus
   documentos. Nulo = rige el valor por defecto del despliegue.
   """
   revisionScheme: RevisionScheme
@@ -1612,23 +1631,37 @@ type DocProjectSettings {
   defaultOrganizer: UserName
 }
 
-"Declaración de la configuración documental de un proyecto"
-input DeclareDocProjectSettingsInput {
-  "¿El proyecto usa el atributo de ubicación física? Por defecto sí"
+"Estado del contrato: en curso admite todas las operaciones; cerrado, solo lectura"
+enum DocProjectStatus {
+  "En curso"
+  ACTIVE
+  "Cerrado. Solo lectura y consulta histórica"
+  CLOSED
+}
+
+"Declaración del contrato documental"
+input DeclareDocProjectInput {
+  "¿El contrato usa el atributo de ubicación física? Por defecto sí"
   locationEnabled: Boolean
   "¿Lo exige al dar de alta un documento? Por defecto no"
   locationRequired: Boolean
-  "Etiqueta con que el proyecto la nombra"
+  "Etiqueta con que el contrato la nombra"
   locationLabel: String
-  "Proyecto al que corresponde"
-  projectId: Int!
+  "Código con que se identifica el contrato. Es su identidad y no cambia"
+  code: String!
+  "Nombre del contrato"
+  name: String!
+  "Descripción"
+  description: String
+  "Gestión PMI asociada. Nulo = la obra no se administra en mi-project"
+  projectId: Int
   "Rol documental a declarar"
   documentRole: DocumentRoleInput!
   "Nombre de la contraparte. Obligatorio en Emisor y Receptor, prohibido en Interno"
   counterpartyName: String
-  "Esquema de revisión del proyecto. Nulo = rige el del despliegue"
+  "Esquema de revisión del contrato. Nulo = rige el del despliegue"
   revisionScheme: RevisionSchemeInput
-  "Armador por defecto de los documentos del proyecto"
+  "Armador por defecto de los documentos del contrato"
   defaultOrganizerId: Int
 }
 
@@ -3176,7 +3209,7 @@ type Query {
   # ─── Contexto de proyecto ───
 
   "Configuración documental de un proyecto. Nula si todavía no declaró su rol"
-  docProjectSettings(projectId: Int!): DocProjectSettings
+  docProject(projectId: Int!): DocProject
 
   """
   Documentos pendientes de salir en un proyecto.
@@ -3338,9 +3371,9 @@ type Mutation {
   Es administrativa: se gobierna solo por el permiso global, porque un proyecto
   sin configuración tampoco tiene miembros a quienes exigir membresía.
   """
-  declareDocProjectSettings(
-    input: DeclareDocProjectSettingsInput!
-  ): DocProjectSettings!
+  declareDocProject(
+    input: DeclareDocProjectInput!
+  ): DocProject!
 
   """
   Incorpora un usuario al proyecto, o lo reincorpora si estaba dado de baja.

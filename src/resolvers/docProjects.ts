@@ -6,13 +6,17 @@ import { handleError } from "../utils/handleError.js"
 import { DocumentRole, RevisionScheme } from "../generated/prisma/enums.js"
 import { AuditAction } from "../events/catalog.js"
 import { emitAuditEvent } from "../events/emit.js"
-import { assertCounterparty, assertRoleIsSettled } from "../utils/projectSettings.js"
+import { assertCounterparty, assertRoleIsSettled } from "../utils/docProjects.js"
 import { createLogger } from "@CLGonzalezGroh/mi-common/logger"
 
-const logger = createLogger("projectSettings")
+const logger = createLogger("docProjects")
 
 /**
- * Configuración documental del proyecto (BLOQUE 02, D-09, D-19 y B4).
+ * El contrato: raíz de alcance del módulo documental (BLOQUE 02D, D-29, B1 y B2).
+ *
+ * Absorbe la configuración documental que BLOQUE 02 había puesto en una entidad
+ * aparte. `documentRole` no es una preferencia de configuración, es lo que el
+ * contrato ES (D-09), y por eso vive en el objeto y no en un satélite.
  *
  * Declarar el rol documental de un proyecto es un acto ADMINISTRATIVO y se
  * gobierna únicamente por el permiso global, sin la segunda capa. El motivo es
@@ -21,9 +25,9 @@ const logger = createLogger("projectSettings")
  *
  * Es el mismo criterio con que OperMask Digitalization trata su membresía.
  */
-export const projectSettingsResolvers = {
+export const docProjectsResolvers = {
   Query: {
-    docProjectSettings: async (
+    docProject: async (
       _: any,
       { projectId }: { projectId: number },
       context: ResolverContext,
@@ -32,11 +36,11 @@ export const projectSettingsResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENTS_PROJECT_SETTINGS_READ],
         context,
       })
-      logger.info("docProjectSettings", { userId })
+      logger.info("docProject", { userId })
 
       try {
-        // Nulo cuando el proyecto todavía no declaró su rol documental
-        return await context.orm.docProjectSettings.findUnique({
+        // Nulo cuando la obra todavía no tiene contrato documental
+        return await context.orm.docProject.findUnique({
           where: { projectId },
         })
       } catch (error) {
@@ -44,9 +48,9 @@ export const projectSettingsResolvers = {
           error,
           userId,
           context,
-          logName: "GET_DOC_PROJECT_SETTINGS",
+          logName: "GET_DOC_PROJECT",
           messages: {
-            default: "Error al obtener la configuración documental del proyecto.",
+            default: "Error al obtener el contrato documental de la obra.",
           },
         })
       }
@@ -54,13 +58,20 @@ export const projectSettingsResolvers = {
   },
 
   Mutation: {
-    declareDocProjectSettings: async (
+    declareDocProject: async (
       _: any,
       {
         input,
       }: {
         input: {
-          projectId: number
+          // Identidad del contrato (B1). El código lo identifica dentro del
+          // módulo y no cambia, con el criterio de D-24.
+          code: string
+          name: string
+          description?: string | null
+          // Gestión PMI asociada. Nulo = la obra de este contrato no se
+          // administra en mi-project (B3, B6).
+          projectId?: number | null
           documentRole: DocumentRole
           counterpartyName?: string
           // Esquema con que el proyecto propone el código de la PRIMERA revisión
@@ -85,20 +96,25 @@ export const projectSettingsResolvers = {
         requiredPermissions: [PERMISSIONS.DOCUMENTS_PROJECT_SETTINGS_UPDATE],
         context,
       })
-      logger.info("declareDocProjectSettings", { userId })
+      logger.info("declareDocProject", { userId })
 
       // Invariante de la contraparte (B4): exigida en ISSUER y RECEIVER,
       // prohibida en INTERNAL, que por definición no la tiene (D-19).
       assertCounterparty(input.documentRole, input.counterpartyName)
 
       // El rol es inmutable desde el primer documento o transmittal (B5)
-      await assertRoleIsSettled(context, input.projectId, input.documentRole)
+      await assertRoleIsSettled(context, input.code, input.documentRole)
 
       try {
         return await context.orm.$transaction(async (tx) => {
-          const settings = await tx.docProjectSettings.upsert({
-            where: { projectId: input.projectId },
+          const contrato = await tx.docProject.upsert({
+            // Por CÓDIGO y no por proyecto: es la identidad del contrato, y
+            // siempre está. Un contrato sin gestión PMI no tendría clave.
+            where: { code: input.code },
             update: {
+              code: input.code,
+              name: input.name,
+              description: input.description ?? null,
               documentRole: input.documentRole,
               counterpartyName: input.counterpartyName ?? null,
               revisionScheme: input.revisionScheme ?? null,
@@ -109,7 +125,10 @@ export const projectSettingsResolvers = {
               updatedById: userId,
             },
             create: {
-              projectId: input.projectId,
+              code: input.code,
+              name: input.name,
+              description: input.description ?? null,
+              projectId: input.projectId ?? null,
               documentRole: input.documentRole,
               counterpartyName: input.counterpartyName ?? null,
               revisionScheme: input.revisionScheme ?? null,
@@ -123,11 +142,13 @@ export const projectSettingsResolvers = {
           })
 
           await emitAuditEvent(tx, {
-            action: AuditAction.DeclareProjectSettings,
-            objectId: settings.id,
+            action: AuditAction.DeclareDocProject,
+            objectId: contrato.id,
             actorId: userId,
             meta: {
-              projectId: input.projectId,
+              code: input.code,
+              name: input.name,
+              projectId: input.projectId ?? null,
               documentRole: input.documentRole,
               counterpartyName: input.counterpartyName ?? null,
               revisionScheme: input.revisionScheme ?? null,
@@ -138,17 +159,18 @@ export const projectSettingsResolvers = {
             },
           })
 
-          return settings
+          return contrato
         })
       } catch (error) {
         return handleError({
           error,
           userId,
           context,
-          logName: "DECLARE_DOC_PROJECT_SETTINGS",
+          logName: "DECLARE_DOC_PROJECT",
           messages: {
-            uniqueConstraint: "El proyecto ya tiene configuración documental.",
-            default: "Error al declarar la configuración documental del proyecto.",
+            uniqueConstraint:
+              "Ya existe un contrato con ese código, o la obra ya tiene contrato documental.",
+            default: "Error al declarar el contrato documental.",
           },
         })
       }

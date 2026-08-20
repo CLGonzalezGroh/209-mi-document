@@ -14,7 +14,7 @@ import {
 import { locationResolvers } from "./locations.js"
 import { documentResolvers } from "./documents.js"
 import { catalogScopeResolvers } from "./catalogScopes.js"
-import { projectSettingsResolvers } from "./projectSettings.js"
+import { docProjectsResolvers } from "./docProjects.js"
 import { projectMemberResolvers } from "./projectMembers.js"
 import { AuditAction } from "../events/catalog.js"
 
@@ -62,7 +62,7 @@ const limpiar = async () => {
   await prisma.docProjectMember.deleteMany({
     where: { projectId: { in: PROYECTOS } },
   })
-  await prisma.docProjectSettings.deleteMany({
+  await prisma.docProject.deleteMany({
     where: { projectId: { in: PROYECTOS } },
   })
   await prisma.docAuditEvent.deleteMany({
@@ -75,10 +75,12 @@ const declarar = async (
   conMembresia = true,
   ubicacion: { locationEnabled?: boolean; locationRequired?: boolean } = {},
 ) => {
-  await projectSettingsResolvers.Mutation.declareDocProjectSettings(
+  await docProjectsResolvers.Mutation.declareDocProject(
     null,
     {
       input: {
+        code: `T-${projectId}`,
+        name: "Contrato de prueba",
         projectId,
         documentRole: DocumentRole.INTERNAL,
         defaultOrganizerId: USER_ID,
@@ -777,7 +779,7 @@ test("un proyecto sin catálogo propio no se ofrece como fuente", async () => {
   )
 
   await prisma.docProjectMember.deleteMany({ where: { projectId: VACIO } })
-  await prisma.docProjectSettings.deleteMany({ where: { projectId: VACIO } })
+  await prisma.docProject.deleteMany({ where: { projectId: VACIO } })
 })
 
 test("con revisión aprobada la ubicación se sigue editando (criterio 6)", async () => {
@@ -813,10 +815,12 @@ test("los tres roles atraviesan el alta sin declarar ubicación (criterio 7)", a
     [EMISOR, DocumentRole.ISSUER],
     [RECEPTOR, DocumentRole.RECEIVER],
   ] as const) {
-    await projectSettingsResolvers.Mutation.declareDocProjectSettings(
+    await docProjectsResolvers.Mutation.declareDocProject(
       null,
       {
         input: {
+          code: `T-${projectId}`,
+          name: "Contrato de prueba",
           projectId,
           documentRole: rol,
           counterpartyName: "Contraparte de prueba",
@@ -841,7 +845,7 @@ test("los tres roles atraviesan el alta sin declarar ubicación (criterio 7)", a
   await prisma.docProjectMember.deleteMany({
     where: { projectId: { in: [EMISOR, RECEPTOR] } },
   })
-  await prisma.docProjectSettings.deleteMany({
+  await prisma.docProject.deleteMany({
     where: { projectId: { in: [EMISOR, RECEPTOR] } },
   })
 })

@@ -20,7 +20,7 @@ import { documentResolvers } from "./documents.js"
 import { workflowResolvers } from "./workflows.js"
 import { revisionResolvers } from "./revisions.js"
 import { workingCopyResolvers } from "./workingCopies.js"
-import { projectSettingsResolvers } from "./projectSettings.js"
+import { docProjectsResolvers } from "./docProjects.js"
 import { qualificationResolvers } from "./qualifications.js"
 import { projectMemberResolvers } from "./projectMembers.js"
 import { resolverTypes } from "./resolversTypes/index.js"
@@ -57,16 +57,18 @@ const limpiar = async () => {
   await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
   await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: { in: PROYECTOS } } })
   await prisma.docProjectMember.deleteMany({ where: { projectId: { in: PROYECTOS } } })
-  await prisma.docProjectSettings.deleteMany({ where: { projectId: { in: PROYECTOS } } })
+  await prisma.docProject.deleteMany({ where: { projectId: { in: PROYECTOS } } })
   await prisma.docAuditEvent.deleteMany({ where: { projectId: { in: PROYECTOS } } })
   await prisma.docWorkflowEvent.deleteMany({ where: { projectId: { in: PROYECTOS } } })
 }
 
 const declarar = async (projectId: number, documentRole: DocumentRole) => {
-  await projectSettingsResolvers.Mutation.declareDocProjectSettings(
+  await docProjectsResolvers.Mutation.declareDocProject(
     null,
     {
       input: {
+        code: `T-${projectId}`,
+        name: "Contrato de prueba",
         projectId,
         documentRole,
         ...(documentRole !== DocumentRole.INTERNAL && {

@@ -1,6 +1,6 @@
 {
   "name": "209-mi-document",
-  "version": "2.10.0",
+  "version": "2.11.0",
   "description": "María Ingeniería API de Gestión Documental",
   "type": "module",
   "main": "index.js",
@@ -21,11 +21,11 @@
     "rover-publish-current": "rover subgraph publish Maria-Ingenieria@current --name mi-document --schema ./schema.graphql --routing-url http://localhost:4209",
     "test:project-scope": "node --import tsx --test src/utils/projectAuthorization.test.ts",
     "test:project-scope-db": "node --import tsx --test src/utils/projectAuthorizationPersistence.test.ts",
-    "test:block02": "npm run test:block01 && npm run test:project-scope && npm run test:project-settings",
+    "test:block02": "npm run test:block01 && npm run test:project-scope && npm run test:doc-projects",
     "test:block02-db": "npm run test:block02 && npm run test:events-db && npm run test:project-scope-db",
     "test:block02-integration": "node --import tsx --test src/resolvers/authorization.integration.test.ts",
     "test:block02-all": "npm run test:block02-db && npm run test:block02-integration",
-    "test:project-settings": "node --import tsx --test src/utils/projectSettings.test.ts src/utils/documentContext.test.ts",
+    "test:doc-projects": "node --import tsx --test src/utils/docProjects.test.ts src/utils/documentContext.test.ts",
     "test:revision-scheme": "node --import tsx --test src/utils/revisionScheme.test.ts",
     "test:step-signature": "node --import tsx --test src/utils/stepSignature.test.ts",
     "test:document-metadata": "node --import tsx --test src/utils/documentMetadata.test.ts",
@@ -63,7 +63,10 @@
     "test:classification-seed": "node --import tsx --test src/utils/classificationSeed.test.ts",
     "test:block02c": "npm run test:block02b && npm run test:classification-seed",
     "test:block02c-db": "npm run test:block02c && npm run test:events-db && npm run test:project-scope-db && npm run test:object-context-db && npm run test:model-constraints-db",
-    "test:block02c-all": "npm run test:block02c-db && npm run test:block02-integration && npm run test:block03-integration && npm run test:block04-integration && npm run test:block02b-integration && npm run test:block02c-integration"
+    "test:block02c-all": "npm run test:block02c-db && npm run test:block02-integration && npm run test:block03-integration && npm run test:block04-integration && npm run test:block02b-integration && npm run test:block02c-integration",
+    "test:block02d": "npm run test:block02c",
+    "test:block02d-db": "npm run test:block02d && npm run test:events-db && npm run test:project-scope-db && npm run test:object-context-db && npm run test:model-constraints-db",
+    "test:block02d-all": "npm run test:block02d-db && npm run test:block02-integration && npm run test:block03-integration && npm run test:block04-integration && npm run test:block02b-integration && npm run test:block02c-integration"
   },
   "keywords": [],
   "author": "César González Groh",

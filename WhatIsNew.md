@@ -1205,3 +1205,30 @@ Que `ScannedFile` no participe del alcance deja de ser una decisión de diseño 
 Que un bloque corrija principios ya promovidos es lo previsto: la SFS describe lo implementado y validado, y cuando lo implementado cambia, lo que estaba escrito **deja de ser cierto** y no simplemente incompleto.
 
 Con esto el bloque queda cerrado: seis fases, desplegado y verificado en los cinco despliegues.
+
+---
+
+# What's new in María Ingeniería API Documents 2.11.0
+
+2026-08-20
+
+## La raíz de alcance propia del módulo (BLOQUE 02D)
+
+### Fase 2 — `DocProject`, y `DocProjectSettings` disuelto adentro
+
+El módulo deja de referenciar el `Project` de `mi-project` y pasa a ser dueño de su propia entidad. Es lo que D-15 ya había nombrado sin darle objeto: **cada proyecto documental es un contrato**.
+
+`DocProjectSettings` **desaparece**: era la entidad de contrato sin identidad propia. Sus siete campos —rol documental, contraparte, esquema de revisión, armador por defecto y la configuración de ubicación con su etiqueta— pasan a `DocProject` sin un solo cambio de forma. Lo que se agrega es lo que le faltaba: **código, nombre, descripción, estado y cierre**.
+
+**Cambia el contrato GraphQL.** `DocProjectSettings` pasa a `DocProject`, la consulta `docProjectSettings` a `docProject`, la mutación `declareDocProjectSettings` a `declareDocProject` —con `code` y `name` obligatorios— y el valor `DOC_PROJECT_SETTINGS` de `DocObjectType` a `DOC_PROJECT`, en el tipo y en su variante `Input`. **Ninguna pantalla se rompe**: el nombre viejo solo aparecía en el archivo generado de la webapp, y no hay componente que lo consuma.
+
+**El alta pasa a identificarse por código y no por proyecto.** Un contrato sin gestión PMI asociada no tiene `projectId` con el que buscarse, de modo que el `upsert` va por `code`, que es la identidad y siempre está.
+
+**El uno a uno con `mi-project` se conserva en esta fase.** La unicidad de `projectId` cae en la fase 4, que es la que habilita varios contratos por obra. Hasta entonces los catorce lugares que leen la configuración por proyecto siguen funcionando sin cambiar de clave de búsqueda — y esa es la razón por la que **el renombre a `docProjectId` se adelantó delante del N:1**: quitar la unicidad antes los dejaría sin clave.
+
+**La migración se niega a correr si encuentra configuraciones cargadas.** Cada fila sería un contrato a crear, y le falta justamente lo que este bloque agrega: código y nombre no se pueden inventar por el cliente. El control de precondición ya había verificado cero en los cinco despliegues.
+
+**`ALTER TYPE ... RENAME VALUE` para el tipo de objeto de la traza**, que conserva las filas existentes sin tocarlas. Es un cambio de etiqueta y no una conversión: ningún evento ya emitido queda apuntando a un valor que el contrato no declara, que es la rotura latente que BLOQUE 02C encontró.
+
+**Verificado:** `tsc` limpio, **525 pruebas y 0 fallos** —el mismo total que antes del cambio—, `prisma migrate diff` sin diferencias entre migraciones y modelo, y la ruta completa reconstruida sobre una base limpia con `pg_dump` **idéntico** al de la base migrada de forma incremental.
+

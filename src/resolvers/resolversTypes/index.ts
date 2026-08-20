@@ -593,7 +593,7 @@ export const resolverTypes = {
     },
   },
 
-  DocProjectSettings: {
+  DocProject: {
     defaultOrganizer: (parent: { defaultOrganizerId: number | null }) => {
       if (parent.defaultOrganizerId === null) return null
       return { __typename: "UserName", id: parent.defaultOrganizerId }
@@ -673,7 +673,7 @@ export const resolverTypes = {
      * combinaciones imposibles, que ningún transmittal llega a tener.
      */
     direction: async (parent: Transmittal) => {
-      const settings = await prisma.docProjectSettings.findUnique({
+      const settings = await prisma.docProject.findUnique({
         where: { projectId: parent.projectId },
         select: { documentRole: true },
       })

@@ -11,7 +11,7 @@ import {
 } from "../generated/prisma/enums.js"
 import { documentResolvers } from "./documents.js"
 import { transmittalResolvers } from "./transmittals.js"
-import { projectSettingsResolvers } from "./projectSettings.js"
+import { docProjectsResolvers } from "./docProjects.js"
 import { projectMemberResolvers } from "./projectMembers.js"
 import { AuditAction } from "../events/catalog.js"
 
@@ -51,7 +51,7 @@ const limpiar = async () => {
   })
   await prisma.document.deleteMany({ where: { code: { startsWith: CODIGO } } })
   await prisma.docProjectMember.deleteMany({ where: { userId: USER_ID } })
-  await prisma.docProjectSettings.deleteMany({
+  await prisma.docProject.deleteMany({
     where: { projectId: { in: [PROYECTO_CON_MEMBRESIA, PROYECTO_SIN_MEMBRESIA] } },
   })
   await prisma.docAuditEvent.deleteMany({
@@ -217,7 +217,7 @@ test("un documento de proyecto sin proyecto se rechaza antes de autorizar", asyn
             module: ModuleType.PROJECTS,
             documentTypeId: 1,
             // El archivo dejó de ser obligatorio (BLOQUE 03, H-20): el alta ya
-            // no lo lleva, y el armador lo aporta DocProjectSettings.
+            // no lo lleva, y el armador lo aporta DocProject.
             assignedOrganizerId: USER_ID,
           },
         },
@@ -241,7 +241,7 @@ test("crear en un proyecto ajeno se rechaza con FORBIDDEN", async () => {
             projectId: PROYECTO_SIN_MEMBRESIA,
             documentTypeId: 1,
             // El archivo dejó de ser obligatorio (BLOQUE 03, H-20): el alta ya
-            // no lo lleva, y el armador lo aporta DocProjectSettings.
+            // no lo lleva, y el armador lo aporta DocProject.
             assignedOrganizerId: USER_ID,
           },
         },
@@ -257,10 +257,12 @@ test("crear en un proyecto ajeno se rechaza con FORBIDDEN", async () => {
 // --- Contexto de proyecto: configuración y membresía (fase F) ---
 
 test("la configuración se declara y se lee, y emite su traza", async () => {
-  const settings: any = await projectSettingsResolvers.Mutation.declareDocProjectSettings(
+  const settings: any = await docProjectsResolvers.Mutation.declareDocProject(
     null,
     {
       input: {
+        code: `T-${PROYECTO_CON_MEMBRESIA}`,
+        name: "Contrato de prueba",
         projectId: PROYECTO_CON_MEMBRESIA,
         documentRole: DocumentRole.ISSUER,
         counterpartyName: "Planta de prueba",
@@ -271,7 +273,7 @@ test("la configuración se declara y se lee, y emite su traza", async () => {
 
   assert.equal(settings.documentRole, DocumentRole.ISSUER)
 
-  const leida: any = await projectSettingsResolvers.Query.docProjectSettings(
+  const leida: any = await docProjectsResolvers.Query.docProject(
     null,
     { projectId: PROYECTO_CON_MEMBRESIA },
     context,
@@ -280,7 +282,7 @@ test("la configuración se declara y se lee, y emite su traza", async () => {
 
   // La traza del objeto nuevo lleva su proyecto, derivado (B9)
   const eventos = await prisma.docAuditEvent.findMany({
-    where: { objectId: settings.id, action: AuditAction.DeclareProjectSettings },
+    where: { objectId: settings.id, action: AuditAction.DeclareDocProject },
   })
   assert.equal(eventos.length, 1)
   assert.equal(eventos[0].projectId, PROYECTO_CON_MEMBRESIA)
@@ -289,10 +291,12 @@ test("la configuración se declara y se lee, y emite su traza", async () => {
 test("un proyecto interno no admite contraparte", async () => {
   assert.equal(
     await codigoDeError(() =>
-      projectSettingsResolvers.Mutation.declareDocProjectSettings(
+      docProjectsResolvers.Mutation.declareDocProject(
         null,
         {
           input: {
+            code: `T-${PROYECTO_SIN_MEMBRESIA}`,
+            name: "Contrato de prueba",
             projectId: PROYECTO_SIN_MEMBRESIA,
             documentRole: DocumentRole.INTERNAL,
             counterpartyName: "Alguien",
@@ -309,10 +313,12 @@ test("el rol no puede cambiarse si el proyecto ya tiene documentos", async () =>
   // PROYECTO_CON_MEMBRESIA ya tiene un documento creado en el before
   assert.equal(
     await codigoDeError(() =>
-      projectSettingsResolvers.Mutation.declareDocProjectSettings(
+      docProjectsResolvers.Mutation.declareDocProject(
         null,
         {
           input: {
+            code: `T-${PROYECTO_CON_MEMBRESIA}`,
+            name: "Contrato de prueba",
             projectId: PROYECTO_CON_MEMBRESIA,
             documentRole: DocumentRole.RECEIVER,
             counterpartyName: "Otro",

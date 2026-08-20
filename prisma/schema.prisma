@@ -166,6 +166,15 @@ enum DocumentRole {
   INTERNAL // Interno: no hay contraparte; el ciclo termina en la aprobación
 }
 
+// Estado del contrato (BLOQUE 02D, B9). Dos estados y un solo efecto, con el
+// precedente literal de ProjectStatus en digitalización. El cierre es una puerta
+// sobre la escritura y NO se propaga hacia abajo: una revisión en circuito al
+// momento del cierre queda donde está.
+enum DocProjectStatus {
+  ACTIVE // Admite todas las operaciones del ciclo documental
+  CLOSED // Solo lectura / consulta histórica
+}
+
 // Lado del proyecto al que pertenece un miembro (BLOQUE 02, D-15).
 // El rótulo visible lo aporta el rol del proyecto: Ingeniería/Cliente o Planta/Contratista.
 enum DocProjectSide {
@@ -442,7 +451,7 @@ model DocumentRevision {
   // Armador designado al crear la revisión (BLOQUE 03, B3). Obligatorio: es el
   // único actor que debe conocerse en el alta, porque todo lo demás lo trae la
   // plantilla o lo decide el armado. Su valor por defecto lo aporta
-  // DocProjectSettings.defaultOrganizerId. Referencia externa sin FK: User vive
+  // DocProject.defaultOrganizerId. Referencia externa sin FK: User vive
   // en mi-admin. El paso de armado se reasigna después como cualquier otro (B9).
   assignedOrganizerId Int
 
@@ -790,7 +799,7 @@ model Transmittal {
   respondsToTransmittalId Int?
 
   // `issuedTo` se retira: el destinatario de una emisión es la contraparte del
-  // proyecto, que es única (D-15) y vive en DocProjectSettings.counterpartyName.
+  // contrato, que es única (D-15) y vive en DocProject.counterpartyName.
   // Guardarla por registro permitía que dos transmittals del mismo proyecto
   // declararan destinatarios distintos, que es lo que la unidad contractual
   // considera inválido. Cierra B11 de BLOQUE 02 en la dirección que anticipó.
@@ -897,19 +906,46 @@ model Attachment {
 // CONTEXTO DE PROYECTO — BLOQUE 02
 // ================================
 
-// Configuración documental de un proyecto (D-09, D-19).
-// Un registro por proyecto. Es además el lugar donde residirán el esquema de
-// revisión (D-13) y la configuración de ubicación física (D-14).
-model DocProjectSettings {
+// Raíz de alcance del módulo documental (BLOQUE 02D, D-29, B1 y B2).
+//
+// El módulo es dueño de su proyecto: no referencia el Project de mi-project ni
+// lo federa. Es lo que D-15 ya había nombrado sin darle objeto —cada proyecto
+// documental ES UN CONTRATO— y sigue el precedente de DigitalizationProject
+// (DOM-019) de OperMask Digitalization.
+//
+// Absorbe por completo a DocProjectSettings, que era la entidad de contrato sin
+// identidad propia: documentRole no es una preferencia de configuración, es lo
+// que el contrato ES (D-09).
+model DocProject {
   id          Int       @id @default(autoincrement())
   createdAt   DateTime  @default(now())
   createdById Int
   updatedAt   DateTime? @updatedAt
   updatedById Int       @default(1)
+  isSys       Boolean   @default(false)
 
-  // Referencia externa sin FK: Project vive en mi-project
-  projectId Int @unique
+  // ── Identidad ──────────────────────────────────────────────────────────────
+  // Lo que hasta BLOQUE 02D no existía en ninguna parte: el módulo no podía
+  // nombrar sus propios contratos porque no era dueño de ellos.
+  code        String  @unique
+  name        String
+  description String?
 
+  status   DocProjectStatus @default(ACTIVE)
+  closedAt DateTime?
+  closedById Int?
+
+  // ── Gestión PMI ────────────────────────────────────────────────────────────
+  // Referencia externa sin FK al Project de mi-project. NULO significa que el
+  // contrato no tiene asociada una gestión PMI —porque el cliente no compró ese
+  // módulo, o porque esa obra no se sigue por cronograma— y NO que el contrato
+  // esté incompleto (B3, B6).
+  //
+  // Sigue siendo único mientras dura la fase 3: la unicidad cae con el N:1, que
+  // es lo que habilita varios contratos por obra, uno por contratista.
+  projectId Int? @unique
+
+  // ── Lo que venía de DocProjectSettings ─────────────────────────────────────
   documentRole DocumentRole
 
   // Nombre de la contraparte: cliente en ISSUER, contratista en RECEIVER.
@@ -917,13 +953,13 @@ model DocProjectSettings {
   // que por definición no tiene contraparte.
   counterpartyName String?
 
-  // Esquema con que el proyecto propone el código de la PRIMERA revisión de sus
+  // Esquema con que el contrato propone el código de la PRIMERA revisión de sus
   // documentos (BLOQUE 03, B13). Nulo = rige el valor por defecto del despliegue
   // (DocSettings). De la segunda revisión en adelante el esquema se infiere de la
   // última revisión no abortada, que es el escalón del documento.
   revisionScheme RevisionScheme?
 
-  // Armador por defecto del proyecto —habitualmente el jefe de proyecto—, con el
+  // Armador por defecto del contrato —habitualmente el jefe de proyecto—, con el
   // que el alta llega con el campo lleno (B3). Nulo = sin valor por defecto, y
   // quien crea el documento debe designarlo. Referencia externa sin FK.
   defaultOrganizerId Int?
@@ -932,7 +968,7 @@ model DocProjectSettings {
   //
   // Habilitado y NO obligatorio por defecto, en los tres roles. Se corrige acá la
   // expectativa de D-14 de que "una planta lo exigirá": la planta lo usa para
-  // filtrar, no para exigir. Un proyecto atraviesa el ciclo completo sin declarar
+  // filtrar, no para exigir. Un contrato atraviesa el ciclo completo sin declarar
   // ninguna ubicación.
   //
   // La etiqueta sí es configurable, a diferencia del esquema de revisión: "área",
@@ -942,7 +978,9 @@ model DocProjectSettings {
   locationRequired Boolean @default(false)
   locationLabel    String?
 
-  @@map("doc_project_settings")
+  @@index([projectId])
+  @@index([status])
+  @@map("doc_projects")
 }
 
 // ================================
@@ -1270,14 +1308,14 @@ enum DocScopeMode {
 
 // Cómo resuelve un proyecto cada catálogo documental (BLOQUE 02B, B1).
 //
-// UNA FILA POR PROYECTO Y CATÁLOGO, y no columnas en `DocProjectSettings`: B1
+// UNA FILA POR PROYECTO Y CATÁLOGO, y no columnas en `DocProject`: B1
 // sostiene que el mecanismo es uno para los tres catálogos, y esta es la única
 // forma en que eso es cierto en el modelo. `BLOCK_02C` lo reutiliza agregando
 // valores a `DocCatalogKind`, sin migrar estructura.
 //
 // Es además la distinción que D-21 ya había hecho: las demás configuraciones por
 // proyecto —el rol, el esquema de revisión, el armador por defecto— son VALORES
-// donde lo específico reemplaza a lo general, y viven en `DocProjectSettings`.
+// donde lo específico reemplaza a lo general, y viven en `DocProject`.
 // Un catálogo es un CONJUNTO, y lo que se declara es si se hereda o no.
 //
 // LA AUSENCIA DE FILA ES `INHERIT`. No se exige declarar nada para operar, y es
@@ -1421,7 +1459,7 @@ enum DocObjectType {
   TRANSMITTAL
   DOCUMENT_CLASS
   DOCUMENT_TYPE
-  DOC_PROJECT_SETTINGS
+  DOC_PROJECT
   DOC_PROJECT_MEMBER
 
   // Ciclo interno (BLOQUE 03)

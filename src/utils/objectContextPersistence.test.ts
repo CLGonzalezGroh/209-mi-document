@@ -73,7 +73,7 @@ const limpiar = async () => {
   await prisma.docWorkflowTemplate.deleteMany({ where: { projectId: PROYECTO } })
   await prisma.docQualification.deleteMany({ where: { projectId: PROYECTO } })
   await prisma.docProjectMember.deleteMany({ where: { projectId: PROYECTO } })
-  await prisma.docProjectSettings.deleteMany({ where: { projectId: PROYECTO } })
+  await prisma.docProject.deleteMany({ where: { projectId: PROYECTO } })
   await prisma.documentType.deleteMany({ where: { code: `${CODIGO}-T` } })
   await prisma.documentClass.deleteMany({ where: { code: `${CODIGO}-C` } })
 }
@@ -189,8 +189,10 @@ before(async () => {
     create: { id: 1, revisionScheme: RevisionScheme.ALPHA },
   })
 
-  const projectSettings = await prisma.docProjectSettings.create({
+  const docProject = await prisma.docProject.create({
     data: {
+      code: `T-${PROYECTO}`,
+      name: "Contrato de prueba",
       projectId: PROYECTO,
       documentRole: DocumentRole.INTERNAL,
       createdById: 1,
@@ -284,7 +286,7 @@ before(async () => {
     settingsId: settings.id,
     qualificationId: calificacion.id,
     responseId: respuesta.id,
-    projectSettingsId: projectSettings.id,
+    docProjectId: docProject.id,
     memberId: miembro.id,
     transmittalId: transmittal.id,
     classId: clase.id,
@@ -377,8 +379,8 @@ test("la configuración y la membresía del proyecto no tienen módulo", async (
   // Son contexto del proyecto, no documentación.
   assert.deepEqual(
     await contextoDe(
-      DocObjectType.DOC_PROJECT_SETTINGS,
-      (creados as any).projectSettingsId,
+      DocObjectType.DOC_PROJECT,
+      (creados as any).docProjectId,
     ),
     { projectId: PROYECTO, module: null },
   )

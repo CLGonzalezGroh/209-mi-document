@@ -426,7 +426,7 @@ export const documentResolvers = {
       logger.info("pendingDocuments", { userId })
 
       try {
-        const settings = await context.orm.docProjectSettings.findUnique({
+        const settings = await context.orm.docProject.findUnique({
           where: { projectId },
           select: { documentRole: true },
         })

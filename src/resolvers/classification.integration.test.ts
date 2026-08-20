@@ -15,7 +15,7 @@ import { documentClassResolvers } from "./documentClasses.js"
 import { documentTypeResolvers } from "./documentTypes.js"
 import { catalogScopeResolvers } from "./catalogScopes.js"
 import { classificationResolvers } from "./classification.js"
-import { projectSettingsResolvers } from "./projectSettings.js"
+import { docProjectsResolvers } from "./docProjects.js"
 import { projectMemberResolvers } from "./projectMembers.js"
 import { AuditAction } from "../events/catalog.js"
 import { documentResolvers } from "./documents.js"
@@ -68,7 +68,7 @@ const limpiar = async () => {
   await prisma.docProjectMember.deleteMany({
     where: { projectId: { in: PROYECTOS } },
   })
-  await prisma.docProjectSettings.deleteMany({
+  await prisma.docProject.deleteMany({
     where: { projectId: { in: PROYECTOS } },
   })
   await prisma.docAuditEvent.deleteMany({
@@ -77,10 +77,12 @@ const limpiar = async () => {
 }
 
 const declarar = async (projectId: number, conMembresia = true) => {
-  await projectSettingsResolvers.Mutation.declareDocProjectSettings(
+  await docProjectsResolvers.Mutation.declareDocProject(
     null,
     {
       input: {
+        code: `T-${projectId}`,
+        name: "Contrato de prueba",
         projectId,
         documentRole: DocumentRole.INTERNAL,
         defaultOrganizerId: USER_ID,

@@ -161,6 +161,14 @@ export const DocumentRole = {
 export type DocumentRole = (typeof DocumentRole)[keyof typeof DocumentRole]
 
 
+export const DocProjectStatus = {
+  ACTIVE: 'ACTIVE',
+  CLOSED: 'CLOSED'
+} as const
+
+export type DocProjectStatus = (typeof DocProjectStatus)[keyof typeof DocProjectStatus]
+
+
 export const DocProjectSide = {
   HOST: 'HOST',
   COUNTERPARTY: 'COUNTERPARTY'
@@ -211,7 +219,7 @@ export const DocObjectType = {
   TRANSMITTAL: 'TRANSMITTAL',
   DOCUMENT_CLASS: 'DOCUMENT_CLASS',
   DOCUMENT_TYPE: 'DOCUMENT_TYPE',
-  DOC_PROJECT_SETTINGS: 'DOC_PROJECT_SETTINGS',
+  DOC_PROJECT: 'DOC_PROJECT',
   DOC_PROJECT_MEMBER: 'DOC_PROJECT_MEMBER',
   DOC_STEP_SIGNATURE: 'DOC_STEP_SIGNATURE',
   DOC_WORKFLOW_TEMPLATE: 'DOC_WORKFLOW_TEMPLATE',

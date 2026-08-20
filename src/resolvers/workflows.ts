@@ -325,7 +325,7 @@ const roleOfRevision = async (
 
   if (revision.document.projectId === null) return DocumentRole.INTERNAL
 
-  const settings = await context.orm.docProjectSettings.findUnique({
+  const settings = await context.orm.docProject.findUnique({
     where: { projectId: revision.document.projectId },
     select: { documentRole: true },
   })

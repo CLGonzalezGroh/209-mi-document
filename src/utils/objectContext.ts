@@ -159,8 +159,8 @@ const derivadores: Record<
 
   // La configuración y la membresía pertenecen a un proyecto por definición, y
   // no a un módulo: son el contexto del proyecto, no documentación.
-  [DocObjectType.DOC_PROJECT_SETTINGS]: async (client, id) => {
-    const settings = await client.docProjectSettings.findUnique({
+  [DocObjectType.DOC_PROJECT]: async (client, id) => {
+    const settings = await client.docProject.findUnique({
       where: { id },
       select: { projectId: true },
     })

@@ -68,7 +68,7 @@ export const ModelName = {
   Transmittal: 'Transmittal',
   TransmittalItem: 'TransmittalItem',
   Attachment: 'Attachment',
-  DocProjectSettings: 'DocProjectSettings',
+  DocProject: 'DocProject',
   DocSettings: 'DocSettings',
   DocWorkflowTemplate: 'DocWorkflowTemplate',
   DocWorkflowTemplateStep: 'DocWorkflowTemplateStep',
@@ -378,12 +378,19 @@ export const AttachmentScalarFieldEnum = {
 export type AttachmentScalarFieldEnum = (typeof AttachmentScalarFieldEnum)[keyof typeof AttachmentScalarFieldEnum]
 
 
-export const DocProjectSettingsScalarFieldEnum = {
+export const DocProjectScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
   createdById: 'createdById',
   updatedAt: 'updatedAt',
   updatedById: 'updatedById',
+  isSys: 'isSys',
+  code: 'code',
+  name: 'name',
+  description: 'description',
+  status: 'status',
+  closedAt: 'closedAt',
+  closedById: 'closedById',
   projectId: 'projectId',
   documentRole: 'documentRole',
   counterpartyName: 'counterpartyName',
@@ -394,7 +401,7 @@ export const DocProjectSettingsScalarFieldEnum = {
   locationLabel: 'locationLabel'
 } as const
 
-export type DocProjectSettingsScalarFieldEnum = (typeof DocProjectSettingsScalarFieldEnum)[keyof typeof DocProjectSettingsScalarFieldEnum]
+export type DocProjectScalarFieldEnum = (typeof DocProjectScalarFieldEnum)[keyof typeof DocProjectScalarFieldEnum]
 
 
 export const DocSettingsScalarFieldEnum = {

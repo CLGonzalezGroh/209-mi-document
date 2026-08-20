@@ -61,20 +61,28 @@ export const sideLabel = (role: DocumentRole, side: DocProjectSide): string => {
  *
  * El rol invierte el orden entre el circuito de revisión y el transmittal, de
  * modo que cambiarlo con objetos ya en circulación dejaría un ciclo que no
- * corresponde al modo declarado. Mientras el proyecto esté vacío se modifica
+ * corresponde al modo declarado. Mientras el contrato esté vacío se modifica
  * libremente: lo que cambia es la precondición, no la operación.
+ *
+ * El contrato se busca por su CÓDIGO, que es su identidad y siempre está; el
+ * `projectId` puede faltar, porque un contrato sin gestión PMI es válido (B3).
+ * Sin gestión PMI tampoco puede haber documentos todavía —hasta la fase 3 el
+ * documento cuelga del proyecto de mi-project—, de modo que el rol es libre.
  */
 export const assertRoleIsSettled = async (
   context: ResolverContext,
-  projectId: number,
+  code: string,
   nuevoRol: DocumentRole,
 ): Promise<void> => {
-  const actual = await context.orm.docProjectSettings.findUnique({
-    where: { projectId },
-    select: { documentRole: true },
+  const actual = await context.orm.docProject.findUnique({
+    where: { code },
+    select: { documentRole: true, projectId: true },
   })
 
   if (!actual || actual.documentRole === nuevoRol) return
+  if (actual.projectId === null) return
+
+  const projectId = actual.projectId
 
   const [documentos, transmittals] = await Promise.all([
     context.orm.document.count({ where: { projectId } }),
@@ -83,7 +91,7 @@ export const assertRoleIsSettled = async (
 
   if (documentos > 0 || transmittals > 0) {
     throw new GraphQLError(
-      "El rol documental no puede cambiarse: el proyecto ya tiene documentos o transmittals",
+      "El rol documental no puede cambiarse: el contrato ya tiene documentos o transmittals",
       { extensions: { code: "CONFLICT" } },
     )
   }

@@ -559,7 +559,7 @@ export const transmittalResolvers = {
         // El rol se DECLARA y no se deduce (D-19). Sin declaración no hay
         // circulación posible: es el rol el que dice si el transmittal sale, si
         // entra, o si no existe.
-        const settings = await context.orm.docProjectSettings.findUnique({
+        const settings = await context.orm.docProject.findUnique({
           where: { projectId: input.projectId },
           select: { documentRole: true },
         })
@@ -732,7 +732,7 @@ export const transmittalResolvers = {
         assertCarriesItems(transmittal.nature)
         assertDraft(transmittal.status, "agregar documentos")
 
-        const settings = await context.orm.docProjectSettings.findUnique({
+        const settings = await context.orm.docProject.findUnique({
           where: { projectId: transmittal.projectId },
           select: { documentRole: true },
         })
@@ -918,7 +918,7 @@ export const transmittalResolvers = {
           )
         }
 
-        const settings = await context.orm.docProjectSettings.findUnique({
+        const settings = await context.orm.docProject.findUnique({
           where: { projectId: transmittal.projectId },
           select: { documentRole: true },
         })
@@ -1353,7 +1353,7 @@ export const transmittalResolvers = {
           },
         })
 
-        const settings = await context.orm.docProjectSettings.findUnique({
+        const settings = await context.orm.docProject.findUnique({
           where: { projectId: transmittal.projectId },
           select: { documentRole: true },
         })

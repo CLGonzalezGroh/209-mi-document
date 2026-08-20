@@ -270,16 +270,20 @@ Es el precedente que D-28 ya citaba, aplicado ahora sin obstáculo: en OperMask 
 
 | Fase | Contenido |
 | ---- | --------- |
-| 1 | **Línea base medida** en los cinco despliegues: filas de cada tabla que se toca, entradas de catálogo con `projectId` no nulo y su cruce con `scanned_files`, y `projectId` no nulo en `scanned_files` y `areas` |
-| 2 | `DocProject` con identidad, absorbiendo `DocProjectSettings` (`B1`, `B2`) |
-| 3 | Vínculo opcional N:1 con `mi-project` (`B3`) |
-| 4 | Contraparte como referencia a `Company`, con federación (`B4`) |
-| 5 | Renombre a `docProjectId` en los once modelos, con claves foráneas (`B7`) |
+| 1 ✔ | **Línea base medida** en los cinco despliegues: filas de cada tabla que se toca, entradas de catálogo con `projectId` no nulo y su cruce con `scanned_files`, y `projectId` no nulo en `scanned_files` y `areas` |
+| 2 | `DocProject` con identidad, absorbiendo `DocProjectSettings` (`B1`, `B2`). Conserva el uno a uno con `mi-project` |
+| 3 | Renombre a `docProjectId` en los once modelos, con claves foráneas (`B7`) |
+| 4 | Vínculo opcional N:1 con `mi-project` (`B3`) |
+| 5 | Contraparte como referencia a `Company`, con federación (`B4`) |
 | 6 | Índices únicos, los dos parciales por módulo (`B5`, `B6`) |
 | 7 | Estados del contrato y puerta de escritura por estado (`B9`) |
 | 8 | Contrato GraphQL, operaciones del contrato, permisos y siembra |
 | 9 | Pruebas de las tres capas, controles de despliegue y línea base contrastada |
 | 10 | Corrección de D-06, D-15 y D-28 en el plan, y promoción a la SFS |
+
+**El renombre se adelantó delante del N:1, y el motivo lo puso el código.** El orden original ponía el vínculo opcional antes del renombre, y no funciona: **catorce lugares leen la configuración con `findUnique({ where: { projectId } })`**, que exige que esa columna sea única. Quitarle la unicidad para admitir varios contratos por obra los deja sin clave de búsqueda, y la que los reemplaza —`docProjectId`, que apunta al contrato directamente— no existe hasta el renombre.
+
+Con el orden nuevo cada paso es coherente por sí solo: la fase 2 deja el contrato uno a uno con el proyecto y nada cambia de lugar; la fase 3 hace que todo cuelgue del contrato por su id; y recién entonces la fase 4 puede quitar la unicidad, porque **ya nadie busca por ahí**. Es además una simplificación: después del renombre los catorce lugares tienen el contrato a mano y dejan de buscarlo.
 
 La línea base va primero porque es lo único que puede invalidar el supuesto sobre el que se apoya todo el bloque —que no hay datos que migrar—, y porque medir después de tocar no sirve de nada. **Su control sobre los catálogos es condición de arranque y no un dato de contexto**: de dar distinto de cero, cambia el alcance de la fase 5.
 

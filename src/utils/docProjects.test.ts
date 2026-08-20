@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 import { DocProjectSide, DocumentRole } from "../generated/prisma/enums.js"
-import { assertCounterparty, counterpartyViolation, sideLabel } from "./projectSettings.js"
+import { assertCounterparty, counterpartyViolation, sideLabel } from "./docProjects.js"
 
 // Reglas de la configuración documental del proyecto (BLOQUE 02, B4).
 
