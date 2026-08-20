@@ -393,7 +393,7 @@ export const DocProjectScalarFieldEnum = {
   closedById: 'closedById',
   projectId: 'projectId',
   documentRole: 'documentRole',
-  counterpartyName: 'counterpartyName',
+  counterpartyId: 'counterpartyId',
   revisionScheme: 'revisionScheme',
   defaultOrganizerId: 'defaultOrganizerId',
   locationEnabled: 'locationEnabled',

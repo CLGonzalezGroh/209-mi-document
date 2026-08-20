@@ -378,6 +378,26 @@ Una prueba de limpieza tuvo que corregirse por una razón que conviene retener: 
 
 **Verificado:** `tsc` limpio, **527 pruebas y 0 fallos**, `prisma migrate diff` sin diferencias, y ruta completa sobre base limpia con `pg_dump` idéntico al de la base incremental.
 
+### Fase 5 — completada
+
+**La contraparte dejó de ser un nombre.** `counterpartyName` se retira y aparece `counterpartyId`, referencia externa sin clave foránea a `Company` de `205-mi-admin`. Es lo que la mudanza del 2026-08-19 vino a habilitar, y el motivo por el que tuvo que ir primero.
+
+**Una referencia hizo más barata la invariante, y no solo más limpia.** Con el nombre libre había un tercer estado —texto en blanco— que `counterpartyViolation` tenía que descartar a mano con un `trim()`. Una referencia no lo admite: es un id o es nulo. La regla de D-19 quedó enunciada sobre dos estados en lugar de tres.
+
+**El contrato expone la empresa, no su id.** `DocProject.counterparty: Company` se resuelve por federación, con el mismo patrón con que el módulo trata a `UserName`. El stub de `Company` que el subgrafo ya declaraba sin uso —heredado de cuando la empresa vivía en `mi-comercial`— pasa por fin a tener consumidor, y su descripción dice de dónde viene.
+
+**La composición del supergrafo se verificó localmente**, con `rover supergraph compose` sobre los siete subgrafos: compone sin error, y `Company` queda declarada como entidad en cuatro subgrafos con sus campos resueltos por `mi-admin`. Es una verificación que el bloque no había necesitado hasta ahora, porque **es la primera vez que federa contra otro subgrafo**.
+
+Aparece de paso una inconsistencia preexistente y ajena a este bloque: `mi-management` y `mi-project` describen a `Company` como *"empresa para darle seguimiento comercial"*, y esa es la descripción que el supergrafo elige. Es cosmética y no se toca acá.
+
+#### `tsc` no delata un campo viejo en una escritura de Prisma
+
+Al retirar `counterpartyName` del modelo y regenerar el cliente, el `upsert` que seguía pasándolo en `data` **compiló sin un solo error**. El `XOR<...>` con que Prisma tipa `data` desactiva el control de propiedades excedentes de TypeScript. En ejecución falla —*Unknown argument*—, de modo que **lo único que lo encuentra son las pruebas**.
+
+Es la contracara exacta del hallazgo de la fase 3 sobre el contrato: allá un campo retirado del modelo se resolvía como `null` en lugar de romperse; acá una escritura con el nombre viejo compila y falla recién al ejecutarse. **En los dos casos `tsc` limpio no es evidencia de nada**, y lo que vale es `grep` del nombre viejo más una prueba que ejercite el camino.
+
+**Verificado:** `tsc` limpio, **527 pruebas y 0 fallos**, `prisma migrate diff` sin diferencias, ruta completa sobre base limpia con `pg_dump` idéntico, y el supergrafo compuesto sin error.
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-06, D-07, D-09, D-15, D-19, D-21, D-24, D-28, D-29

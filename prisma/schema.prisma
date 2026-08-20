@@ -958,10 +958,18 @@ model DocProject {
   // ── Lo que venía de DocProjectSettings ─────────────────────────────────────
   documentRole DocumentRole
 
-  // Nombre de la contraparte: cliente en ISSUER, contratista en RECEIVER.
-  // Exigido por invariante en ISSUER y RECEIVER; prohibido en INTERNAL,
-  // que por definición no tiene contraparte.
-  counterpartyName String?
+  // Contraparte del contrato: cliente en ISSUER, contratista en RECEIVER
+  // (BLOQUE 02D, B4). Referencia externa sin FK a Company, que vive en
+  // 205-mi-admin desde el 2026-08-19.
+  //
+  // Se contrata con la EMPRESA y no con la razón social: a cuál se le factura
+  // es un dato de facturación que este módulo no necesita. Eso mantiene la
+  // referencia apuntando a un registro transversal, sin que documentos dependa
+  // nunca de mi-comercial ni de mi-management.
+  //
+  // Exigida por invariante en ISSUER y RECEIVER; prohibida en INTERNAL, que por
+  // definición no tiene contraparte (D-19).
+  counterpartyId Int?
 
   // Esquema con que el contrato propone el código de la PRIMERA revisión de sus
   // documentos (BLOQUE 03, B13). Nulo = rige el valor por defecto del despliegue
@@ -1005,6 +1013,7 @@ model DocProject {
 
   @@index([projectId])
   @@index([status])
+  @@index([counterpartyId])
   @@map("doc_projects")
 }
 

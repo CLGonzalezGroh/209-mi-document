@@ -10,13 +10,19 @@ import { DocProjectSide, DocumentRole } from "../generated/prisma/enums.js"
 export const requiresCounterparty = (role: DocumentRole): boolean =>
   role !== DocumentRole.INTERNAL
 
-/** Devuelve el motivo del incumplimiento, o `null` si la declaración es válida. */
+/**
+ * Devuelve el motivo del incumplimiento, o `null` si la declaración es válida.
+ *
+ * La contraparte es una REFERENCIA a `Company` de `mi-admin` desde BLOQUE 02D,
+ * B4, y no un nombre: se contrata con la empresa, no con la razón social. Lo
+ * que la invariante mira, por lo tanto, es si hay empresa declarada — y una
+ * referencia está o no está, sin el "texto en blanco" que el nombre admitía.
+ */
 export const counterpartyViolation = (
   role: DocumentRole,
-  counterpartyName: string | null | undefined,
+  counterpartyId: number | null | undefined,
 ): string | null => {
-  const declarada = counterpartyName !== null && counterpartyName !== undefined &&
-    counterpartyName.trim() !== ""
+  const declarada = counterpartyId !== null && counterpartyId !== undefined
 
   if (requiresCounterparty(role) && !declarada) {
     return "Un proyecto en modo Emisor o Receptor debe declarar su contraparte"
@@ -31,9 +37,9 @@ export const counterpartyViolation = (
 
 export const assertCounterparty = (
   role: DocumentRole,
-  counterpartyName: string | null | undefined,
+  counterpartyId: number | null | undefined,
 ): void => {
-  const violacion = counterpartyViolation(role, counterpartyName)
+  const violacion = counterpartyViolation(role, counterpartyId)
 
   if (violacion) {
     throw new GraphQLError(violacion, { extensions: { code: "BAD_USER_INPUT" } })

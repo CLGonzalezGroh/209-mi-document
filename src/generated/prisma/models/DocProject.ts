@@ -32,6 +32,7 @@ export type DocProjectAvgAggregateOutputType = {
   updatedById: number | null
   closedById: number | null
   projectId: number | null
+  counterpartyId: number | null
   defaultOrganizerId: number | null
 }
 
@@ -41,6 +42,7 @@ export type DocProjectSumAggregateOutputType = {
   updatedById: number | null
   closedById: number | null
   projectId: number | null
+  counterpartyId: number | null
   defaultOrganizerId: number | null
 }
 
@@ -59,7 +61,7 @@ export type DocProjectMinAggregateOutputType = {
   closedById: number | null
   projectId: number | null
   documentRole: $Enums.DocumentRole | null
-  counterpartyName: string | null
+  counterpartyId: number | null
   revisionScheme: $Enums.RevisionScheme | null
   defaultOrganizerId: number | null
   locationEnabled: boolean | null
@@ -82,7 +84,7 @@ export type DocProjectMaxAggregateOutputType = {
   closedById: number | null
   projectId: number | null
   documentRole: $Enums.DocumentRole | null
-  counterpartyName: string | null
+  counterpartyId: number | null
   revisionScheme: $Enums.RevisionScheme | null
   defaultOrganizerId: number | null
   locationEnabled: boolean | null
@@ -105,7 +107,7 @@ export type DocProjectCountAggregateOutputType = {
   closedById: number
   projectId: number
   documentRole: number
-  counterpartyName: number
+  counterpartyId: number
   revisionScheme: number
   defaultOrganizerId: number
   locationEnabled: number
@@ -121,6 +123,7 @@ export type DocProjectAvgAggregateInputType = {
   updatedById?: true
   closedById?: true
   projectId?: true
+  counterpartyId?: true
   defaultOrganizerId?: true
 }
 
@@ -130,6 +133,7 @@ export type DocProjectSumAggregateInputType = {
   updatedById?: true
   closedById?: true
   projectId?: true
+  counterpartyId?: true
   defaultOrganizerId?: true
 }
 
@@ -148,7 +152,7 @@ export type DocProjectMinAggregateInputType = {
   closedById?: true
   projectId?: true
   documentRole?: true
-  counterpartyName?: true
+  counterpartyId?: true
   revisionScheme?: true
   defaultOrganizerId?: true
   locationEnabled?: true
@@ -171,7 +175,7 @@ export type DocProjectMaxAggregateInputType = {
   closedById?: true
   projectId?: true
   documentRole?: true
-  counterpartyName?: true
+  counterpartyId?: true
   revisionScheme?: true
   defaultOrganizerId?: true
   locationEnabled?: true
@@ -194,7 +198,7 @@ export type DocProjectCountAggregateInputType = {
   closedById?: true
   projectId?: true
   documentRole?: true
-  counterpartyName?: true
+  counterpartyId?: true
   revisionScheme?: true
   defaultOrganizerId?: true
   locationEnabled?: true
@@ -304,7 +308,7 @@ export type DocProjectGroupByOutputType = {
   closedById: number | null
   projectId: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName: string | null
+  counterpartyId: number | null
   revisionScheme: $Enums.RevisionScheme | null
   defaultOrganizerId: number | null
   locationEnabled: boolean
@@ -350,7 +354,7 @@ export type DocProjectWhereInput = {
   closedById?: Prisma.IntNullableFilter<"DocProject"> | number | null
   projectId?: Prisma.IntNullableFilter<"DocProject"> | number | null
   documentRole?: Prisma.EnumDocumentRoleFilter<"DocProject"> | $Enums.DocumentRole
-  counterpartyName?: Prisma.StringNullableFilter<"DocProject"> | string | null
+  counterpartyId?: Prisma.IntNullableFilter<"DocProject"> | number | null
   revisionScheme?: Prisma.EnumRevisionSchemeNullableFilter<"DocProject"> | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.IntNullableFilter<"DocProject"> | number | null
   locationEnabled?: Prisma.BoolFilter<"DocProject"> | boolean
@@ -382,7 +386,7 @@ export type DocProjectOrderByWithRelationInput = {
   closedById?: Prisma.SortOrderInput | Prisma.SortOrder
   projectId?: Prisma.SortOrderInput | Prisma.SortOrder
   documentRole?: Prisma.SortOrder
-  counterpartyName?: Prisma.SortOrderInput | Prisma.SortOrder
+  counterpartyId?: Prisma.SortOrderInput | Prisma.SortOrder
   revisionScheme?: Prisma.SortOrderInput | Prisma.SortOrder
   defaultOrganizerId?: Prisma.SortOrderInput | Prisma.SortOrder
   locationEnabled?: Prisma.SortOrder
@@ -417,7 +421,7 @@ export type DocProjectWhereUniqueInput = Prisma.AtLeast<{
   closedById?: Prisma.IntNullableFilter<"DocProject"> | number | null
   projectId?: Prisma.IntNullableFilter<"DocProject"> | number | null
   documentRole?: Prisma.EnumDocumentRoleFilter<"DocProject"> | $Enums.DocumentRole
-  counterpartyName?: Prisma.StringNullableFilter<"DocProject"> | string | null
+  counterpartyId?: Prisma.IntNullableFilter<"DocProject"> | number | null
   revisionScheme?: Prisma.EnumRevisionSchemeNullableFilter<"DocProject"> | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.IntNullableFilter<"DocProject"> | number | null
   locationEnabled?: Prisma.BoolFilter<"DocProject"> | boolean
@@ -449,7 +453,7 @@ export type DocProjectOrderByWithAggregationInput = {
   closedById?: Prisma.SortOrderInput | Prisma.SortOrder
   projectId?: Prisma.SortOrderInput | Prisma.SortOrder
   documentRole?: Prisma.SortOrder
-  counterpartyName?: Prisma.SortOrderInput | Prisma.SortOrder
+  counterpartyId?: Prisma.SortOrderInput | Prisma.SortOrder
   revisionScheme?: Prisma.SortOrderInput | Prisma.SortOrder
   defaultOrganizerId?: Prisma.SortOrderInput | Prisma.SortOrder
   locationEnabled?: Prisma.SortOrder
@@ -480,7 +484,7 @@ export type DocProjectScalarWhereWithAggregatesInput = {
   closedById?: Prisma.IntNullableWithAggregatesFilter<"DocProject"> | number | null
   projectId?: Prisma.IntNullableWithAggregatesFilter<"DocProject"> | number | null
   documentRole?: Prisma.EnumDocumentRoleWithAggregatesFilter<"DocProject"> | $Enums.DocumentRole
-  counterpartyName?: Prisma.StringNullableWithAggregatesFilter<"DocProject"> | string | null
+  counterpartyId?: Prisma.IntNullableWithAggregatesFilter<"DocProject"> | number | null
   revisionScheme?: Prisma.EnumRevisionSchemeNullableWithAggregatesFilter<"DocProject"> | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.IntNullableWithAggregatesFilter<"DocProject"> | number | null
   locationEnabled?: Prisma.BoolWithAggregatesFilter<"DocProject"> | boolean
@@ -502,7 +506,7 @@ export type DocProjectCreateInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -534,7 +538,7 @@ export type DocProjectUncheckedCreateInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -565,7 +569,7 @@ export type DocProjectUpdateInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -597,7 +601,7 @@ export type DocProjectUncheckedUpdateInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -629,7 +633,7 @@ export type DocProjectCreateManyInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -651,7 +655,7 @@ export type DocProjectUpdateManyMutationInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -674,7 +678,7 @@ export type DocProjectUncheckedUpdateManyInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -707,7 +711,7 @@ export type DocProjectCountOrderByAggregateInput = {
   closedById?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   documentRole?: Prisma.SortOrder
-  counterpartyName?: Prisma.SortOrder
+  counterpartyId?: Prisma.SortOrder
   revisionScheme?: Prisma.SortOrder
   defaultOrganizerId?: Prisma.SortOrder
   locationEnabled?: Prisma.SortOrder
@@ -721,6 +725,7 @@ export type DocProjectAvgOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   closedById?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
+  counterpartyId?: Prisma.SortOrder
   defaultOrganizerId?: Prisma.SortOrder
 }
 
@@ -739,7 +744,7 @@ export type DocProjectMaxOrderByAggregateInput = {
   closedById?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   documentRole?: Prisma.SortOrder
-  counterpartyName?: Prisma.SortOrder
+  counterpartyId?: Prisma.SortOrder
   revisionScheme?: Prisma.SortOrder
   defaultOrganizerId?: Prisma.SortOrder
   locationEnabled?: Prisma.SortOrder
@@ -762,7 +767,7 @@ export type DocProjectMinOrderByAggregateInput = {
   closedById?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
   documentRole?: Prisma.SortOrder
-  counterpartyName?: Prisma.SortOrder
+  counterpartyId?: Prisma.SortOrder
   revisionScheme?: Prisma.SortOrder
   defaultOrganizerId?: Prisma.SortOrder
   locationEnabled?: Prisma.SortOrder
@@ -776,6 +781,7 @@ export type DocProjectSumOrderByAggregateInput = {
   updatedById?: Prisma.SortOrder
   closedById?: Prisma.SortOrder
   projectId?: Prisma.SortOrder
+  counterpartyId?: Prisma.SortOrder
   defaultOrganizerId?: Prisma.SortOrder
 }
 
@@ -945,7 +951,7 @@ export type DocProjectCreateWithoutDocumentClassesInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -976,7 +982,7 @@ export type DocProjectUncheckedCreateWithoutDocumentClassesInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -1022,7 +1028,7 @@ export type DocProjectUpdateWithoutDocumentClassesInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1053,7 +1059,7 @@ export type DocProjectUncheckedUpdateWithoutDocumentClassesInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1083,7 +1089,7 @@ export type DocProjectCreateWithoutDocumentTypesInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -1114,7 +1120,7 @@ export type DocProjectUncheckedCreateWithoutDocumentTypesInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -1160,7 +1166,7 @@ export type DocProjectUpdateWithoutDocumentTypesInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1191,7 +1197,7 @@ export type DocProjectUncheckedUpdateWithoutDocumentTypesInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1221,7 +1227,7 @@ export type DocProjectCreateWithoutDocumentsInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -1252,7 +1258,7 @@ export type DocProjectUncheckedCreateWithoutDocumentsInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -1298,7 +1304,7 @@ export type DocProjectUpdateWithoutDocumentsInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1329,7 +1335,7 @@ export type DocProjectUncheckedUpdateWithoutDocumentsInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1359,7 +1365,7 @@ export type DocProjectCreateWithoutTransmittalsInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -1390,7 +1396,7 @@ export type DocProjectUncheckedCreateWithoutTransmittalsInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -1436,7 +1442,7 @@ export type DocProjectUpdateWithoutTransmittalsInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1467,7 +1473,7 @@ export type DocProjectUncheckedUpdateWithoutTransmittalsInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1497,7 +1503,7 @@ export type DocProjectCreateWithoutWorkflowTemplatesInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -1528,7 +1534,7 @@ export type DocProjectUncheckedCreateWithoutWorkflowTemplatesInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -1574,7 +1580,7 @@ export type DocProjectUpdateWithoutWorkflowTemplatesInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1605,7 +1611,7 @@ export type DocProjectUncheckedUpdateWithoutWorkflowTemplatesInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1635,7 +1641,7 @@ export type DocProjectCreateWithoutMembersInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -1666,7 +1672,7 @@ export type DocProjectUncheckedCreateWithoutMembersInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -1712,7 +1718,7 @@ export type DocProjectUpdateWithoutMembersInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1743,7 +1749,7 @@ export type DocProjectUncheckedUpdateWithoutMembersInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1773,7 +1779,7 @@ export type DocProjectCreateWithoutQualificationsInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -1804,7 +1810,7 @@ export type DocProjectUncheckedCreateWithoutQualificationsInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -1850,7 +1856,7 @@ export type DocProjectUpdateWithoutQualificationsInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1881,7 +1887,7 @@ export type DocProjectUncheckedUpdateWithoutQualificationsInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1911,7 +1917,7 @@ export type DocProjectCreateWithoutCatalogScopesInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -1942,7 +1948,7 @@ export type DocProjectUncheckedCreateWithoutCatalogScopesInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -1988,7 +1994,7 @@ export type DocProjectUpdateWithoutCatalogScopesInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2019,7 +2025,7 @@ export type DocProjectUncheckedUpdateWithoutCatalogScopesInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2049,7 +2055,7 @@ export type DocProjectCreateWithoutLocationsInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -2080,7 +2086,7 @@ export type DocProjectUncheckedCreateWithoutLocationsInput = {
   closedById?: number | null
   projectId?: number | null
   documentRole: $Enums.DocumentRole
-  counterpartyName?: string | null
+  counterpartyId?: number | null
   revisionScheme?: $Enums.RevisionScheme | null
   defaultOrganizerId?: number | null
   locationEnabled?: boolean
@@ -2126,7 +2132,7 @@ export type DocProjectUpdateWithoutLocationsInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2157,7 +2163,7 @@ export type DocProjectUncheckedUpdateWithoutLocationsInput = {
   closedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   projectId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documentRole?: Prisma.EnumDocumentRoleFieldUpdateOperationsInput | $Enums.DocumentRole
-  counterpartyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  counterpartyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   revisionScheme?: Prisma.NullableEnumRevisionSchemeFieldUpdateOperationsInput | $Enums.RevisionScheme | null
   defaultOrganizerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   locationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2291,7 +2297,7 @@ export type DocProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   closedById?: boolean
   projectId?: boolean
   documentRole?: boolean
-  counterpartyName?: boolean
+  counterpartyId?: boolean
   revisionScheme?: boolean
   defaultOrganizerId?: boolean
   locationEnabled?: boolean
@@ -2324,7 +2330,7 @@ export type DocProjectSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   closedById?: boolean
   projectId?: boolean
   documentRole?: boolean
-  counterpartyName?: boolean
+  counterpartyId?: boolean
   revisionScheme?: boolean
   defaultOrganizerId?: boolean
   locationEnabled?: boolean
@@ -2347,7 +2353,7 @@ export type DocProjectSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   closedById?: boolean
   projectId?: boolean
   documentRole?: boolean
-  counterpartyName?: boolean
+  counterpartyId?: boolean
   revisionScheme?: boolean
   defaultOrganizerId?: boolean
   locationEnabled?: boolean
@@ -2370,7 +2376,7 @@ export type DocProjectSelectScalar = {
   closedById?: boolean
   projectId?: boolean
   documentRole?: boolean
-  counterpartyName?: boolean
+  counterpartyId?: boolean
   revisionScheme?: boolean
   defaultOrganizerId?: boolean
   locationEnabled?: boolean
@@ -2378,7 +2384,7 @@ export type DocProjectSelectScalar = {
   locationLabel?: boolean
 }
 
-export type DocProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "isSys" | "code" | "name" | "description" | "status" | "closedAt" | "closedById" | "projectId" | "documentRole" | "counterpartyName" | "revisionScheme" | "defaultOrganizerId" | "locationEnabled" | "locationRequired" | "locationLabel", ExtArgs["result"]["docProject"]>
+export type DocProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "createdById" | "updatedAt" | "updatedById" | "isSys" | "code" | "name" | "description" | "status" | "closedAt" | "closedById" | "projectId" | "documentRole" | "counterpartyId" | "revisionScheme" | "defaultOrganizerId" | "locationEnabled" | "locationRequired" | "locationLabel", ExtArgs["result"]["docProject"]>
 export type DocProjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documents?: boolean | Prisma.DocProject$documentsArgs<ExtArgs>
   transmittals?: boolean | Prisma.DocProject$transmittalsArgs<ExtArgs>
@@ -2422,7 +2428,7 @@ export type $DocProjectPayload<ExtArgs extends runtime.Types.Extensions.Internal
     closedById: number | null
     projectId: number | null
     documentRole: $Enums.DocumentRole
-    counterpartyName: string | null
+    counterpartyId: number | null
     revisionScheme: $Enums.RevisionScheme | null
     defaultOrganizerId: number | null
     locationEnabled: boolean
@@ -2874,7 +2880,7 @@ export interface DocProjectFieldRefs {
   readonly closedById: Prisma.FieldRef<"DocProject", 'Int'>
   readonly projectId: Prisma.FieldRef<"DocProject", 'Int'>
   readonly documentRole: Prisma.FieldRef<"DocProject", 'DocumentRole'>
-  readonly counterpartyName: Prisma.FieldRef<"DocProject", 'String'>
+  readonly counterpartyId: Prisma.FieldRef<"DocProject", 'Int'>
   readonly revisionScheme: Prisma.FieldRef<"DocProject", 'RevisionScheme'>
   readonly defaultOrganizerId: Prisma.FieldRef<"DocProject", 'Int'>
   readonly locationEnabled: Prisma.FieldRef<"DocProject", 'Boolean'>

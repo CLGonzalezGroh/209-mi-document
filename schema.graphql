@@ -15,7 +15,10 @@ type UserName @key(fields: "id") {
   id: Int
 }
 
-"Empresa para darle seguimiento comercial"
+"""
+Empresa con la que se contrata. Vive en `205-mi-admin` y este subgrafo solo la
+referencia: es la contraparte del contrato documental.
+"""
 type Company @key(fields: "id") {
   id: Int!
 }
@@ -1620,8 +1623,14 @@ type DocProject {
   projectId: Int
   "Rol documental declarado"
   documentRole: DocumentRole!
-  "Nombre de la contraparte. Nulo en contratos internos, que no la tienen"
-  counterpartyName: String
+  """
+  Contraparte del contrato: cliente en Emisor, contratista en Receptor.
+
+  Se contrata con la EMPRESA y no con la razón social: a cuál se le factura es
+  un dato de facturación que este módulo no necesita. Nula en contratos
+  internos, que por definición no la tienen.
+  """
+  counterparty: Company
   """
   Esquema con que el contrato propone el código de la PRIMERA revisión de sus
   documentos. Nulo = rige el valor por defecto del despliegue.
@@ -1657,8 +1666,8 @@ input DeclareDocProjectInput {
   projectId: Int
   "Rol documental a declarar"
   documentRole: DocumentRoleInput!
-  "Nombre de la contraparte. Obligatorio en Emisor y Receptor, prohibido en Interno"
-  counterpartyName: String
+  "Contraparte del contrato. Obligatoria en Emisor y Receptor, prohibida en Interno"
+  counterpartyId: Int
   "Esquema de revisión del contrato. Nulo = rige el del despliegue"
   revisionScheme: RevisionSchemeInput
   "Armador por defecto de los documentos del contrato"

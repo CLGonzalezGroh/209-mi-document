@@ -41,6 +41,10 @@ import { AuditAction } from "../events/catalog.js"
  * usuario de prueba con el rol documental completo, y la base local.
  */
 
+/** Empresas de prueba: la contraparte es una referencia a Company (B4). */
+const EMPRESA_A = -424801
+const EMPRESA_B = -424802
+
 const USER_ID = 3
 const ROLE_IDS = [1, 16] // view + doc-full
 const EMISOR = -424410
@@ -81,7 +85,7 @@ const declarar = async (projectId: number, documentRole: DocumentRole) => {
         projectId,
         documentRole,
         ...(documentRole !== DocumentRole.INTERNAL && {
-          counterpartyName: "Contraparte de prueba",
+          counterpartyId: EMPRESA_A,
         }),
         defaultOrganizerId: USER_ID,
       },

@@ -41,6 +41,10 @@ import { verifySignature } from "../utils/stepSignature.js"
  *  - la base local del módulo.
  */
 
+/** Empresas de prueba: la contraparte es una referencia a Company (B4). */
+const EMPRESA_A = -424801
+const EMPRESA_B = -424802
+
 const USER_ID = 3
 const ROLE_IDS = [1, 16] // view + doc-full
 const ROLE_IDS_BASICO = [1, 15] // view + doc-basic: SIN el permiso especial de B9
@@ -96,7 +100,7 @@ before(async () => {
         name: "Contrato de prueba",
         projectId: PROYECTO,
         documentRole: DocumentRole.ISSUER,
-        counterpartyName: "Cliente de prueba",
+        counterpartyId: EMPRESA_A,
         defaultOrganizerId: USER_ID,
       },
     },

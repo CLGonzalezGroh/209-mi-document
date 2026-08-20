@@ -32,6 +32,10 @@ import { AuditAction } from "../events/catalog.js"
  * usuario de prueba con el rol documental completo, y la base local.
  */
 
+/** Empresas de prueba: la contraparte es una referencia a Company (B4). */
+const EMPRESA_A = -424801
+const EMPRESA_B = -424802
+
 const USER_ID = 3
 const ROLE_IDS = [1, 16] // view + doc-full
 
@@ -832,7 +836,7 @@ test("los tres roles atraviesan el alta sin declarar ubicación (criterio 7)", a
           name: "Contrato de prueba",
           projectId,
           documentRole: rol,
-          counterpartyName: "Contraparte de prueba",
+          counterpartyId: EMPRESA_A,
           defaultOrganizerId: USER_ID,
         },
       },

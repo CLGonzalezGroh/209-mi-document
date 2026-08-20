@@ -33,6 +33,10 @@ import { AuditAction } from "../events/catalog.js"
  * para revalidarlo. No se persiste ni sale de localhost.
  */
 
+/** Empresas de prueba: la contraparte es una referencia a Company (B4). */
+const EMPRESA_A = -424801
+const EMPRESA_B = -424802
+
 const USER_ID = 3
 const ROLE_IDS = [1, 16] // view + doc-full
 
@@ -280,7 +284,7 @@ test("la configuración se declara y se lee, y emite su traza", async () => {
         name: "Contrato de prueba",
         projectId: PROYECTO_CON_MEMBRESIA,
         documentRole: DocumentRole.ISSUER,
-        counterpartyName: "Planta de prueba",
+        counterpartyId: EMPRESA_A,
       },
     },
     context,
@@ -293,7 +297,7 @@ test("la configuración se declara y se lee, y emite su traza", async () => {
     { id: settings.id },
     context,
   )
-  assert.equal(leida.counterpartyName, "Planta de prueba")
+  assert.equal(leida.counterpartyId, EMPRESA_A)
 
   // La traza del objeto nuevo lleva su proyecto, derivado (B9)
   const eventos = await prisma.docAuditEvent.findMany({
@@ -314,7 +318,7 @@ test("un proyecto interno no admite contraparte", async () => {
             name: "Contrato de prueba",
             projectId: PROYECTO_SIN_MEMBRESIA,
             documentRole: DocumentRole.INTERNAL,
-            counterpartyName: "Alguien",
+            counterpartyId: EMPRESA_A,
           },
         },
         context,
@@ -340,7 +344,7 @@ test("una obra admite varios contratos, uno por contratista", async () => {
           name: `Contrato ${i + 1}`,
           projectId: OBRA,
           documentRole: DocumentRole.RECEIVER,
-          counterpartyName: `Contratista ${i + 1}`,
+          counterpartyId: EMPRESA_A + i,
         },
       },
       context,
@@ -358,8 +362,8 @@ test("una obra admite varios contratos, uno por contratista", async () => {
 
   // Cada uno conserva UNA sola contraparte: la binariedad de D-15 no se toca.
   assert.deepEqual(
-    contratos.map((c) => c.counterpartyName).sort(),
-    ["Contratista 1", "Contratista 2", "Contratista 3"],
+    contratos.map((c) => c.counterpartyId).sort((a, b) => a - b),
+    [EMPRESA_A, EMPRESA_A + 1, EMPRESA_A + 2],
   )
 
   // Y una obra sin contratos devuelve vacío, que no es un error.
@@ -387,7 +391,7 @@ test("el rol no puede cambiarse si el proyecto ya tiene documentos", async () =>
             name: "Contrato de prueba",
             projectId: PROYECTO_CON_MEMBRESIA,
             documentRole: DocumentRole.RECEIVER,
-            counterpartyName: "Otro",
+            counterpartyId: EMPRESA_B,
           },
         },
         context,

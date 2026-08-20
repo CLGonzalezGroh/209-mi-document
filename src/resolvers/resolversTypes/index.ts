@@ -598,6 +598,12 @@ export const resolverTypes = {
       if (parent.defaultOrganizerId === null) return null
       return { __typename: "UserName", id: parent.defaultOrganizerId }
     },
+    // La contraparte se resuelve por federación contra Company de mi-admin
+    // (BLOQUE 02D, B4). Nula en los contratos internos, que no la tienen.
+    counterparty: (parent: { counterpartyId: number | null }) => {
+      if (parent.counterpartyId === null) return null
+      return { __typename: "Company", id: parent.counterpartyId }
+    },
   },
 
   Transmittal: {

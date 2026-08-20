@@ -107,7 +107,8 @@ export const docProjectsResolvers = {
           // administra en mi-project (B3, B6).
           projectId?: number | null
           documentRole: DocumentRole
-          counterpartyName?: string
+          // Contraparte: referencia a Company de mi-admin (B4)
+          counterpartyId?: number | null
           // Esquema con que el proyecto propone el código de la PRIMERA revisión
           // de sus documentos (BLOQUE 03, B13). Nulo = rige el del despliegue.
           revisionScheme?: RevisionScheme | null
@@ -134,7 +135,7 @@ export const docProjectsResolvers = {
 
       // Invariante de la contraparte (B4): exigida en ISSUER y RECEIVER,
       // prohibida en INTERNAL, que por definición no la tiene (D-19).
-      assertCounterparty(input.documentRole, input.counterpartyName)
+      assertCounterparty(input.documentRole, input.counterpartyId)
 
       // El rol es inmutable desde el primer documento o transmittal (B5)
       await assertRoleIsSettled(context, input.code, input.documentRole)
@@ -153,7 +154,7 @@ export const docProjectsResolvers = {
               // no es identidad, a diferencia del código.
               projectId: input.projectId ?? null,
               documentRole: input.documentRole,
-              counterpartyName: input.counterpartyName ?? null,
+              counterpartyId: input.counterpartyId ?? null,
               revisionScheme: input.revisionScheme ?? null,
               defaultOrganizerId: input.defaultOrganizerId ?? null,
               locationEnabled: input.locationEnabled ?? true,
@@ -167,7 +168,7 @@ export const docProjectsResolvers = {
               description: input.description ?? null,
               projectId: input.projectId ?? null,
               documentRole: input.documentRole,
-              counterpartyName: input.counterpartyName ?? null,
+              counterpartyId: input.counterpartyId ?? null,
               revisionScheme: input.revisionScheme ?? null,
               defaultOrganizerId: input.defaultOrganizerId ?? null,
               locationEnabled: input.locationEnabled ?? true,
@@ -187,7 +188,7 @@ export const docProjectsResolvers = {
               name: input.name,
               projectId: input.projectId ?? null,
               documentRole: input.documentRole,
-              counterpartyName: input.counterpartyName ?? null,
+              counterpartyId: input.counterpartyId ?? null,
               revisionScheme: input.revisionScheme ?? null,
               defaultOrganizerId: input.defaultOrganizerId ?? null,
               locationEnabled: input.locationEnabled ?? true,

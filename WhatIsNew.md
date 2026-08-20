@@ -1278,3 +1278,27 @@ Al agregar la segunda, el control de contrato de la fase 3 **falló de inmediato
 
 **Verificado:** `tsc` limpio, **527 pruebas y 0 fallos** —una más, la de tres contratos sobre la misma obra—, `prisma migrate diff` sin diferencias, y ruta completa sobre base limpia con `pg_dump` idéntico al de la base incremental.
 
+---
+
+# What's new in María Ingeniería API Documents 2.14.0
+
+2026-08-20
+
+## La raíz de alcance propia del módulo (BLOQUE 02D)
+
+### Fase 5 — la contraparte es una referencia, no un nombre
+
+`counterpartyName` se retira y aparece `counterpartyId`, referencia externa sin clave foránea a `Company` de `205-mi-admin`. Es lo que la mudanza de `Company` del 2026-08-19 vino a habilitar, y el motivo por el que tuvo que ir primero.
+
+Se contrata con la **empresa** y no con la razón social: a cuál se le factura es un dato de facturación que este módulo no necesita. La referencia apunta a un registro transversal, sin que documentos dependa nunca de `mi-comercial` ni de `mi-management`.
+
+**El contrato expone la empresa, no su id**: `DocProject.counterparty: Company`, resuelto por federación con el mismo patrón que `UserName`. El stub de `Company` que el subgrafo declaraba sin uso pasa por fin a tener consumidor.
+
+**Una referencia hizo más barata la invariante.** Con el nombre libre había un tercer estado —texto en blanco— que había que descartar con un `trim()`. Una referencia es un id o es nulo, y la regla de D-19 quedó enunciada sobre dos estados en lugar de tres.
+
+**Al desplegar:** la migración `20260820200000_doc_project_counterparty` se detiene si encuentra contratos con contraparte por nombre. Convertir un nombre libre en una referencia exige decidir a cuál `Company` corresponde, y esa decisión no la puede tomar una migración.
+
+**Verificado:** `tsc` limpio, **527 pruebas y 0 fallos**, `prisma migrate diff` sin diferencias, ruta completa sobre base limpia con `pg_dump` idéntico, y **el supergrafo compuesto sin error con `rover`** — la primera vez que el bloque federa contra otro subgrafo.
+
+Y una advertencia que esta fase dejó a la vista: **`tsc` no delata un campo viejo en una escritura de Prisma**. El `upsert` que seguía pasando `counterpartyName` compiló sin un solo error, porque el `XOR<...>` con que Prisma tipa `data` desactiva el control de propiedades excedentes. En ejecución falla, de modo que lo único que lo encuentra son las pruebas.
+
