@@ -538,6 +538,28 @@ El bloque toca **tres repositorios** y el orden no es negociable: cada paso deja
 
 **El paso 4 es el que más veces se olvidó en este módulo**, y es el que ningún control de contrato detecta: el servicio expone las operaciones aunque nadie pueda ejecutarlas.
 
+### Desplegado y verificado en testing — 2026-08-21
+
+`rbb`, `optimal` y `proion`. `mi-admin` 2.6.0, `mi-document` 2.17.3, `@CLGonzalezGroh/mi-common@3.1.0`.
+
+| Verificación | Resultado |
+| ------------ | --------- |
+| Las cinco migraciones | `mi-document` **healthy** en los tres. Si alguna falla el contenedor no arranca, de modo que el estado sano es la prueba |
+| Contrato | Los cuatro bloques presentes, y **`declareDocProject` y `DeclareDocProjectInput` ausentes** — el marcador de que la imagen no quedó a medias |
+| Permisos | Siete recursos completos; `doc-basic` con 3 y `doc-full` con 6 en la columna `contrato`. Veredicto `OK` |
+| Siembra | `9 otorgados, 0 revocados, 0 manuales preservados` en los tres |
+| Línea base del legado | **Idéntica**: 9 escaneados, 4 con clase, 4 con tipo, 3 áreas, 32 logs, 3 clases y 4 tipos |
+
+**El supergrafo se recompuso y los tres routers se reiniciaron.** Testing y producción lo leen de un archivo montado y no de Studio, de modo que la publicación al registro —que la fase 9 ya había hecho— no alcanza acá.
+
+#### El control de precondición no sirve para contrastar, y se vio en el peor momento
+
+Al correrlo después de migrar abortó con `column "projectId" does not exist`. **No era una falla del despliegue**: el control pregunta por la columna que el bloque acaba de renombrar, y contra una base ya migrada no puede correr. Pero *parece* una falla, que es exactamente lo que un control no debe hacer.
+
+La corrección tiene una forma que conviene retener: **la herramienta que contrasta una línea base solo puede tocar columnas que el bloque no renombra**. `check-document-baseline.sh` mide lo mismo sobre `ScannedFile` y `Area` —que `B7` excluyó— y sobre los catálogos sin mirar su alcance, de modo que **el mismo comando vale antes y después**, y dice en cuál de las dos orillas está. Se probó contra una base al día y contra una reconstruida hasta la migración anterior al bloque.
+
+El control de precondición ganó además una guarda: si el bloque ya está aplicado lo dice y sale con éxito.
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-06, D-07, D-09, D-15, D-19, D-21, D-24, D-28, D-29

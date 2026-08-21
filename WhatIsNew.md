@@ -1438,3 +1438,21 @@ Importa por lo que evita: esa rama era la única del bloque que pierde informaci
 
 Con esto la fase 9 queda cerrada y solo resta la promoción a la SFS.
 
+---
+
+# What's new in María Ingeniería API Documents 2.17.4
+
+2026-08-21
+
+## La raíz de alcance propia del módulo (BLOQUE 02D)
+
+### Desplegado y verificado en testing
+
+`rbb`, `optimal` y `proion`, con `mi-admin` 2.6.0 y `mi-common@3.1.0`.
+
+Las cinco migraciones aplicadas —`mi-document` *healthy* en los tres, que es la prueba: si alguna falla el contenedor no arranca—. Contrato con los cuatro bloques y **las operaciones retiradas ya ausentes**. Permisos completos y repartidos: `doc-basic` 3, `doc-full` 6. Siembra sin revocar nada.
+
+**La línea base del subsistema legado quedó idéntica**: 9 escaneados, 4 con clase, 4 con tipo, 3 áreas, 32 logs, 3 clases y 4 tipos. Medida antes y después con el mismo control.
+
+**El control de precondición no sirve para contrastar, y se vio al usarlo.** Aborta con `column "projectId" does not exist` contra una base ya migrada: pregunta por la columna que el bloque renombra. No es una falla del despliegue, pero lo parece. Se agregó `check-document-baseline.sh`, que mide lo mismo tocando **solo columnas que ningún bloque renombra** y sirve en las dos orillas, y una guarda al de precondición para que avise en lugar de abortar.
+
