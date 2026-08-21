@@ -158,13 +158,13 @@ Un documento puede tener varias revisiones abandonadas con el mismo código; cad
 
 El esquema no es un atributo del documento: **se elige al crear cada revisión**, y el sistema propone el código.
 
-- **Primera revisión** — según el esquema del proyecto o, en su defecto, el del despliegue.
+- **Primera revisión** — según el esquema del contrato o, en su defecto, el del despliegue.
 - **Revisiones siguientes** — a partir de la última revisión no abandonada, **infiriendo el esquema de la forma de su código**: dígitos continúan la secuencia numérica, letras la alfabética.
 - **Cambiar de esquema** es elegir otro en ese momento, y la secuencia se reinicia.
 
 El motivo es que un esquema almacenado **puede contradecir a los hechos**: declararlo numérico con la revisión vigente en `A` afirma algo que el documento no muestra.
 
-La precedencia se conserva en tres escalones —documento, proyecto, despliegue—, pero **el del documento se lee de su última revisión en lugar de guardarse**.
+La precedencia se conserva en tres escalones —documento, contrato, despliegue—, pero **el del documento se lee de su última revisión en lugar de guardarse**.
 
 Bajo los esquemas que el sistema calcula, el código informado se rechaza; bajo texto libre lo ingresa el usuario y solo se valida que no se repita entre las revisiones no abandonadas.
 
@@ -174,7 +174,7 @@ Bajo los esquemas que el sistema calcula, el código informado se rechaza; bajo 
 
 Sin plantilla, el armador declararía el circuito paso por paso en cada documento, que es el trabajo que el control documental no puede asumir.
 
-La plantilla se resuelve por alcance contra la tupla del propio documento, y **gana la más específica**: tipo, después clase, después proyecto. La plantilla del proyecto sin clase ni tipo **es** su default, sin necesidad de una marca aparte.
+La plantilla se resuelve por alcance contra la tupla del propio documento, y **gana la más específica**: tipo, después clase, después contrato. La plantilla del contrato sin clase ni tipo **es** su default, sin necesidad de una marca aparte.
 
 **Los valores se copian al materializarse.** Cambiar la plantilla después no altera ningún circuito en curso, con el mismo criterio del payload firmado.
 
@@ -229,7 +229,7 @@ Un documento nuevo que declara a cuál reemplaza conserva lo que la edición del
 
 **Obsoleto no es dado de baja.** La baja lógica corrige un alta que no debió existir; la obsolescencia es un hecho del ciclo de vida. Lo único que el documento obsoleto pierde es la posibilidad de emitir de nuevo.
 
-**Los documentos de un acto comparten ámbito.** Lo que cruza del proyecto al régimen de publicación no es reemplazar sino **promover**, y son cosas distintas en los cuatro rasgos que importan: ocurre entre revisiones y no entre documentos, el de origen no queda obsoleto —quedó terminado—, produce una revisión y no un documento, y cambia de ámbito. La promoción pertenece al módulo de activos y no se registra acá.
+**Los documentos de un acto comparten ámbito.** Lo que cruza del contrato al régimen de publicación no es reemplazar sino **promover**, y son cosas distintas en los cuatro rasgos que importan: ocurre entre revisiones y no entre documentos, el de origen no queda obsoleto —quedó terminado—, produce una revisión y no un documento, y cambia de ámbito. La promoción pertenece al módulo de activos y no se registra acá.
 
 ---
 

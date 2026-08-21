@@ -60,8 +60,8 @@ Los estados `PROPUESTO`, `APROBADO_PENDIENTE` e `IMPLEMENTADO_CON_BRECHA` perten
 | `00_Convenciones.md` | Convenciones de idioma, nomenclatura y promoción documental | Draft de cobertura |
 | `domain/00_transversal/10_DOM-001_DocWorkflowEvent.md` | Transición de estado de un objeto del dominio | Approved |
 | `domain/00_transversal/20_DOM-002_DocAuditEvent.md` | Acción ejecutada sobre un objeto del dominio | Approved |
-| `domain/05_project/10_DOM-003_DocProjectSettings.md` | Rol documental que el proyecto declara y su contraparte | Approved |
-| `domain/05_project/20_DOM-004_DocProjectMember.md` | Membresía que habilita el acceso a un proyecto | Approved |
+| `domain/05_project/10_DOM-003_DocProject.md` | El contrato: raíz de alcance del módulo, con su rol y su contraparte | Approved |
+| `domain/05_project/20_DOM-004_DocProjectMember.md` | Membresía que habilita el acceso a un contrato | Approved |
 | `domain/05_project/80_Principios_del_Modelo.md` | Principios del contexto de proyecto: regímenes, alcance y autorización | Approved |
 | `domain/10_cycle/10_DOM-005_Document.md` | Identidad de la documentación y su metadata congelada | Approved |
 | `domain/10_cycle/20_DOM-006_DocumentRevision.md` | Unidad de emisión, con sus circuitos sucesivos y su armador | Approved |

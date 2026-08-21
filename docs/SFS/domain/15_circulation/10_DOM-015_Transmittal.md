@@ -24,17 +24,17 @@ Lo que lo clasifica no es su dirección sino su **propósito**, porque es el pro
 | `EMISSION` | Entrega de documentación producida |
 | `RESPONSE` | Calificación consolidada de una emisión. Referencia necesariamente la emisión que contesta |
 
-**El sentido no se declara: se deriva** del rol documental del proyecto y de la naturaleza. Guardarlo sería un dato capaz de contradecir a los hechos.
+**El sentido no se declara: se deriva** del rol documental del contrato y de la naturaleza. Guardarlo sería un dato capaz de contradecir a los hechos.
 
-| Rol del proyecto | `EMISSION` | `RESPONSE` |
+| Rol del contrato | `EMISSION` | `RESPONSE` |
 | ---------------- | ---------- | ---------- |
 | `ISSUER` | Saliente | Entrante |
 | `RECEIVER` | Entrante, del contratista | No existe |
 | `INTERNAL` | No existe | No existe |
 
-Que la respuesta consolidada exista solo en modo Emisor no es una asimetría arbitraria: la planta no consolida su calificación en un remito, responde documento a documento. Y un proyecto sin contraparte no tiene a quién entregarle nada.
+Que la respuesta consolidada exista solo en modo Emisor no es una asimetría arbitraria: la planta no consolida su calificación en un remito, responde documento a documento. Y un contrato sin contraparte no tiene a quién entregarle nada.
 
-El destinatario tampoco se declara por transmittal: es la contraparte del proyecto, que es única.
+El destinatario tampoco se declara por transmittal: es la contraparte del contrato, que es única.
 
 ---
 
@@ -51,7 +51,7 @@ No es responsable de:
 
 - condicionar el avance de los documentos que agrupa: cada uno sigue su ciclo con independencia de los demás;
 - alojar la calificación de la contraparte, que pertenece a cada documento;
-- existir en proyectos sin contraparte.
+- existir en contratos sin contraparte.
 
 ---
 
@@ -59,9 +59,9 @@ No es responsable de:
 
 Entre los atributos propios del `Transmittal` podrán encontrarse:
 
-- código propio, único dentro del proyecto;
+- código propio, único dentro del contrato;
 - naturaleza y estado;
-- proyecto al que pertenece;
+- contrato al que pertenece;
 - referencia externa: cómo la contraparte lo nombra;
 - emisión que contesta, cuando es una respuesta;
 - emisión, acuse y cierre, cada uno con su actor y su fecha;
@@ -91,15 +91,15 @@ stateDiagram-v2
 
 # Invariantes
 
-**El proyecto debe haber declarado su rol documental.** Sin él no hay circulación posible: es el rol el que dice si el transmittal sale, si entra o si no existe.
+**El contrato declara su rol documental desde que nace.** Sin él no hay circulación posible: es el rol el que dice si el transmittal sale, si entra o si no existe.
 
-**Un proyecto interno no admite transmittals**, de ninguna naturaleza.
+**Un contrato interno no admite transmittals**, de ninguna naturaleza.
 
 **En modo Receptor no existe el transmittal de respuesta.**
 
-**Una respuesta referencia siempre una emisión del mismo proyecto**, y nunca otra respuesta. Una emisión, en cambio, no contesta nada.
+**Una respuesta referencia siempre una emisión del mismo contrato**, y nunca otra respuesta. Una emisión, en cambio, no contesta nada.
 
-**El código es único dentro del proyecto** y lo genera el sistema. La numeración corre por proyecto porque el proyecto es la unidad contractual.
+**El código es único dentro del contrato** y lo genera el sistema. La numeración corre por contrato porque el contrato **es** la unidad de la relación.
 
 **Solo la emisión lleva ítems.** La respuesta es el sobre en que viajaron las respuestas de los documentos, y no crea registros propios sobre las mismas revisiones.
 
@@ -115,7 +115,7 @@ stateDiagram-v2
 
 **Pertenece a**
 
-- un proyecto, con su rol documental declarado
+- un contrato, con su rol documental declarado
 
 **Agrupa**
 
@@ -150,6 +150,6 @@ stateDiagram-v2
 # Referencias
 
 - `20_DOM-016_TransmittalItem.md`, `30_DOM-017_DocTransmittalResponse.md`
-- `../05_project/10_DOM-003_DocProjectSettings.md`
+- `../05_project/10_DOM-003_DocProject.md`
 - `80_Principios_del_Modelo.md`
 - `../../00_Convenciones.md`

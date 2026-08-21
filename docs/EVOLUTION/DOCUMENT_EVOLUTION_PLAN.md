@@ -271,6 +271,12 @@ Definido al abrir `BLOCK_02`:
 
 Al no existir documentos productivos, estos cambios se aplican de forma directa sobre el modelo, sin etapas de compatibilidad.
 
+**Corregido por D-29 (`BLOCK_02D`, promovido el 2026-08-21).** Tres cosas que esta decisión afirmaba dejaron de ser ciertas:
+
+- **el proyecto ya no es una referencia externa**: el módulo es dueño de su raíz de alcance, y `Document.docProjectId` tiene clave foránea real. Por lo tanto **cae la premisa** con que se descartó el proyecto reservado del sistema —*"el módulo no es dueño de `Project`"*—, aunque la conclusión se mantiene por otro motivo: el nulo sigue siendo la forma correcta del régimen de publicación, y no una carencia que haya que rellenar;
+- **la unicidad ya no se discrimina por el nulo del alcance sino por el módulo**: `[docProjectId, code]` donde `module = PROJECTS`, `[module, code]` en el resto. El régimen pasó a expresarse con lo que lo nombra;
+- **el invariante dejó de vivir en la aplicación**: un `CHECK` bicondicional garantiza que módulo y alcance coincidan, que es lo que permite que los dos índices parciales cubran juntos todas las filas.
+
 ### D-07 — La interfaz entre tareas y documentos se posterga
 
 **Estado:** Aprobada — diferida.
@@ -440,6 +446,16 @@ Aun con una sola contraparte, todo proyecto tiene **dos partes**, y no ven lo mi
 Sobre la etapa de construcción, donde el escenario multi-proveedor es más plausible por la aparición de subcontratistas: la práctica documental habitual es que el contratista principal consolide y emita, y que los documentos del subcontratista ingresen a través suyo.
 
 Señal que obligaría a revisar esta recomendación: que dos proveedores emitan **en paralelo** sobre un mismo proyecto y requieran no verse entre sí. En ese caso, trasladar la contraparte del proyecto a la membresía es una migración contenida, y para entonces existiría evidencia concreta en lugar de una hipótesis.
+
+**Corregido por D-29 (`BLOCK_02D`, promovido el 2026-08-21), y en la dirección que esta decisión anticipaba sin poder nombrar.** *"Cada proyecto es un contrato"* dejó de ser una descripción y pasó a ser el objeto: `DocProject`.
+
+Lo que cambia:
+
+- **la señal que obligaría a revisar la recomendación ya está resuelta, y sin tocar la binariedad.** Dos proveedores emitiendo en paralelo sobre la misma obra son **dos contratos**, cada uno con su única contraparte y su propia membresía. No hizo falta trasladar la contraparte a la membresía ni introducir ninguna lógica multi-parte;
+- **la contraparte es una referencia a la empresa** y no un nombre libre, habilitada por la reubicación de `Company` a `mi-admin`;
+- **la membresía cuelga del contrato**, no del proyecto del otro módulo.
+
+Lo que no cambia: un contrato admite **una sola** contraparte, y la visibilidad entre anfitrión y contraparte sigue siendo binaria.
 
 ### D-18 — La circulación es asimétrica entre modos
 
@@ -974,6 +990,18 @@ Alternativa descartada: construir `BLOCK_05` sobre la ruta actual y mudarla al r
 
 Alternativa descartada: administrar el catálogo de cada proyecto desde la pantalla global, con un selector de proyecto. Se descarta porque vuelve al ámbito un filtro dentro de una pantalla en lugar de un lugar donde se está parado, y obliga a que la misma pantalla resuelva permisos de despliegue y membresías de proyecto a la vez.
 
+**Corregido por D-29 (`BLOCK_02D`, promovido el 2026-08-21): la dependencia externa cayó.** Con raíz de alcance propia, el workspace es del módulo documental y no espera la reorganización de `mi-project`. La tabla de ámbitos queda:
+
+| Ámbito | Ruta | Qué vive ahí |
+| ------ | ---- | ------------ |
+| Despliegue | `documents/settings/` | Catálogo global, configuración por defecto, auditoría |
+| Módulo | `<modulo>/documents/` | Catálogo y documentos de calidad, comercial y activos |
+| **Contrato** | `documents/[docProjectId]/` | El contrato, su catálogo propio y sus documentos |
+
+El precedente sigue siendo el mismo que esta decisión ya citaba: en OperMask Digitalization el workspace es `digitalization/[projectId]/` y los catálogos del despliegue viven en `digitalization/settings/`.
+
+Todo lo demás de D-28 se conserva: que el ámbito se expresa en la ruta con una regla y no caso por caso, que no es preferencia de navegación, y que la bandeja de trabajo es transversal con el filtro por contrato como vista.
+
 ### D-29 — El módulo es dueño de su raíz de alcance
 
 **Estado:** Aprobada. Revisa D-06, D-15 y D-28.
@@ -1191,7 +1219,7 @@ Orden propuesto. Cada bloque se abre con su propio documento, con línea base co
 | `BLOCK_04B` | Paquete de información de entrada y promoción a documento controlado (D-16, D-20) | `BLOCK_02` |
 | `BLOCK_02B` ✔ | Ubicación física jerárquica del documento, y **el mecanismo de alcance por proyecto** que los tres catálogos comparten (D-14; construye D-21; descarta H-36). **Promovido a la SFS y desplegado en testing** | `BLOCK_02` |
 | `BLOCK_02C` ✔ | Alcance por proyecto de clase y tipo, aplicando el mecanismo que construye `BLOCK_02B`: clase y tipo declaran juntos, siembra conjunta, cruce en un solo sentido, y el eje de módulo preparado en la declaración de alcance (D-21). **Promovido a la SFS y desplegado en testing y producción** | `BLOCK_02`, `BLOCK_03` por la unicidad, `BLOCK_02B` por el mecanismo |
-| `BLOCK_02D` | Raíz de alcance propia: `DocProject` como entidad del módulo, `DocProjectSettings` disuelto dentro suyo, vínculo opcional y N:1 con `mi-project`, contraparte como referencia a `Company`, estados del contrato con puerta de escritura, y unicidad del código discriminada por módulo (D-29; revisa D-06, D-15 y D-28) | `BLOCK_02`, `BLOCK_02C` |
+| `BLOCK_02D` ✔ | Raíz de alcance propia: `DocProject` como entidad del módulo, `DocProjectSettings` disuelto dentro suyo, vínculo opcional y N:1 con `mi-project`, contraparte como referencia a `Company`, estados del contrato con puerta de escritura, y unicidad del código discriminada por módulo (D-29; revisa D-06, D-15 y D-28). **Promovido a la SFS y desplegado en testing y producción** | `BLOCK_02`, `BLOCK_02C` |
 | `BLOCK_05` | Interfaz de usuario del subsistema, en la organización por ámbito de D-28 corregida por D-29 (H-25) | `BLOCK_03`, `BLOCK_04`, `BLOCK_02B`, `BLOCK_02C`, `BLOCK_02D` |
 
 El rol documental (D-09) gobierna el ciclo completo, por lo que el contexto de proyecto pasa a ser el primer bloque funcional: ya no puede quedar detrás del ciclo de revisión.

@@ -9,7 +9,7 @@
 
 # Propósito
 
-Declarar la **familia** a la que pertenece un documento. En proyectos de ingeniería la clase **es** la disciplina —civil, eléctrica, mecánica, piping—, y es el eje con que la organización agrupa lo que produce.
+Declarar la **familia** a la que pertenece un documento. En contratos de ingeniería la clase **es** la disciplina —civil, eléctrica, mecánica, piping—, y es el eje con que la organización agrupa lo que produce.
 
 ---
 
@@ -20,11 +20,11 @@ Una `DocumentClass` es una entrada de catálogo con nombre, código y orden de p
 | Eje | Qué declara | Nulo significa |
 | --- | ----------- | -------------- |
 | Módulo | Qué módulo la usa | Compartida entre todos los módulos que heredan |
-| Proyecto | Qué proyecto la agregó | Del catálogo del despliegue, del que los proyectos heredan |
+| Contrato | Qué contrato la agregó | Del catálogo del despliegue, del que los contratos heredan |
 
-Los dos conviven en lugar de excluirse. El proyecto solo tiene sentido como alcance **dentro del módulo que lo tiene**: una entrada con proyecto exige el módulo de proyectos, y la base lo sostiene.
+Los dos conviven en lugar de excluirse. El contrato solo tiene sentido como alcance **dentro del módulo que lo tiene**: una entrada con contrato exige el módulo de proyectos, y la base lo sostiene.
 
-**El catálogo del despliegue es el estándar de la propia organización.** El de un proyecto es el de su cliente, y por eso el segundo proyecto para el mismo cliente se siembra del primero.
+**El catálogo del despliegue es el estándar de la propia organización.** El de un contrato es el de su cliente, y por eso el segundo contrato para el mismo cliente se siembra del primero.
 
 ---
 
@@ -39,7 +39,7 @@ Los dos conviven en lugar de excluirse. El proyecto solo tiene sentido como alca
 No es responsable de:
 
 - decidir qué documentos la usan, que es de la revisión que se clasifica con ella;
-- el modo con que un proyecto resuelve el catálogo, que es de `DocCatalogScope`.
+- el modo con que un contrato resuelve el catálogo, que es de `DocCatalogScope`.
 
 ---
 
@@ -47,7 +47,7 @@ No es responsable de:
 
 Nombre, código, descripción y orden de presentación, más los dos ejes de alcance. Con la autoría del alta y de la última modificación, y la marca de vigencia.
 
-**Nombre y código son únicos dentro de su ámbito**, entendiendo por ámbito la combinación de módulo y proyecto. Dos clientes pueden nombrar igual su propia clase, y un proyecto puede agregar un código que el despliegue ya usa: son entradas distintas porque viven en ámbitos distintos.
+**Nombre y código son únicos dentro de su ámbito**, entendiendo por ámbito la combinación de módulo y contrato. Dos clientes pueden nombrar igual su propia clase, y un contrato puede agregar un código que el despliegue ya usa: son entradas distintas porque viven en ámbitos distintos.
 
 La unicidad trata los nulos como **iguales entre sí**. Sin eso, la restricción no impediría duplicados en el caso más frecuente —el catálogo del despliegue, donde los dos ejes son nulos—.
 
@@ -76,11 +76,11 @@ La unicidad trata los nulos como **iguales entre sí**. Sin eso, la restricción
 
 # Observaciones
 
-**Clase y tipo son un solo sistema de clasificación**, y por eso declaran su alcance juntos. No son dos catálogos que coinciden en pantalla: el tipo cuelga de la clase, de modo que un proyecto con clasificación propia que heredara tipos los tendría apuntando a clases que no ve.
+**Clase y tipo son un solo sistema de clasificación**, y por eso declaran su alcance juntos. No son dos catálogos que coinciden en pantalla: el tipo cuelga de la clase, de modo que un contrato con clasificación propia que heredara tipos los tendría apuntando a clases que no ve.
 
 **La clase es identidad y no descripción.** Integra el payload de la firma junto con el código, el título y el tipo, porque a menudo el propio código del documento se compone de la clase y el tipo, y porque está impresa en el rótulo del plano. Con una revisión aprobada, la clasificación queda congelada con el resto de la identificación.
 
-**El eje de módulo tiene un significado que va a precisarse.** Hoy *sin módulo* significa disponible para todos, sin condición. Cuando un módulo pueda declarar catálogo propio, pasará a significar disponible para los módulos que heredan — la misma generalización que el proyecto ya recibió, un escalón más arriba.
+**El eje de módulo tiene un significado que va a precisarse.** Hoy *sin módulo* significa disponible para todos, sin condición. Cuando un módulo pueda declarar catálogo propio, pasará a significar disponible para los módulos que heredan — la misma generalización que el contrato ya recibió, un escalón más arriba.
 
 ---
 

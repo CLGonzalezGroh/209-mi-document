@@ -52,7 +52,7 @@ No es responsable de:
 
 Entre los atributos propios de la `DocQualification` podrán encontrarse:
 
-- alcance: proyecto, o el despliegue entero;
+- alcance: contrato, o el despliegue entero;
 - código y rótulo;
 - efecto;
 - orden dentro de la lista;
@@ -64,11 +64,11 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 # Invariantes
 
-**El código es único dentro de su alcance.** Dos proyectos pueden usar el mismo código con rótulos distintos, porque son contratos distintos.
+**El código es único dentro de su alcance.** Dos contratos pueden usar el mismo código con rótulos distintos, porque son contratos distintos.
 
-**El proyecto reemplaza al despliegue; no lo hereda.** El que declara una calificación propia usa **las suyas y solo las suyas**.
+**El contrato reemplaza al despliegue; no lo hereda.** El que declara una calificación propia usa **las suyas y solo las suyas**.
 
-**El alcance no se edita.** Mover una calificación entre el despliegue y un proyecto cambiaría los valores disponibles sin que nadie lo declare: se crea en el alcance que corresponde y se da de baja la que sobra.
+**El alcance no se edita.** Mover una calificación entre el despliegue y un contrato cambiaría los valores disponibles sin que nadie lo declare: se crea en el alcance que corresponde y se da de baja la que sobra.
 
 **La baja es lógica y no revalida lo ya calificado.** Una calificación dada de baja deja de poder elegirse; las respuestas que la usaron no se tocan.
 
@@ -78,7 +78,7 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **Alcanza a**
 
-- un proyecto, o al despliegue entero cuando no declara ninguno
+- un contrato, o al despliegue entero cuando no declara ninguno
 
 **Es elegida por**
 
@@ -90,15 +90,15 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **Es un catálogo y no una enumeración porque el usuario elige el rótulo.** Cuando el que interpreta el efecto es el sistema y el usuario no elige nada, corresponde una enumeración: por eso el rol del archivo dentro de una versión no es catálogo, y esto sí.
 
-**No hereda, a diferencia de otros catálogos con alcance por proyecto.** La lista de calificaciones es la del **contrato**, y una mezclada —cuatro del despliegue más tres del cliente— no es la de nadie y admitiría calificar con un valor que la contraparte no usa. Donde el alcance más específico agrega opciones sin estorbar, heredar tiene sentido; acá no.
+**No hereda, a diferencia de otros catálogos con alcance por contrato.** La lista de calificaciones es la del **contrato**, y una mezclada —cuatro del despliegue más tres del cliente— no es la de nadie y admitiría calificar con un valor que la contraparte no usa. Donde el alcance más específico agrega opciones sin estorbar, heredar tiene sentido; acá no.
 
-**La baja lógica no cambia el alcance.** El alcance se decide sobre el catálogo completo, de modo que dar de baja la última calificación propia no devuelve el proyecto al catálogo del despliegue y no le cambia en silencio los valores disponibles.
+**La baja lógica no cambia el alcance.** El alcance se decide sobre el catálogo completo, de modo que dar de baja la última calificación propia no devuelve el contrato al catálogo del despliegue y no le cambia en silencio los valores disponibles.
 
 **Sirve a los dos modos con el mismo catálogo**, y esa es la razón de modelarlo una sola vez: en modo Receptor la planta emite la calificación al cerrar el circuito, y en modo Emisor el control documental transcribe la que el cliente devolvió. Misma lista y mismos efectos.
 
 **No incluye el acuse de recibo.** Un acuse no habilita nada y no obliga a nada — la combinación que este catálogo declara inexistente— porque no dice nada sobre el documento: dice que el envío llegó.
 
-**El despliegue se siembra con las cuatro calificaciones habituales**, de modo que un despliegue nuevo queda operativo sin configurar nada y cada proyecto declara las suyas cuando su contrato lo pide.
+**El despliegue se siembra con las cuatro calificaciones habituales**, de modo que un despliegue nuevo queda operativo sin configurar nada y cada contrato declara las suyas cuando su contrato lo pide.
 
 ---
 

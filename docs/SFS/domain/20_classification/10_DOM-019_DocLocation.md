@@ -1,7 +1,7 @@
 # DOM-019 — DocLocation
 
 **Ámbito:** Clasificación
-**Categoría:** Catalog (jerárquico, con alcance por proyecto)
+**Categoría:** Catalog (jerárquico, con alcance por contrato)
 **Estado:** Approved
 **Versión:** 1.0
 
@@ -37,13 +37,13 @@ La planta que tiene los dos mantiene un árbol en cada uno, y **esa divergencia 
 
 - definir un valor admitido de ubicación física para la clasificación documental;
 - mantener su posición en la jerarquía y su ruta consistente con su ascendencia;
-- declarar a qué ámbito pertenece —el árbol del despliegue o el de un proyecto—;
+- declarar a qué ámbito pertenece —el árbol del despliegue o el de un contrato—;
 - conservar, cuando corresponde, la referencia al objeto de otro sistema que describe.
 
 No es responsable de:
 
-- determinar si el atributo participa de la clasificación ni su obligatoriedad, que declara `DocProjectSettings`;
-- resolver qué nodos ve un proyecto, que es de `DocCatalogScope`;
+- determinar si el atributo participa de la clasificación ni su obligatoriedad, que declara `DocProject`;
+- resolver qué nodos ve un contrato, que es de `DocCatalogScope`;
 - representar el activo en sí, que pertenece a otro módulo.
 
 ---
@@ -72,7 +72,7 @@ Un nodo dado de baja **no se elige**, y los documentos que ya lo tenían **lo co
 
 **Alcanza a**
 
-- un proyecto, o al despliegue entero cuando no declara ninguno
+- un contrato, o al despliegue entero cuando no declara ninguno
 
 **Es referenciada por**
 
@@ -82,19 +82,19 @@ Un nodo dado de baja **no se elige**, y los documentos que ya lo tenían **lo co
 
 # Observaciones
 
-**El cruce de alcances se admite en un solo sentido.** Un nodo de proyecto cuelga de uno del despliegue —eso *es* ampliar, y es cómo una planta agrega una unidad dentro de un área que ya existe—; al revés no, porque volvería el árbol global dependiente de un proyecto: quien mirara el catálogo del despliegue vería una rama ajena, y borrar el proyecto dejaría huérfano un nodo global. Y un proyecto no cuelga del árbol de otro, que no ve.
+**El cruce de alcances se admite en un solo sentido.** Un nodo de contrato cuelga de uno del despliegue —eso *es* ampliar, y es cómo una planta agrega una unidad dentro de un área que ya existe—; al revés no, porque volvería el árbol global dependiente de un contrato: quien mirara el catálogo del despliegue vería una rama ajena, y borrar el contrato dejaría huérfano un nodo global. Y un contrato no cuelga del árbol de otro, que no ve.
 
 **La ruta completa es denormalización de conveniencia y no evidencia.** Existe para evitar el recorrido recursivo en cada listado, y ordenar por ella agrupa cada rama con su descendencia. Como la ubicación del documento se edita siempre y no integra el payload de la firma, **renombrar o mover un nodo recalcula las rutas de su descendencia de forma automática**, sin propagación explícita ni auditada. Es donde este catálogo se aparta del precedente de digitalización, donde el snapshot forma parte de una publicación.
 
-**El recálculo alcanza a las ampliaciones ajenas.** Renombrar un nodo del despliegue cambia la ruta de los nodos que los proyectos le colgaron, y de los documentos clasificados con ellos. Lo mismo la cuenta de descendencia que protege el borrado: un nodo global con ampliaciones tiene descendencia, aunque quien lo mira no la vea desde su propio catálogo.
+**El recálculo alcanza a las ampliaciones ajenas.** Renombrar un nodo del despliegue cambia la ruta de los nodos que los contratos le colgaron, y de los documentos clasificados con ellos. Lo mismo la cuenta de descendencia que protege el borrado: un nodo global con ampliaciones tiene descendencia, aunque quien lo mira no la vea desde su propio catálogo.
 
 **Mover es un acto propio y no una edición más**, y verifica que el nodo no quede colgado de su propia descendencia: esa rama quedaría desconectada de toda raíz y ningún recálculo la alcanzaría.
 
-**La unicidad del código es por nivel y por alcance.** Dos plantas pueden tener su área *100*, y dos proyectos su propio nodo con el mismo código. Los nodos raíz del despliegue —que en un catálogo plano son todos— exigen `NULLS NOT DISTINCT` para que la restricción sea efectiva.
+**La unicidad del código es por nivel y por alcance.** Dos plantas pueden tener su área *100*, y dos contratos su propio nodo con el mismo código. Los nodos raíz del despliegue —que en un catálogo plano son todos— exigen `NULLS NOT DISTINCT` para que la restricción sea efectiva.
 
 **La referencia externa se declara completa o no se declara.** Origen e identificador viajan juntos: un origen sin identificador no dice nada. Es el puente con el registro de activos cuando ese módulo exista, y con un sistema documental externo.
 
-**No reutiliza `Area`**, que es plana, obligatoriamente atada a un proyecto y pertenece al subsistema de `ScannedFile`.
+**No reutiliza `Area`**, que es plana, obligatoriamente atada a un contrato y pertenece al subsistema de `ScannedFile`.
 
 ---
 
@@ -102,6 +102,6 @@ Un nodo dado de baja **no se elige**, y los documentos que ya lo tenían **lo co
 
 - `20_DOM-020_DocCatalogScope.md`
 - `../10_cycle/10_DOM-005_Document.md`
-- `../05_project/10_DOM-003_DocProjectSettings.md`
+- `../05_project/10_DOM-003_DocProject.md`
 - `80_Principios_del_Modelo.md`
 - `../../00_Convenciones.md`

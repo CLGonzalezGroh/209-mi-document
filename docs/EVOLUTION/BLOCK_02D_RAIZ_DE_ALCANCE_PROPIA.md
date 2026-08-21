@@ -1,7 +1,7 @@
 # Bloque 02D — Raíz de alcance propia: el contrato
 
-**Estado:** `APROBADO_PENDIENTE`
-**Versión:** 1.0
+**Estado:** `PROMOVIDO_A_SFS`
+**Versión:** 2.0
 **Depende de:** `BLOCK_02`, cuya configuración y membresía de proyecto este bloque reubica; `BLOCK_02C`, por la unicidad con nulos de los catálogos.
 **Decisiones que ejecuta:** D-29, que se incorpora al plan con este bloque.
 **Decisiones que revisa:** D-06, D-15, D-28.
@@ -576,7 +576,36 @@ El control de precondición ganó además una guarda: si el bloque ya está apli
 
 **El seed preservó cuatro permisos manuales en `proion`, y los nombró uno por uno**: `proj-basic` con `workCalendar:read`, y `proj-planner` con `project:update`, `project:create` y `workCalendar:read`. Son **dos más** que los medidos durante la mudanza de `Company`, de modo que la corrección de `SEED_ROLE_PERMISSIONS_PRESERVATION` no solo funciona: **está evitando una pérdida que hoy sería mayor que la de entonces**.
 
-**Estado del bloque: implementado, desplegado y verificado en los cinco despliegues.** Resta la promoción a la SFS.
+**Estado del bloque: implementado, desplegado y verificado en los cinco despliegues.**
+
+### Fase 10 — completada
+
+**Promovido a la SFS.** El comportamiento del bloque se incorporó al ámbito de contexto de proyecto, con un cambio que no es de redacción sino de objeto: **`DOM-003` deja de ser `DocProjectSettings` y pasa a ser `DocProject`**, categoría *Aggregate Root*. La entidad anterior describía correctamente lo único que podía describirse mientras el proyecto viviera en otro módulo — pero el rol documental no es una preferencia de configuración, es lo que el contrato **es**.
+
+**Diecisiete documentos existentes se corrigieron por lo que este bloque volvió falso.** Donde decían *proyecto* como unidad de alcance ahora dicen *contrato*, y donde nombran al módulo de proyectos siguen diciendo proyecto: son dos cosas distintas y la SFS ahora las distingue. Los principios del ámbito ganaron además dos enunciados nuevos:
+
+- **el módulo es dueño de su raíz de alcance**, con las tres consecuencias que eso tiene —que la gestión documental puede venderse sola, que la pertenencia es estructural, y que una obra admite varios contratos—;
+- **el estado del contrato dice qué admite, no quién puede**, separado de la autorización a propósito para que un contrato cerrado no se lea como una falta de permisos.
+
+**Tres decisiones del plan quedaron corregidas**, y conviene decir en qué dirección:
+
+| Decisión | Qué dejó de ser cierto |
+| -------- | ---------------------- |
+| **D-06** | El proyecto ya no es referencia externa; la unicidad discrimina por módulo y no por el nulo; el invariante dejó de vivir en la aplicación |
+| **D-15** | *"Cada proyecto es un contrato"* pasó de descripción a objeto. **La señal que aquella decisión pedía vigilar quedó resuelta sin tocar la binariedad**: dos proveedores en paralelo son dos contratos |
+| **D-28** | Cayó la dependencia externa. El ámbito de contrato es `documents/[docProjectId]/` |
+
+Que un bloque corrija decisiones ya aprobadas es lo previsto: la SFS describe lo implementado y validado, y cuando lo implementado cambia, lo que estaba escrito **deja de ser cierto** y no simplemente incompleto.
+
+## Cierre
+
+**Diez fases, desplegado y verificado en los cinco despliegues, y promovido a la SFS.**
+
+Lo que el bloque deja, más allá del modelo:
+
+- **`BLOCK_05` quedó desbloqueado.** Era su última dependencia, y además la que no dependía de este equipo: la interfaz ya no espera la reorganización de `mi-project`;
+- **el módulo puede venderse solo**, que era la mitad de la regla de oro que nadie había verificado;
+- **una obra admite varios contratos**, que es la situación que la operación tenía y el modelo no podía representar.
 
 ## Referencias
 

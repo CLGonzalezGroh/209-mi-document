@@ -8,9 +8,9 @@
 
 # 1. La circulación empieza donde termina el ciclo interno
 
-El ciclo interno es idéntico en los tres roles documentales: se elabora, se revisa, se marca, se rechaza, se corrige y se aprueba de la misma forma. **Lo único que distingue a un proyecto de otro es tener contraparte**, y eso es lo que este ámbito agrega.
+El ciclo interno es idéntico en los tres roles documentales: se elabora, se revisa, se marca, se rechaza, se corrige y se aprueba de la misma forma. **Lo único que distingue a un contrato de otro es tener contraparte**, y eso es lo que este ámbito agrega.
 
-Un proyecto sin contraparte no participa: su ciclo terminó al aprobar, y no hay nada que entregar ni nadie que responda.
+Un contrato sin contraparte no participa: su ciclo terminó al aprobar, y no hay nada que entregar ni nadie que responda.
 
 De ahí que la frontera entre ámbitos no sea organizativa sino de dominio. El ciclo interno no sabe de transmittals; la circulación no reabre el circuito, salvo en el único punto donde el circuito **es** el mecanismo de respuesta.
 
@@ -20,7 +20,7 @@ De ahí que la frontera entre ámbitos no sea organizativa sino de dominio. El c
 
 Lo que determina qué reglas gobiernan un transmittal no es su dirección sino su propósito: entregar documentación producida, o consolidar la calificación de una entrega.
 
-El sentido —saliente o entrante— **se deriva** del rol del proyecto y de la naturaleza, y no se declara. Es la misma razón por la que el esquema de revisión no se persiste: un dato guardado que puede contradecir a los hechos obliga a inventar una precondición que tape la incoherencia.
+El sentido —saliente o entrante— **se deriva** del rol del contrato y de la naturaleza, y no se declara. Es la misma razón por la que el esquema de revisión no se persiste: un dato guardado que puede contradecir a los hechos obliga a inventar una precondición que tape la incoherencia.
 
 La distinción tiene una consecuencia práctica que conviene no perder: **los dos casos entrantes no comparten una sola regla**. Lo que entra en modo Emisor es una respuesta que contesta algo nuestro; lo que entra en modo Receptor es una emisión que no contesta nada, y que llega sin haber pasado por ningún circuito nuestro.
 
@@ -52,7 +52,7 @@ Quitar el ítem, posible solo en borrador, libera la revisión: nunca salió.
 
 # 5. No hay documento esperado: hay documento
 
-Todo documento dado de alta en el proyecto es un documento esperado, y el que aparece después del alcance inicial también — nació más tarde, no es de otra clase.
+Todo documento dado de alta en el contrato es un documento esperado, y el que aparece después del alcance inicial también — nació más tarde, no es de otra clase.
 
 Esperado y adicional describen **cuándo apareció**, no **qué es**, y el cuándo ya lo registra la auditoría. Por eso no existe un objeto de expectativa ni un acto de promoción entre él y el documento.
 
@@ -106,9 +106,9 @@ Y la calificación queda **en el mismo lugar en los dos modos**: la respuesta de
 
 El armado de un circuito siempre tiene contenido porque **el elaborador nunca se preasigna**: designarlo es distribuir carga de trabajo y se decide documento por documento.
 
-En el rol Receptor no hay elaborador. Con la plantilla del proyecto completa, el armado queda literalmente vacío, y entonces lo resuelve el sistema: emitir el transmittal entrante arma el circuito de cada documento y somete su revisión, en un solo acto y sin intervención.
+En el rol Receptor no hay elaborador. Con la plantilla del contrato completa, el armado queda literalmente vacío, y entonces lo resuelve el sistema: emitir el transmittal entrante arma el circuito de cada documento y somete su revisión, en un solo acto y sin intervención.
 
-La plantilla resuelve su alcance por proyecto, clase y tipo, con actores preasignados — y en el ámbito de proyectos **la clase es la disciplina**. Es, para esos ejes, la matriz de responsabilidad.
+La plantilla resuelve su alcance por contrato, clase y tipo, con actores preasignados — y en el ámbito de proyectos **la clase es la disciplina**. Es, para esos ejes, la matriz de responsabilidad.
 
 Cuando la plantilla no alcanza, ese documento conserva su armado pendiente y quien recibe lo resuelve a mano, mientras el resto del transmittal avanza. Es una red y no el camino: rechazar la emisión dejaría al contratista trabado por una configuración que él no puede corregir.
 
@@ -132,7 +132,7 @@ Lo que el sistema interpreta no es el rótulo sino el **efecto**, y el efecto re
 
 Es catálogo, y no enumeración, porque el usuario elige el rótulo. Cuando el usuario no elige nada y el sistema interpreta el efecto, corresponde lo contrario.
 
-Y a diferencia de otros catálogos con alcance por proyecto, **este no hereda**: la lista es la del contrato, y una mezclada no es la de nadie.
+Y a diferencia de otros catálogos con alcance por contrato, **este no hereda**: la lista es la del contrato, y una mezclada no es la de nadie.
 
 ---
 

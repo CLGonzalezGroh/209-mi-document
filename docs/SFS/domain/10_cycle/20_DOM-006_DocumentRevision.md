@@ -75,7 +75,7 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 # Invariantes
 
-**El armador es obligatorio.** Es el único actor que debe conocerse en el alta: todo lo demás lo trae la plantilla o lo decide el armado. Cuando no se informa, lo aporta la configuración del proyecto.
+**El armador es obligatorio.** Es el único actor que debe conocerse en el alta: todo lo demás lo trae la plantilla o lo decide el armado. Cuando no se informa, lo aporta la configuración del contrato.
 
 **Un documento tiene a lo sumo una revisión en curso.** Abrir otra exige completar o abandonar la anterior.
 

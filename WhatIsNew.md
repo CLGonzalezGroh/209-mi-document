@@ -1474,3 +1474,28 @@ Las cinco migraciones aplicadas —`mi-document` *healthy* en los tres, que es l
 
 Con esto el bloque queda implementado, desplegado y verificado en los cinco despliegues. Resta la promoción a la SFS.
 
+---
+
+# What's new in María Ingeniería API Documents 2.18.0
+
+2026-08-21
+
+## La raíz de alcance propia del módulo (BLOQUE 02D) — promovido a la SFS
+
+### Fase 10 — Promoción
+
+**`DOM-003` deja de ser `DocProjectSettings` y pasa a ser `DocProject`**, categoría *Aggregate Root*. No es un cambio de redacción sino de objeto: la entidad anterior describía correctamente lo único que podía describirse mientras el proyecto viviera en otro módulo, pero el rol documental **no es una preferencia de configuración, es lo que el contrato es**.
+
+**Diecisiete documentos existentes se corrigieron por lo que este bloque volvió falso.** Donde decían *proyecto* como unidad de alcance ahora dicen *contrato*; donde nombran al módulo de proyectos siguen diciendo proyecto. Son dos cosas distintas y la SFS ahora las distingue.
+
+**Los principios del ámbito ganaron dos enunciados:**
+
+- **el módulo es dueño de su raíz de alcance**, con sus tres consecuencias: la gestión documental puede ofrecerse sola, la pertenencia es estructural y no una convención entre servicios, y una obra admite varios contratos;
+- **el estado del contrato dice qué admite, no quién puede**, separado de la autorización a propósito para que un contrato cerrado no se lea como una falta de permisos.
+
+**Tres decisiones del plan corregidas:** D-06 —el proyecto ya no es referencia externa y la unicidad discrimina por módulo—, D-15 —*"cada proyecto es un contrato"* pasó de descripción a objeto, y la señal que aquella decisión pedía vigilar quedó resuelta sin tocar la binariedad— y D-28, cuya dependencia externa cayó.
+
+Que un bloque corrija decisiones ya aprobadas es lo previsto: la SFS describe lo implementado y validado, y cuando lo implementado cambia, lo escrito **deja de ser cierto** y no simplemente incompleto.
+
+Con esto el bloque queda cerrado: **diez fases, desplegado y verificado en los cinco despliegues, y promovido a la SFS.**
+

@@ -24,7 +24,7 @@ Es lo que la vuelve barata de corregir y lo que permite que su snapshot se reesc
 
 # 3. Un catálogo es un conjunto, y por eso se hereda
 
-Las configuraciones por proyecto son **valores**: el rol documental, el esquema de revisión, el armador por defecto. Lo específico reemplaza a lo general y no hay nada que combinar.
+Las configuraciones por contrato son **valores**: el rol documental, el esquema de revisión, el armador por defecto. Lo específico reemplaza a lo general y no hay nada que combinar.
 
 Un catálogo es un **conjunto**, de modo que la pregunta es otra: qué entradas están disponibles. Ahí sí tiene sentido heredar y ampliar, y por eso el alcance es una declaración propia y no un valor más de la configuración.
 
@@ -36,9 +36,9 @@ Un catálogo es un **conjunto**, de modo que la pregunta es otra: qué entradas 
 
 Ubicación y clasificación comparten la declaración, los dos modos y la siembra por copia. Está construido una vez sobre el catálogo que no tenía datos ni interfaz en producción, y el otro lo reutiliza sin migrar estructura.
 
-**Clase y tipo son un solo catálogo y no dos.** El tipo cuelga de la clase, de modo que declararlos por separado admitiría un proyecto con clasificación propia heredando tipos que apuntan a clases que no ve. Los ejes de alcance son los mismos; lo que se declara una sola vez es cómo se resuelven.
+**Clase y tipo son un solo catálogo y no dos.** El tipo cuelga de la clase, de modo que declararlos por separado admitiría un contrato con clasificación propia heredando tipos que apuntan a clases que no ve. Los ejes de alcance son los mismos; lo que se declara una sola vez es cómo se resuelven.
 
-**La invariante de cruce sí se generaliza, y no es del árbol.** Compara dos alcances y no dos nodos: lo del proyecto cuelga de lo del despliegue —eso es ampliar— y nunca al revés, porque el catálogo global quedaría dependiendo de un proyecto. Vale para el nodo y su padre, para el tipo y su clase, y para la plantilla del circuito y las entradas que referencia. La clase es lo único que no la necesita, porque no cuelga de nada.
+**La invariante de cruce sí se generaliza, y no es del árbol.** Compara dos alcances y no dos nodos: lo del contrato cuelga de lo del despliegue —eso es ampliar— y nunca al revés, porque el catálogo global quedaría dependiendo de un contrato. Vale para el nodo y su padre, para el tipo y su clase, y para la plantilla del circuito y las entradas que referencia. La clase es lo único que no la necesita, porque no cuelga de nada.
 
 **Lo que cambia entre los dos catálogos es la identidad, y de ahí sale la siembra.** Un nodo **es** su ruta completa; una clase es su código, y un tipo su código **dentro de su clase**. Por eso copiar un árbol resuelve rutas y copiar la clasificación resuelve códigos, con la misma regla: copiar solo lo vigente, comparar contra lo que el destino **ve**, y no duplicar.
 
@@ -76,7 +76,7 @@ Es la misma partición que gobierna el cambio de modo de un catálogo, y la raz�
 
 # 8. Opcional en los tres roles
 
-El atributo nace habilitado y no obligatorio, y un proyecto atraviesa el ciclo completo sin declarar ninguna ubicación. La obligatoriedad se configura, y **deshabilitado no exige**: exigir lo que no se puede declarar sería una contradicción, no una regla estricta.
+El atributo nace habilitado y no obligatorio, y un contrato atraviesa el ciclo completo sin declarar ninguna ubicación. La obligatoriedad se configura, y **deshabilitado no exige**: exigir lo que no se puede declarar sería una contradicción, no una regla estricta.
 
 La etiqueta sí es configurable —*área*, *unidad*, *sector*— a diferencia de la revisión, que es terminología establecida del dominio documental.
 

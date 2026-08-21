@@ -51,7 +51,7 @@ Entre los atributos propios del `DocAuditEvent` podrán encontrarse:
 - fecha y hora;
 - actor, que puede ser nulo cuando la emite el sistema;
 - datos contextuales de la acción;
-- proyecto y ámbito del objeto afectado, derivados de él y no informados por quien emite. Pueden ser nulos: los catálogos no pertenecen a ningún proyecto, y la documentación publicada tampoco.
+- contrato y ámbito del objeto afectado, derivados de él y no informados por quien emite. Pueden ser nulos: los catálogos no pertenecen a ningún contrato, y la documentación publicada tampoco.
 
 La definición detallada de estos atributos corresponde al Modelo de Datos.
 

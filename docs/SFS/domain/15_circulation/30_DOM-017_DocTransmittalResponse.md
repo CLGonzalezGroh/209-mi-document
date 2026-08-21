@@ -67,7 +67,7 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **Solo se responde lo que salió.** Un transmittal en borrador es la carpeta que se está armando y todavía no llegó a nadie. Uno cerrado sí admite respuesta tardía.
 
-**La calificación debe pertenecer al catálogo vigente del proyecto.** Una lista mezclada admitiría calificar con un valor que la contraparte no usa.
+**La calificación debe pertenecer al catálogo vigente del contrato.** Una lista mezclada admitiría calificar con un valor que la contraparte no usa.
 
 **El sobre declarado, cuando existe, debe contestar la emisión por la que ese documento salió.** Sin esa condición un remito podría transportar la calificación de documentos que nunca contestó.
 
@@ -85,7 +85,7 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **Elige**
 
-- `DocQualification` del catálogo vigente del proyecto
+- `DocQualification` del catálogo vigente del contrato
 
 **Viajó en**
 

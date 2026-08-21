@@ -21,7 +21,7 @@ Su identificación se compone de código, título, clase y tipo. En el control d
 
 De esa identificación, **el documento conserva solo el código**. El título, la clase y el tipo pertenecen a la revisión, porque están impresos dentro del archivo y lo impreso pertenece a la emisión que lo produjo. El documento los replica para poder listarlos y filtrarlos, pero como copia y no como dato propio.
 
-El documento pertenece a un proyecto o al régimen de publicación, según lo define el ámbito de contexto de proyecto.
+El documento pertenece a un **contrato** o al régimen de publicación, según lo define el ámbito de contexto de proyecto.
 
 **Un documento existe desde su alta con un circuito ya en marcha**, aunque todavía no tenga archivo: el paso de elaboración existe precisamente para producirlo.
 
@@ -50,7 +50,7 @@ No es responsable de:
 Entre los atributos propios del `Document` podrán encontrarse:
 
 - **código identificador**, que no cambia;
-- descripción y ámbito —proyecto o módulo de publicación—;
+- descripción y ámbito —contrato o módulo de publicación—;
 - **ubicación física** y la ruta de esa ubicación como snapshot;
 - copia de la identificación de su revisión en curso: título, clase y tipo;
 - fecha, actor y motivo de su obsolescencia;
@@ -58,7 +58,7 @@ Entre los atributos propios del `Document` podrán encontrarse:
 
 **No se encuentra entre ellos el esquema de revisión.** Se elige al crear cada revisión y se lee de la última no abandonada.
 
-**La ubicación se edita siempre, como la descripción.** No entra en el congelamiento de la revisión aprobada ni en el payload de la firma: clasifica y no identifica, de modo que corregir dónde está un equipo no exige abrir una revisión. Su ruta es un snapshot que el propio catálogo recalcula al renombrar o mover el nodo. Es opcional, y el proyecto puede exigirla por configuración — ver `../20_classification/10_DOM-019_DocLocation.md`.
+**La ubicación se edita siempre, como la descripción.** No entra en el congelamiento de la revisión aprobada ni en el payload de la firma: clasifica y no identifica, de modo que corregir dónde está un equipo no exige abrir una revisión. Su ruta es un snapshot que el propio catálogo recalcula al renombrar o mover el nodo. Es opcional, y el contrato puede exigirla por configuración — ver `../20_classification/10_DOM-019_DocLocation.md`.
 
 La copia de la identificación **se nombra por la lectura que sirve** —`currentTitle` y equivalentes—, para que ningún consumidor la confunda con la identificación de la revisión aprobada.
 
@@ -70,7 +70,9 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **El código es el identificador y no cambia.** Está en los transmittals emitidos, en el payload de cada firma, en las referencias cruzadas de otros documentos y en el rótulo de cada archivo que salió. Solo se corrige **mientras el documento no tenga ninguna revisión aprobada**, que es la condición material de que nada salió; después, lo que corresponde es un documento nuevo que lo reemplace.
 
-**El código es único dentro de su ámbito**: dentro del proyecto para la documentación en circulación, dentro del módulo para la publicada. **El documento obsoleto no lo libera.**
+**El código es único dentro de su ámbito**: dentro del **contrato** para la documentación en circulación, dentro del módulo para la publicada. **El documento obsoleto no lo libera.**
+
+Dos contratos de la misma obra **pueden** repetir el mismo código, y es deliberado: son contrapartes distintas, y cada una numera su documentación con su propia convención. Imponerles una numeración común sería imponer un acuerdo que ninguna hizo.
 
 **La identificación se congela con la revisión aprobada, y el congelamiento es estructural.** No es una precondición de la edición: es que una revisión aprobada no se modifica, y la identificación vive en ella. Abrir la revisión siguiente la vuelve a habilitar.
 
@@ -86,7 +88,7 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **Se clasifica por**
 
-- `DocumentClass` y `DocumentType`, por la copia de la identificación de su revisión en curso. La clase y el tipo elegidos deben estar **dentro del alcance que su proyecto resuelve** y **vigentes**: el selector no es una sugerencia sino un límite
+- `DocumentClass` y `DocumentType`, por la copia de la identificación de su revisión en curso. La clase y el tipo elegidos deben estar **dentro del alcance que su contrato resuelve** y **vigentes**: el selector no es una sugerencia sino un límite
 
 **Agrupa a**
 
@@ -98,15 +100,15 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **Pertenece a**
 
-- un proyecto, por referencia externa, o a ninguno bajo el régimen de publicación
+- un **contrato**, o a ninguno bajo el régimen de publicación
 
 ---
 
 # Observaciones
 
-**Un documento está pendiente cuando su revisión en curso todavía no salió.** No es un atributo ni una clase aparte: se deriva de que esa revisión no figure en ninguna emisión, y su significado depende del rol del proyecto. No hay documento esperado y documento adicional — todo el que se da de alta en el proyecto es esperado, y el que aparece más tarde también. Ver `../15_circulation/80_Principios_del_Modelo.md`.
+**Un documento está pendiente cuando su revisión en curso todavía no salió.** No es un atributo ni una clase aparte: se deriva de que esa revisión no figure en ninguna emisión, y su significado depende del rol del contrato. No hay documento esperado y documento adicional — todo el que se da de alta en el contrato es esperado, y el que aparece más tarde también. Ver `../15_circulation/80_Principios_del_Modelo.md`.
 
-El documento expone **dos lecturas distintas** de su estado, y confundirlas es el defecto que su especificación previene: la revisión **vigente** es la última aprobada y solo esa, y la revisión **en curso** es la última no abandonada en cualquier estado. Un documento sin ninguna revisión aprobada no tiene revisión vigente, y devolver un borrador en su lugar afirmaría que el proyecto tiene un documento que en realidad no aprobó.
+El documento expone **dos lecturas distintas** de su estado, y confundirlas es el defecto que su especificación previene: la revisión **vigente** es la última aprobada y solo esa, y la revisión **en curso** es la última no abandonada en cualquier estado. Un documento sin ninguna revisión aprobada no tiene revisión vigente, y devolver un borrador en su lugar afirmaría que el contrato tiene un documento que en realidad no aprobó.
 
 **Esas mismas dos lecturas alcanzan a la identificación**, y por eso la copia lleva el prefijo que la nombra. La metadata **vigente** es la de la última aprobada —lo que dice el rótulo que efectivamente salió—; la metadata **en curso** es la de la revisión abierta. Un campo que callara cuál de las dos es se derivaría mal en cada consumidor.
 

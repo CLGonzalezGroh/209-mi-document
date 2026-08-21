@@ -17,15 +17,15 @@
 
 Una `DocWorkflowTemplate` declara un circuito habitual: qué pasos lo componen, en qué orden, y opcionalmente quién los ocupa.
 
-Se resuelve **por alcance** contra la tupla del propio documento —proyecto, clase y tipo—, y **gana la más específica**:
+Se resuelve **por alcance** contra la tupla del propio documento —contrato, clase y tipo—, y **gana la más específica**:
 
 | Alcance declarado | Precedencia |
 | ----------------- | ----------- |
-| Proyecto, clase y tipo | La más específica |
-| Proyecto y clase | Intermedia |
-| Solo proyecto | Es el default de ese proyecto |
+| Contrato, clase y tipo | La más específica |
+| Contrato y clase | Intermedia |
+| Solo contrato | Es el default de ese contrato |
 
-Una columna con valor debe coincidir con la del documento; una en blanco no restringe. La plantilla del proyecto sin clase ni tipo **es** su default, sin necesidad de una marca aparte.
+Una columna con valor debe coincidir con la del documento; una en blanco no restringe. La plantilla del contrato sin clase ni tipo **es** su default, sin necesidad de una marca aparte.
 
 **La plantilla propone y no impone**: quien crea el documento y el armador pueden cambiarla o ignorarla.
 
@@ -52,7 +52,7 @@ No es responsable de:
 Entre los atributos propios de la `DocWorkflowTemplate` podrán encontrarse:
 
 - nombre y descripción;
-- alcance: proyecto, clase y tipo de documento, cualquiera de ellos sin declarar;
+- alcance: contrato, clase y tipo de documento, cualquiera de ellos sin declarar;
 - pasos, con su orden, su tipo y su actor preasignado opcional;
 - fecha de baja;
 - fechas y actores de alta y modificación.
@@ -63,7 +63,7 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 # Invariantes
 
-**El alcance es único.** No existen dos plantillas vigentes para la misma combinación de proyecto, clase y tipo, y las combinaciones sin declarar cuentan como valor a estos efectos.
+**El alcance es único.** No existen dos plantillas vigentes para la misma combinación de contrato, clase y tipo, y las combinaciones sin declarar cuentan como valor a estos efectos.
 
 **La plantilla no declara el armado ni la elaboración.** Esos pasos los pone el sistema: una plantilla que pudiera omitirlos permitiría circuitos sin elaborador, y una que pudiera incluirlos permitiría dos armados.
 
@@ -83,8 +83,8 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **Acota su alcance con**
 
-- un proyecto, por referencia externa
-- `DocumentClass` y `DocumentType`, dentro del alcance que la propia plantilla resuelve: una del despliegue no referencia entradas de proyecto
+- un contrato, por referencia externa
+- `DocumentClass` y `DocumentType`, dentro del alcance que la propia plantilla resuelve: una del despliegue no referencia entradas de contrato
 
 ---
 

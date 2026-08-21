@@ -20,10 +20,10 @@ Un `DocumentType` es una entrada de catálogo con los **mismos dos ejes de alcan
 | Eje | Nulo significa |
 | --- | -------------- |
 | Módulo | Compartido entre todos los módulos que heredan |
-| Proyecto | Del catálogo del despliegue |
+| Contrato | Del catálogo del despliegue |
 | Clase | Disponible para todas las clases |
 
-**El alcance del tipo y el de su clase pueden diferir, en un solo sentido.** Un tipo del proyecto puede colgar de una clase del despliegue: eso **es** ampliar la clasificación heredada, y es el caso normal. Al revés no — un tipo del despliegue colgado de una clase de proyecto dejaría al catálogo global dependiendo de un proyecto, y quien mirara el catálogo del despliegue vería una entrada que pertenece a otro. Tampoco cuelga de la clase de otro proyecto, que no ve.
+**El alcance del tipo y el de su clase pueden diferir, en un solo sentido.** Un tipo del contrato puede colgar de una clase del despliegue: eso **es** ampliar la clasificación heredada, y es el caso normal. Al revés no — un tipo del despliegue colgado de una clase de contrato dejaría al catálogo global dependiendo de un contrato, y quien mirara el catálogo del despliegue vería una entrada que pertenece a otro. Tampoco cuelga de la clase de otro contrato, que no ve.
 
 ---
 

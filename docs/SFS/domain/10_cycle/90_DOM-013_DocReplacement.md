@@ -37,7 +37,7 @@ No es responsable de:
 
 - declarar de qué clase de reemplazo se trata, que se deriva de su cardinalidad;
 - cerrar los documentos reemplazados, que es baja lógica y no obsolescencia;
-- expresar el paso de un documento de proyecto al activo de planta, que es promoción y no reemplazo.
+- expresar el paso de un documento de contrato al activo de planta, que es promoción y no reemplazo.
 
 ---
 
@@ -60,7 +60,7 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **Un documento no aparece dos veces con el mismo papel** dentro de un acto.
 
-**Los documentos de un acto comparten ámbito**: todos del mismo proyecto, o todos del régimen de publicación. Lo que cruza de uno a otro no es reemplazar sino promover.
+**Los documentos de un acto comparten ámbito**: todos del mismo contrato, o todos del régimen de publicación. Lo que cruza de uno a otro no es reemplazar sino promover.
 
 **El motivo es obligatorio**, con el criterio que rige todo acto consecuente del ciclo.
 
@@ -94,7 +94,7 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **Que compartan ámbito no es solo una regla de negocio.** Es lo que vuelve bien definido el contexto del acto en la traza: cualquiera de sus documentos da la misma respuesta, de modo que no hay que elegir uno.
 
-**La promoción al activo de planta es otra cosa**, y no se registra acá. Ocurre entre revisiones y no entre documentos, el documento de proyecto no queda obsoleto —quedó terminado—, produce una revisión en el activo en lugar de un documento, y cruza de ámbito. Pertenece al módulo de activos.
+**La promoción al activo de planta es otra cosa**, y no se registra acá. Ocurre entre revisiones y no entre documentos, el documento de contrato no queda obsoleto —quedó terminado—, produce una revisión en el activo en lugar de un documento, y cruza de ámbito. Pertenece al módulo de activos.
 
 ---
 

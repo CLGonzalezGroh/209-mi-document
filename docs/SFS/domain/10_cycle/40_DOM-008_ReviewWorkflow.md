@@ -104,7 +104,7 @@ La definición detallada de estos atributos corresponde al Modelo de Datos.
 
 **La reinstanciación depende de la salida.** El rechazo abre un circuito desde la elaboración con el **mismo elenco copiado**, porque el trabajo vuelve al elaborador sin rearmar nada. La cancelación abre uno desde el armado, porque lo que se corrige es precisamente cómo estaba armado.
 
-**Salvo donde no hay elaborador.** La regla uniforme es que el rechazo devuelve el trabajo a quien elabora; lo que cambia es dónde vive esa persona. En el rol Receptor vive afuera, de modo que no hay circuito sucesor y la emisión siguiente llega con revisión nueva. Por lo mismo, ahí el armado no tiene contenido y lo resuelve el sistema desde la plantilla del proyecto.
+**Salvo donde no hay elaborador.** La regla uniforme es que el rechazo devuelve el trabajo a quien elabora; lo que cambia es dónde vive esa persona. En el rol Receptor vive afuera, de modo que no hay circuito sucesor y la emisión siguiente llega con revisión nueva. Por lo mismo, ahí el armado no tiene contenido y lo resuelve el sistema desde la plantilla del contrato.
 
 **El elenco se copia y no se referencia**: reasignar un paso del circuito nuevo no altera la historia del anterior.
 
