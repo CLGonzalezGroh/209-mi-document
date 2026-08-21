@@ -560,6 +560,24 @@ La corrección tiene una forma que conviene retener: **la herramienta que contra
 
 El control de precondición ganó además una guarda: si el bloque ya está aplicado lo dice y sale con éxito.
 
+### Desplegado y verificado en producción — 2026-08-21
+
+`optimal` y `proion`. Respaldo de las ocho bases antes de tocar nada, `8/8 OK`.
+
+| Verificación | `optimal` | `proion` |
+| ------------ | --------- | -------- |
+| Las cinco migraciones | `mi-document` **healthy** | **healthy** |
+| Contrato | Los cuatro bloques, retiradas ausentes | ídem |
+| Permisos | 7 recursos completos; `doc-basic` 3, `doc-full` 6 | ídem |
+| Siembra | 9 otorgados, 0 revocados | 9 otorgados, 0 revocados, **4 manuales preservados** |
+| Línea base del legado | **3.425 / 3.318 / 3.300 / 52 / 5.277, 8 clases, 57 tipos — idéntica** | 0 en todo |
+
+**Acá el criterio 5 se midió de verdad.** `optimal` productivo tiene el 96% de su subsistema legado apoyado en los dos catálogos que este bloque renombró alrededor sin tocar, y la comparación antes y después **no registra una sola diferencia**. Que `ScannedFile` y `Area` queden fuera del renombre deja de ser una decisión de diseño y pasa a ser un hecho verificado sobre el único cliente con uso real.
+
+**El seed preservó cuatro permisos manuales en `proion`, y los nombró uno por uno**: `proj-basic` con `workCalendar:read`, y `proj-planner` con `project:update`, `project:create` y `workCalendar:read`. Son **dos más** que los medidos durante la mudanza de `Company`, de modo que la corrección de `SEED_ROLE_PERMISSIONS_PRESERVATION` no solo funciona: **está evitando una pérdida que hoy sería mayor que la de entonces**.
+
+**Estado del bloque: implementado, desplegado y verificado en los cinco despliegues.** Resta la promoción a la SFS.
+
 ## Referencias
 
 - `DOCUMENT_EVOLUTION_PLAN.md` — D-06, D-07, D-09, D-15, D-19, D-21, D-24, D-28, D-29

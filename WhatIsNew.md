@@ -1456,3 +1456,21 @@ Las cinco migraciones aplicadas —`mi-document` *healthy* en los tres, que es l
 
 **El control de precondición no sirve para contrastar, y se vio al usarlo.** Aborta con `column "projectId" does not exist` contra una base ya migrada: pregunta por la columna que el bloque renombra. No es una falla del despliegue, pero lo parece. Se agregó `check-document-baseline.sh`, que mide lo mismo tocando **solo columnas que ningún bloque renombra** y sirve en las dos orillas, y una guarda al de precondición para que avise en lugar de abortar.
 
+---
+
+# What's new in María Ingeniería API Documents 2.17.5
+
+2026-08-21
+
+## La raíz de alcance propia del módulo (BLOQUE 02D)
+
+### Desplegado y verificado en producción
+
+`optimal` y `proion`, con respaldo previo de las ocho bases. Las cinco migraciones aplicadas, contrato con los cuatro bloques y las retiradas ausentes, permisos completos y repartidos en los dos.
+
+**Acá el criterio 5 se midió de verdad.** `optimal` productivo tiene el 96% de su subsistema legado apoyado en los dos catálogos que este bloque renombró alrededor sin tocar, y la comparación antes y después **no registra una sola diferencia**: 3.425 archivos escaneados, 3.318 con clase, 3.300 con tipo, 52 áreas, 5.277 registros de log, 8 clases y 57 tipos. Que `ScannedFile` y `Area` queden fuera del renombre deja de ser una decisión de diseño y pasa a ser un hecho verificado sobre el único cliente con uso real.
+
+**El seed preservó cuatro permisos manuales en `proion`** —`proj-basic` uno, `proj-planner` tres— y los nombró uno por uno. Son dos más que los medidos durante la mudanza de `Company`: la corrección de la siembra está evitando una pérdida que hoy sería mayor que entonces.
+
+Con esto el bloque queda implementado, desplegado y verificado en los cinco despliegues. Resta la promoción a la SFS.
+
